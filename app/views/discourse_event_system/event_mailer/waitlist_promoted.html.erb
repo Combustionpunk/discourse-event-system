@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Great news - a space is available! 🎉</h2>
+  <p>Hi <%= @user.username %>,</p>
+  <p>A space has become available in <strong><%= @event_class.name %></strong> at <strong><%= @event.title %></strong>!</p>
+
+  <h3>Event Details</h3>
+  <p><strong>Event:</strong> <%= @event.title %></p>
+  <p><strong>Class:</strong> <%= @event_class.name %></p>
+  <p><strong>Date:</strong> <%= @event.start_date.strftime("%A, %d %B %Y at %H:%M") %></p>
+  <% if @event.location.present? %>
+    <p><strong>Location:</strong> <%= @event.location %></p>
+  <% end %>
+
+  <p><strong>You have 24 hours to complete your booking before the space is offered to the next person on the waitlist.</strong></p>
+
+  <p>Please log in and complete your booking as soon as possible!</p>
+</body>
+</html>

@@ -19,4 +19,17 @@ export default class MyBookingsController extends Controller {
       popupAjaxError(error);
     }
   }
+
+  @action
+  async leaveWaitlist(waitlistId) {
+    if (!window.confirm("Leave the waitlist for this class?")) return;
+    try {
+      await ajax("/des/waitlist/" + waitlistId + ".json", {
+        type: "DELETE",
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
 }

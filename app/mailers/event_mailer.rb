@@ -40,6 +40,18 @@ module DiscourseEventSystem
       )
     end
 
+    def waitlist_promoted(waitlist_entry)
+      @entry = waitlist_entry
+      @user = waitlist_entry.user
+      @event = waitlist_entry.event
+      @event_class = waitlist_entry.event_class
+
+      mail(
+        to: @user.email,
+        subject: "A space is available! - #{@event.title} - #{@event_class.name}"
+      )
+    end
+
     def event_updated(booking, changes)
       @booking = booking
       @user = booking.user

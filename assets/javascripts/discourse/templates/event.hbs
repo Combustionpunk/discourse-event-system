@@ -42,16 +42,22 @@
           <div class="event-class-spaces">
             {{cls.spaces_remaining}} / {{cls.capacity}} spaces
           </div>
-          <input
-            type="checkbox"
-            id="class-{{cls.id}}"
-            value={{cls.id}}
-            disabled={{eq cls.status "sold_out"}}
-            {{on "change" (fn this.toggleClass cls.id)}}
-          />
-          <label for="class-{{cls.id}}">
-            {{if (eq cls.status "sold_out") "Sold Out" "Select"}}
-          </label>
+          {{#if (eq cls.status "sold_out")}}
+            <button
+              class="btn btn-small btn-default"
+              {{on "click" (fn this.joinWaitlist cls.id)}}
+            >
+              📋 Join Waitlist
+            </button>
+          {{else}}
+            <input
+              type="checkbox"
+              id="class-{{cls.id}}"
+              value={{cls.id}}
+              {{on "change" (fn this.toggleClass cls.id)}}
+            />
+            <label for="class-{{cls.id}}">Select</label>
+          {{/if}}
         </div>
       {{/each}}
     </div>

@@ -2,23 +2,34 @@ import Route from "@ember/routing/route";
 import { ajax } from "discourse/lib/ajax";
 
 export default class MyBookingsRoute extends Route {
-  model() {
-    return ajax("/des/bookings.json").then((response) => {
-      const bookings = Array.isArray(response) ? response : response.bookings || [];
-      return bookings.map((booking) => {
-        if (booking.event && booking.event.start_date) {
-          const date = new Date(booking.event.start_date);
-          booking.event.formatted_date = date.toLocaleDateString("en-GB", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-        }
-        return booking;
+  async model() {
+    const formatDate = (dateStr) => {
+      if (!dateStr) return null;
+      return new Date(dateStr).toLocaleDateString("en-GB", {
+        weekday: "long", year: "numeric", month: "long",
+        day: "numeric", hour: "2-digit", minute: "2-digit",
       });
+    };
+
+    const [bookingsResponse, waitlistResponse] = await Promise.all([
+      ajax("/des/bookings.json"),
+      ajax("/des/waitlist.json"),
+    ]);
+
+    const bookings = Array.isArray(bookingsResponse) ? bookingsResponse : bookingsResponse.bookings || [];
+    bookings.forEach(b => {
+      if (b.event && b.event.start_date) {
+        b.event.formatted_date = formatDate(b.event.start_date);
+      }
     });
+
+    const waitlist = waitlistResponse.waitlist || [];
+    waitlist.forEach(w => {
+      if (w.event && w.event.start_date) {
+        w.event.formatted_date = formatDate(w.event.start_date);
+      }
+    });
+
+    return { bookings, waitlist };
   }
 }

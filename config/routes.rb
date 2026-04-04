@@ -28,6 +28,9 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/des/events/:id/entrants" => "events#entrants"
 
   get "/des/bookings" => "bookings#index"
+  post "/des/waitlist" => "bookings#join_waitlist"
+  delete "/des/waitlist/:id" => "bookings#leave_waitlist"
+  get "/des/waitlist" => "bookings#my_waitlist"
   get "/des/bookings/eligible-cars" => "bookings#eligible_cars"
   get "/des/bookings/:id" => "bookings#show"
   post "/des/bookings" => "bookings#create"

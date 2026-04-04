@@ -83,6 +83,58 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def join_waitlist
+      event = DesEvent.find(params[:event_id])
+      event_class = DesEventClass.find(params[:event_class_id])
+
+      # Check if already on waitlist
+      existing = DesEventWaitlist.find_by(
+        event_class_id: event_class.id,
+        user_id: current_user.id,
+        status: 'waiting'
+      )
+      return render json: { error: 'Already on waitlist' }, status: :unprocessable_entity if existing
+
+      # Check if class has spaces - if it does, no need to join waitlist
+      if event_class.spaces_remaining > 0 && event_class.status != 'sold_out'
+        return render json: { error: 'Class still has spaces available - please book directly' }, status: :unprocessable_entity
+      end
+
+      waitlist_entry = DesEventWaitlist.add_to_waitlist(event, event_class, current_user)
+      render json: {
+        id: waitlist_entry.id,
+        position: waitlist_entry.position,
+        class_name: event_class.name,
+        status: waitlist_entry.status
+      }, status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def leave_waitlist
+      entry = DesEventWaitlist.find_by(id: params[:id], user_id: current_user.id)
+      return render json: { error: 'Not found' }, status: :not_found unless entry
+      entry.expire!
+      render json: { success: true }
+    end
+
+    def my_waitlist
+      entries = DesEventWaitlist.where(user_id: current_user.id)
+        .where(status: ['waiting', 'notified'])
+        .includes(:event, :event_class)
+      render json: {
+        waitlist: entries.map { |e|
+          {
+            id: e.id,
+            event: { id: e.event.id, title: e.event.title, start_date: e.event.start_date },
+            class_name: e.event_class.name,
+            position: e.position,
+            status: e.status
+          }
+        }
+      }
+    end
+
     def add_classes
       ensure_booking_owner!
       service = DesBookingService.new(current_user, @booking.event)

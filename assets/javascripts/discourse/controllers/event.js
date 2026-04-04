@@ -41,6 +41,26 @@ export default class EventController extends Controller {
   }
 
   @action
+  async joinWaitlist(classId) {
+    if (!this.currentUser) {
+      alert("Please log in to join the waitlist");
+      return;
+    }
+    try {
+      const response = await ajax("/des/waitlist.json", {
+        type: "POST",
+        data: {
+          event_id: this.model.id,
+          event_class_id: classId,
+        },
+      });
+      alert("You have been added to the waitlist at position " + response.position + ". We will email you if a space becomes available!");
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
   async publishEvent() {
     if (!window.confirm("Publish this event? It will become visible to all users.")) return;
     try {

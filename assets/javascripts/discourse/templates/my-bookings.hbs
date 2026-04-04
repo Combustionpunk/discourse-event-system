@@ -10,9 +10,9 @@
     <h1>My Bookings</h1>
   </div>
 
-  {{#if this.model.length}}
+  {{#if this.model.bookings.length}}
     <div class="my-bookings-list">
-      {{#each this.model as |booking|}}
+      {{#each this.model.bookings as |booking|}}
         <div class="booking-card booking-card--{{booking.status}}">
           <div class="booking-card-header">
             <h2>{{booking.event.title}}</h2>
@@ -63,12 +63,40 @@
         </div>
       {{/each}}
     </div>
-  {{else}}
+  {{/if}}
+
+  {{!-- Waitlist --}}
+  {{#if this.model.waitlist.length}}
+    <div class="my-bookings-header" style="margin-top: 32px;">
+      <h2>My Waitlist</h2>
+    </div>
+    <div class="my-bookings-list">
+      {{#each this.model.waitlist as |entry|}}
+        <div class="booking-card booking-card--pending">
+          <div class="booking-card-header">
+            <h2>{{entry.event.title}}</h2>
+            <span class="booking-status booking-status--pending">waitlist #{{entry.position}}</span>
+          </div>
+          <div class="booking-meta">
+            <div>📅 {{entry.event.formatted_date}}</div>
+          </div>
+          <div class="booking-footer">
+            <span class="booking-class-badge">{{entry.class_name}}</span>
+            <button class="btn btn-small btn-danger" {{on "click" (fn this.leaveWaitlist entry.id)}}>
+              Leave Waitlist
+            </button>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{#unless this.model.bookings.length}}
     <div class="my-bookings-empty">
       <p>You haven't made any bookings yet.</p>
       <LinkTo @route="events" class="btn btn-primary">
         Browse Events
       </LinkTo>
     </div>
-  {{/if}}
+  {{/unless}}
 </div>
