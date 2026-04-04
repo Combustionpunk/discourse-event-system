@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Booking Cancelled</h2>
+  <p>Hi <%= @user.username %>,</p>
+  <p>Your booking for <strong><%= @event.title %></strong> has been cancelled.</p>
+
+  <% if @reason.present? %>
+    <p><strong>Reason:</strong> <%= @reason %></p>
+  <% end %>
+
+  <p><strong>Event Date:</strong> <%= @event.start_date.strftime("%A, %d %B %Y at %H:%M") %></p>
+
+  <% if @booking.amount_paid.to_f > 0 %>
+    <p>A refund of <strong>£<%= @booking.amount_paid %></strong> will be processed to your original payment method within 3-5 business days.</p>
+  <% end %>
+
+  <p>We hope to see you at a future event!</p>
+</body>
+</html>

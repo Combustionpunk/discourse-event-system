@@ -1,4 +1,11 @@
 <div class="my-bookings-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="my-bookings" class="btn btn-default">🎟 My Bookings</LinkTo>
+    <LinkTo @route="racing-profile" class="btn btn-default">👤 Profile</LinkTo>
+    <LinkTo @route="my-garage" class="btn btn-default">🚗 My Garage</LinkTo>
+  </div>
+
   <div class="my-bookings-header">
     <h1>My Bookings</h1>
   </div>
@@ -23,12 +30,13 @@
 
           <div class="booking-classes">
             {{#each booking.classes as |cls|}}
-              <span class="booking-class-badge">
-                {{cls.class_name}}
+              <div class="booking-class-item">
+                <span class="booking-class-badge">{{cls.class_name}}</span>
                 {{#if cls.transponder_number}}
-                  ({{cls.transponder_number}})
+                  <span class="transponder-number">📡 {{cls.transponder_number}}</span>
                 {{/if}}
-              </span>
+                <span class="booking-class-amount">£{{cls.amount_charged}}</span>
+              </div>
             {{/each}}
           </div>
 
@@ -40,6 +48,16 @@
                   💬 Discussion
                 </a>
               {{/if}}
+              {{#unless (eq booking.status "cancelled")}}
+                {{#unless (eq booking.status "refunded")}}
+                  <button
+                    class="btn btn-small btn-danger"
+                    {{on "click" (fn this.cancelBooking booking.id)}}
+                  >
+                    Cancel Booking
+                  </button>
+                {{/unless}}
+              {{/unless}}
             </div>
           </div>
         </div>

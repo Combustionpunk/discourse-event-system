@@ -881,3 +881,15 @@
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--primary-very-low); }
 }
+
+.booking-class-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.booking-class-amount {
+  color: var(--primary-medium);
+  font-size: 0.85em;
+}

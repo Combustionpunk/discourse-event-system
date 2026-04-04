@@ -52,5 +52,6 @@ after_initialize do
   load File.expand_path("../app/controllers/discourse_event_system/racing_profiles_controller.rb", __FILE__)
   load File.expand_path("../app/controllers/discourse_event_system/garage_controller.rb", __FILE__)
   load File.expand_path("../app/controllers/discourse_event_system/admin_controller.rb", __FILE__)
+  load File.expand_path("../app/mailers/event_mailer.rb", __FILE__)
   load File.expand_path("../db/seeds.rb", __FILE__) if DesPosition.count == 0
 end

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Event Updated</h2>
+  <p>Hi <%= @user.username %>,</p>
+  <p>Details for <strong><%= @event.title %></strong> have been updated.</p>
+
+  <h3>What Changed</h3>
+  <ul>
+  <% @changes.each do |field, values| %>
+    <li>
+      <strong><%= field.to_s.humanize %>:</strong>
+      <%= values[:from] %> → <%= values[:to] %>
+    </li>
+  <% end %>
+  </ul>
+
+  <h3>Current Event Details</h3>
+  <p><strong>Date:</strong> <%= @event.start_date.strftime("%A, %d %B %Y at %H:%M") %></p>
+  <% if @event.location.present? %>
+    <p><strong>Location:</strong> <%= @event.location %></p>
+  <% end %>
+
+  <p>If you have any questions please contact the event organiser.</p>
+</body>
+</html>

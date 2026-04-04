@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Booking Confirmed! 🎉</h2>
+  <p>Hi <%= @user.username %>,</p>
+  <p>Your booking for <strong><%= @event.title %></strong> has been confirmed.</p>
+
+  <h3>Booking Details</h3>
+  <p><strong>Event:</strong> <%= @event.title %></p>
+  <p><strong>Date:</strong> <%= @event.start_date.strftime("%A, %d %B %Y at %H:%M") %></p>
+  <% if @event.location.present? %>
+    <p><strong>Location:</strong> <%= @event.location %></p>
+  <% end %>
+
+  <h3>Classes Booked</h3>
+  <ul>
+  <% @classes.each do |bc| %>
+    <li>
+      <%= bc.event_class.name %>
+      <% if bc.transponder_number.present? %>
+        (Transponder: <%= bc.transponder_number %>)
+      <% end %>
+      - £<%= bc.amount_charged %>
+    </li>
+  <% end %>
+  </ul>
+
+  <p><strong>Total Paid: £<%= @booking.amount_paid %></strong></p>
+
+  <% if @booking.brca_membership_number.present? %>
+    <p><strong>BRCA Number:</strong> <%= @booking.brca_membership_number %></p>
+  <% end %>
+
+  <p>We look forward to seeing you at the event!</p>
+</body>
+</html>

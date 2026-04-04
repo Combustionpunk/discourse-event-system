@@ -74,8 +74,32 @@ module DiscourseEventSystem
 
     def update
       ensure_organisation_admin!(@event.organisation)
+      # Track what changed for email notification
+      changes = {}
+      [:title, :start_date, :end_date, :location].each do |field|
+        old_val = @event.send(field)
+        new_val = event_params[field]
+        if new_val.present? && old_val.to_s != new_val.to_s
+          changes[field] = { from: old_val, to: new_val }
+        end
+      end
+
       if @event.update(event_params)
         @event.update_topic_content! if @event.topic_id.present?
+
+        # Send update emails if significant changes
+        if changes.any?
+          bookings = DesEventBooking.where(event_id: @event.id)
+            .where.not(status: 'cancelled')
+          bookings.each do |booking|
+            begin
+              DiscourseEventSystem::EventMailer.event_updated(booking, changes).deliver_later
+            rescue => e
+              Rails.logger.error "Failed to send event update email: #{e.message}"
+            end
+          end
+        end
+
         render json: serialize_event(@event)
       else
         render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity

@@ -15,8 +15,10 @@ class DesEventClass < ActiveRecord::Base
   end
 
   def confirmed_bookings_count
-    # We'll fill this in when we build the bookings model
-    0
+    DesEventBookingClass.joins(:booking)
+      .where(event_class_id: id)
+      .where(des_event_bookings: { status: ['confirmed', 'pending'] })
+      .count
   end
 
   def sold_out?

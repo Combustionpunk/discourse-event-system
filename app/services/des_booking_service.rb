@@ -141,6 +141,13 @@ class DesBookingService
 
     confirmed_bookings.each do |booking|
       begin
+        # Send event cancellation email
+        begin
+          DiscourseEventSystem::EventMailer.event_cancelled(booking, cancellation_reason).deliver_later
+        rescue => e
+          Rails.logger.error "Failed to send event cancellation email: #{e.message}"
+        end
+        booking.cancel!
         booking.payments.completed.each do |payment|
           refund_amount = payment.refundable_amount
           next if refund_amount <= 0
