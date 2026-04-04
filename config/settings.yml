@@ -11,3 +11,9 @@ plugins:
   discourse_event_system_paypal_sandbox:
     default: true
     client: true
+  discourse_event_system_category_name:
+    default: "RC Meetings"
+    client: true
+  discourse_event_system_category_slug:
+    default: "rc-meetings"
+    client: true

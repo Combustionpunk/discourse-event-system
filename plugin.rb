@@ -54,4 +54,27 @@ after_initialize do
   load File.expand_path("../app/controllers/discourse_event_system/admin_controller.rb", __FILE__)
   load File.expand_path("../app/mailers/event_mailer.rb", __FILE__)
   load File.expand_path("../db/seeds.rb", __FILE__) if DesPosition.count == 0
+
+  # Auto-create events category if it doesn't exist
+  DiscourseEvent.on(:site_settings_changed) do |changes|
+    next unless changes.include?(:discourse_event_system_category_slug)
+  end
+
+  begin
+    category_name = SiteSetting.discourse_event_system_category_name
+    category_slug = SiteSetting.discourse_event_system_category_slug
+    unless Category.find_by(slug: category_slug)
+      Category.create!(
+        name: category_name,
+        slug: category_slug,
+        user: Discourse.system_user,
+        color: "0088CC",
+        text_color: "FFFFFF",
+        description: "#{category_name} - Book your place at upcoming events"
+      )
+      Rails.logger.info "Created #{category_name} category"
+    end
+  rescue => e
+    Rails.logger.error "Failed to create events category: #{e.message}"
+  end
 end
