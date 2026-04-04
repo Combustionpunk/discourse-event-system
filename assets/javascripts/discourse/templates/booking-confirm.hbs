@@ -1,37 +1,70 @@
 <div class="booking-confirm-container">
-  <div class="booking-confirm-header">
-    <div class="booking-confirm-icon">✅</div>
-    <h1>Booking Confirmed!</h1>
-    <p>Your booking for <strong>{{this.model.event.title}}</strong> is confirmed.</p>
-  </div>
+
+  {{#if (eq this.model.status "confirmed")}}
+    <div class="booking-confirm-header">
+      <div class="booking-confirm-icon">✅</div>
+      <h1>Booking Confirmed!</h1>
+      <p>Your booking for <strong>{{this.model.event.title}}</strong> has been confirmed and payment received.</p>
+    </div>
+  {{else if (eq this.model.status "pending")}}
+    <div class="booking-confirm-header">
+      <div class="booking-confirm-icon">⏳</div>
+      <h1>Booking Pending</h1>
+      <p>Your booking for <strong>{{this.model.event.title}}</strong> is being processed. You will receive a confirmation email shortly.</p>
+    </div>
+  {{else}}
+    <div class="booking-confirm-header">
+      <div class="booking-confirm-icon">📋</div>
+      <h1>Booking Summary</h1>
+    </div>
+  {{/if}}
 
   <div class="booking-confirm-details">
-    <h2>Booking Summary</h2>
+    <h2>Booking Details</h2>
 
     <div class="booking-detail-item">
       <strong>Event:</strong> {{this.model.event.title}}
     </div>
+
+    {{#if this.model.event.formatted_date}}
+      <div class="booking-detail-item">
+        <strong>📅 Date:</strong> {{this.model.event.formatted_date}}
+      </div>
+    {{/if}}
+
+    {{#if this.model.event.location}}
+      <div class="booking-detail-item">
+        <strong>📍 Location:</strong> {{this.model.event.location}}
+      </div>
+    {{/if}}
+
     <div class="booking-detail-item">
       <strong>Status:</strong>
       <span class="booking-status booking-status--{{this.model.status}}">
         {{this.model.status}}
       </span>
     </div>
+
     <div class="booking-detail-item">
-      <strong>Classes booked:</strong>
-      <ul>
+      <strong>Classes Booked:</strong>
+      <ul class="booking-classes-list">
         {{#each this.model.classes as |cls|}}
-          <li>{{cls.class_name}} — £{{cls.amount_charged}}
+          <li>
+            <span class="booking-class-badge">{{cls.class_name}}</span>
             {{#if cls.transponder_number}}
-              (Transponder: {{cls.transponder_number}})
+              <span class="transponder-number">📡 {{cls.transponder_number}}</span>
             {{/if}}
+            <span class="booking-class-amount">£{{cls.amount_charged}}</span>
           </li>
         {{/each}}
       </ul>
     </div>
+
     <div class="booking-detail-item">
-      <strong>Total paid:</strong> £{{this.model.amount_paid}}
+      <strong>Total Paid:</strong>
+      <span class="booking-total">£{{this.model.amount_paid}}</span>
     </div>
+
     {{#if this.model.brca_membership_number}}
       <div class="booking-detail-item">
         <strong>BRCA Number:</strong> {{this.model.brca_membership_number}}
@@ -41,7 +74,7 @@
 
   <div class="booking-confirm-actions">
     <LinkTo @route="my-bookings" class="btn btn-primary">
-      View My Bookings
+      🎟 View My Bookings
     </LinkTo>
     {{#if this.model.event.topic_url}}
       <a href={{this.model.event.topic_url}} class="btn btn-default">
@@ -49,7 +82,7 @@
       </a>
     {{/if}}
     <LinkTo @route="events" class="btn btn-default">
-      Browse More Events
+      📅 Browse More Events
     </LinkTo>
   </div>
 </div>
