@@ -1,5 +1,7 @@
 export default function () {
   this.route("events", { path: "/events" });
+  this.route("event-new", { path: "/events/new" });
+  this.route("event-manage", { path: "/events/:event_id/manage" });
   this.route("event", { path: "/events/:event_id" });
   this.route("booking-confirm", { path: "/events/booking/:booking_id/confirm" });
   this.route("booking-cancel", { path: "/events/booking/:booking_id/cancel" });
@@ -10,5 +12,4 @@ export default function () {
   this.route("des-admin", { path: "/des-admin" });
   this.route("racing-profile", { path: "/racing-profile" });
   this.route("my-garage", { path: "/my-garage" });
-  this.route("event-new", { path: "/events/new" });
 }

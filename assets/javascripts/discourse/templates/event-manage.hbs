@@ -1,0 +1,171 @@
+<div class="event-manage-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="event" @model={{this.model.event.id}} class="btn btn-default">
+      👁 View Event
+    </LinkTo>
+  </div>
+
+  <div class="event-manage-header">
+    <div>
+      <h1>⚙️ {{this.model.event.title}}</h1>
+      <span class="event-status event-status--{{this.model.event.status}}">
+        {{this.model.event.status}}
+      </span>
+    </div>
+    <div class="event-manage-actions">
+      {{#if (eq this.model.event.status "draft")}}
+        <button class="btn btn-warning" {{on "click" this.publishEvent}}>
+          📢 Publish
+        </button>
+      {{/if}}
+      {{#unless (eq this.model.event.status "cancelled")}}
+        <button class="btn btn-danger" {{on "click" this.cancelEvent}}>
+          ❌ Cancel Event
+        </button>
+      {{/unless}}
+    </div>
+  </div>
+
+  {{!-- Tabs --}}
+  <div class="manage-tabs">
+    <button
+      class="manage-tab {{if (eq this.activeTab 'details') 'active'}}"
+      {{on "click" this.showDetails}}
+    >
+      📋 Details
+    </button>
+    <button
+      class="manage-tab {{if (eq this.activeTab 'entrants') 'active'}}"
+      {{on "click" this.showEntrants}}
+    >
+      🏎️ Entrants
+    </button>
+  </div>
+
+  {{!-- Details Tab --}}
+  {{#if (eq this.activeTab "details")}}
+    <div class="manage-section">
+      <div class="manage-section-header">
+        <h2>Event Details</h2>
+        <button class="btn btn-small btn-default" {{on "click" this.toggleEdit}}>
+          {{if this.editMode "Cancel" "✏️ Edit"}}
+        </button>
+      </div>
+
+      {{#if this.editMode}}
+        <div class="org-form-field">
+          <label>Title</label>
+          <input type="text" value={{this.model.event.title}} {{on "input" (fn this.updateField "title")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Description</label>
+          <textarea {{on "input" (fn this.updateField "description")}}>{{this.model.event.description}}</textarea>
+        </div>
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Start Date</label>
+            <input type="datetime-local" value={{this.model.event.start_date}} {{on "change" (fn this.updateField "start_date")}} />
+          </div>
+          <div class="org-form-field">
+            <label>End Date</label>
+            <input type="datetime-local" value={{this.model.event.end_date}} {{on "change" (fn this.updateField "end_date")}} />
+          </div>
+        </div>
+        <div class="org-form-field">
+          <label>Booking Closing Date</label>
+          <input type="datetime-local" value={{this.model.event.booking_closing_date}} {{on "change" (fn this.updateField "booking_closing_date")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Location</label>
+          <input type="text" value={{this.model.event.location}} {{on "input" (fn this.updateField "location")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Google Maps URL</label>
+          <input type="url" value={{this.model.event.google_maps_url}} {{on "input" (fn this.updateField "google_maps_url")}} />
+        </div>
+        <button
+          class="btn btn-primary"
+          disabled={{this.isSaving}}
+          {{on "click" this.saveChanges}}
+        >
+          {{if this.isSaving "Saving..." "Save Changes"}}
+        </button>
+      {{else}}
+        <div class="event-detail-list">
+          <div class="event-detail-row">
+            <span class="event-detail-label">📅 Start</span>
+            <span>{{this.model.event.formatted_start_date}}</span>
+          </div>
+          {{#if this.model.event.location}}
+            <div class="event-detail-row">
+              <span class="event-detail-label">📍 Location</span>
+              <span>{{this.model.event.location}}</span>
+            </div>
+          {{/if}}
+          {{#if this.model.event.booking_closing_date}}
+            <div class="event-detail-row">
+              <span class="event-detail-label">⏰ Booking closes</span>
+              <span>{{this.model.event.formatted_booking_closing_date}}</span>
+            </div>
+          {{/if}}
+        </div>
+      {{/if}}
+
+      <div class="manage-classes">
+        <h3>Classes</h3>
+        {{#each this.model.event.classes as |cls|}}
+          <div class="manage-class-row">
+            <span class="manage-class-name">{{cls.name}}</span>
+            <span class="manage-class-bookings">{{cls.bookings_count}} / {{cls.capacity}} booked</span>
+            <span class="org-status org-status--{{cls.status}}">{{cls.status}}</span>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
+
+  {{!-- Entrants Tab --}}
+  {{#if (eq this.activeTab "entrants")}}
+    <div class="manage-section">
+      <h2>Entrants</h2>
+      {{#each this.model.entrants.classes as |cls|}}
+        <div class="entrants-class">
+          <h3>
+            {{cls.name}}
+            <span class="field-help">{{cls.bookings_count}} / {{cls.capacity}} entries</span>
+          </h3>
+          {{#if cls.entrants.length}}
+            <table class="entrants-table">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Transponder</th>
+                  <th>BRCA No.</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each cls.entrants as |entrant index|}}
+                  <tr>
+                    <td></td>
+                    <td>{{entrant.username}}</td>
+                    <td class="transponder-number">{{entrant.transponder}}</td>
+                    <td>{{entrant.brca_number}}</td>
+                    <td>
+                      <span class="booking-status booking-status--{{entrant.status}}">
+                        {{entrant.status}}
+                      </span>
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          {{else}}
+            <p class="field-help">No entrants yet.</p>
+          {{/if}}
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+</div>

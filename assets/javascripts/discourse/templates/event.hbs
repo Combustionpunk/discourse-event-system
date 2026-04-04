@@ -81,6 +81,11 @@
       <button class="btn btn-warning" {{on "click" this.publishEvent}}>
         📢 Publish Event
       </button>
+    {{/if}}
+    {{#if this.currentUser}}
+      <LinkTo @route="event-manage" @model={{this.model.id}} class="btn btn-default">
+        ⚙️ Manage Event
+      </LinkTo>
     {{else if this.currentUser}}
       <button
         class="btn btn-primary"

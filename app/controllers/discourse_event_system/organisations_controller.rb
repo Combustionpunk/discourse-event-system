@@ -142,7 +142,20 @@ module DiscourseEventSystem
             id: e.id,
             title: e.title,
             start_date: e.start_date,
-            status: e.status
+            booking_closing_date: e.booking_closing_date,
+            location: e.location,
+            status: e.status,
+            booking_type: e.booking_type,
+            classes: e.des_event_classes.map { |c|
+              {
+                id: c.id,
+                name: c.name,
+                capacity: c.capacity,
+                spaces_remaining: c.spaces_remaining,
+                status: c.status,
+                bookings_count: c.capacity - c.spaces_remaining
+              }
+            }
           }
         },
         positions: DesPosition.all.map { |p| { id: p.id, name: p.name, is_admin: p.is_admin } }

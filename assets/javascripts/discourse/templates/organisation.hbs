@@ -142,7 +142,14 @@
             <LinkTo @route="event" @model={{event.id}}>
               {{event.title}}
             </LinkTo>
-            <span class="event-status event-status--{{event.status}}">{{event.status}}</span>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="event-status event-status--{{event.status}}">{{event.status}}</span>
+              {{#if this.model.is_admin}}
+                <LinkTo @route="event-manage" @model={{event.id}} class="btn btn-small btn-default">
+                  ⚙️ Manage
+                </LinkTo>
+              {{/if}}
+            </div>
           </div>
         {{/each}}
       </div>

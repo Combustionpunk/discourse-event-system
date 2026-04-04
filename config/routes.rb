@@ -3,6 +3,7 @@
 DiscourseEventSystem::Engine.routes.draw do
   # Frontend routes
   get "/events" => "frontend#index"
+  get "/events/:id/manage" => "frontend#index"
   get "/events/:id" => "frontend#index"
   get "/events/booking/:booking_id/confirm" => "frontend#index"
   get "/events/booking/:booking_id/cancel" => "frontend#index"
@@ -24,6 +25,7 @@ DiscourseEventSystem::Engine.routes.draw do
   put "/des/events/:id" => "events#update"
   post "/des/events/:id/publish" => "events#publish"
   post "/des/events/:id/cancel" => "events#cancel"
+  get "/des/events/:id/entrants" => "events#entrants"
 
   get "/des/bookings" => "bookings#index"
   get "/des/bookings/eligible-cars" => "bookings#eligible_cars"

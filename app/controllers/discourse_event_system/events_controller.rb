@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show]
-    before_action :set_event, only: [:show, :update, :publish, :cancel]
+    before_action :set_event, only: [:show, :update, :publish, :cancel, :entrants]
 
     def index
       events = DesEvent.published.upcoming.includes(:organisation, :event_type, :des_event_classes)
@@ -86,6 +86,38 @@ module DiscourseEventSystem
       ensure_organisation_admin!(@event.organisation)
       @event.publish!
       render json: serialize_event(@event)
+    end
+
+    def entrants
+      ensure_organisation_admin!(@event.organisation)
+      bookings = DesEventBooking.where(event_id: @event.id)
+        .includes(:user, booking_classes: :event_class)
+        .where.not(status: 'cancelled')
+
+      render json: {
+        event: { id: @event.id, title: @event.title },
+        classes: @event.des_event_classes.map do |ec|
+          class_bookings = bookings.select { |b| 
+            b.booking_classes.any? { |bc| bc.event_class_id == ec.id }
+          }
+          {
+            id: ec.id,
+            name: ec.name,
+            capacity: ec.capacity,
+            spaces_remaining: ec.spaces_remaining,
+            entrants: class_bookings.map do |b|
+              bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
+              {
+                booking_id: b.id,
+                username: b.user.username,
+                transponder: bc&.transponder_number,
+                status: b.status,
+                brca_number: b.brca_membership_number
+              }
+            end
+          }
+        end
+      }
     end
 
     def cancel
