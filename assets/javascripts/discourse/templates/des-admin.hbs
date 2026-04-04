@@ -1,0 +1,150 @@
+<div class="des-admin-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+    <LinkTo @route="des-admin" class="btn btn-primary">⚙️ Admin</LinkTo>
+  </div>
+
+  <h1>Event System Admin</h1>
+
+  {{!-- Pending Organisations --}}
+  <div class="des-admin-section">
+    <h2>
+      Pending Organisations
+      {{#if this.model.pending_organisations.length}}
+        <span class="pending-badge">{{this.model.pending_organisations.length}}</span>
+      {{/if}}
+    </h2>
+    {{#if this.model.pending_organisations.length}}
+      {{#each this.model.pending_organisations as |org|}}
+        <div class="admin-org-card admin-org-card--pending">
+          <div class="admin-org-info">
+            <h3>{{org.name}}</h3>
+            {{#if org.description}}<p>{{org.description}}</p>{{/if}}
+            <div class="admin-org-meta">
+              {{#if org.email}}<span>✉️ {{org.email}}</span>{{/if}}
+              {{#if org.website}}<span>🌐 {{org.website}}</span>{{/if}}
+              {{#if org.paypal_email}}<span>💰 {{org.paypal_email}}</span>{{/if}}
+              <span>👤 {{org.created_by}}</span>
+            </div>
+          </div>
+          <div class="admin-org-actions">
+            <button class="btn btn-success" {{on "click" (fn this.approveOrganisation org)}}>✅ Approve</button>
+            <button class="btn btn-danger" {{on "click" (fn this.rejectOrganisation org)}}>❌ Reject</button>
+          </div>
+        </div>
+      {{/each}}
+    {{else}}
+      <p class="no-pending">No pending organisations 🎉</p>
+    {{/if}}
+  </div>
+
+  {{!-- Approved Organisations --}}
+  <div class="des-admin-section">
+    <h2>Approved Organisations ({{this.model.approved_organisations.length}})</h2>
+    {{#each this.model.approved_organisations as |org|}}
+      <div class="admin-org-card admin-org-card--approved">
+        <div class="admin-org-info">
+          <h3>{{org.name}}</h3>
+          <div class="admin-org-meta">
+            <span>💰 Surcharge: {{org.surcharge_percentage}}%</span>
+            {{#if org.email}}<span>✉️ {{org.email}}</span>{{/if}}
+            {{#if org.paypal_email}}<span>🏦 {{org.paypal_email}}</span>{{/if}}
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+
+  {{!-- Pending Manufacturers --}}
+  {{#if this.model.pending_manufacturers.length}}
+    <div class="des-admin-section">
+      <h2>
+        Pending Manufacturers
+        <span class="pending-badge">{{this.model.pending_manufacturers.length}}</span>
+      </h2>
+      {{#each this.model.pending_manufacturers as |manufacturer|}}
+        <div class="admin-org-card admin-org-card--pending">
+          <div class="admin-org-info">
+            <h3>{{manufacturer.name}}</h3>
+            <div class="admin-org-meta">
+              <span>👤 Suggested by: {{manufacturer.created_by}}</span>
+            </div>
+          </div>
+          <div class="admin-org-actions">
+            <button class="btn btn-success" {{on "click" (fn this.approveManufacturer manufacturer)}}>✅ Approve</button>
+            <button class="btn btn-danger" {{on "click" (fn this.rejectManufacturer manufacturer)}}>❌ Reject</button>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{!-- Pending Car Models --}}
+  {{#if this.model.pending_models.length}}
+    <div class="des-admin-section">
+      <h2>
+        Pending Car Models
+        <span class="pending-badge">{{this.model.pending_models.length}}</span>
+      </h2>
+      <p class="field-help">When approving, you will be asked to enter the year of first manufacture.</p>
+      {{#each this.model.pending_models as |model|}}
+        <div class="admin-org-card admin-org-card--pending">
+          <div class="admin-org-info">
+            <h3>{{model.manufacturer}} {{model.name}}</h3>
+            <div class="admin-org-meta">
+              {{#if model.year_released}}<span>📅 Year: {{model.year_released}}</span>{{/if}}
+              {{#if model.driveline}}<span>⚙️ Drive: {{model.driveline}}</span>{{/if}}
+              {{#if model.chassis_type}}<span>🚗 Chassis: {{model.chassis_type}}</span>{{/if}}
+              <span>👤 Suggested by: {{model.created_by}}</span>
+            </div>
+          </div>
+          <div class="admin-org-actions">
+            <button class="btn btn-success" {{on "click" (fn this.approveModel model)}}>✅ Approve</button>
+            <button class="btn btn-danger" {{on "click" (fn this.rejectModel model)}}>❌ Reject</button>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{!-- Rejected Organisations --}}
+  {{!-- Approved Models --}}
+  <div class="des-admin-section">
+    <h2>Approved Car Models ({{this.model.approved_models.length}})</h2>
+    <p class="field-help">Edit year, driveline or chassis type for any approved model.</p>
+    {{#each this.model.approved_models as |model|}}
+      <div class="admin-org-card admin-org-card--approved">
+        <div class="admin-org-info">
+          <h3>{{model.manufacturer}} {{model.name}}</h3>
+          <div class="admin-org-meta">
+            {{#if model.year_released}}<span>📅 {{model.year_released}}</span>{{/if}}
+            {{#if model.driveline}}<span>⚙️ {{model.driveline}}</span>{{/if}}
+            {{#if model.chassis_type}}<span>🚗 {{model.chassis_type}}</span>{{else}}<span class="rejection-reason">⚠️ No chassis type set!</span>{{/if}}
+          </div>
+        </div>
+        <div class="admin-org-actions">
+          <button class="btn btn-default btn-small" {{on "click" (fn this.editModel model)}}>
+            ✏️ Edit
+          </button>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+
+  {{#if this.model.rejected_organisations.length}}
+    <div class="des-admin-section">
+      <h2>Rejected Organisations ({{this.model.rejected_organisations.length}})</h2>
+      {{#each this.model.rejected_organisations as |org|}}
+        <div class="admin-org-card admin-org-card--rejected">
+          <div class="admin-org-info">
+            <h3>{{org.name}}</h3>
+            {{#if org.rejection_reason}}
+              <p class="rejection-reason">Reason: {{org.rejection_reason}}</p>
+            {{/if}}
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+</div>

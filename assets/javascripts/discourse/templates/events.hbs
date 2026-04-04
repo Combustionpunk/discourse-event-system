@@ -1,0 +1,69 @@
+<div class="events-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Upcoming Events</LinkTo>
+    <LinkTo @route="my-bookings" class="btn btn-default">🎟 My Bookings</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+    <LinkTo @route="racing-profile" class="btn btn-default">👤 Racing Profile</LinkTo>
+  </div>
+
+  <div class="events-header">
+    <h1>Upcoming Events</h1>
+    <LinkTo @route="event-new" class="btn btn-primary">+ Create Event</LinkTo>
+  </div>
+
+  {{#if this.model.length}}
+    <div class="events-list">
+      {{#each this.model as |event|}}
+        <div class="event-card">
+          <div class="event-card-header">
+            <h2 class="event-title">
+              <LinkTo @route="event" @model={{event.id}}>
+                {{event.title}}
+              </LinkTo>
+            </h2>
+            <span class="event-status event-status--{{event.status}}">
+              {{event.status}}
+            </span>
+          </div>
+
+          <div class="event-meta">
+            <span class="event-organisation">
+              🏢 {{event.organisation.name}}
+            </span>
+            <span class="event-date">
+              📅 {{event.formatted_date}}
+            </span>
+            {{#if event.location}}
+              <span class="event-location">
+                📍 {{event.location}}
+              </span>
+            {{/if}}
+          </div>
+
+          <div class="event-classes">
+            {{#each event.classes as |cls|}}
+              <span class="event-class-badge">
+                {{cls.name}} ({{cls.spaces_remaining}} spaces)
+              </span>
+            {{/each}}
+          </div>
+
+          <div class="event-footer">
+            {{#if event.pricing}}
+              <span class="event-price">
+                💷 From £{{event.pricing.first_class_price}}
+              </span>
+            {{/if}}
+            <LinkTo @route="event" @model={{event.id}} class="btn btn-primary">
+              View Event
+            </LinkTo>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="events-empty">
+      <p>No upcoming events at the moment. Check back soon!</p>
+    </div>
+  {{/if}}
+</div>

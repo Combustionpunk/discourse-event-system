@@ -1,0 +1,54 @@
+<div class="organisations-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="my-bookings" class="btn btn-default">🎟 My Bookings</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+    <LinkTo @route="organisation-new" class="btn btn-primary">+ New Organisation</LinkTo>
+  </div>
+
+  <div class="organisations-header">
+    <h1>Organisations</h1>
+  </div>
+
+  {{#if this.model.length}}
+    <div class="organisations-list">
+      {{#each this.model as |org|}}
+        <div class="org-card">
+          <div class="org-card-header">
+            <h2>
+              <LinkTo @route="organisation" @model={{org.id}}>
+                {{org.name}}
+              </LinkTo>
+            </h2>
+            <span class="org-status org-status--{{org.status}}">
+              {{org.status}}
+            </span>
+          </div>
+          {{#if org.description}}
+            <p class="org-description">{{org.description}}</p>
+          {{/if}}
+          <div class="org-meta">
+            {{#if org.email}}
+              <span>✉️ {{org.email}}</span>
+            {{/if}}
+            {{#if org.website}}
+              <span>🌐 <a href={{org.website}} target="_blank">{{org.website}}</a></span>
+            {{/if}}
+          </div>
+          <div style="margin-top: 12px;">
+            <LinkTo @route="organisation" @model={{org.id}} class="btn btn-small btn-default">
+              View Organisation →
+            </LinkTo>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="events-empty">
+      <p>No organisations yet.</p>
+      <LinkTo @route="organisation-new" class="btn btn-primary">
+        Create Organisation
+      </LinkTo>
+    </div>
+  {{/if}}
+</div>

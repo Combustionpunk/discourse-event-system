@@ -1,0 +1,107 @@
+<div class="racing-profile-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="my-bookings" class="btn btn-default">🎟 My Bookings</LinkTo>
+    <LinkTo @route="racing-profile" class="btn btn-default">👤 Racing Profile</LinkTo>
+  </div>
+
+  <h1>🏎️ Racing Profile</h1>
+  <p class="profile-intro">
+    Set up your racing profile to make booking faster. Your transponder numbers
+    and BRCA membership number will be automatically added to your bookings.
+  </p>
+
+  {{#if this.successMessage}}
+    <div class="alert alert-success">{{this.successMessage}}</div>
+  {{/if}}
+
+  <div class="profile-section">
+    <h2>Personal Details</h2>
+    <div class="profile-form">
+      <div class="org-form-field">
+        <label>Date of Birth</label>
+        <p class="field-help">Used to calculate eligibility for age-based discounts (e.g. junior pricing)</p>
+        <input
+          type="date"
+          value={{if this.dateOfBirth this.dateOfBirth this.model.user.date_of_birth}}
+          {{on "input" this.setDateOfBirth}}
+        />
+      </div>
+
+      <div class="org-form-field">
+        <label>BRCA Membership Number</label>
+        <p class="field-help">Required after your first 3 bookings</p>
+        <input
+          type="text"
+          placeholder="e.g. BRCA-12345"
+          value={{if this.brcaNumber this.brcaNumber this.model.user.brca_membership_number}}
+          {{on "input" this.setBrcaNumber}}
+        />
+      </div>
+
+      <button
+        class="btn btn-primary"
+        disabled={{this.isSaving}}
+        {{on "click" this.saveProfile}}
+      >
+        {{if this.isSaving "Saving..." "Save Details"}}
+      </button>
+    </div>
+  </div>
+
+  <div class="profile-section">
+    <h2>Transponder Numbers</h2>
+    <p class="field-help">
+      Set your transponder number for each class you race in.
+      These will be automatically added when you book events.
+    </p>
+
+    {{#if this.model.transponders.length}}
+      <div class="transponder-list">
+        {{#each this.model.transponders as |transponder|}}
+          <div class="transponder-item">
+            <div class="transponder-info">
+              <strong>{{transponder.class_type_name}}</strong>
+              <span class="transponder-number">{{transponder.transponder_number}}</span>
+            </div>
+            <button
+              class="btn btn-small btn-danger"
+              {{on "click" (fn this.removeTransponder transponder.id)}}
+            >
+              Remove
+            </button>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="no-transponders">No transponders set up yet.</p>
+    {{/if}}
+
+    {{#if this.availableClassTypes.length}}
+      <div class="add-transponder">
+        <h3>Add Transponder</h3>
+        <div class="add-transponder-form">
+          <select {{on "change" this.setNewTransponderClass}}>
+            <option value="">Select class...</option>
+            {{#each this.availableClassTypes as |ct|}}
+              <option value={{ct.id}}>{{ct.name}}</option>
+            {{/each}}
+          </select>
+          <input
+            type="text"
+            placeholder="Transponder number"
+            value={{this.newTransponderNumber}}
+            {{on "input" this.setNewTransponderNumber}}
+          />
+          <button
+            class="btn btn-primary"
+            disabled={{or (eq this.newTransponderClassId "") (eq this.newTransponderNumber "")}}
+            {{on "click" this.addTransponder}}
+          >
+            Add
+          </button>
+        </div>
+      </div>
+    {{/if}}
+  </div>
+</div>

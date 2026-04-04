@@ -1,0 +1,109 @@
+<div class="organisation-new-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+  </div>
+
+  <h1>Create Organisation</h1>
+  <p class="org-new-intro">
+    Submit your organisation for review. An administrator will approve it before it appears publicly.
+  </p>
+
+  {{#if this.successMessage}}
+    <div class="alert alert-success">
+      {{this.successMessage}}
+    </div>
+  {{else}}
+    <form class="org-form">
+      <div class="org-form-field">
+        <label>Organisation Name *</label>
+        <input
+          type="text"
+          value={{this.model.name}}
+          placeholder="e.g. Midlands RC Racing Club"
+          {{on "input" (fn this.updateField "name")}}
+        />
+      </div>
+
+      <div class="org-form-field">
+        <label>Description</label>
+        <textarea
+          placeholder="Tell us about your organisation..."
+          {{on "input" (fn this.updateField "description")}}
+        >{{this.model.description}}</textarea>
+      </div>
+
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Email</label>
+          <input
+            type="email"
+            value={{this.model.email}}
+            placeholder="contact@yourclub.com"
+            {{on "input" (fn this.updateField "email")}}
+          />
+        </div>
+        <div class="org-form-field">
+          <label>Phone</label>
+          <input
+            type="tel"
+            value={{this.model.phone}}
+            placeholder="07700 900000"
+            {{on "input" (fn this.updateField "phone")}}
+          />
+        </div>
+      </div>
+
+      <div class="org-form-field">
+        <label>Website</label>
+        <input
+          type="url"
+          value={{this.model.website}}
+          placeholder="https://www.yourclub.com"
+          {{on "input" (fn this.updateField "website")}}
+        />
+      </div>
+
+      <div class="org-form-field">
+        <label>Address</label>
+        <textarea
+          placeholder="Your club's address..."
+          {{on "input" (fn this.updateField "address")}}
+        >{{this.model.address}}</textarea>
+      </div>
+
+      <div class="org-form-field">
+        <label>Google Maps URL</label>
+        <input
+          type="url"
+          value={{this.model.google_maps_url}}
+          placeholder="https://maps.google.com/..."
+          {{on "input" (fn this.updateField "google_maps_url")}}
+        />
+      </div>
+
+      <div class="org-form-field">
+        <label>PayPal Email</label>
+        <input
+          type="email"
+          value={{this.model.paypal_email}}
+          placeholder="payments@yourclub.com"
+          {{on "input" (fn this.updateField "paypal_email")}}
+        />
+      </div>
+
+      <div class="org-form-actions">
+        <button
+          class="btn btn-primary"
+          disabled={{this.isSaving}}
+          {{on "click" this.saveOrganisation}}
+        >
+          {{if this.isSaving "Submitting..." "Submit for Approval"}}
+        </button>
+        <LinkTo @route="organisations" class="btn btn-default">
+          Cancel
+        </LinkTo>
+      </div>
+    </form>
+  {{/if}}
+</div>

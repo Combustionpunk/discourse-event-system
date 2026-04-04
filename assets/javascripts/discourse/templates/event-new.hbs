@@ -1,0 +1,240 @@
+<div class="event-new-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+  </div>
+
+  <h1>Create New Event</h1>
+
+  <div class="event-new-form">
+
+    <div class="event-form-section">
+      <h2>Basic Details</h2>
+
+      <div class="org-form-field">
+        <label>Organisation *</label>
+        <select {{on "change" (fn this.updateField "organisation_id")}}>
+          <option value="">Select organisation...</option>
+          {{#each this.model.organisations as |org|}}
+            <option value={{org.id}}>{{org.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Event Title *</label>
+          <input
+            type="text"
+            placeholder="e.g. Summer RC Championship 2026"
+            {{on "input" (fn this.updateField "title")}}
+          />
+        </div>
+        <div class="org-form-field">
+          <label>Event Type *</label>
+          <select {{on "change" (fn this.updateField "event_type_id")}}>
+            <option value="">Select type...</option>
+            {{#each this.model.event_types as |et|}}
+              <option value={{et.id}}>{{et.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+
+      <div class="org-form-field">
+        <label>Description</label>
+        <textarea
+          placeholder="Tell racers about this event..."
+          {{on "input" (fn this.updateField "description")}}
+        ></textarea>
+      </div>
+
+      <div class="org-form-field">
+        <label>Location</label>
+        <input
+          type="text"
+          placeholder="e.g. Midlands RC Circuit, Birmingham"
+          {{on "input" (fn this.updateField "location")}}
+        />
+      </div>
+
+      <div class="org-form-field">
+        <label>Google Maps URL</label>
+        <input
+          type="url"
+          placeholder="https://maps.google.com/..."
+          {{on "input" (fn this.updateField "google_maps_url")}}
+        />
+      </div>
+
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Start Date & Time *</label>
+          <input
+            type="datetime-local"
+            {{on "change" (fn this.updateField "start_date")}}
+          />
+        </div>
+        <div class="org-form-field">
+          <label>End Date & Time</label>
+          <input
+            type="datetime-local"
+            {{on "change" (fn this.updateField "end_date")}}
+          />
+        </div>
+      </div>
+
+      <div class="org-form-field">
+        <label>Booking Method *</label>
+        <select {{on "change" (fn this.updateField "booking_type")}}>
+          <option value="internal">Online via this system (PayPal)</option>
+          <option value="external">Booked externally</option>
+        </select>
+      </div>
+
+      {{#if this.isExternalBooking}}
+        <div class="org-form-field">
+          <label>External Booking URL</label>
+          <input
+            type="url"
+            placeholder="https://brca.org/book..."
+            {{on "input" (fn this.updateField "external_booking_url")}}
+          />
+        </div>
+        <div class="org-form-field">
+          <label>Booking Details</label>
+          <textarea
+            placeholder="e.g. Book via BRCA website. Enter class and transponder number on the entry form."
+            {{on "input" (fn this.updateField "external_booking_details")}}
+          ></textarea>
+        </div>
+      {{else}}
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Booking Closing Date</label>
+            <input
+              type="datetime-local"
+              {{on "change" (fn this.updateField "booking_closing_date")}}
+            />
+          </div>
+          <div class="org-form-field">
+            <label>Refund Cutoff (days before event)</label>
+            <input
+              type="number"
+              value="7"
+              min="0"
+              {{on "input" (fn this.updateField "refund_cutoff_days")}}
+            />
+          </div>
+        </div>
+      {{/if}}
+    </div>
+
+    {{!-- Classes --}}
+    <div class="event-form-section">
+      <div class="org-section-header">
+        <h2>Classes</h2>
+        <button class="btn btn-small btn-primary" {{on "click" this.addClass}}>
+          + Add Class
+        </button>
+      </div>
+
+      {{#if this.classes.length}}
+        <div class="classes-list">
+          {{#each this.classes as |cls index|}}
+            <div class="class-row">
+              <div class="org-form-field">
+                <label>Class Type</label>
+                <select value={{cls.class_type_id}} {{on "change" (fn this.updateClass index "class_type_id")}}>
+                  <option value="">Select class...</option>
+                  {{#each this.model.class_types as |ct|}}
+                    <option value={{ct.id}} selected={{eq (concat ct.id "") cls.class_type_id}}>{{ct.name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="org-form-field">
+                <label>Capacity</label>
+                <input
+                  type="number"
+                  value={{cls.capacity}}
+                  min="1"
+                  {{on "input" (fn this.updateClass index "capacity")}}
+                />
+              </div>
+              <button
+                class="btn btn-small btn-danger remove-class-btn"
+                {{on "click" (fn this.removeClass index)}}
+              >
+                ✕
+              </button>
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <p class="field-help">No classes added yet. Click "+ Add Class" to add one.</p>
+      {{/if}}
+    </div>
+
+    {{!-- Pricing - only for internal bookings --}}
+    {{#unless this.isExternalBooking}}
+      <div class="event-form-section">
+        <h2>Pricing</h2>
+
+        <div class="org-form-field">
+          <label>Pricing Type</label>
+          <select {{on "change" this.updatePricingType}}>
+            <option value="tiered">Tiered (different price for first class)</option>
+            <option value="flat">Flat (same price per class)</option>
+          </select>
+        </div>
+
+        {{#if this.pricingIsFlat}}
+          <div class="org-form-field">
+            <label>Price per class (£)</label>
+            <input
+              type="number"
+              placeholder="e.g. 20"
+              min="0"
+              step="0.01"
+              {{on "input" (fn this.updatePricing "flat_price")}}
+            />
+          </div>
+        {{else}}
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>First Class Price (£)</label>
+              <input
+                type="number"
+                placeholder="e.g. 20"
+                min="0"
+                step="0.01"
+                {{on "input" (fn this.updatePricing "first_class_price")}}
+              />
+            </div>
+            <div class="org-form-field">
+              <label>Additional Classes Price (£)</label>
+              <input
+                type="number"
+                placeholder="e.g. 10"
+                min="0"
+                step="0.01"
+                {{on "input" (fn this.updatePricing "subsequent_class_price")}}
+              />
+            </div>
+          </div>
+        {{/if}}
+      </div>
+    {{/unless}}
+
+    <div class="event-form-actions">
+      <button
+        class="btn btn-primary"
+        disabled={{this.isSaving}}
+        {{on "click" this.saveEvent}}
+      >
+        {{if this.isSaving "Saving..." "Save as Draft"}}
+      </button>
+      <LinkTo @route="events" class="btn btn-default">Cancel</LinkTo>
+    </div>
+  </div>
+</div>

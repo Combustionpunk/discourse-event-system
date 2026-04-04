@@ -1,0 +1,56 @@
+<div class="my-bookings-container">
+  <div class="my-bookings-header">
+    <h1>My Bookings</h1>
+  </div>
+
+  {{#if this.model.length}}
+    <div class="my-bookings-list">
+      {{#each this.model as |booking|}}
+        <div class="booking-card booking-card--{{booking.status}}">
+          <div class="booking-card-header">
+            <h2>{{booking.event.title}}</h2>
+            <span class="booking-status booking-status--{{booking.status}}">
+              {{booking.status}}
+            </span>
+          </div>
+
+          <div class="booking-meta">
+            <div>📅 {{booking.event.formatted_date}}</div>
+            {{#if booking.event.location}}
+              <div>📍 {{booking.event.location}}</div>
+            {{/if}}
+          </div>
+
+          <div class="booking-classes">
+            {{#each booking.classes as |cls|}}
+              <span class="booking-class-badge">
+                {{cls.class_name}}
+                {{#if cls.transponder_number}}
+                  ({{cls.transponder_number}})
+                {{/if}}
+              </span>
+            {{/each}}
+          </div>
+
+          <div class="booking-footer">
+            <strong>Total paid: £{{booking.amount_paid}}</strong>
+            <div class="booking-actions">
+              {{#if booking.event.topic_url}}
+                <a href={{booking.event.topic_url}} class="btn btn-small btn-default">
+                  💬 Discussion
+                </a>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="my-bookings-empty">
+      <p>You haven't made any bookings yet.</p>
+      <LinkTo @route="events" class="btn btn-primary">
+        Browse Events
+      </LinkTo>
+    </div>
+  {{/if}}
+</div>

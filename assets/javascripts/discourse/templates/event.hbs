@@ -1,0 +1,148 @@
+<div class="event-detail-container">
+  <div class="event-detail-header">
+    <h1>{{this.model.title}}</h1>
+    <span class="event-status event-status--{{this.model.status}}">
+      {{this.model.status}}
+    </span>
+  </div>
+
+  <div class="event-detail-meta">
+    <div class="event-detail-meta-item">
+      <strong>Organisation:</strong> {{this.model.organisation.name}}
+    </div>
+    <div class="event-detail-meta-item">
+      <strong>Date:</strong> {{this.model.formatted_date}}
+    </div>
+    {{#if this.model.location}}
+      <div class="event-detail-meta-item">
+        <strong>Location:</strong> {{this.model.location}}
+      </div>
+    {{/if}}
+    {{#if this.model.google_maps_url}}
+      <div class="event-detail-meta-item">
+        <a href={{this.model.google_maps_url}} target="_blank" rel="noopener">
+          📍 View on Google Maps
+        </a>
+      </div>
+    {{/if}}
+  </div>
+
+  {{#if this.model.description}}
+    <div class="event-detail-description">
+      {{this.model.description}}
+    </div>
+  {{/if}}
+
+  <div class="event-detail-classes">
+    <h2>Classes</h2>
+    <div class="event-classes-grid">
+      {{#each this.model.classes as |cls|}}
+        <div class="event-class-card {{if (eq cls.status "sold_out") "sold-out"}}">
+          <div class="event-class-name">{{cls.name}}</div>
+          <div class="event-class-spaces">
+            {{cls.spaces_remaining}} / {{cls.capacity}} spaces
+          </div>
+          <input
+            type="checkbox"
+            id="class-{{cls.id}}"
+            value={{cls.id}}
+            disabled={{eq cls.status "sold_out"}}
+            {{on "change" (fn this.toggleClass cls.id)}}
+          />
+          <label for="class-{{cls.id}}">
+            {{if (eq cls.status "sold_out") "Sold Out" "Select"}}
+          </label>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+
+  {{#if this.model.pricing}}
+    <div class="event-detail-pricing">
+      <h2>Pricing</h2>
+      {{#if (eq this.model.pricing.rule_type "tiered")}}
+        <p>First class: £{{this.model.pricing.first_class_price}}</p>
+        <p>Additional classes: £{{this.model.pricing.subsequent_class_price}} each</p>
+      {{else}}
+        <p>£{{this.model.pricing.flat_price}} per class</p>
+      {{/if}}
+
+      {{#if this.selectedClasses.length}}
+        <div class="event-booking-summary">
+          <strong>Selected: {{this.selectedClasses.length}} classes</strong>
+          <strong>Total: £{{this.calculatedTotal}}</strong>
+        </div>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  <div class="event-detail-actions">
+    {{#if (eq this.model.status "draft")}}
+      <button class="btn btn-warning" {{on "click" this.publishEvent}}>
+        📢 Publish Event
+      </button>
+    {{else if this.currentUser}}
+      <button
+        class="btn btn-primary"
+        disabled={{eq this.selectedClasses.length 0}}
+        {{on "click" this.bookEvent}}
+      >
+        {{if this.isBooking "Processing..." "Book Now"}}
+      </button>
+    {{else}}
+      <p>Please <a href="/login">log in</a> to book this event.</p>
+    {{/if}}
+
+    {{#if this.model.topic_url}}
+      <a href={{this.model.topic_url}} class="btn btn-default">
+        💬 Discuss this Event
+      </a>
+    {{/if}}
+  </div>
+
+  {{!-- Car Selection Modal --}}
+  {{#if this.showCarSelection}}
+    <div class="car-selection-overlay">
+      <div class="car-selection-modal">
+        <h2>Select Your Cars</h2>
+        <p class="field-help">Select which car you are entering for each class.</p>
+
+        {{#each this.eligibleCars as |cls|}}
+          <div class="car-selection-class">
+            <h3>{{cls.class_name}}</h3>
+            {{#if cls.eligible_cars.length}}
+              <select {{on "change" (fn this.selectCar cls.class_id)}}>
+                <option value="">Select car...</option>
+                {{#each cls.eligible_cars as |car|}}
+                  <option value={{car.id}}>
+                    {{car.friendly_name}} — {{car.driveline}} — 📡 {{car.transponder_number}}
+                  </option>
+                {{/each}}
+              </select>
+            {{else}}
+              <div class="no-eligible-cars">
+                ⚠️ No eligible cars in your garage for this class.
+                <LinkTo @route="my-garage" class="btn btn-small btn-default">
+                  Add a car
+                </LinkTo>
+              </div>
+            {{/if}}
+          </div>
+        {{/each}}
+
+        <div class="car-selection-actions">
+          <button
+            class="btn btn-primary"
+            disabled={{not this.allCarsSelected}}
+            {{on "click" this.confirmBooking}}
+          >
+            {{if this.isBooking "Processing..." "Confirm & Pay"}}
+          </button>
+          <button class="btn btn-default" {{on "click" this.cancelCarSelection}}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+</div>

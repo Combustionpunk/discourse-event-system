@@ -1,0 +1,151 @@
+<div class="organisation-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+  </div>
+
+  <div class="org-detail-header">
+    <div>
+      <h1>{{this.model.name}}</h1>
+      <span class="org-status org-status--{{this.model.status}}">{{this.model.status}}</span>
+    </div>
+  </div>
+
+  {{#if this.model.description}}
+    <p class="org-detail-description">{{this.model.description}}</p>
+  {{/if}}
+
+  <div class="org-detail-grid">
+    <div class="org-detail-info">
+      <h2>Details</h2>
+      <div class="org-info-list">
+        {{#if this.model.email}}
+          <div class="org-info-item">
+            <span class="org-info-label">✉️ Email</span>
+            <a href="mailto:{{this.model.email}}">{{this.model.email}}</a>
+          </div>
+        {{/if}}
+        {{#if this.model.phone}}
+          <div class="org-info-item">
+            <span class="org-info-label">📞 Phone</span>
+            <span>{{this.model.phone}}</span>
+          </div>
+        {{/if}}
+        {{#if this.model.website}}
+          <div class="org-info-item">
+            <span class="org-info-label">🌐 Website</span>
+            <a href={{this.model.website}} target="_blank">{{this.model.website}}</a>
+          </div>
+        {{/if}}
+        {{#if this.model.address}}
+          <div class="org-info-item">
+            <span class="org-info-label">📍 Address</span>
+            <span>{{this.model.address}}</span>
+          </div>
+        {{/if}}
+        {{#if this.model.google_maps_url}}
+          <div class="org-info-item">
+            <a href={{this.model.google_maps_url}} target="_blank" class="btn btn-small btn-default">
+              📍 View on Google Maps
+            </a>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+
+    <div class="org-detail-members">
+      <div class="org-section-header">
+        <h2>Members</h2>
+        {{#if this.model.is_admin}}
+          <button class="btn btn-small btn-primary" {{on "click" this.toggleAddMember}}>
+            {{if this.showAddMember "Cancel" "+ Add Member"}}
+          </button>
+        {{/if}}
+      </div>
+
+      {{#if this.showAddMember}}
+        <div class="add-member-form">
+          <div class="org-form-row">
+            <div class="org-form-field user-search-field">
+              <label>Search User</label>
+              <input
+                type="text"
+                placeholder="Type to search users..."
+                value={{this.newMemberUsername}}
+                {{on "input" this.updateUsername}}
+              />
+              {{#if this.userSearchResults.length}}
+                <div class="user-search-results">
+                  {{#each this.userSearchResults as |user|}}
+                    <div class="user-search-result" {{on "click" (fn this.selectUser user.username)}}>
+                      <img src={{user.avatar_template}} class="user-avatar" alt={{user.username}} />
+                      <span class="user-username">{{user.username}}</span>
+                      {{#if user.name}}
+                        <span class="user-name">{{user.name}}</span>
+                      {{/if}}
+                    </div>
+                  {{/each}}
+                </div>
+              {{/if}}
+            </div>
+            <div class="org-form-field">
+              <label>Position</label>
+              <select {{on "change" this.updatePosition}}>
+                <option value="">Select position...</option>
+                {{#each this.model.positions as |pos|}}
+                  <option value={{pos.id}}>{{pos.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+          <button
+            class="btn btn-primary"
+            disabled={{this.isSaving}}
+            {{on "click" this.addMember}}
+          >
+            {{if this.isSaving "Adding..." "Add Member"}}
+          </button>
+        </div>
+      {{/if}}
+
+      {{#if this.model.members.length}}
+        <div class="members-list">
+          {{#each this.model.members as |member|}}
+            <div class="member-item">
+              <div class="member-info">
+                <strong>{{member.user.username}}</strong>
+                <span class="member-position">{{member.position.name}}</span>
+              </div>
+              {{#if this.model.is_admin}}
+                <button
+                  class="btn btn-small btn-danger"
+                  {{on "click" (fn this.removeMember member.id)}}
+                >
+                  Remove
+                </button>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <p class="field-help">No members yet.</p>
+      {{/if}}
+    </div>
+  </div>
+
+  {{#if this.model.events.length}}
+    <div class="org-detail-events">
+      <h2>Events</h2>
+      <div class="org-events-list">
+        {{#each this.model.events as |event|}}
+          <div class="org-event-item">
+            <LinkTo @route="event" @model={{event.id}}>
+              {{event.title}}
+            </LinkTo>
+            <span class="event-status event-status--{{event.status}}">{{event.status}}</span>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
+</div>

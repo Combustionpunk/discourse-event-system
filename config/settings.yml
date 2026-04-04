@@ -1,0 +1,13 @@
+plugins:
+  discourse_event_system_enabled:
+    default: true
+    client: true
+  discourse_event_system_paypal_client_id:
+    default: ""
+    client: true
+  discourse_event_system_paypal_secret:
+    default: ""
+    client: false
+  discourse_event_system_paypal_sandbox:
+    default: true
+    client: true

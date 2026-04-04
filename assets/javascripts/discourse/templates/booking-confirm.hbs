@@ -1,0 +1,55 @@
+<div class="booking-confirm-container">
+  <div class="booking-confirm-header">
+    <div class="booking-confirm-icon">✅</div>
+    <h1>Booking Confirmed!</h1>
+    <p>Your booking for <strong>{{this.model.event.title}}</strong> is confirmed.</p>
+  </div>
+
+  <div class="booking-confirm-details">
+    <h2>Booking Summary</h2>
+
+    <div class="booking-detail-item">
+      <strong>Event:</strong> {{this.model.event.title}}
+    </div>
+    <div class="booking-detail-item">
+      <strong>Status:</strong>
+      <span class="booking-status booking-status--{{this.model.status}}">
+        {{this.model.status}}
+      </span>
+    </div>
+    <div class="booking-detail-item">
+      <strong>Classes booked:</strong>
+      <ul>
+        {{#each this.model.classes as |cls|}}
+          <li>{{cls.class_name}} — £{{cls.amount_charged}}
+            {{#if cls.transponder_number}}
+              (Transponder: {{cls.transponder_number}})
+            {{/if}}
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+    <div class="booking-detail-item">
+      <strong>Total paid:</strong> £{{this.model.amount_paid}}
+    </div>
+    {{#if this.model.brca_membership_number}}
+      <div class="booking-detail-item">
+        <strong>BRCA Number:</strong> {{this.model.brca_membership_number}}
+      </div>
+    {{/if}}
+  </div>
+
+  <div class="booking-confirm-actions">
+    <LinkTo @route="my-bookings" class="btn btn-primary">
+      View My Bookings
+    </LinkTo>
+    {{#if this.model.event.topic_url}}
+      <a href={{this.model.event.topic_url}} class="btn btn-default">
+        💬 Discuss this Event
+      </a>
+    {{/if}}
+    <LinkTo @route="events" class="btn btn-default">
+      Browse More Events
+    </LinkTo>
+  </div>
+</div>
