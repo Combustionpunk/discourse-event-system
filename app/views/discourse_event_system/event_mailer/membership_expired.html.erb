@@ -1,0 +1,11 @@
+<h2>Your membership has expired</h2>
+
+<p>Hi <%= @user.username %>,</p>
+
+<p>Your <strong><%= @membership_type.name %></strong> membership with <strong><%= @organisation.name %></strong> has now expired.</p>
+
+<p>We hope you enjoyed being a member! You can rejoin at any time.</p>
+
+<p><a href="<%= Discourse.base_url %>/organisations/<%= @organisation.id %>">Rejoin <%= @organisation.name %></a></p>
+
+<p>Thanks,<br>The <%= @organisation.name %> Team</p>

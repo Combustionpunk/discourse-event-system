@@ -53,6 +53,7 @@ after_initialize do
   load File.expand_path("../app/controllers/discourse_event_system/garage_controller.rb", __FILE__)
   load File.expand_path("../app/controllers/discourse_event_system/admin_controller.rb", __FILE__)
   load File.expand_path("../app/mailers/event_mailer.rb", __FILE__)
+  load File.expand_path("../app/jobs/scheduled/membership_expiry_check.rb", __FILE__)
   load File.expand_path("../app/models/des_membership_family_member.rb", __FILE__)
   load File.expand_path("../app/models/des_organisation_membership.rb", __FILE__)
   load File.expand_path("../app/models/des_organisation_membership_type.rb", __FILE__)

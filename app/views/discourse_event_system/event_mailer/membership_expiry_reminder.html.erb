@@ -1,0 +1,13 @@
+<h2>Your membership is expiring soon</h2>
+
+<p>Hi <%= @user.username %>,</p>
+
+<p>Your <strong><%= @membership_type.name %></strong> membership with <strong><%= @organisation.name %></strong> 
+expires in <strong><%= @days_left %> day<%= 's' if @days_left != 1 %></strong> 
+on <strong><%= @expires_at.strftime('%d %B %Y') %></strong>.</p>
+
+<p>To continue enjoying the benefits of membership, please renew as soon as possible.</p>
+
+<p><a href="<%= Discourse.base_url %>/organisations/<%= @organisation.id %>">Renew Membership</a></p>
+
+<p>Thanks,<br>The <%= @organisation.name %> Team</p>

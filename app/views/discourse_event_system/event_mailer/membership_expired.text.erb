@@ -1,0 +1,8 @@
+Hi <%= @user.username %>,
+
+Your <%= @membership_type.name %> membership with <%= @organisation.name %> has now expired.
+
+You can rejoin at: <%= Discourse.base_url %>/organisations/<%= @organisation.id %>
+
+Thanks,
+The <%= @organisation.name %> Team
