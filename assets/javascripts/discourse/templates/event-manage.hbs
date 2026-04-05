@@ -128,7 +128,12 @@
   {{!-- Entrants Tab --}}
   {{#if (eq this.activeTab "entrants")}}
     <div class="manage-section">
-      <h2>Entrants</h2>
+      <div class="manage-section-header">
+        <h2>Entrants</h2>
+        <button class="btn btn-default" {{on "click" this.downloadCsv}}>
+          📥 Download RCTiming CSV
+        </button>
+      </div>
       {{#each this.model.entrants.classes as |cls|}}
         <div class="entrants-class">
           <h3>

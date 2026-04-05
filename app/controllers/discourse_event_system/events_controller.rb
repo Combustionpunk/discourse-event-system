@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show]
-    before_action :set_event, only: [:show, :update, :publish, :cancel, :entrants]
+    before_action :set_event, only: [:show, :update, :publish, :cancel, :entrants, :export_csv]
 
     def index
       events = DesEvent.published.upcoming.includes(:organisation, :event_type, :des_event_classes)
@@ -116,6 +116,41 @@ module DiscourseEventSystem
       ensure_organisation_admin!(@event.organisation)
       @event.publish!
       render json: serialize_event(@event)
+    end
+
+    def export_csv
+      ensure_logged_in
+      ensure_organisation_admin!(@event.organisation)
+      bookings = DesEventBooking.where(event_id: @event.id)
+        .includes(:user, booking_classes: { event_class: :class_type })
+        .where.not(status: 'cancelled')
+
+      csv_data = CSV.generate(headers: true) do |csv|
+        csv << ['Name', 'BRCA Number', 'Class', 'PT No', 'Car Make', 'Paid Status', 'Entry Desc']
+        bookings.each do |booking|
+          booking.booking_classes.each do |bc|
+            car = DesUserCar.find_by(
+              user_id: booking.user_id,
+              transponder_number: bc.transponder_number
+            ) if bc.transponder_number.present?
+            manufacturer = car&.manufacturer&.name || ''
+            csv << [
+              booking.user.username,
+              booking.brca_membership_number.presence || '0',
+              bc.event_class.name,
+              bc.transponder_number.presence || '0',
+              manufacturer,
+              booking.status == 'confirmed' ? '1' : '0',
+              'entry'
+            ]
+          end
+        end
+      end
+
+      send_data csv_data,
+        filename: "#{@event.title.parameterize}-entries.csv",
+        type: 'text/csv',
+        disposition: 'attachment'
     end
 
     def entrants

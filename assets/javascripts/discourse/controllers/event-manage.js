@@ -17,6 +17,33 @@ export default class EventManageController extends Controller {
   }
 
   @action
+  async downloadCsv() {
+    try {
+      const csrfToken = document.querySelector("meta[name='csrf-token']")?.content;
+      const response = await fetch("/des/events/" + this.model.event.id + "/export-csv", {
+        credentials: "same-origin",
+        headers: {
+          "X-CSRF-Token": csrfToken,
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      });
+      if (!response.ok) throw new Error("Failed");
+      const text = await response.text();
+      const blob = new Blob([text], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = this.model.event.title.replace(/[^a-z0-9]/gi, "-").toLowerCase() + "-entries.csv";
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      alert("Failed to download CSV");
+    }
+  }
+
+  @action
   showDetails() {
     this.activeTab = "details";
   }
