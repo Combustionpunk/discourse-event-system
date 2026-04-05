@@ -1,0 +1,20 @@
+<div class="booking-confirm-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+  </div>
+
+  <div class="booking-error">
+    <div class="booking-success-icon">❌</div>
+    <h1>Payment Cancelled</h1>
+    <p class="field-help">Your membership payment was cancelled. No charge was made.</p>
+    <div class="booking-success-actions">
+      <LinkTo @route="organisations" class="btn btn-primary">
+        Browse Organisations
+      </LinkTo>
+      <LinkTo @route="my-memberships" class="btn btn-default">
+        My Memberships
+      </LinkTo>
+    </div>
+  </div>
+</div>

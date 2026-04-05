@@ -1,0 +1,34 @@
+<div class="booking-confirm-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+  </div>
+
+  {{#if this.model.success}}
+    <div class="booking-success">
+      <div class="booking-success-icon">🎉</div>
+      <h1>Membership Confirmed!</h1>
+      <p>You are now a member of <strong>{{this.model.organisation.name}}</strong>.</p>
+      <p class="field-help">You've been added to the organisation's member group.</p>
+      <div class="booking-success-actions">
+        <LinkTo @route="my-memberships" class="btn btn-primary">
+          🎫 View My Memberships
+        </LinkTo>
+        <LinkTo @route="organisation" @model={{this.model.organisation.id}} class="btn btn-default">
+          View Organisation
+        </LinkTo>
+      </div>
+    </div>
+  {{else}}
+    <div class="booking-error">
+      <div class="booking-success-icon">❌</div>
+      <h1>Confirmation Failed</h1>
+      <p>{{this.model.error}}</p>
+      <div class="booking-success-actions">
+        <LinkTo @route="my-memberships" class="btn btn-default">
+          View My Memberships
+        </LinkTo>
+      </div>
+    </div>
+  {{/if}}
+</div>

@@ -60,6 +60,8 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/memberships/:membership_id/family" => "organisations#add_family_member"
   delete "/des/memberships/:membership_id/family/:user_id" => "organisations#remove_family_member"
   post "/des/organisations/:id/memberships/:membership_id/confirm" => "organisations#confirm_membership"
+  post "/des/memberships/:membership_id/confirm" => "organisations#confirm_membership_direct"
+  post "/des/memberships/:membership_id/confirm" => "organisations#confirm_membership_direct"
   get "/des/my-memberships" => "organisations#my_memberships"
   get "/my-memberships" => "frontend#index"
   get "/memberships/:membership_id/confirm" => "frontend#index"

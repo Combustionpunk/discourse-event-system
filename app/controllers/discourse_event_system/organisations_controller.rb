@@ -295,6 +295,23 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def confirm_membership_direct
+      membership = DesOrganisationMembership.find_by(
+        id: params[:membership_id],
+        user_id: current_user.id
+      )
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      return render json: { success: true, already_active: true } if membership.status == 'active'
+      paypal = DesPaypalService.new
+      capture = paypal.capture_order(membership.paypal_order_id)
+      capture_id = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'id')
+      amount = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'amount', 'value')
+      membership.activate!(capture_id, amount)
+      render json: { success: true, organisation: { id: membership.organisation.id, name: membership.organisation.name } }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     def confirm_membership
       membership = DesOrganisationMembership.find_by(
         id: params[:membership_id],
