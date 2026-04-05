@@ -37,6 +37,34 @@ class DesPaypalService
     JSON.parse(response.body)
   end
 
+  def create_membership_order(membership, membership_type)
+    token = get_access_token
+    org = membership.organisation
+    response = HTTParty.post(
+      "#{base_url}/v2/checkout/orders",
+      headers: {
+        'Content-Type' => 'application/json',
+        'Authorization' => "Bearer #{token}"
+      },
+      body: {
+        intent: 'CAPTURE',
+        purchase_units: [{
+          amount: {
+            currency_code: 'GBP',
+            value: membership_type.price.to_s
+          },
+          description: "#{org.name} - #{membership_type.name} Membership",
+          payee: { email_address: org.paypal_email }
+        }],
+        application_context: {
+          return_url: "#{Discourse.base_url}/memberships/#{membership.id}/confirm",
+          cancel_url: "#{Discourse.base_url}/memberships/#{membership.id}/cancel"
+        }
+      }.to_json
+    )
+    JSON.parse(response.body)
+  end
+
   def capture_order(paypal_order_id)
     uri = URI("#{@base_url}/v2/checkout/orders/#{paypal_order_id}/capture")
     req = Net::HTTP::Post.new(uri)

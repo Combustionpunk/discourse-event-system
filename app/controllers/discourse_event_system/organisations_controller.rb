@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class OrganisationsController < ApplicationController
     before_action :ensure_logged_in
-    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule]
+    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership]
 
     def index
       organisations = current_user.admin? ? DesOrganisation.all.order(:name) : DesOrganisation.approved.order(:name)
@@ -172,6 +172,20 @@ module DiscourseEventSystem
       render json: { success: true }
     end
 
+    def serialize_membership_type(type)
+      {
+        id: type.id,
+        name: type.name,
+        description: type.description,
+        price: type.price,
+        duration_months: type.duration_months,
+        discount_percentage: type.discount_percentage,
+        max_members: type.max_members,
+        is_family: type.is_family,
+        active: type.active
+      }
+    end
+
     def serialize_class_type(ct)
       {
         id: ct.id,
@@ -185,6 +199,155 @@ module DiscourseEventSystem
       serialize_class_type(ct).merge(
         rules: ct.compatibility_rules.map { |r| serialize_rule(r) }
       )
+    end
+
+    def membership_types
+      types = @organisation.des_organisation_membership_types.active
+      render json: {
+        membership_types: types.map { |t| serialize_membership_type(t) },
+        is_admin: is_org_admin?
+      }
+    end
+
+    def create_membership_type
+      ensure_organisation_admin!
+      type = @organisation.des_organisation_membership_types.create!(
+        name: params[:name],
+        description: params[:description],
+        price: params[:price],
+        duration_months: params[:duration_months],
+        discount_percentage: params[:discount_percentage] || 0,
+        max_members: params[:max_members] || 1,
+        is_family: params[:is_family] || false,
+        active: true
+      )
+      render json: serialize_membership_type(type), status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def update_membership_type
+      ensure_organisation_admin!
+      type = @organisation.des_organisation_membership_types.find(params[:type_id])
+      type.update!(
+        name: params[:name],
+        description: params[:description],
+        price: params[:price],
+        duration_months: params[:duration_months],
+        discount_percentage: params[:discount_percentage] || 0,
+        active: params[:active]
+      )
+      render json: serialize_membership_type(type)
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_membership_type
+      ensure_organisation_admin!
+      type = @organisation.des_organisation_membership_types.find(params[:type_id])
+      type.update!(active: false)
+      render json: { success: true }
+    end
+
+    def join
+      type = @organisation.des_organisation_membership_types.find(params[:membership_type_id])
+      membership = DesOrganisationMembership.create!(
+        organisation_id: @organisation.id,
+        user_id: current_user.id,
+        membership_type_id: type.id,
+        status: 'pending',
+        starts_at: Time.now,
+        expires_at: Time.now + type.duration_months.months
+      )
+      if type.free?
+        membership.activate!(nil, 0)
+        render json: { success: true, membership_id: membership.id, free: true }
+      else
+        paypal = DesPaypalService.new
+        response = paypal.create_membership_order(membership, type)
+        order_id = response['id']
+        approval_url = response['links'].find { |l| l['rel'] == 'approve' }['href']
+        membership.update!(paypal_order_id: order_id)
+        render json: { approval_url: approval_url, membership_id: membership.id }
+      end
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def add_family_member
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], user_id: current_user.id)
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      new_user = User.find_by(username: params[:username])
+      return render json: { error: 'User not found' }, status: :not_found unless new_user
+      membership.add_family_member!(new_user)
+      render json: { success: true, user: { id: new_user.id, username: new_user.username } }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def remove_family_member
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], user_id: current_user.id)
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      member_user = User.find(params[:user_id])
+      membership.remove_family_member!(member_user)
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def confirm_membership
+      membership = DesOrganisationMembership.find_by(
+        id: params[:membership_id],
+        user_id: current_user.id
+      )
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      paypal = DesPaypalService.new
+      capture = paypal.capture_order(membership.paypal_order_id)
+      capture_id = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'id')
+      amount = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'amount', 'value')
+      membership.activate!(capture_id, amount)
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def my_memberships
+      memberships = DesOrganisationMembership
+        .where(user_id: current_user.id)
+        .includes(:organisation, :membership_type)
+        .order(expires_at: :desc)
+      render json: {
+        memberships: memberships.map { |m|
+          {
+            id: m.id,
+            organisation: { id: m.organisation.id, name: m.organisation.name },
+            membership_type: { name: m.membership_type.name, price: m.membership_type.price },
+            status: m.status,
+            starts_at: m.starts_at,
+            expires_at: m.expires_at,
+            amount_paid: m.amount_paid
+          }
+        }
+      }
+    end
+
+    def create_discourse_group!(organisation)
+      return if organisation.discourse_group_id.present?
+      group_name = organisation.name.downcase.gsub(/[^a-z0-9]+/, '_').gsub(/^_|_$/, '')
+      group_name = "org_#{group_name}"
+      group = Group.find_by(name: group_name)
+      unless group
+        group = Group.create!(
+          name: group_name,
+          full_name: organisation.name,
+          bio_raw: "Members of #{organisation.name}",
+          visibility_level: Group.visibility_levels[:members],
+          members_visibility_level: Group.visibility_levels[:members]
+        )
+      end
+      organisation.update!(discourse_group_id: group.id)
+    rescue => e
+      Rails.logger.error "Failed to create Discourse group for org #{organisation.id}: \#{e.message}"
     end
 
     private

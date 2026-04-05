@@ -27,6 +27,49 @@ export default class OrganisationController extends Controller {
   @action
   showRules() { this.activeTab = "rules"; }
 
+  @action
+  showMemberships() { this.activeTab = "memberships"; }
+
+  @action
+  async createMembershipType() {
+    const name = document.getElementById('mtype-name').value.trim();
+    const price = document.getElementById('mtype-price').value;
+    const duration = document.getElementById('mtype-duration').value;
+    const description = document.getElementById('mtype-desc').value.trim();
+    const discount = document.getElementById('mtype-discount').value || 0;
+    const maxMembers = document.getElementById('mtype-max-members').value || 1;
+    const isFamily = parseInt(maxMembers) > 1;
+    if (!name || !price || !duration) { alert("Please fill in name, price and duration."); return; }
+    try {
+      await ajax("/des/organisations/" + this.model.id + "/membership-types.json", {
+        type: "POST",
+        data: { name, price, duration_months: duration, description, discount_percentage: discount, max_members: maxMembers, is_family: isFamily },
+      });
+      document.getElementById('mtype-name').value = '';
+      document.getElementById('mtype-price').value = '';
+      document.getElementById('mtype-duration').value = '';
+      document.getElementById('mtype-desc').value = '';
+      document.getElementById('mtype-discount').value = '';
+      document.getElementById('mtype-max-members').value = '1';
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async deleteMembershipType(typeId) {
+    if (!window.confirm("Remove this membership type?")) return;
+    try {
+      await ajax("/des/organisations/" + this.model.id + "/membership-types/" + typeId + ".json", {
+        type: "DELETE",
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
   get groupedOrgRules() {
     const rules = this.model.org_rules || [];
     const groups = {};

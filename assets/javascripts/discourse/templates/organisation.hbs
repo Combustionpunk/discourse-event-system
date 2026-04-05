@@ -30,6 +30,9 @@
       <button class="manage-tab {{if (eq this.activeTab 'rules') 'active'}}" {{on "click" this.showRules}}>
         ⚙️ Class Rules
       </button>
+      <button class="manage-tab {{if (eq this.activeTab 'memberships') 'active'}}" {{on "click" this.showMemberships}}>
+        🎫 Memberships
+      </button>
     </div>
   {{/if}}
 
@@ -199,7 +202,6 @@
       <h2>Organisation Class Types</h2>
       <p class="field-help">Create custom class types for your organisation's events with their own eligibility rules.</p>
 
-      {{!-- Create new class type --}}
       <div class="admin-rule-form">
         <h3>Create New Class Type</h3>
         <div class="org-form-row">
@@ -219,7 +221,6 @@
         </div>
       </div>
 
-      {{!-- Existing org class types --}}
       {{#if this.model.org_class_types.length}}
         {{#each this.model.org_class_types as |ct|}}
           <div class="rules-class-group">
@@ -230,7 +231,6 @@
               </button>
             </div>
 
-            {{!-- Existing rules --}}
             {{#each ct.rules as |rule|}}
               <div class="rule-row">
                 <span class="rule-type-badge rule-type-badge--{{rule.rule_type}}">{{this.ruleTypeLabel rule.rule_type}}</span>
@@ -241,7 +241,6 @@
               </div>
             {{/each}}
 
-            {{!-- Add rule to this class --}}
             <div class="add-rule-inline">
               <select class="rule-type-select" data-class-id={{ct.id}} {{on "change" (fn this.onRuleTypeChange ct.id)}}>
                 <option value="driveline">Driveline</option>
@@ -253,7 +252,6 @@
                 <option value="min_age">Min Driver Age</option>
               </select>
 
-              {{!-- Driveline multi-select --}}
               <div class="rule-value-container rule-value-container--driveline" data-class-id={{ct.id}}>
                 <select class="rule-multiselect" data-class-id={{ct.id}} multiple size="4">
                   {{#each this.model.drivelines as |dl|}}
@@ -263,7 +261,6 @@
                 <span class="field-help">Hold Ctrl/Cmd to select multiple</span>
               </div>
 
-              {{!-- Chassis multi-select --}}
               <div class="rule-value-container rule-value-container--chassis" data-class-id={{ct.id}} style="display:none">
                 <select class="rule-multiselect" data-class-id={{ct.id}} multiple size="4">
                   {{#each this.model.chassis_types as |ct2|}}
@@ -273,7 +270,6 @@
                 <span class="field-help">Hold Ctrl/Cmd to select multiple</span>
               </div>
 
-              {{!-- Manufacturer multi-select --}}
               <div class="rule-value-container rule-value-container--manufacturer" data-class-id={{ct.id}} style="display:none">
                 <select class="rule-multiselect" data-class-id={{ct.id}} multiple size="4">
                   {{#each this.model.manufacturers as |m|}}
@@ -283,7 +279,6 @@
                 <span class="field-help">Hold Ctrl/Cmd to select multiple</span>
               </div>
 
-              {{!-- Year select --}}
               <div class="rule-value-container rule-value-container--year" data-class-id={{ct.id}} style="display:none">
                 <select class="rule-year-select" data-class-id={{ct.id}}>
                   {{#each this.yearOptions as |year|}}
@@ -292,7 +287,6 @@
                 </select>
               </div>
 
-              {{!-- Age input --}}
               <div class="rule-value-container rule-value-container--age" data-class-id={{ct.id}} style="display:none">
                 <input type="number" class="rule-age-input" data-class-id={{ct.id}} min="1" max="100" placeholder="Age" style="width: 80px;" />
               </div>
@@ -307,7 +301,6 @@
         <p class="field-help">No custom class types yet. Create one above!</p>
       {{/if}}
 
-      {{!-- Global class types reference --}}
       <div style="margin-top: 32px;">
         <h3>Global Class Types</h3>
         <p class="field-help">These are available to all organisations. You can also use these when setting up events.</p>
@@ -317,6 +310,78 @@
           {{/each}}
         </div>
       </div>
+    </div>
+  {{/if}}
+
+  {{!-- Memberships Tab --}}
+  {{#if (eq this.activeTab 'memberships')}}
+    <div class="manage-section">
+      <h2>Membership Types</h2>
+      <p class="field-help">Set up membership types that users can purchase to join your organisation.</p>
+
+      <div class="admin-rule-form">
+        <h3>Add Membership Type</h3>
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Name</label>
+            <input type="text" id="mtype-name" placeholder="e.g. Annual Member" />
+          </div>
+          <div class="org-form-field">
+            <label>Price (£)</label>
+            <input type="number" id="mtype-price" placeholder="30.00" step="0.01" min="0" />
+          </div>
+          <div class="org-form-field">
+            <label>Duration (months)</label>
+            <input type="number" id="mtype-duration" placeholder="12" min="1" />
+          </div>
+        </div>
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Description <span class="field-help">(optional)</span></label>
+            <input type="text" id="mtype-desc" placeholder="Brief description" />
+          </div>
+          <div class="org-form-field">
+            <label>Event Discount % <span class="field-help">(optional)</span></label>
+            <input type="number" id="mtype-discount" placeholder="0" min="0" max="100" />
+          </div>
+          <div class="org-form-field">
+            <label>Max Members <span class="field-help">(1 = individual, 2+ = family)</span></label>
+            <input type="number" id="mtype-max-members" placeholder="1" min="1" max="10" value="1" />
+          </div>
+          <div class="org-form-field" style="justify-content: flex-end;">
+            <button class="btn btn-primary" {{on "click" this.createMembershipType}}>
+              + Add Type
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {{#if this.model.membership_types.length}}
+        {{#each this.model.membership_types as |mtype|}}
+          <div class="rules-class-group">
+            <div class="org-section-header">
+              <div>
+                <h4>{{mtype.name}}
+                  <span class="booking-class-badge">£{{mtype.price}}</span>
+                  <span class="field-help">{{mtype.duration_months}} months</span>
+                  {{#if mtype.discount_percentage}}
+                    <span class="rule-type-badge rule-type-badge--driveline">{{mtype.discount_percentage}}% discount</span>
+                  {{/if}}
+                  {{#if mtype.is_family}}
+                    <span class="rule-type-badge rule-type-badge--chassis">👨‍👩‍👧 Family (up to {{mtype.max_members}})</span>
+                  {{/if}}
+                </h4>
+                {{#if mtype.description}}<p class="field-help">{{mtype.description}}</p>{{/if}}
+              </div>
+              <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteMembershipType mtype.id)}}>
+                🗑 Remove
+              </button>
+            </div>
+          </div>
+        {{/each}}
+      {{else}}
+        <p class="field-help">No membership types yet. Add one above!</p>
+      {{/if}}
     </div>
   {{/if}}
 

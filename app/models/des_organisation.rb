@@ -3,6 +3,9 @@
 class DesOrganisation < ActiveRecord::Base
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by', optional: true
   has_many :des_organisation_members, foreign_key: 'organisation_id'
+  has_many :des_organisation_membership_types, foreign_key: 'organisation_id'
+  has_many :des_organisation_memberships, foreign_key: 'organisation_id'
+  belongs_to :discourse_group, class_name: 'Group', foreign_key: 'discourse_group_id', optional: true
   has_many :users, through: :des_organisation_members
 
   validates :name, presence: true, uniqueness: true
