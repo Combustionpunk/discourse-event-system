@@ -77,6 +77,91 @@
       </div>
     </div>
 
+    {{!-- Public membership section --}}
+    {{#if this.model.membership_types.length}}
+      <div class="org-memberships-public">
+        <h2>🎫 Memberships</h2>
+        <p class="field-help">Join {{this.model.name}} to become an official member.</p>
+        <div class="membership-types-list">
+          {{#each this.model.membership_types as |mtype|}}
+            <div class="membership-type-card">
+              <div class="membership-type-info">
+                <h3>{{mtype.name}}</h3>
+                {{#if mtype.description}}<p class="field-help">{{mtype.description}}</p>{{/if}}
+                <div class="membership-type-meta">
+                  <span class="booking-class-badge">£{{mtype.price}}</span>
+                  <span class="field-help">{{mtype.duration_months}} months</span>
+                  {{#if mtype.discount_percentage}}
+                    <span class="rule-type-badge rule-type-badge--driveline">{{mtype.discount_percentage}}% event discount</span>
+                  {{/if}}
+                  {{#if mtype.is_family}}
+                    <span class="rule-type-badge rule-type-badge--chassis">👨‍👩‍👧 Family (up to {{mtype.max_members}})</span>
+                  {{/if}}
+                </div>
+              </div>
+              {{#if this.currentUser}}
+                <button
+                  class="btn btn-primary"
+                  {{on "click" (fn this.joinMembership mtype.id mtype.is_family mtype.max_members)}}
+                >
+                  {{if (eq this.joiningMembershipTypeId mtype.id) "Cancel" "Join"}}
+                </button>
+              {{else}}
+                <a href="/login" class="btn btn-default">Log in to Join</a>
+              {{/if}}
+              {{!-- Inline family member form --}}
+              {{#if (eq this.joiningMembershipTypeId mtype.id)}}
+                {{#if mtype.is_family}}
+                  <div class="family-inline-form">
+                    <p class="field-help">Add up to {{this.maxFamilyMembers}} members total (including yourself).</p>
+                    <div style="margin-bottom:8px;">
+                      <div style="display:flex; gap:8px;">
+                        <input
+                          type="text"
+                          placeholder="Type username to search..."
+                          value={{this.familyMemberSearch}}
+                          {{on "input" this.updateFamilySearch}}
+                          autocomplete="off"
+                        />
+                        <button class="btn btn-small btn-default" {{on "click" this.addFamilyMemberToList}}>
+                          + Add
+                        </button>
+                      </div>
+                      {{#if this.familyUserSearchResults.length}}
+                        <div class="family-search-results">
+                          {{#each this.familyUserSearchResults as |user|}}
+                            <div class="family-search-result" {{on "click" (fn this.selectFamilyUser user.username)}}>
+                              <img src={{user.avatar_template}} class="user-avatar" alt={{user.username}} />
+                              <span class="user-username">{{user.username}}</span>
+                              {{#if user.name}}<span class="user-name">{{user.name}}</span>{{/if}}
+                            </div>
+                          {{/each}}
+                        </div>
+                      {{/if}}
+                    </div>
+                    {{#each this.familyMemberUsernames as |username|}}
+                      <div class="rule-row" style="margin-bottom:4px;">
+                        <span style="flex:1">👤 {{username}}</span>
+                        <button class="btn btn-small btn-danger" {{on "click" (fn this.removeFamilyMemberFromList username)}}>✕</button>
+                      </div>
+                    {{/each}}
+                    <div style="margin-top:12px; display:flex; gap:8px;">
+                      <button class="btn btn-primary" {{on "click" this.confirmFamilyJoin}}>
+                        Proceed to Payment
+                      </button>
+                      <button class="btn btn-default" {{on "click" this.cancelFamilyModal}}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                {{/if}}
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/if}}
+
     {{#if this.model.events.length}}
       <div class="org-detail-events">
         <h2>Upcoming Events</h2>

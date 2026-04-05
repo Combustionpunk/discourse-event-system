@@ -1,6 +1,7 @@
 import Controller from "@ember/controller";
 import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
+import { later } from "@ember/runloop";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
@@ -27,8 +28,118 @@ export default class OrganisationController extends Controller {
   @action
   showRules() { this.activeTab = "rules"; }
 
+  @tracked joiningMembershipTypeId = null;
+  @tracked isFamilyMembership = false;
+  @tracked maxFamilyMembers = 1;
+  @tracked familyMemberUsernames = [];
+  @tracked showFamilyModal = false;
+  @tracked familyMemberSearch = "";
+  @tracked familyUserSearchResults = [];
+
   @action
   showMemberships() { this.activeTab = "memberships"; }
+
+  @action
+  joinMembership(typeId, isFamily, maxMembers) {
+    // Toggle off if already selected
+    if (this.joiningMembershipTypeId === typeId) {
+      this.cancelFamilyModal();
+      return;
+    }
+    this.joiningMembershipTypeId = typeId;
+    this.isFamilyMembership = isFamily;
+    this.maxFamilyMembers = maxMembers;
+    this.familyMemberUsernames = [];
+    this.familyMemberSearch = "";
+    if (!isFamily) {
+      this.proceedWithJoin(typeId);
+    }
+  }
+
+  @action
+  addFamilyMemberToList() {
+    const username = this.familyMemberSearch.trim();
+    if (!username) return;
+    if (this.familyMemberUsernames.includes(username)) {
+      alert("Already added " + username);
+      return;
+    }
+    if (this.familyMemberUsernames.length >= this.maxFamilyMembers - 1) {
+      alert("Maximum family members reached");
+      return;
+    }
+    this.familyMemberUsernames = [...this.familyMemberUsernames, username];
+    this.familyMemberSearch = "";
+    this.familyUserSearchResults = [];
+  }
+
+  @action
+  removeFamilyMemberFromList(username) {
+    this.familyMemberUsernames = this.familyMemberUsernames.filter(u => u !== username);
+  }
+
+  @action
+  async updateFamilySearch(event) {
+    this.familyMemberSearch = event.target.value;
+    const query = this.familyMemberSearch.trim();
+    if (query.length < 2) {
+      this.familyUserSearchResults = [];
+      return;
+    }
+    try {
+      const response = await ajax("/u/search/users.json", {
+        data: { term: query, include_groups: false }
+      });
+      this.familyUserSearchResults = (response.users || []).slice(0, 5).map(u => ({
+        ...u,
+        avatar_template: u.avatar_template.replace('{size}', '24')
+      }));
+    } catch (e) {
+      this.familyUserSearchResults = [];
+    }
+  }
+
+  @action
+  selectFamilyUser(username) {
+    this.familyMemberSearch = username;
+    this.familyUserSearchResults = [];
+    this.addFamilyMemberToList();
+  }
+
+  @action
+  cancelFamilyModal() {
+    this.showFamilyModal = false;
+    this.joiningMembershipTypeId = null;
+    this.familyMemberUsernames = [];
+    this.familyMemberSearch = "";
+    this.familyUserSearchResults = [];
+  }
+
+  @action
+  async confirmFamilyJoin() {
+    await this.proceedWithJoin(this.joiningMembershipTypeId, this.familyMemberUsernames);
+    this.showFamilyModal = false;
+  }
+
+  async proceedWithJoin(typeId, familyUsernames = []) {
+    try {
+      const response = await ajax("/des/organisations/" + this.model.id + "/memberships.json", {
+        type: "POST",
+        data: {
+          membership_type_id: typeId,
+          family_usernames: familyUsernames
+        },
+      });
+      if (response.free) {
+        alert("You have successfully joined " + this.model.name + "!");
+        this.router.refresh();
+      } else {
+        window.location.href = response.approval_url;
+      }
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
 
   @action
   async createMembershipType() {

@@ -38,7 +38,7 @@ class DesPaypalService
   end
 
   def create_membership_order(membership, membership_type)
-    token = get_access_token
+    token = access_token
     org = membership.organisation
     response = HTTParty.post(
       "#{base_url}/v2/checkout/orders",
