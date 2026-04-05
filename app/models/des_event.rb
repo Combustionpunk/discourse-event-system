@@ -57,12 +57,16 @@ class DesEvent < ActiveRecord::Base
 
   def create_topic!
     creator_user = User.find(created_by)
+    category_slug = SiteSetting.discourse_event_system_category_slug.presence || 'rc-meetings'
+    events_category_id = Category.find_by(slug: category_slug)&.id || SiteSetting.uncategorized_category_id
+    topic_tags = build_topic_tags
 
     post_creator = PostCreator.new(
       creator_user,
       title: title,
       raw: build_post_content,
-      category: category_id || SiteSetting.uncategorized_category_id,
+      category: events_category_id,
+      tags: topic_tags,
       skip_validations: true,
       skip_jobs: false
     )
@@ -70,8 +74,26 @@ class DesEvent < ActiveRecord::Base
     post = post_creator.create
     raise "Failed to create topic: #{post_creator.errors.full_messages.join(', ')}" unless post&.persisted?
 
-    update!(topic_id: post.topic_id)
+    update!(topic_id: post.topic_id, category_id: events_category_id)
     post.topic
+  end
+
+  def build_topic_tags
+    tags = []
+    if organisation.present?
+      org_tag = organisation.name.downcase.gsub(/[^a-z0-9]+/, '-').gsub(/^-|-$/, '')
+      tags << org_tag
+    end
+    if event_type.present?
+      type_tag = event_type.name.downcase.gsub(/[^a-z0-9]+/, '-').gsub(/^-|-$/, '')
+      tags << type_tag
+    end
+    des_event_classes.each do |ec|
+      class_tag = ec.name.downcase.gsub(/[^a-z0-9]+/, '-').gsub(/^-|-$/, '')
+      tags << class_tag
+    end
+    tags.uniq.each { |tag_name| Tag.find_or_create_by!(name: tag_name) }
+    tags.uniq
   end
 
   def update_topic_content!
@@ -90,7 +112,7 @@ class DesEvent < ActiveRecord::Base
 
   def build_post_content
     classes_list = des_event_classes.map do |ec|
-      "- **#{ec.name}** — #{ec.capacity} spaces"
+      "- **#{ec.name}** --- #{ec.capacity} spaces"
     end.join("\n")
 
     pricing = des_event_pricing_rule
@@ -105,32 +127,18 @@ class DesEvent < ActiveRecord::Base
       'Free'
     end
 
-    <<~MARKDOWN
-      ## #{title}
-
-      **Organisation:** #{organisation.name}
-      **Date:** #{start_date.strftime('%A %d %B %Y at %H:%M')}
-      #{"**End Date:** #{end_date.strftime('%A %d %B %Y at %H:%M')}" if end_date.present?}
-      **Location:** #{location || 'TBC'}
-      #{"**Map:** #{google_maps_url}" if google_maps_url.present?}
-
-      ---
-
-      #{description}
-
-      ---
-
-      ## Classes
-
-      #{classes_list.present? ? classes_list : 'Classes to be announced'}
-
-      ## Pricing
-
-      #{price_info}
-
-      ---
-
-      *To book your place, click the **Book Now** button below.*
-    MARKDOWN
+    content = "## #{title}\n\n"
+    content += "**Organisation:** #{organisation.name}\n"
+    content += "**Date:** #{start_date.strftime('%A %d %B %Y at %H:%M')}\n"
+    content += "**End Date:** #{end_date.strftime('%A %d %B %Y at %H:%M')}\n" if end_date.present?
+    content += "**Location:** #{location.presence || 'TBC'}\n"
+    content += "**Map:** #{google_maps_url}\n" if google_maps_url.present?
+    content += "\n---\n\n"
+    content += "#{description}\n\n" if description.present?
+    content += "---\n\n## Classes\n\n"
+    content += classes_list.present? ? classes_list : 'Classes to be announced'
+    content += "\n\n## Pricing\n\n#{price_info}\n\n"
+    content += "---\n\n*To book your place, visit the event page.*\n"
+    content
   end
 end
