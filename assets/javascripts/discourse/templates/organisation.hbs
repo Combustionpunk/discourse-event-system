@@ -233,7 +233,7 @@
             {{!-- Existing rules --}}
             {{#each ct.rules as |rule|}}
               <div class="rule-row">
-                <span class="rule-type-badge rule-type-badge--{{rule.rule_type}}">{{rule.rule_type}}</span>
+                <span class="rule-type-badge rule-type-badge--{{rule.rule_type}}">{{this.ruleTypeLabel rule.rule_type}}</span>
                 <span class="rule-value">{{rule.rule_value}}</span>
                 <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteClassTypeRule ct.id rule.id)}}>
                   🗑

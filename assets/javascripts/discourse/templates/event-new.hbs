@@ -147,9 +147,19 @@
                 <label>Class Type</label>
                 <select value={{cls.class_type_id}} {{on "change" (fn this.updateClass index "class_type_id")}}>
                   <option value="">Select class...</option>
-                  {{#each this.model.class_types as |ct|}}
+                  <option value="">Select class type...</option>
+                  <optgroup label="Global Classes">
+                  {{#each this.globalClassTypes as |ct|}}
                     <option value={{ct.id}} selected={{eq (concat ct.id "") cls.class_type_id}}>{{ct.name}}</option>
                   {{/each}}
+                  </optgroup>
+                  {{#if this.orgClassTypes.length}}
+                    <optgroup label="Organisation Classes">
+                    {{#each this.orgClassTypes as |ct|}}
+                      <option value={{ct.id}} selected={{eq (concat ct.id "") cls.class_type_id}}>{{ct.name}}</option>
+                    {{/each}}
+                    </optgroup>
+                  {{/if}}
                 </select>
               </div>
               <div class="org-form-field">

@@ -66,6 +66,20 @@ export default class DesAdminController extends Controller {
     }
   }
 
+  ruleTypeLabel(ruleType) {
+    const labels = {
+      driveline: 'Driveline',
+      chassis: 'Chassis',
+      manufacturer: 'Manufacturer',
+      max_year: 'Max Year',
+      min_year: 'Min Year',
+      max_age: 'Max Age',
+      min_age: 'Min Age',
+      model: 'Model'
+    };
+    return labels[ruleType] || ruleType;
+  }
+
   get groupedGlobalRules() {
     const rules = this.model.global_rules || [];
     const groups = {};

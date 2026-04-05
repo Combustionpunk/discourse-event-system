@@ -9,6 +9,18 @@ class DesBookingService
 
   def create_booking(class_ids, car_selections = {})
     validate_classes!(class_ids)
+    # Check driver age eligibility
+    class_ids.each do |class_id|
+      event_class = DesEventClass.find(class_id)
+      age_rules = DesClassCompatibilityRule
+        .where(class_type_id: event_class.class_type_id)
+        .where(rule_type: ['max_age', 'min_age'])
+      age_rules.each do |rule|
+        unless rule.driver_eligible?(@user)
+          raise "You are not eligible for #{event_class.name} due to age restrictions"
+        end
+      end
+    end
 
     booking = DesEventBooking.create!(
       event_id: @event.id,

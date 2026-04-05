@@ -20,11 +20,37 @@ export default class EventNewController extends Controller {
     return this.bookingType === "external";
   }
 
+
+  get globalClassTypes() {
+    return (this.model.class_types || []).filter(ct => !ct.isOrg);
+  }
+
+  get orgClassTypes() {
+    return (this.model.class_types || []).filter(ct => ct.isOrg);
+  }
+
   @action
-  updateField(field, event) {
+  async updateField(field, event) {
     this.model.event[field] = event.target.value;
     if (field === "booking_type") {
       this.bookingType = event.target.value;
+    }
+    if (field === "organisation_id" && event.target.value) {
+      try {
+        const data = await ajax("/des/organisations/" + event.target.value + "/class-types.json");
+        const orgTypes = (data.org_class_types || []).map(ct => ({
+          id: ct.id,
+          name: ct.name + " ★",
+          isOrg: true
+        }));
+        const globalTypes = data.global_class_types || [];
+        this.model.class_types = [
+          ...globalTypes,
+          ...orgTypes
+        ];
+      } catch (e) {
+        // keep existing class types
+      }
     }
   }
 
