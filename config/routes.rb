@@ -19,6 +19,7 @@ DiscourseEventSystem::Engine.routes.draw do
   # API routes
   get "/des/class-types" => "events#class_types"
   get "/des/event-types" => "events#event_types"
+  get "/des/events/by-topic/:topic_id" => "events#by_topic"
   get "/des/events" => "events#index"
   get "/des/events/:id" => "events#show"
   post "/des/events" => "events#create"

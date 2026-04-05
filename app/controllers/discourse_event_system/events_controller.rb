@@ -10,6 +10,12 @@ module DiscourseEventSystem
       render json: serialize_events(events)
     end
 
+    def by_topic
+      event = DesEvent.find_by(topic_id: params[:topic_id])
+      return render json: { error: 'Not found' }, status: :not_found unless event
+      render json: serialize_event(event)
+    end
+
     def class_types
       render json: {
         class_types: DesEventClassType.all.order(:name).map { |ct| { id: ct.id, name: ct.name } }

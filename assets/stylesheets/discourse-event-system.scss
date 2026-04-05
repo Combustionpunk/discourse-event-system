@@ -927,3 +927,78 @@
   80% { transform: scale(1.2); }
   100% { transform: scale(1); }
 }
+
+// Event booking widget (in Discourse topics)
+.event-booking-widget {
+  margin-top: 24px;
+  border: 2px solid var(--tertiary-low);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--primary-very-low);
+
+  h3 {
+    font-size: 1.2em;
+    margin: 0 0 16px 0;
+    color: var(--tertiary);
+  }
+}
+
+.event-classes-booking {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.event-class-booking-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--secondary);
+  border-radius: 8px;
+  border: 1px solid var(--primary-low);
+}
+
+.event-class-booking-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.spaces-badge {
+  background: var(--success-low);
+  color: var(--success);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.85em;
+
+  &.sold-out {
+    background: var(--danger-low);
+    color: var(--danger);
+  }
+}
+
+.class-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.event-booking-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--highlight-low);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 0.95em;
+}
+
+.event-book-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.05em;
+}
