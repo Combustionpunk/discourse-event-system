@@ -32,3 +32,11 @@ end
     m.status = 'approved'
   end
 end
+
+# Default event types
+[
+  'Race Meeting', 'Club Meeting', 'Championship Round',
+  'Regional', 'National', 'Practice'
+].each do |name|
+  DesEventType.find_or_create_by!(name: name)
+end
