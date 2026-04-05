@@ -47,6 +47,14 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/organisations/:id/approve" => "organisations#approve"
   post "/des/organisations/:id/reject" => "organisations#reject"
   get "/des/organisations/:id/members" => "organisations#members"
+  get "/des/organisations/:id/rules" => "organisations#rules"
+  post "/des/organisations/:id/rules" => "organisations#create_rule"
+  delete "/des/organisations/:id/rules/:rule_id" => "organisations#destroy_rule"
+  get "/des/organisations/:id/class-types" => "organisations#class_types"
+  post "/des/organisations/:id/class-types" => "organisations#create_class_type"
+  delete "/des/organisations/:id/class-types/:class_type_id" => "organisations#destroy_class_type"
+  post "/des/organisations/:id/class-types/:class_type_id/rules" => "organisations#create_class_type_rule"
+  delete "/des/organisations/:id/class-types/:class_type_id/rules/:rule_id" => "organisations#destroy_class_type_rule"
   post "/des/organisations/:id/add_member" => "organisations#add_member"
 
   get "/des/racing-profile" => "racing_profiles#show"
@@ -68,6 +76,8 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/admin/models/:id/approve" => "admin#approve_model"
   post "/des/admin/models/:id/reject" => "admin#reject_model"
   put "/des/admin/models/:id" => "admin#update_model"
+  post "/des/admin/rules" => "admin#create_rule"
+  delete "/des/admin/rules/:id" => "admin#destroy_rule"
 end
 
 Discourse::Application.routes.draw do

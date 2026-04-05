@@ -38,9 +38,13 @@ class DesUserCar < ActiveRecord::Base
     car_model.present? && car_model.status == 'approved'
   end
 
-  def eligible_for_class?(event_class)
+  def eligible_for_class?(event_class, organisation_id = nil)
     class_type_id = event_class.respond_to?(:class_type_id) ? event_class.class_type_id : event_class.id
-    rules = DesClassCompatibilityRule.where(class_type_id: class_type_id)
+    rules = if organisation_id
+      DesClassCompatibilityRule.applicable_to(organisation_id).where(class_type_id: class_type_id)
+    else
+      DesClassCompatibilityRule.global.where(class_type_id: class_type_id)
+    end
     return true if rules.empty?
     rules.all? { |rule| rule.car_eligible?(self) }
   end

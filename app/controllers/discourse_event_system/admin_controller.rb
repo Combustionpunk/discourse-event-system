@@ -12,8 +12,30 @@ module DiscourseEventSystem
         rejected_organisations: DesOrganisation.rejected.map { |o| serialize_organisation(o) },
         pending_manufacturers: DesManufacturer.pending.map { |m| serialize_manufacturer(m) },
         pending_models: DesCarModel.pending.includes(:manufacturer).map { |m| serialize_model(m) },
-        approved_models: DesCarModel.approved.includes(:manufacturer).map { |m| serialize_model(m) }
+        approved_models: DesCarModel.approved.includes(:manufacturer).map { |m| serialize_model(m) },
+        class_types: DesEventClassType.all.map { |ct| { id: ct.id, name: ct.name } },
+        global_rules: DesClassCompatibilityRule.global.includes(:class_type).map { |r| serialize_rule(r) }
       }
+    end
+
+    def create_rule
+      rule = DesClassCompatibilityRule.create!(
+        class_type_id: params[:class_type_id],
+        rule_type: params[:rule_type],
+        rule_value: params[:rule_value],
+        organisation_id: nil
+      )
+      render json: serialize_rule(rule), status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_rule
+      rule = DesClassCompatibilityRule.find(params[:id])
+      rule.destroy
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
 
     def update_model
@@ -96,6 +118,17 @@ module DiscourseEventSystem
         name: manufacturer.name,
         created_by: manufacturer.creator&.username,
         status: manufacturer.status
+      }
+    end
+
+    def serialize_rule(rule)
+      {
+        id: rule.id,
+        class_type_id: rule.class_type_id,
+        class_type_name: rule.class_type&.name,
+        rule_type: rule.rule_type,
+        rule_value: rule.rule_value,
+        organisation_id: rule.organisation_id
       }
     end
 

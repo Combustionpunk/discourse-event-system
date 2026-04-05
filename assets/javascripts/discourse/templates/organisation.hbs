@@ -15,44 +15,84 @@
     <p class="org-detail-description">{{this.model.description}}</p>
   {{/if}}
 
-  <div class="org-detail-grid">
-    <div class="org-detail-info">
-      <h2>Details</h2>
-      <div class="org-info-list">
-        {{#if this.model.email}}
-          <div class="org-info-item">
-            <span class="org-info-label">✉️ Email</span>
-            <a href="mailto:{{this.model.email}}">{{this.model.email}}</a>
-          </div>
-        {{/if}}
-        {{#if this.model.phone}}
-          <div class="org-info-item">
-            <span class="org-info-label">📞 Phone</span>
-            <span>{{this.model.phone}}</span>
-          </div>
-        {{/if}}
-        {{#if this.model.website}}
-          <div class="org-info-item">
-            <span class="org-info-label">🌐 Website</span>
-            <a href={{this.model.website}} target="_blank">{{this.model.website}}</a>
-          </div>
-        {{/if}}
-        {{#if this.model.address}}
-          <div class="org-info-item">
-            <span class="org-info-label">📍 Address</span>
-            <span>{{this.model.address}}</span>
-          </div>
-        {{/if}}
-        {{#if this.model.google_maps_url}}
-          <div class="org-info-item">
-            <a href={{this.model.google_maps_url}} target="_blank" class="btn btn-small btn-default">
-              📍 View on Google Maps
-            </a>
-          </div>
-        {{/if}}
+  {{!-- Tabs for org admins --}}
+  {{#if this.model.is_admin}}
+    <div class="manage-tabs">
+      <button class="manage-tab {{if (eq this.activeTab 'details') 'active'}}" {{on "click" this.showDetails}}>
+        📋 Details
+      </button>
+      <button class="manage-tab {{if (eq this.activeTab 'members') 'active'}}" {{on "click" this.showMembers}}>
+        👥 Members
+      </button>
+      <button class="manage-tab {{if (eq this.activeTab 'events') 'active'}}" {{on "click" this.showEvents}}>
+        📅 Events
+      </button>
+      <button class="manage-tab {{if (eq this.activeTab 'rules') 'active'}}" {{on "click" this.showRules}}>
+        ⚙️ Class Rules
+      </button>
+    </div>
+  {{/if}}
+
+  {{!-- Details Tab --}}
+  {{#if (eq this.activeTab 'details')}}
+    <div class="org-detail-grid">
+      <div class="org-detail-info">
+        <h2>Details</h2>
+        <div class="org-info-list">
+          {{#if this.model.email}}
+            <div class="org-info-item">
+              <span class="org-info-label">✉️ Email</span>
+              <a href="mailto:{{this.model.email}}">{{this.model.email}}</a>
+            </div>
+          {{/if}}
+          {{#if this.model.phone}}
+            <div class="org-info-item">
+              <span class="org-info-label">📞 Phone</span>
+              <span>{{this.model.phone}}</span>
+            </div>
+          {{/if}}
+          {{#if this.model.website}}
+            <div class="org-info-item">
+              <span class="org-info-label">🌐 Website</span>
+              <a href={{this.model.website}} target="_blank">{{this.model.website}}</a>
+            </div>
+          {{/if}}
+          {{#if this.model.address}}
+            <div class="org-info-item">
+              <span class="org-info-label">📍 Address</span>
+              <span>{{this.model.address}}</span>
+            </div>
+          {{/if}}
+          {{#if this.model.google_maps_url}}
+            <div class="org-info-item">
+              <a href={{this.model.google_maps_url}} target="_blank" class="btn btn-small btn-default">
+                📍 View on Google Maps
+              </a>
+            </div>
+          {{/if}}
+        </div>
       </div>
     </div>
 
+    {{#if this.model.events.length}}
+      <div class="org-detail-events">
+        <h2>Upcoming Events</h2>
+        <div class="org-events-list">
+          {{#each this.model.events as |event|}}
+            <div class="org-event-item">
+              <LinkTo @route="event" @model={{event.id}}>{{event.title}}</LinkTo>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <span class="event-status event-status--{{event.status}}">{{event.status}}</span>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/if}}
+  {{/if}}
+
+  {{!-- Members Tab --}}
+  {{#if (eq this.activeTab 'members')}}
     <div class="org-detail-members">
       <div class="org-section-header">
         <h2>Members</h2>
@@ -98,11 +138,7 @@
               </select>
             </div>
           </div>
-          <button
-            class="btn btn-primary"
-            disabled={{this.isSaving}}
-            {{on "click" this.addMember}}
-          >
+          <button class="btn btn-primary" disabled={{this.isSaving}} {{on "click" this.addMember}}>
             {{if this.isSaving "Adding..." "Add Member"}}
           </button>
         </div>
@@ -117,10 +153,7 @@
                 <span class="member-position">{{member.position.name}}</span>
               </div>
               {{#if this.model.is_admin}}
-                <button
-                  class="btn btn-small btn-danger"
-                  {{on "click" (fn this.removeMember member.id)}}
-                >
+                <button class="btn btn-small btn-danger" {{on "click" (fn this.removeMember member.id)}}>
                   Remove
                 </button>
               {{/if}}
@@ -131,28 +164,160 @@
         <p class="field-help">No members yet.</p>
       {{/if}}
     </div>
-  </div>
+  {{/if}}
 
-  {{#if this.model.events.length}}
+  {{!-- Events Tab --}}
+  {{#if (eq this.activeTab 'events')}}
     <div class="org-detail-events">
-      <h2>Events</h2>
-      <div class="org-events-list">
-        {{#each this.model.events as |event|}}
-          <div class="org-event-item">
-            <LinkTo @route="event" @model={{event.id}}>
-              {{event.title}}
-            </LinkTo>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <span class="event-status event-status--{{event.status}}">{{event.status}}</span>
-              {{#if this.model.is_admin}}
+      <div class="org-section-header">
+        <h2>Events</h2>
+        <LinkTo @route="event-new" class="btn btn-small btn-primary">+ New Event</LinkTo>
+      </div>
+      {{#if this.model.events.length}}
+        <div class="org-events-list">
+          {{#each this.model.events as |event|}}
+            <div class="org-event-item">
+              <LinkTo @route="event" @model={{event.id}}>{{event.title}}</LinkTo>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <span class="event-status event-status--{{event.status}}">{{event.status}}</span>
                 <LinkTo @route="event-manage" @model={{event.id}} class="btn btn-small btn-default">
                   ⚙️ Manage
                 </LinkTo>
-              {{/if}}
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <p class="field-help">No events yet.</p>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{!-- Class Rules Tab --}}
+  {{#if (eq this.activeTab 'rules')}}
+    <div class="manage-section">
+      <h2>Organisation Class Types</h2>
+      <p class="field-help">Create custom class types for your organisation's events with their own eligibility rules.</p>
+
+      {{!-- Create new class type --}}
+      <div class="admin-rule-form">
+        <h3>Create New Class Type</h3>
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Class Name</label>
+            <input type="text" id="new-class-type-name" placeholder="e.g. Our Fun Class" />
+          </div>
+          <div class="org-form-field">
+            <label>Description <span class="field-help">(optional)</span></label>
+            <input type="text" id="new-class-type-desc" placeholder="Brief description" />
+          </div>
+          <div class="org-form-field" style="justify-content: flex-end;">
+            <button class="btn btn-primary" {{on "click" this.createClassType}}>
+              + Create Class
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {{!-- Existing org class types --}}
+      {{#if this.model.org_class_types.length}}
+        {{#each this.model.org_class_types as |ct|}}
+          <div class="rules-class-group">
+            <div class="org-section-header">
+              <h4>{{ct.name}} {{#if ct.description}}<span class="field-help">— {{ct.description}}</span>{{/if}}</h4>
+              <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteClassType ct.id)}}>
+                🗑 Delete Class
+              </button>
+            </div>
+
+            {{!-- Existing rules --}}
+            {{#each ct.rules as |rule|}}
+              <div class="rule-row">
+                <span class="rule-type-badge rule-type-badge--{{rule.rule_type}}">{{rule.rule_type}}</span>
+                <span class="rule-value">{{rule.rule_value}}</span>
+                <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteClassTypeRule ct.id rule.id)}}>
+                  🗑
+                </button>
+              </div>
+            {{/each}}
+
+            {{!-- Add rule to this class --}}
+            <div class="add-rule-inline">
+              <select class="rule-type-select" data-class-id={{ct.id}} {{on "change" (fn this.onRuleTypeChange ct.id)}}>
+                <option value="driveline">Driveline</option>
+                <option value="chassis">Chassis Type</option>
+                <option value="manufacturer">Manufacturer</option>
+                <option value="max_year">Max Year (on or before)</option>
+                <option value="min_year">Min Year (on or after)</option>
+                <option value="max_age">Max Driver Age</option>
+                <option value="min_age">Min Driver Age</option>
+              </select>
+
+              {{!-- Driveline multi-select --}}
+              <div class="rule-value-container rule-value-container--driveline" data-class-id={{ct.id}}>
+                <select class="rule-multiselect" data-class-id={{ct.id}} multiple size="4">
+                  {{#each this.model.drivelines as |dl|}}
+                    <option value={{dl}}>{{dl}}</option>
+                  {{/each}}
+                </select>
+                <span class="field-help">Hold Ctrl/Cmd to select multiple</span>
+              </div>
+
+              {{!-- Chassis multi-select --}}
+              <div class="rule-value-container rule-value-container--chassis" data-class-id={{ct.id}} style="display:none">
+                <select class="rule-multiselect" data-class-id={{ct.id}} multiple size="4">
+                  {{#each this.model.chassis_types as |ct2|}}
+                    <option value={{ct2}}>{{ct2}}</option>
+                  {{/each}}
+                </select>
+                <span class="field-help">Hold Ctrl/Cmd to select multiple</span>
+              </div>
+
+              {{!-- Manufacturer multi-select --}}
+              <div class="rule-value-container rule-value-container--manufacturer" data-class-id={{ct.id}} style="display:none">
+                <select class="rule-multiselect" data-class-id={{ct.id}} multiple size="4">
+                  {{#each this.model.manufacturers as |m|}}
+                    <option value={{m.name}}>{{m.name}}{{#if (eq m.status 'pending')}} (pending){{/if}}</option>
+                  {{/each}}
+                </select>
+                <span class="field-help">Hold Ctrl/Cmd to select multiple</span>
+              </div>
+
+              {{!-- Year select --}}
+              <div class="rule-value-container rule-value-container--year" data-class-id={{ct.id}} style="display:none">
+                <select class="rule-year-select" data-class-id={{ct.id}}>
+                  {{#each this.yearOptions as |year|}}
+                    <option value={{year}}>{{year}}</option>
+                  {{/each}}
+                </select>
+              </div>
+
+              {{!-- Age input --}}
+              <div class="rule-value-container rule-value-container--age" data-class-id={{ct.id}} style="display:none">
+                <input type="number" class="rule-age-input" data-class-id={{ct.id}} min="1" max="100" placeholder="Age" style="width: 80px;" />
+              </div>
+
+              <button class="btn btn-small btn-default" {{on "click" (fn this.addClassTypeRule ct.id)}}>
+                + Add Rule
+              </button>
             </div>
           </div>
         {{/each}}
+      {{else}}
+        <p class="field-help">No custom class types yet. Create one above!</p>
+      {{/if}}
+
+      {{!-- Global class types reference --}}
+      <div style="margin-top: 32px;">
+        <h3>Global Class Types</h3>
+        <p class="field-help">These are available to all organisations. You can also use these when setting up events.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+          {{#each this.model.global_class_types as |ct|}}
+            <span class="booking-class-badge">{{ct.name}}</span>
+          {{/each}}
+        </div>
       </div>
     </div>
   {{/if}}
+
 </div>

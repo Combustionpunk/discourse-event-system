@@ -66,6 +66,56 @@ export default class DesAdminController extends Controller {
     }
   }
 
+  get groupedGlobalRules() {
+    const rules = this.model.global_rules || [];
+    const groups = {};
+    rules.forEach(rule => {
+      if (!groups[rule.class_type_id]) {
+        groups[rule.class_type_id] = {
+          class_type_name: rule.class_type_name,
+          rules: []
+        };
+      }
+      groups[rule.class_type_id].rules.push(rule);
+    });
+    return Object.values(groups);
+  }
+
+  @action
+  async addGlobalRule() {
+    const classTypeId = document.getElementById('new-rule-class-type').value;
+    const ruleType = document.getElementById('new-rule-type').value;
+    const ruleValue = document.getElementById('new-rule-value').value.trim();
+
+    if (!classTypeId || !ruleValue) {
+      alert("Please select a class type and enter a rule value.");
+      return;
+    }
+
+    try {
+      await ajax("/des/admin/rules.json", {
+        type: "POST",
+        data: { class_type_id: classTypeId, rule_type: ruleType, rule_value: ruleValue },
+      });
+      document.getElementById('new-rule-class-type').value = '';
+      document.getElementById('new-rule-value').value = '';
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async deleteGlobalRule(ruleId) {
+    if (!window.confirm("Delete this rule?")) return;
+    try {
+      await ajax("/des/admin/rules/" + ruleId + ".json", { type: "DELETE" });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
   @action
   async approveModel(model) {
     const year = window.prompt(

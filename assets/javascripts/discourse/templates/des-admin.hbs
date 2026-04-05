@@ -109,6 +109,65 @@
   {{/if}}
 
   {{!-- Rejected Organisations --}}
+  {{!-- Global Class Compatibility Rules --}}
+  <div class="des-admin-section">
+    <h2>Class Compatibility Rules</h2>
+    <p class="field-help">These rules apply globally to all organisations. They define which cars are eligible for each class type.</p>
+
+    {{!-- Add new rule form --}}
+    <div class="admin-rule-form">
+      <h3>Add Global Rule</h3>
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Class Type</label>
+          <select id="new-rule-class-type">
+            <option value="">Select class type...</option>
+            {{#each this.model.class_types as |ct|}}
+              <option value={{ct.id}}>{{ct.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="org-form-field">
+          <label>Rule Type</label>
+          <select id="new-rule-type">
+            <option value="driveline">Driveline</option>
+            <option value="chassis">Chassis Type</option>
+          </select>
+        </div>
+        <div class="org-form-field">
+          <label>Allowed Values <span class="field-help">(comma separated)</span></label>
+          <input type="text" id="new-rule-value" placeholder="e.g. 2WD,Rear Motor" />
+        </div>
+        <div class="org-form-field" style="justify-content: flex-end;">
+          <button class="btn btn-primary" {{on "click" this.addGlobalRule}}>
+            + Add Rule
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {{!-- Existing rules grouped by class type --}}
+    {{#each this.groupedGlobalRules as |group|}}
+      <div class="rules-class-group">
+        <h4>{{group.class_type_name}}</h4>
+        {{#each group.rules as |rule|}}
+          <div class="rule-row">
+            <span class="rule-type-badge rule-type-badge--{{rule.rule_type}}">{{rule.rule_type}}</span>
+            <span class="rule-value">{{rule.rule_value}}</span>
+            <button
+              class="btn btn-small btn-danger"
+              {{on "click" (fn this.deleteGlobalRule rule.id)}}
+            >
+              🗑
+            </button>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="field-help">No global rules set yet.</p>
+    {{/each}}
+  </div>
+
   {{!-- Approved Models --}}
   <div class="des-admin-section">
     <h2>Approved Car Models ({{this.model.approved_models.length}})</h2>

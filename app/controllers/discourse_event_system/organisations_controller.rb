@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class OrganisationsController < ApplicationController
     before_action :ensure_logged_in
-    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member]
+    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule]
 
     def index
       organisations = current_user.admin? ? DesOrganisation.all.order(:name) : DesOrganisation.approved.order(:name)
@@ -81,6 +81,110 @@ module DiscourseEventSystem
       return render json: { error: 'Member not found' }, status: :not_found unless member
       member.update!(status: 'inactive')
       render json: { success: true }
+    end
+
+
+    def class_types
+      ensure_organisation_admin!
+      global = DesEventClassType.global
+      org_types = DesEventClassType.for_organisation(@organisation.id).includes(:compatibility_rules)
+      manufacturers = DesManufacturer.all.order(:name)
+      render json: {
+        global_class_types: global.map { |ct| serialize_class_type(ct) },
+        org_class_types: org_types.map { |ct| serialize_class_type_with_rules(ct) },
+        manufacturers: manufacturers.map { |m| { id: m.id, name: m.name, status: m.status } },
+        drivelines: DesCarModel::DRIVELINES,
+        chassis_types: DesCarModel::CHASSIS_TYPES
+      }
+    end
+
+    def create_class_type
+      ensure_organisation_admin!
+      ct = DesEventClassType.create!(
+        name: params[:name],
+        description: params[:description],
+        organisation_id: @organisation.id
+      )
+      render json: serialize_class_type_with_rules(ct), status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_class_type
+      ensure_organisation_admin!
+      ct = DesEventClassType.find_by(id: params[:class_type_id], organisation_id: @organisation.id)
+      return render json: { error: 'Not found' }, status: :not_found unless ct
+      ct.destroy
+      render json: { success: true }
+    end
+
+    def create_class_type_rule
+      ensure_organisation_admin!
+      ct = DesEventClassType.find_by(id: params[:class_type_id], organisation_id: @organisation.id)
+      return render json: { error: 'Not found' }, status: :not_found unless ct
+      rule = DesClassCompatibilityRule.create!(
+        class_type_id: ct.id,
+        rule_type: params[:rule_type],
+        rule_value: params[:rule_value],
+        organisation_id: @organisation.id
+      )
+      render json: serialize_rule(rule), status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_class_type_rule
+      ensure_organisation_admin!
+      rule = DesClassCompatibilityRule.find_by(id: params[:rule_id], organisation_id: @organisation.id)
+      return render json: { error: 'Not found' }, status: :not_found unless rule
+      rule.destroy
+      render json: { success: true }
+    end
+
+    def rules
+      ensure_organisation_admin!
+      rules = DesClassCompatibilityRule.for_organisation(@organisation.id).includes(:class_type)
+      class_types = DesEventClassType.all
+      render json: {
+        rules: rules.map { |r| serialize_rule(r) },
+        class_types: class_types.map { |ct| { id: ct.id, name: ct.name } }
+      }
+    end
+
+    def create_rule
+      ensure_organisation_admin!
+      rule = DesClassCompatibilityRule.create!(
+        class_type_id: params[:class_type_id],
+        rule_type: params[:rule_type],
+        rule_value: params[:rule_value],
+        organisation_id: @organisation.id
+      )
+      render json: serialize_rule(rule), status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_rule
+      ensure_organisation_admin!
+      rule = DesClassCompatibilityRule.find_by(id: params[:rule_id], organisation_id: @organisation.id)
+      return render json: { error: 'Not found' }, status: :not_found unless rule
+      rule.destroy
+      render json: { success: true }
+    end
+
+    def serialize_class_type(ct)
+      {
+        id: ct.id,
+        name: ct.name,
+        description: ct.description,
+        organisation_id: ct.organisation_id
+      }
+    end
+
+    def serialize_class_type_with_rules(ct)
+      serialize_class_type(ct).merge(
+        rules: ct.compatibility_rules.map { |r| serialize_rule(r) }
+      )
     end
 
     private
@@ -190,6 +294,17 @@ module DiscourseEventSystem
         user: { id: member.user.id, username: member.user.username },
         position: { id: member.position_id, name: member.position&.name, is_admin: member.position&.is_admin },
         status: member.status
+      }
+    end
+
+    def serialize_rule(rule)
+      {
+        id: rule.id,
+        class_type_id: rule.class_type_id,
+        class_type_name: rule.class_type&.name,
+        rule_type: rule.rule_type,
+        rule_value: rule.rule_value,
+        organisation_id: rule.organisation_id
       }
     end
 
