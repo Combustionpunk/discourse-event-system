@@ -1,0 +1,61 @@
+<div class="my-memberships-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+    <LinkTo @route="my-bookings" class="btn btn-default">🎟️ My Bookings</LinkTo>
+  </div>
+
+  <h1>🎫 My Memberships</h1>
+
+  {{#if this.model.memberships.length}}
+    <div class="memberships-list">
+      {{#each this.model.memberships as |membership|}}
+        <div class="membership-card membership-card--{{membership.status}}">
+          <div class="membership-card-header">
+            <div>
+              <h3>{{membership.organisation.name}}</h3>
+              <span class="membership-type-name">{{membership.membership_type.name}}</span>
+            </div>
+            <span class="membership-status-badge membership-status-badge--{{membership.status}}">
+              {{membership.status}}
+            </span>
+          </div>
+
+          <div class="membership-card-details">
+            <div class="membership-detail-item">
+              <span class="membership-detail-label">💰 Paid</span>
+              <span>£{{membership.amount_paid}}</span>
+            </div>
+            <div class="membership-detail-item">
+              <span class="membership-detail-label">📅 Starts</span>
+              <span>{{this.formatDate membership.starts_at}}</span>
+            </div>
+            <div class="membership-detail-item">
+              <span class="membership-detail-label">⏰ Expires</span>
+              <span class="{{if this.isExpiringSoon membership.expires_at 'expiring-soon'}}">
+                {{this.formatDate membership.expires_at}}
+              </span>
+            </div>
+            {{#if membership.family_members.length}}
+              <div class="membership-detail-item">
+                <span class="membership-detail-label">👨‍👩‍👧 Family</span>
+                <span>{{membership.family_members_count}} additional members</span>
+              </div>
+            {{/if}}
+          </div>
+
+          <div class="membership-card-actions">
+            <LinkTo @route="organisation" @model={{membership.organisation.id}} class="btn btn-small btn-default">
+              View Organisation
+            </LinkTo>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="empty-state">
+      <p>You don't have any memberships yet.</p>
+      <LinkTo @route="organisations" class="btn btn-primary">Browse Organisations</LinkTo>
+    </div>
+  {{/if}}
+</div>

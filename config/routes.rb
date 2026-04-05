@@ -61,6 +61,7 @@ DiscourseEventSystem::Engine.routes.draw do
   delete "/des/memberships/:membership_id/family/:user_id" => "organisations#remove_family_member"
   post "/des/organisations/:id/memberships/:membership_id/confirm" => "organisations#confirm_membership"
   get "/des/my-memberships" => "organisations#my_memberships"
+  get "/my-memberships" => "frontend#index"
   get "/memberships/:membership_id/confirm" => "frontend#index"
   get "/memberships/:membership_id/cancel" => "frontend#index"
   get "/des/organisations/:id/class-types" => "organisations#class_types"

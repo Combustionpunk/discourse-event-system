@@ -6,6 +6,8 @@ export default function () {
   this.route("booking-confirm", { path: "/events/booking/:booking_id/confirm" });
   this.route("booking-cancel", { path: "/events/booking/:booking_id/cancel" });
   this.route("my-bookings", { path: "/my-bookings" });
+  this.route("my-memberships", { path: "/my-memberships" });
+  this.route("my-memberships", { path: "/my-memberships" });
   this.route("organisations", { path: "/organisations" });
   this.route("organisation-new", { path: "/organisations/new" });
   this.route("organisation", { path: "/organisations/:organisation_id" });

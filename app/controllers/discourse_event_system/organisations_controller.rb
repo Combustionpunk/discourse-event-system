@@ -314,7 +314,7 @@ module DiscourseEventSystem
     def my_memberships
       memberships = DesOrganisationMembership
         .where(user_id: current_user.id)
-        .includes(:organisation, :membership_type)
+        .includes(:organisation, :membership_type, :family_members)
         .order(expires_at: :desc)
       render json: {
         memberships: memberships.map { |m|
@@ -325,7 +325,8 @@ module DiscourseEventSystem
             status: m.status,
             starts_at: m.starts_at,
             expires_at: m.expires_at,
-            amount_paid: m.amount_paid
+            amount_paid: m.amount_paid,
+            family_members_count: m.family_members.count
           }
         }
       }
