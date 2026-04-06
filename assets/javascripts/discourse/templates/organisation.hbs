@@ -39,9 +39,6 @@
         </button>
       {{/if}}
       {{#if this.model.is_admin}}
-        <button class="manage-tab {{if (eq this.activeTab 'settings') 'active'}}" {{on "click" this.showSettings}}>
-          ⚙️ Settings
-        </button>
       {{/if}}
     </div>
   {{/if}}
@@ -480,4 +477,46 @@
     </div>
   {{/if}}
 
+
+  {{!-- Settings Tab --}}
+  {{#if (eq this.activeTab "settings")}}
+    <div class="manage-section">
+      <h2>Organisation Settings</h2>
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Organisation Name *</label>
+          <input type="text" value={{this.settingsForm.name}} {{on "input" (fn this.updateSettingsField "name")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Email</label>
+          <input type="email" value={{this.settingsForm.email}} {{on "input" (fn this.updateSettingsField "email")}} />
+        </div>
+      </div>
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Phone</label>
+          <input type="text" value={{this.settingsForm.phone}} {{on "input" (fn this.updateSettingsField "phone")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Website</label>
+          <input type="url" value={{this.settingsForm.website}} {{on "input" (fn this.updateSettingsField "website")}} />
+        </div>
+      </div>
+      <div class="org-form-field">
+        <label>Address</label>
+        <input type="text" value={{this.settingsForm.address}} {{on "input" (fn this.updateSettingsField "address")}} />
+      </div>
+      <div class="org-form-field">
+        <label>Google Maps URL</label>
+        <input type="url" value={{this.settingsForm.google_maps_url}} {{on "input" (fn this.updateSettingsField "google_maps_url")}} />
+      </div>
+      <div class="org-form-field">
+        <label>Description</label>
+        <textarea rows="4" {{on "input" (fn this.updateSettingsField "description")}}>{{this.settingsForm.description}}</textarea>
+      </div>
+      <button class="btn btn-primary" {{on "click" this.saveSettings}}>
+        💾 Save Settings
+      </button>
+    </div>
+  {{/if}}
 </div>
