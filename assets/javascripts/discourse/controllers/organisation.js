@@ -20,7 +20,86 @@ export default class OrganisationController extends Controller {
   showDetails() { this.activeTab = "details"; }
 
   @action
-  showMembers() { this.activeTab = "members"; }
+  showMembers() {
+    this.activeTab = "members";
+    this.loadAdminMemberships();
+  }
+
+  async loadAdminMemberships() {
+    try {
+      const response = await ajax("/des/organisations/" + this.model.id + "/admin-memberships.json");
+      this.adminMemberships = response.memberships;
+    } catch (e) {
+      this.adminMemberships = [];
+    }
+  }
+
+  @action
+  toggleAddMembership() {
+    this.showAddMembership = !this.showAddMembership;
+  }
+
+  @action
+  updateNewMembershipField(field, e) {
+    if (field === "username") this.newMembershipUsername = e.target.value;
+    else if (field === "membership_type_id") this.newMembershipTypeId = e.target.value;
+    else if (field === "expires_at") this.newMembershipExpiresAt = e.target.value;
+    else if (field === "amount_paid") this.newMembershipAmountPaid = e.target.value;
+  }
+
+  @action
+  async saveAdminMembership() {
+    try {
+      await ajax("/des/organisations/" + this.model.id + "/admin-memberships.json", {
+        type: "POST",
+        data: {
+          username: this.newMembershipUsername,
+          membership_type_id: this.newMembershipTypeId,
+          expires_at: this.newMembershipExpiresAt,
+          amount_paid: this.newMembershipAmountPaid,
+        },
+      });
+      this.showAddMembership = false;
+      this.newMembershipUsername = "";
+      this.newMembershipTypeId = "";
+      this.newMembershipExpiresAt = "";
+      this.newMembershipAmountPaid = "";
+      this.loadAdminMemberships();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  editMembership(m) {
+    this.editingMembershipId = m.id;
+    this.editingMembershipExpiry = m.expires_at ? m.expires_at.split('T')[0] : "";
+  }
+
+  @action
+  updateEditingExpiry(e) {
+    this.editingMembershipExpiry = e.target.value;
+  }
+
+  @action
+  cancelEditMembership() {
+    this.editingMembershipId = null;
+    this.editingMembershipExpiry = "";
+  }
+
+  @action
+  async saveEditMembership() {
+    try {
+      await ajax("/des/organisations/" + this.model.id + "/admin-memberships/" + this.editingMembershipId + ".json", {
+        type: "PUT",
+        data: { expires_at: this.editingMembershipExpiry },
+      });
+      this.editingMembershipId = null;
+      this.loadAdminMemberships();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
 
   @action
   showEvents() { this.activeTab = "events"; }
@@ -358,6 +437,14 @@ export default class OrganisationController extends Controller {
   @tracked newMemberPositionId = "";
   @tracked isSaving = false;
   @tracked settingsForm = {};
+  @tracked showAddMembership = false;
+  @tracked newMembershipUsername = "";
+  @tracked newMembershipTypeId = "";
+  @tracked newMembershipExpiresAt = "";
+  @tracked newMembershipAmountPaid = "";
+  @tracked adminMemberships = [];
+  @tracked editingMembershipId = null;
+  @tracked editingMembershipExpiry = "";
 
   @action
   toggleAddMember() {

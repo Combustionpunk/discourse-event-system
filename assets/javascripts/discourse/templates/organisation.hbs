@@ -16,32 +16,28 @@
   {{/if}}
 
   {{!-- Tabs for org admins --}}
-  {{#if this.model.is_admin}}
-    <div class="manage-tabs">
+  <div class="manage-tabs">
       <button class="manage-tab {{if (eq this.activeTab 'details') 'active'}}" {{on "click" this.showDetails}}>
         📋 Details
-      </button>
-      <button class="manage-tab {{if (eq this.activeTab 'members') 'active'}}" {{on "click" this.showMembers}}>
-        👥 Members
-      </button>
-      <button class="manage-tab {{if (eq this.activeTab 'events') 'active'}}" {{on "click" this.showEvents}}>
-        📅 Events
-      </button>
-      <button class="manage-tab {{if (eq this.activeTab 'rules') 'active'}}" {{on "click" this.showRules}}>
-        ⚙️ Class Rules
       </button>
       <button class="manage-tab {{if (eq this.activeTab 'memberships') 'active'}}" {{on "click" this.showMemberships}}>
         🎫 Memberships
       </button>
       {{#if this.model.is_admin}}
+        <button class="manage-tab {{if (eq this.activeTab 'members') 'active'}}" {{on "click" this.showMembers}}>
+          👥 Members
+        </button>
+        <button class="manage-tab {{if (eq this.activeTab 'events') 'active'}}" {{on "click" this.showEvents}}>
+          📅 Events
+        </button>
+        <button class="manage-tab {{if (eq this.activeTab 'rules') 'active'}}" {{on "click" this.showRules}}>
+          ⚙️ Class Rules
+        </button>
         <button class="manage-tab {{if (eq this.activeTab 'settings') 'active'}}" {{on "click" this.showSettings}}>
           ⚙️ Settings
         </button>
       {{/if}}
-      {{#if this.model.is_admin}}
-      {{/if}}
     </div>
-  {{/if}}
 
   {{!-- Details Tab --}}
   {{#if (eq this.activeTab 'details')}}
@@ -259,6 +255,75 @@
         <p class="field-help">No members yet.</p>
       {{/if}}
     </div>
+  {{/if}}
+
+  {{!-- Admin Memberships Section --}}
+  {{#if (eq this.activeTab 'members')}}
+    {{#if this.model.is_admin}}
+      <div class="manage-section" style="margin-top: 24px;">
+        <div class="org-section-header">
+          <h2>🎫 Memberships</h2>
+          <button class="btn btn-small btn-primary" {{on "click" this.toggleAddMembership}}>
+            {{if this.showAddMembership "Cancel" "+ Add Membership"}}
+          </button>
+        </div>
+
+        {{#if this.showAddMembership}}
+          <div class="add-member-form">
+            <div class="org-form-row">
+              <div class="org-form-field">
+                <label>Username *</label>
+                <input type="text" placeholder="username" value={{this.newMembershipUsername}} {{on "input" (fn this.updateNewMembershipField "username")}} />
+              </div>
+              <div class="org-form-field">
+                <label>Membership Type *</label>
+                <select {{on "change" (fn this.updateNewMembershipField "membership_type_id")}}>
+                  <option value="">Select type...</option>
+                  {{#each this.model.membership_types as |mtype|}}
+                    <option value={{mtype.id}}>{{mtype.name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+            </div>
+            <div class="org-form-row">
+              <div class="org-form-field">
+                <label>Expires At</label>
+                <input type="date" value={{this.newMembershipExpiresAt}} {{on "change" (fn this.updateNewMembershipField "expires_at")}} />
+              </div>
+              <div class="org-form-field">
+                <label>Amount Paid (£)</label>
+                <input type="number" min="0" step="0.01" placeholder="0" value={{this.newMembershipAmountPaid}} {{on "input" (fn this.updateNewMembershipField "amount_paid")}} />
+              </div>
+            </div>
+            <button class="btn btn-primary" {{on "click" this.saveAdminMembership}}>
+              ✅ Add Membership
+            </button>
+          </div>
+        {{/if}}
+
+        {{#each this.adminMemberships as |m|}}
+          <div class="admin-org-card">
+            <div class="admin-org-info">
+              <strong>{{m.username}}</strong>
+              <div class="admin-org-meta">
+                <span>{{m.membership_type}}</span>
+                <span class="org-status org-status--{{m.status}}">{{m.status}}</span>
+                {{#if m.expires_at}}<span>Expires: {{m.expires_at}}</span>{{/if}}
+              </div>
+            </div>
+            <div class="admin-org-actions">
+              {{#if (eq this.editingMembershipId m.id)}}
+                <input type="date" value={{this.editingMembershipExpiry}} {{on "change" this.updateEditingExpiry}} />
+                <button class="btn btn-primary btn-small" {{on "click" this.saveEditMembership}}>💾</button>
+                <button class="btn btn-default btn-small" {{on "click" this.cancelEditMembership}}>✕</button>
+              {{else}}
+                <button class="btn btn-small btn-default" {{on "click" (fn this.editMembership m)}}>✏️ Edit</button>
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{/if}}
   {{/if}}
 
   {{!-- Events Tab --}}

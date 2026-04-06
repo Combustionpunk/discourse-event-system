@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class OrganisationsController < ApplicationController
     before_action :ensure_logged_in
-    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership]
+    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership, :admin_memberships, :admin_add_membership, :admin_update_membership]
 
     def index
       organisations = current_user.admin? ? DesOrganisation.all.order(:name) : DesOrganisation.approved.order(:name)
@@ -247,6 +247,56 @@ module DiscourseEventSystem
       type = @organisation.des_organisation_membership_types.find(params[:type_id])
       type.update!(active: false)
       render json: { success: true }
+    end
+
+    def admin_memberships
+      ensure_organisation_admin!
+      memberships = DesOrganisationMembership.where(organisation_id: @organisation.id)
+        .includes(:user, :membership_type)
+        .order(created_at: :desc)
+      render json: { memberships: memberships.map { |m|
+        {
+          id: m.id,
+          username: m.user&.username,
+          membership_type: m.membership_type&.name,
+          status: m.status,
+          starts_at: m.starts_at,
+          expires_at: m.expires_at
+        }
+      }}
+    end
+
+    def admin_add_membership
+      ensure_organisation_admin!
+      user = User.find_by(username: params[:username])
+      raise Discourse::InvalidParameters, "User not found" unless user
+      type = @organisation.des_organisation_membership_types.find(params[:membership_type_id])
+      expires_at = params[:expires_at].present? ? Date.parse(params[:expires_at]) : Date.today + type.duration_months.months
+      membership = DesOrganisationMembership.create!(
+        user_id: user.id,
+        organisation_id: @organisation.id,
+        membership_type_id: type.id,
+        status: 'active',
+        starts_at: Date.today,
+        expires_at: expires_at,
+        amount_paid: params[:amount_paid].presence || 0
+      )
+      render json: { success: true, membership_id: membership.id }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def admin_update_membership
+      ensure_organisation_admin!
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], organisation_id: @organisation.id)
+      raise Discourse::InvalidAccess unless membership
+      membership.update!(
+        status: params[:status] || membership.status,
+        expires_at: params[:expires_at].present? ? Date.parse(params[:expires_at]) : membership.expires_at
+      )
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
 
     def join
