@@ -50,8 +50,7 @@ class DesPaypalService
           currency_code: 'GBP',
           value: membership_type.price.to_f.round(2).to_s
         },
-        description: "#{org.name} - #{membership_type.name} Membership",
-        payee: { email_address: org.paypal_email }
+        description: "#{org.name} - #{membership_type.name} Membership"
       }],
       application_context: {
         return_url: "#{Discourse.base_url}/memberships/#{membership.id}/confirm",
