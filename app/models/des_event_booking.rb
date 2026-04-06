@@ -45,14 +45,24 @@ class DesEventBooking < ActiveRecord::Base
   def calculate_total
     pricing_rule = event.des_event_pricing_rule
     return 0 unless pricing_rule.present?
+
     base_amount = pricing_rule.calculate_price(total_classes)
-    applicable_discounts = event.des_event_discounts.active.select do |discount|
-      discount.eligible?(user, total_classes, event)
+
+    is_member = DesOrganisationMembership
+      .where(user_id: user.id, organisation_id: event.organisation_id)
+      .active.exists?
+
+    is_junior = if user.date_of_birth.present?
+      age = event.start_date.year - user.date_of_birth.year
+      age -= 1 if event.start_date < user.date_of_birth + age.years
+      age < 16
+    else
+      false
     end
-    discount_amount = applicable_discounts.sum do |discount|
-      base_amount - discount.apply_discount(base_amount)
-    end
-    discounted_amount = [base_amount - discount_amount, 0].max
+
+    discounted_amount = pricing_rule.calculate_discounted_price(total_classes, is_member, is_junior)
+    discount_amount = base_amount - discounted_amount
+
     update!(
       total_amount: base_amount,
       discount_amount: discount_amount,

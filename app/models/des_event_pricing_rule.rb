@@ -1,39 +1,49 @@
+# frozen_string_literal: true
 class DesEventPricingRule < ActiveRecord::Base
   belongs_to :event, class_name: 'DesEvent', foreign_key: 'event_id'
 
   validates :event_id, presence: true
   validates :rule_type, inclusion: { in: %w[flat tiered] }
-  validates :flat_price, presence: true, if: -> { rule_type == 'flat' }
-  validates :first_class_price, presence: true, if: -> { rule_type == 'tiered' }
-  validates :subsequent_class_price, presence: true, if: -> { rule_type == 'tiered' }
 
-  def calculate_price(number_of_classes)
+  def calculate_price(num_classes)
+    return 0 if num_classes == 0
     case rule_type
     when 'flat'
-      flat_price * number_of_classes
+      flat_price.to_f * num_classes
     when 'tiered'
-      return 0 if number_of_classes == 0
-      first_class_price + (subsequent_class_price * (number_of_classes - 1))
+      return first_class_price.to_f if num_classes == 1
+      first_class_price.to_f + (subsequent_class_price.to_f * (num_classes - 1))
     end
   end
 
-  def price_breakdown(number_of_classes)
+  def calculate_discounted_price(num_classes, is_member, is_junior)
+    return 0 if num_classes == 0
+
+    first_discount = 0
+    subsequent_discount = 0
+
+    if is_member
+      first_discount += member_first_class_discount.to_f
+      subsequent_discount += member_subsequent_discount.to_f
+    end
+
+    if is_junior
+      first_discount += junior_first_class_discount.to_f
+      subsequent_discount += junior_subsequent_discount.to_f
+    end
+
     case rule_type
     when 'flat'
-      {
-        classes: number_of_classes,
-        price_per_class: flat_price,
-        total: flat_price * number_of_classes
-      }
+      base = flat_price.to_f
+      first = [base - first_discount, 0].max
+      subsequent = [base - subsequent_discount, 0].max
+      return first if num_classes == 1
+      first + (subsequent * (num_classes - 1))
     when 'tiered'
-      subsequent = number_of_classes - 1
-      {
-        classes: number_of_classes,
-        first_class_price: first_class_price,
-        subsequent_classes: subsequent,
-        subsequent_class_price: subsequent_class_price,
-        total: first_class_price + (subsequent_class_price * subsequent)
-      }
+      first = [first_class_price.to_f - first_discount, 0].max
+      subsequent = [subsequent_class_price.to_f - subsequent_discount, 0].max
+      return first if num_classes == 1
+      first + (subsequent * (num_classes - 1))
     end
   end
 end

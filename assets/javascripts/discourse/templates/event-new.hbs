@@ -138,6 +138,35 @@
           </div>
         </div>
       {{/if}}
+
+      {{!-- Discounts --}}
+      <div class="org-form-section">
+        <h3>Discounts <span class="field-help">(optional - flat rate deductions)</span></h3>
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Member - 1st Class Discount (£)</label>
+            <input type="number" min="0" step="0.50" placeholder="0"
+              {{on "input" (fn this.updatePricing "member_first_class_discount")}} />
+          </div>
+          <div class="org-form-field">
+            <label>Member - Subsequent Classes (£)</label>
+            <input type="number" min="0" step="0.50" placeholder="0"
+              {{on "input" (fn this.updatePricing "member_subsequent_discount")}} />
+          </div>
+        </div>
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Junior (U16) - 1st Class Discount (£)</label>
+            <input type="number" min="0" step="0.50" placeholder="0"
+              {{on "input" (fn this.updatePricing "junior_first_class_discount")}} />
+          </div>
+          <div class="org-form-field">
+            <label>Junior (U16) - Subsequent Classes (£)</label>
+            <input type="number" min="0" step="0.50" placeholder="0"
+              {{on "input" (fn this.updatePricing "junior_subsequent_discount")}} />
+          </div>
+        </div>
+      </div>
     </div>
 
     {{!-- Classes --}}

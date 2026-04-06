@@ -54,6 +54,39 @@ export default class EventManageController extends Controller {
   }
 
   @action
+  showPricing() {
+    this.activeTab = "pricing";
+    const p = this.model.event.pricing || {};
+    this.pricingForm = {
+      rule_type: p.rule_type || "tiered",
+      first_class_price: p.first_class_price || "",
+      subsequent_class_price: p.subsequent_class_price || "",
+      member_first_class_discount: p.member_first_class_discount || "",
+      member_subsequent_discount: p.member_subsequent_discount || "",
+      junior_first_class_discount: p.junior_first_class_discount || "",
+      junior_subsequent_discount: p.junior_subsequent_discount || "",
+    };
+  }
+
+  @action
+  updatePricingForm(field, e) {
+    this.pricingForm = { ...this.pricingForm, [field]: e.target.value };
+  }
+
+  @action
+  async savePricing() {
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/pricing.json", {
+        type: "PUT",
+        data: { pricing: this.pricingForm },
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
   toggleEdit() {
     this.editMode = !this.editMode;
   }

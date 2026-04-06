@@ -41,6 +41,12 @@
     >
       🏎️ Entrants
     </button>
+    <button
+      class="manage-tab {{if (eq this.activeTab 'pricing') 'active'}}"
+      {{on "click" this.showPricing}}
+    >
+      💷 Pricing & Discounts
+    </button>
   </div>
 
   {{!-- Details Tab --}}
@@ -178,4 +184,59 @@
       {{/each}}
     </div>
   {{/if}}
+
+  {{!-- Pricing Tab --}}
+  {{#if (eq this.activeTab "pricing")}}
+    <div class="manage-section">
+      <h2>Pricing & Discounts</h2>
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>First Class Price (£)</label>
+          <input type="number" min="0" step="0.50"
+            value={{this.pricingForm.first_class_price}}
+            {{on "input" (fn this.updatePricingForm "first_class_price")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Subsequent Classes (£)</label>
+          <input type="number" min="0" step="0.50"
+            value={{this.pricingForm.subsequent_class_price}}
+            {{on "input" (fn this.updatePricingForm "subsequent_class_price")}} />
+        </div>
+      </div>
+      <h3>Member Discounts</h3>
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Member - 1st Class Discount (£)</label>
+          <input type="number" min="0" step="0.50"
+            value={{this.pricingForm.member_first_class_discount}}
+            {{on "input" (fn this.updatePricingForm "member_first_class_discount")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Member - Subsequent Classes (£)</label>
+          <input type="number" min="0" step="0.50"
+            value={{this.pricingForm.member_subsequent_discount}}
+            {{on "input" (fn this.updatePricingForm "member_subsequent_discount")}} />
+        </div>
+      </div>
+      <h3>Junior Discounts (Under 16)</h3>
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Junior - 1st Class Discount (£)</label>
+          <input type="number" min="0" step="0.50"
+            value={{this.pricingForm.junior_first_class_discount}}
+            {{on "input" (fn this.updatePricingForm "junior_first_class_discount")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Junior - Subsequent Classes (£)</label>
+          <input type="number" min="0" step="0.50"
+            value={{this.pricingForm.junior_subsequent_discount}}
+            {{on "input" (fn this.updatePricingForm "junior_subsequent_discount")}} />
+        </div>
+      </div>
+      <button class="btn btn-primary" {{on "click" this.savePricing}}>
+        💾 Save Pricing
+      </button>
+    </div>
+  {{/if}}
+
 </div>

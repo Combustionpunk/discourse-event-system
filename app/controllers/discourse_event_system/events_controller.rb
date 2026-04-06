@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show]
-    before_action :set_event, only: [:show, :update, :publish, :cancel, :entrants, :export_csv]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :export_csv]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
@@ -91,12 +91,34 @@ module DiscourseEventSystem
             rule_type: params[:pricing][:rule_type],
             flat_price: params[:pricing][:flat_price],
             first_class_price: params[:pricing][:first_class_price],
-            subsequent_class_price: params[:pricing][:subsequent_class_price]
+            subsequent_class_price: params[:pricing][:subsequent_class_price],
+            member_first_class_discount: params[:pricing][:member_first_class_discount],
+            member_subsequent_discount: params[:pricing][:member_subsequent_discount],
+            junior_first_class_discount: params[:pricing][:junior_first_class_discount],
+            junior_subsequent_discount: params[:pricing][:junior_subsequent_discount]
           )
         end
 
         render json: serialize_event(event.reload), status: :created
       end
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def update_pricing
+      ensure_organisation_admin!(@event.organisation)
+      pricing = @event.des_event_pricing_rule || DesEventPricingRule.new(event_id: @event.id)
+      pricing.update!(
+        rule_type: params[:pricing][:rule_type],
+        flat_price: params[:pricing][:flat_price],
+        first_class_price: params[:pricing][:first_class_price],
+        subsequent_class_price: params[:pricing][:subsequent_class_price],
+        member_first_class_discount: params[:pricing][:member_first_class_discount],
+        member_subsequent_discount: params[:pricing][:member_subsequent_discount],
+        junior_first_class_discount: params[:pricing][:junior_first_class_discount],
+        junior_subsequent_discount: params[:pricing][:junior_subsequent_discount]
+      )
+      render json: { success: true }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
@@ -268,7 +290,11 @@ module DiscourseEventSystem
           rule_type: event.des_event_pricing_rule.rule_type,
           flat_price: event.des_event_pricing_rule.flat_price,
           first_class_price: event.des_event_pricing_rule.first_class_price,
-          subsequent_class_price: event.des_event_pricing_rule.subsequent_class_price
+          subsequent_class_price: event.des_event_pricing_rule.subsequent_class_price,
+          member_first_class_discount: event.des_event_pricing_rule.member_first_class_discount,
+          member_subsequent_discount: event.des_event_pricing_rule.member_subsequent_discount,
+          junior_first_class_discount: event.des_event_pricing_rule.junior_first_class_discount,
+          junior_subsequent_discount: event.des_event_pricing_rule.junior_subsequent_discount
         } : nil,
         max_classes_per_booking: event.max_classes_per_booking,
         is_admin: current_user.present? && is_event_admin?(event),
