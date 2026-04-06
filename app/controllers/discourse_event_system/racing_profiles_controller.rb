@@ -9,7 +9,7 @@ module DiscourseEventSystem
         user: {
           id: current_user.id,
           username: current_user.username,
-          date_of_birth: current_user.custom_fields['des_date_of_birth'],
+          date_of_birth: current_user.date_of_birth,
           brca_membership_number: current_user.custom_fields['brca_membership_number']
         }
       }
@@ -17,7 +17,7 @@ module DiscourseEventSystem
 
     def update
       if params[:date_of_birth].present?
-        current_user.custom_fields['des_date_of_birth'] = params[:date_of_birth]
+        current_user.date_of_birth = Date.parse(params[:date_of_birth])
       end
       if params[:brca_membership_number].present?
         current_user.custom_fields['brca_membership_number'] = params[:brca_membership_number]
