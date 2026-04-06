@@ -14,6 +14,12 @@ class DesEvent < ActiveRecord::Base
 
   validates :title, presence: true
   validates :organisation_id, presence: true
+  validate :end_date_after_start_date
+
+  def end_date_after_start_date
+    return unless start_date.present? && end_date.present?
+    errors.add(:end_date, "must be after start date") if end_date < start_date
+  end
   validates :event_type_id, presence: true
   validates :created_by, presence: true
   validates :start_date, presence: true

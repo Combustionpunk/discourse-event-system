@@ -96,9 +96,25 @@ export default class EventNewController extends Controller {
       alert("Please select an organisation");
       return;
     }
-    if (!this.model.event.start_date) {
-      alert("Please select a start date");
+    if (!this.model.event.title?.trim()) {
+      alert("Please enter an event title");
       return;
+    }
+    if (!this.model.event.start_date) {
+      alert("Please enter a start date");
+      return;
+    }
+    if (this.model.event.end_date && this.model.event.start_date) {
+      if (new Date(this.model.event.end_date) < new Date(this.model.event.start_date)) {
+        alert("End date must be after start date");
+        return;
+      }
+    }
+    if (this.model.event.booking_closing_date && this.model.event.start_date) {
+      if (new Date(this.model.event.booking_closing_date) > new Date(this.model.event.start_date)) {
+        alert("Booking closing date must be before the event start date");
+        return;
+      }
     }
     if (this.classes.length === 0) {
       alert("Please add at least one class");
