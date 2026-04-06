@@ -64,6 +64,8 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/memberships/:membership_id/confirm" => "organisations#confirm_membership_direct"
   get "/des/my-memberships" => "organisations#my_memberships"
   get "/my-memberships" => "frontend#index"
+  get "/my-organisations" => "frontend#index"
+  get "/des/my-organisations" => "organisations#my_organisations"
   get "/memberships/:membership_id/confirm" => "frontend#index"
   get "/memberships/:membership_id/cancel" => "frontend#index"
   get "/des/organisations/:id/class-types" => "organisations#class_types"

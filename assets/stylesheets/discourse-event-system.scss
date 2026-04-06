@@ -1335,3 +1335,104 @@
   display: flex;
   gap: 8px;
 }
+
+.my-organisations-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  h1 { margin-bottom: 24px; }
+}
+
+.my-orgs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.my-org-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+
+  h3 { margin: 0 0 4px 0; }
+  a { text-decoration: none; }
+}
+
+.my-org-info { flex: 1; }
+
+.garage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.garage-car-card {
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+}
+
+.garage-car-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--primary-low);
+  border-bottom: 1px solid var(--primary-low);
+}
+
+.garage-car-icon {
+  font-size: 1.8em;
+  line-height: 1;
+}
+
+.garage-car-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    font-size: 1.05em;
+  }
+}
+
+.garage-car-body {
+  padding: 12px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.garage-car-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9em;
+  gap: 8px;
+}
+
+.garage-car-label {
+  color: var(--primary-medium);
+  white-space: nowrap;
+}
+
+.garage-car-actions {
+  padding: 12px 16px;
+  border-top: 1px solid var(--primary-low);
+  display: flex;
+  justify-content: flex-end;
+}

@@ -1,0 +1,51 @@
+<div class="my-organisations-container">
+  <div class="events-nav">
+    <LinkTo @route="my-organisations" class="btn btn-default">🏢 My Organisations</LinkTo>
+    <LinkTo @route="racing-profile" class="btn btn-default">🏎️ My Racing Profile</LinkTo>
+    <LinkTo @route="my-garage" class="btn btn-default">🚗 My Garage</LinkTo>
+    <LinkTo @route="my-bookings" class="btn btn-default">🎟️ My Bookings</LinkTo>
+    <LinkTo @route="my-memberships" class="btn btn-default">🎫 My Memberships</LinkTo>
+  </div>
+
+  <h1>🏢 My Organisations</h1>
+
+  {{#if this.model.organisations.length}}
+    <div class="my-orgs-list">
+      {{#each this.model.organisations as |org|}}
+        <div class="my-org-card">
+          <div class="my-org-info">
+            <h3>
+              <LinkTo @route="organisation" @model={{org.id}}>{{org.name}}</LinkTo>
+            </h3>
+            {{#if org.description}}
+              <p class="field-help">{{org.description}}</p>
+            {{/if}}
+            <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+              {{#if org.membership}}
+                <span class="membership-status-badge membership-status-badge--active">
+                  🎫 {{org.membership.type}}
+                </span>
+                <span class="field-help">
+                  expires {{this.formatDate org.membership.expires_at}}
+                </span>
+              {{/if}}
+              {{#each org.positions as |position|}}
+                <span class="rule-type-badge rule-type-badge--driveline">
+                  👥 {{position}}
+                </span>
+              {{/each}}
+            </div>
+          </div>
+          <LinkTo @route="organisation" @model={{org.id}} class="btn btn-small btn-default">
+            View →
+          </LinkTo>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="empty-state">
+      <p>You're not a member of any organisations yet.</p>
+      <LinkTo @route="organisations" class="btn btn-primary">Browse Organisations</LinkTo>
+    </div>
+  {{/if}}
+</div>

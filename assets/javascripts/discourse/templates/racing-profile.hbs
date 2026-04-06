@@ -1,114 +1,40 @@
 <div class="racing-profile-container">
   <div class="events-nav">
-    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
-    <LinkTo @route="my-bookings" class="btn btn-default">🎟 My Bookings</LinkTo>
-    <LinkTo @route="racing-profile" class="btn btn-default">👤 Profile</LinkTo>
+    <LinkTo @route="my-organisations" class="btn btn-default">🏢 My Organisations</LinkTo>
+    <LinkTo @route="racing-profile" class="btn btn-default">🏎️ My Racing Profile</LinkTo>
     <LinkTo @route="my-garage" class="btn btn-default">🚗 My Garage</LinkTo>
+    <LinkTo @route="my-bookings" class="btn btn-default">🎟️ My Bookings</LinkTo>
+    <LinkTo @route="my-memberships" class="btn btn-default">🎫 My Memberships</LinkTo>
   </div>
 
-  <h1>👤 Racing Profile</h1>
+  <h1>🏎️ My Racing Profile</h1>
 
-  {{#if this.successMessage}}
-    <div class="alert alert-success">{{this.successMessage}}</div>
-  {{/if}}
-
-  {{!-- Personal Details --}}
   <div class="profile-section">
     <h2>Personal Details</h2>
-    <div class="profile-form">
 
-      <div class="org-form-field">
-        <label>Date of Birth</label>
-        <p class="field-help">Used to calculate eligibility for age-based discounts (e.g. junior pricing)</p>
-        <input
-          type="date"
-          value={{if this.dateOfBirth this.dateOfBirth this.model.profile.user.date_of_birth}}
-          {{on "input" this.setDateOfBirth}}
-        />
-      </div>
-
-      <div class="org-form-field">
-        <label>BRCA Membership Number</label>
-        <p class="field-help">Required after your first 3 bookings</p>
-        <input
-          type="text"
-          placeholder="e.g. BRCA-12345"
-          value={{if this.brcaNumber this.brcaNumber this.model.profile.user.brca_membership_number}}
-          {{on "input" this.setBrcaNumber}}
-        />
-      </div>
-
-      <button
-        class="btn btn-primary"
-        disabled={{this.isSaving}}
-        {{on "click" this.saveProfile}}
-      >
-        {{if this.isSaving "Saving..." "Save Details"}}
-      </button>
-    </div>
-  </div>
-
-  {{!-- Garage --}}
-  <div class="profile-section">
-    <div class="org-section-header">
-      <h2>🚗 My Garage</h2>
-      <LinkTo @route="my-garage" class="btn btn-small btn-primary">
-        + Add Car
-      </LinkTo>
+    <div class="org-form-field">
+      <label>Date of Birth</label>
+      <p class="field-help">Used to calculate eligibility for age-based discounts (e.g. junior pricing)</p>
+      <input
+        type="date"
+        value={{this.model.profile.user.date_of_birth}}
+        {{on "change" this.setDateOfBirth}}
+      />
     </div>
 
-    {{#if this.model.garage.cars.length}}
-      <div class="garage-list">
-        {{#each this.model.garage.cars as |car|}}
-          <div class="garage-car-card">
-            <div class="garage-car-info">
-              <div class="garage-car-name">
-                <strong>{{car.friendly_name}}</strong>
-              </div>
-              <div class="garage-car-details">
-                {{#if car.manufacturer}}
-                  <span>🏭 {{car.manufacturer.name}}</span>
-                {{/if}}
-                {{#if car.model}}
-                  <span>📋 {{car.model.name}}
-                    {{#if car.model.year_released}}({{car.model.year_released}}){{/if}}
-                    {{#if car.model.chassis_type}} — {{car.model.chassis_type}}{{/if}}
-                    {{#unless car.model_approved}}
-                      <span class="pending-tag">pending approval</span>
-                    {{/unless}}
-                  </span>
-                {{else if car.custom_model_name}}
-                  <span>📋 {{car.custom_model_name}} <span class="pending-tag">unlisted - pending approval</span></span>
-                {{/if}}
-                {{#if car.driveline}}
-                  <span class="driveline-badge">{{car.driveline}}</span>
-                {{/if}}
-                {{#if car.transponder_number}}
-                  <span class="transponder-number">📡 {{car.transponder_number}}</span>
-                {{/if}}
-              </div>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <LinkTo @route="my-garage" class="btn btn-small btn-default">
-                ✏️ Edit
-              </LinkTo>
-              <button
-                class="btn btn-small btn-danger"
-                {{on "click" (fn this.removeCar car.id)}}
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        {{/each}}
-      </div>
-    {{else}}
-      <div class="events-empty">
-        <p>Your garage is empty!</p>
-        <LinkTo @route="my-garage" class="btn btn-primary">
-          Add Your First Car
-        </LinkTo>
-      </div>
-    {{/if}}
+    <div class="org-form-field" style="margin-top: 16px;">
+      <label>BRCA Membership Number</label>
+      <p class="field-help">Required after your first 3 bookings</p>
+      <input
+        type="text"
+        placeholder="e.g. 221708"
+        value={{this.model.profile.user.brca_membership_number}}
+        {{on "input" this.setBrcaNumber}}
+      />
+    </div>
+
+    <button class="btn btn-primary" style="margin-top: 16px;" {{on "click" this.saveProfile}}>
+      Save Details
+    </button>
   </div>
 </div>

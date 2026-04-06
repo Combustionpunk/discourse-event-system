@@ -328,6 +328,47 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def my_organisations
+      # Orgs where user has active membership
+      membership_org_ids = DesOrganisationMembership
+        .where(user_id: current_user.id, status: 'active')
+        .where('expires_at > ?', Time.now)
+        .pluck(:organisation_id)
+
+      # Orgs where user is a member
+      member_org_ids = DesOrganisationMember
+        .where(user_id: current_user.id, status: 'active')
+        .pluck(:organisation_id)
+
+      org_ids = (membership_org_ids + member_org_ids).uniq
+      organisations = DesOrganisation.where(id: org_ids).order(:name)
+
+      render json: {
+        organisations: organisations.map { |o|
+          membership = DesOrganisationMembership
+            .where(user_id: current_user.id, organisation_id: o.id, status: 'active')
+            .where('expires_at > ?', Time.now)
+            .includes(:membership_type)
+            .first
+          positions = DesOrganisationMember
+            .where(user_id: current_user.id, organisation_id: o.id, status: 'active')
+            .includes(:position)
+            .map { |m| m.position.name }
+          {
+            id: o.id,
+            name: o.name,
+            description: o.description,
+            status: o.status,
+            membership: membership ? {
+              type: membership.membership_type.name,
+              expires_at: membership.expires_at
+            } : nil,
+            positions: positions
+          }
+        }
+      }
+    end
+
     def my_memberships
       memberships = DesOrganisationMembership
         .where(user_id: current_user.id)
