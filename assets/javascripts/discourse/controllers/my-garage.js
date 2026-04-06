@@ -28,6 +28,8 @@ export default class MyGarageController extends Controller {
   drivelines = ["2WD", "4WD", "FWD", "Rear Motor"];
   chassisTypes = ["1/10 Buggy", "1/10 Stadium", "1/10 Short Course", "1/10 Truggy", "1/8 Buggy", "1/8 Truggy", "1/10 Rally", "Other"];
   @tracked suggestModelChassisType = "";
+  @tracked editingCarId = null;
+  @tracked editingCar = null;
 
   @action
   toggleAddForm() {
@@ -165,6 +167,49 @@ export default class MyGarageController extends Controller {
     if (!window.confirm("Remove this car from your garage?")) return;
     try {
       await ajax("/des/garage/" + carId + ".json", { type: "DELETE" });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  editCar(car) {
+    this.editingCarId = car.id;
+    this.editingCar = { 
+      id: car.id,
+      friendly_name: car.friendly_name,
+      transponder_number: car.transponder_number,
+      driveline: car.driveline,
+    };
+  }
+
+  @action
+  cancelEditCar() {
+    this.editingCarId = null;
+    this.editingCar = null;
+  }
+
+  @action
+  updateEditCarField(field, e) {
+    this.editingCar = { ...this.editingCar, [field]: e.target.value };
+  }
+
+  @action
+  async saveEditCar() {
+    try {
+      await ajax("/des/garage/" + this.editingCar.id + ".json", {
+        type: "PUT",
+        data: {
+          car: {
+            friendly_name: this.editingCar.friendly_name,
+            transponder_number: this.editingCar.transponder_number,
+            driveline: this.editingCar.driveline,
+          }
+        },
+      });
+      this.editingCarId = null;
+      this.editingCar = null;
       this.router.refresh();
     } catch (error) {
       popupAjaxError(error);

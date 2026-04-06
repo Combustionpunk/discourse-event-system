@@ -138,59 +138,88 @@
   {{#if this.model.cars.length}}
     <div class="garage-grid">
       {{#each this.model.cars as |car|}}
-        <div class="garage-car-card">
-          <div class="garage-car-header">
-            <span class="garage-car-icon">🚗</span>
-            <div class="garage-car-title">
-              <strong>{{car.friendly_name}}</strong>
-              {{#if car.driveline}}
-                <span class="driveline-badge">{{car.driveline}}</span>
-              {{/if}}
+        <div class="garage-car-card {{if (eq this.editingCarId car.id) 'garage-car-card--editing'}}">
+          {{#if (eq this.editingCarId car.id)}}
+            <div class="garage-car-edit-form">
+              <div class="org-form-field">
+                <label>Nickname</label>
+                <input type="text" value={{this.editingCar.friendly_name}} {{on "input" (fn this.updateEditCarField "friendly_name")}} />
+              </div>
+              <div class="org-form-field">
+                <label>Transponder Number</label>
+                <input type="text" value={{this.editingCar.transponder_number}} {{on "input" (fn this.updateEditCarField "transponder_number")}} />
+              </div>
+              <div class="org-form-field">
+                <label>Driveline</label>
+                <select {{on "change" (fn this.updateEditCarField "driveline")}}>
+                  <option value="">Select...</option>
+                  {{#each this.drivelines as |d|}}
+                    <option value={{d}} selected={{eq d this.editingCar.driveline}}>{{d}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="garage-car-actions">
+                <button class="btn btn-primary btn-small" {{on "click" this.saveEditCar}}>💾 Save</button>
+                <button class="btn btn-default btn-small" {{on "click" this.cancelEditCar}}>✕ Cancel</button>
+              </div>
             </div>
-          </div>
+          {{else}}
+            <div class="garage-car-header">
+              <span class="garage-car-icon">🚗</span>
+              <div class="garage-car-title">
+                <strong>{{car.friendly_name}}</strong>
+                {{#if car.driveline}}
+                  <span class="driveline-badge">{{car.driveline}}</span>
+                {{/if}}
+              </div>
+            </div>
 
-          <div class="garage-car-body">
-            {{#if car.manufacturer}}
-              <div class="garage-car-row">
-                <span class="garage-car-label">🏭 Manufacturer</span>
-                <span>{{car.manufacturer.name}}</span>
-              </div>
-            {{/if}}
-            {{#if car.model}}
-              <div class="garage-car-row">
-                <span class="garage-car-label">📋 Model</span>
-                <span>{{car.model.name}}
-                  {{#if car.model.year_released}}({{car.model.year_released}}){{/if}}
-                  {{#unless car.model_approved}}
-                    <span class="pending-tag">pending</span>
-                  {{/unless}}
-                </span>
-              </div>
-              {{#if car.model.chassis_type}}
+            <div class="garage-car-body">
+              {{#if car.manufacturer}}
                 <div class="garage-car-row">
-                  <span class="garage-car-label">🏎️ Class</span>
-                  <span>{{car.model.chassis_type}}</span>
+                  <span class="garage-car-label">🏭 Manufacturer</span>
+                  <span>{{car.manufacturer.name}}</span>
                 </div>
               {{/if}}
-            {{else if car.custom_model_name}}
-              <div class="garage-car-row">
-                <span class="garage-car-label">📋 Model</span>
-                <span>{{car.custom_model_name}} <span class="pending-tag">pending</span></span>
-              </div>
-            {{/if}}
-            {{#if car.transponder_number}}
-              <div class="garage-car-row">
-                <span class="garage-car-label">📡 Transponder</span>
-                <span class="transponder-number">{{car.transponder_number}}</span>
-              </div>
-            {{/if}}
-          </div>
+              {{#if car.model}}
+                <div class="garage-car-row">
+                  <span class="garage-car-label">📋 Model</span>
+                  <span>{{car.model.name}}
+                    {{#if car.model.year_released}}({{car.model.year_released}}){{/if}}
+                    {{#unless car.model_approved}}
+                      <span class="pending-tag">pending</span>
+                    {{/unless}}
+                  </span>
+                </div>
+                {{#if car.model.chassis_type}}
+                  <div class="garage-car-row">
+                    <span class="garage-car-label">🏎️ Class</span>
+                    <span>{{car.model.chassis_type}}</span>
+                  </div>
+                {{/if}}
+              {{else if car.custom_model_name}}
+                <div class="garage-car-row">
+                  <span class="garage-car-label">📋 Model</span>
+                  <span>{{car.custom_model_name}} <span class="pending-tag">pending</span></span>
+                </div>
+              {{/if}}
+              {{#if car.transponder_number}}
+                <div class="garage-car-row">
+                  <span class="garage-car-label">📡 Transponder</span>
+                  <span class="transponder-number">{{car.transponder_number}}</span>
+                </div>
+              {{/if}}
+            </div>
 
-          <div class="garage-car-actions">
-            <button class="btn btn-small btn-danger" {{on "click" (fn this.removeCar car.id)}}>
-              🗑 Remove
-            </button>
-          </div>
+            <div class="garage-car-actions">
+              <button class="btn btn-small btn-default" {{on "click" (fn this.editCar car)}}>
+                ✏️ Edit
+              </button>
+              <button class="btn btn-small btn-danger" {{on "click" (fn this.removeCar car.id)}}>
+                🗑 Remove
+              </button>
+            </div>
+          {{/if}}
         </div>
       {{/each}}
     </div>
