@@ -6,8 +6,31 @@ module DiscourseEventSystem
     before_action :set_event, only: [:show, :update, :publish, :cancel, :entrants, :export_csv]
 
     def index
-      events = DesEvent.published.upcoming.includes(:organisation, :event_type, :des_event_classes)
-      render json: serialize_events(events)
+      events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
+
+      # Filter by time
+      case params[:filter]
+      when 'past'
+        events = events.where('start_date < ?', Time.now).order(start_date: :desc)
+      else
+        events = events.upcoming.order(start_date: :asc)
+      end
+
+      # Filter by organisation
+      events = events.where(organisation_id: params[:organisation_id]) if params[:organisation_id].present?
+
+      # Filter by event type
+      events = events.where(event_type_id: params[:event_type_id]) if params[:event_type_id].present?
+
+      # Include organisations and event types for filter dropdowns
+      organisations = DesOrganisation.approved.order(:name)
+      event_types = DesEventType.all.order(:name)
+
+      render json: {
+        events: serialize_events(events),
+        organisations: organisations.map { |o| { id: o.id, name: o.name } },
+        event_types: event_types.map { |et| { id: et.id, name: et.name } }
+      }
     end
 
     def by_topic

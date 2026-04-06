@@ -1,19 +1,55 @@
 <div class="events-container">
   <div class="events-nav">
-    <LinkTo @route="events" class="btn btn-default">📅 Upcoming Events</LinkTo>
-    <LinkTo @route="my-bookings" class="btn btn-default">🎟 My Bookings</LinkTo>
-    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
-    <LinkTo @route="racing-profile" class="btn btn-default">👤 Racing Profile</LinkTo>
+    <LinkTo @route="my-organisations" class="btn btn-default">🏢 My Organisations</LinkTo>
+    <LinkTo @route="racing-profile" class="btn btn-default">🏎️ My Racing Profile</LinkTo>
+    <LinkTo @route="my-garage" class="btn btn-default">🚗 My Garage</LinkTo>
+    <LinkTo @route="my-bookings" class="btn btn-default">🎟️ My Bookings</LinkTo>
+    <LinkTo @route="my-memberships" class="btn btn-default">🎫 My Memberships</LinkTo>
   </div>
 
   <div class="events-header">
-    <h1>Upcoming Events</h1>
-    <LinkTo @route="event-new" class="btn btn-primary">+ Create Event</LinkTo>
+    <h1>{{if this.isUpcoming "Upcoming Events" "Past Events"}}</h1>
+    {{#if this.currentUser.staff}}
+      <LinkTo @route="event-new" class="btn btn-primary">+ Create Event</LinkTo>
+    {{/if}}
   </div>
 
-  {{#if this.model.length}}
+  {{!-- Filters --}}
+  <div class="events-filters">
+    <div class="events-filter-tabs">
+      <button
+        class="btn {{if this.isUpcoming 'btn-primary' 'btn-default'}}"
+        {{on "click" (fn this.setFilter "upcoming")}}
+      >
+        📅 Upcoming
+      </button>
+      <button
+        class="btn {{unless this.isUpcoming 'btn-primary' 'btn-default'}}"
+        {{on "click" (fn this.setFilter "past")}}
+      >
+        🕐 Past
+      </button>
+    </div>
+    <div class="events-filter-selects">
+      <select {{on "change" this.setOrganisation}}>
+        <option value="">All Organisations</option>
+        {{#each this.model.organisations as |org|}}
+          <option value={{org.id}} selected={{eq (concat org.id "") this.organisation_id}}>{{org.name}}</option>
+        {{/each}}
+      </select>
+      <select {{on "change" this.setEventType}}>
+        <option value="">All Event Types</option>
+        {{#each this.model.event_types as |et|}}
+          <option value={{et.id}} selected={{eq (concat et.id "") this.event_type_id}}>{{et.name}}</option>
+        {{/each}}
+      </select>
+    </div>
+  </div>
+
+
+  {{#if this.model.events.length}}
     <div class="events-list">
-      {{#each this.model as |event|}}
+      {{#each this.model.events as |event|}}
         <div class="event-card">
           <div class="event-card-header">
             <h2 class="event-title">
@@ -63,7 +99,7 @@
     </div>
   {{else}}
     <div class="events-empty">
-      <p>No upcoming events at the moment. Check back soon!</p>
+      <p>No {{if this.isUpcoming "upcoming" "past"}} events found.</p>
     </div>
   {{/if}}
 </div>
