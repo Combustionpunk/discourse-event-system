@@ -6,7 +6,9 @@ module DiscourseEventSystem
     before_action :set_booking, only: [:show, :confirm, :cancel, :refund, :add_classes]
 
     def index
-      bookings = DesEventBooking.where(user_id: current_user.id).includes(:event, :booking_classes)
+      bookings = DesEventBooking.where(user_id: current_user.id)
+        .includes(:event, :booking_classes)
+        .select { |b| b.event.present? }
       render json: serialize_bookings(bookings)
     end
 
@@ -123,11 +125,11 @@ module DiscourseEventSystem
         .where(status: ['waiting', 'notified'])
         .includes(:event, :event_class)
       render json: {
-        waitlist: entries.map { |e|
+        waitlist: entries.select { |e| e.event.present? }.map { |e|
           {
             id: e.id,
             event: { id: e.event.id, title: e.event.title, start_date: e.event.start_date },
-            class_name: e.event_class.name,
+            class_name: e.event_class&.name || 'Unknown',
             position: e.position,
             status: e.status
           }
@@ -158,15 +160,16 @@ module DiscourseEventSystem
     end
 
     def serialize_booking(booking)
+      event = booking.event
       {
         id: booking.id,
-        event: {
-          id: booking.event.id,
-          title: booking.event.title,
-          start_date: booking.event.start_date,
-          location: booking.event.location,
-          topic_url: booking.event.topic&.url
-        },
+        event: event ? {
+          id: event.id,
+          title: event.title,
+          start_date: event.start_date,
+          location: event.location,
+          topic_url: event.topic&.url
+        } : nil,
         status: booking.status,
         total_amount: booking.total_amount,
         discount_amount: booking.discount_amount,
@@ -175,7 +178,7 @@ module DiscourseEventSystem
         classes: booking.booking_classes.map do |bc|
           {
             id: bc.id,
-            class_name: bc.event_class.name,
+            class_name: bc.event_class&.name || 'Unknown',
             status: bc.status,
             amount_charged: bc.amount_charged,
             transponder_number: bc.transponder_number,
