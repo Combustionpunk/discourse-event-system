@@ -325,6 +325,7 @@ export default class OrganisationController extends Controller {
   @tracked searchTimeout = null;
   @tracked newMemberPositionId = "";
   @tracked isSaving = false;
+  @tracked settingsForm = {};
 
   @action
   toggleAddMember() {

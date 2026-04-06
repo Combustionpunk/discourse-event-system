@@ -33,6 +33,16 @@
       <button class="manage-tab {{if (eq this.activeTab 'memberships') 'active'}}" {{on "click" this.showMemberships}}>
         🎫 Memberships
       </button>
+      {{#if this.model.is_admin}}
+        <button class="manage-tab {{if (eq this.activeTab 'settings') 'active'}}" {{on "click" this.showSettings}}>
+          ⚙️ Settings
+        </button>
+      {{/if}}
+      {{#if this.model.is_admin}}
+        <button class="manage-tab {{if (eq this.activeTab 'settings') 'active'}}" {{on "click" this.showSettings}}>
+          ⚙️ Settings
+        </button>
+      {{/if}}
     </div>
   {{/if}}
 
