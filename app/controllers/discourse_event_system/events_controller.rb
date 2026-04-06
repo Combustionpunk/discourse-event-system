@@ -298,6 +298,17 @@ module DiscourseEventSystem
         } : nil,
         max_classes_per_booking: event.max_classes_per_booking,
         is_admin: current_user.present? && is_event_admin?(event),
+        user_is_member: current_user.present? && DesOrganisationMembership.where(user_id: current_user.id, organisation_id: event.organisation_id).active.exists?,
+        user_is_junior: current_user.present? && begin
+          dob = current_user.date_of_birth
+          if dob.present?
+            age = event.start_date.year - dob.year
+            age -= 1 if event.start_date < dob + age.years
+            age < 16
+          else
+            false
+          end
+        end,
         formatted_date: event.start_date&.strftime('%A, %d %B %Y at %H:%M')
       }
     end

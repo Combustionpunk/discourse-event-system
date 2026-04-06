@@ -17,13 +17,32 @@ export default class EventController extends Controller {
   get calculatedTotal() {
     const pricing = this.model.pricing;
     if (!pricing || this.selectedClasses.length === 0) return 0;
+
+    const isMember = this.model.user_is_member || false;
+    const isJunior = this.model.user_is_junior || false;
+
+    let firstDiscount = 0;
+    let subsequentDiscount = 0;
+
+    if (isMember) {
+      firstDiscount += parseFloat(pricing.member_first_class_discount || 0);
+      subsequentDiscount += parseFloat(pricing.member_subsequent_discount || 0);
+    }
+    if (isJunior) {
+      firstDiscount += parseFloat(pricing.junior_first_class_discount || 0);
+      subsequentDiscount += parseFloat(pricing.junior_subsequent_discount || 0);
+    }
+
+    const count = this.selectedClasses.length;
     if (pricing.rule_type === "tiered") {
-      const first = parseFloat(pricing.first_class_price);
-      const subsequent = parseFloat(pricing.subsequent_class_price);
-      const count = this.selectedClasses.length;
+      const first = Math.max(parseFloat(pricing.first_class_price) - firstDiscount, 0);
+      const subsequent = Math.max(parseFloat(pricing.subsequent_class_price) - subsequentDiscount, 0);
       return count === 1 ? first : first + subsequent * (count - 1);
     } else {
-      return parseFloat(pricing.flat_price) * this.selectedClasses.length;
+      const base = parseFloat(pricing.flat_price);
+      const first = Math.max(base - firstDiscount, 0);
+      const subsequent = Math.max(base - subsequentDiscount, 0);
+      return count === 1 ? first : first + subsequent * (count - 1);
     }
   }
 
