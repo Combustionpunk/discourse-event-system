@@ -76,6 +76,22 @@ module DiscourseEventSystem
       render json: { success: true }
     end
 
+    def create_model
+      manufacturer = DesManufacturer.find(params[:manufacturer_id])
+      model = DesCarModel.create!(
+        manufacturer_id: params[:manufacturer_id],
+        name: params[:name].to_s.strip,
+        year_released: params[:year_released].present? ? params[:year_released].to_i : nil,
+        driveline: params[:driveline].presence,
+        chassis_type: params[:chassis_type].presence,
+        status: 'approved',
+        created_by: current_user.id
+      )
+      render json: serialize_model(model), status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     def approve_model
       model = DesCarModel.find(params[:id])
       model.update!(

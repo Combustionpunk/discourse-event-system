@@ -169,7 +169,60 @@
     </div>
 
     <div class="des-admin-section">
-      <h2>Approved Car Models ({{this.model.approved_models.length}})</h2>
+      <div class="section-header">
+        <h2>Approved Car Models ({{this.model.approved_models.length}})</h2>
+        <button class="btn btn-primary btn-small" {{on "click" this.toggleAddModelForm}}>
+          {{if this.showAddModelForm "✕ Cancel" "+ Add Model"}}
+        </button>
+      </div>
+
+      {{#if this.showAddModelForm}}
+        <div class="add-model-form">
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Manufacturer *</label>
+              <select {{on "change" (fn this.updateNewModel "manufacturer_id")}}>
+                <option value="">Select manufacturer...</option>
+                {{#each this.model.approved_manufacturers as |mfr|}}
+                  <option value={{mfr.id}}>{{mfr.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="org-form-field">
+              <label>Model Name *</label>
+              <input type="text" placeholder="e.g. B7.1" {{on "input" (fn this.updateNewModel "name")}} />
+            </div>
+          </div>
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Year Released</label>
+              <input type="number" placeholder="e.g. 2024" min="1970" max="2030" {{on "input" (fn this.updateNewModel "year_released")}} />
+            </div>
+            <div class="org-form-field">
+              <label>Driveline</label>
+              <select {{on "change" (fn this.updateNewModel "driveline")}}>
+                <option value="">Select...</option>
+                {{#each this.drivelines as |d|}}
+                  <option value={{d}}>{{d}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="org-form-field">
+              <label>Chassis Type</label>
+              <select {{on "change" (fn this.updateNewModel "chassis_type")}}>
+                <option value="">Select...</option>
+                {{#each this.chassisTypes as |c|}}
+                  <option value={{c}}>{{c}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" {{on "click" this.createModel}}>
+            ✅ Add Model
+          </button>
+        </div>
+      {{/if}}
+
       <p class="field-help">Edit year, driveline or chassis type for any approved model.</p>
       {{#each this.model.approved_models_by_manufacturer as |mfr|}}
         <div class="models-manufacturer-group">

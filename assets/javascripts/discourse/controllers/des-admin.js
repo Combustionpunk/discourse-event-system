@@ -9,10 +9,43 @@ export default class DesAdminController extends Controller {
   @service router;
   @tracked activeTab = "organisations";
   drivelines = ["2WD", "4WD", "FWD", "Rear Motor"];
+  chassisTypes = ["1/10 Buggy", "1/10 Stadium", "1/10 Short Course", "1/10 Truggy", "1/8 Buggy", "1/8 Truggy", "1/10 Rally", "Other"];
 
   @action
   setTab(tab) {
     this.activeTab = tab;
+  }
+
+  @tracked newModel = { manufacturer_id: "", name: "", year_released: "", driveline: "", chassis_type: "" };
+  @tracked showAddModelForm = false;
+
+  @action
+  toggleAddModelForm() {
+    this.showAddModelForm = !this.showAddModelForm;
+  }
+
+  @action
+  updateNewModel(field, e) {
+    this.newModel = { ...this.newModel, [field]: e.target.value };
+  }
+
+  @action
+  async createModel() {
+    if (!this.newModel.manufacturer_id || !this.newModel.name) {
+      alert("Please select a manufacturer and enter a model name");
+      return;
+    }
+    try {
+      await ajax("/des/admin/models.json", {
+        type: "POST",
+        data: this.newModel,
+      });
+      this.newModel = { manufacturer_id: "", name: "", year_released: "", driveline: "", chassis_type: "" };
+      this.showAddModelForm = false;
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
   }
 
   @action
