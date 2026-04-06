@@ -63,7 +63,12 @@ export default apiInitializer("1.0", (api) => {
           const user = api.getCurrentUser();
           if (!user) return [];
           const links = [
+            new RCLink({ route: "events", title: "📅 Events" }),
             new RCLink({ route: "my-organisations", title: "🏢 My Organisations" }),
+            new RCLink({ route: "racing-profile", title: "🏎️ My Racing Profile" }),
+            new RCLink({ route: "my-garage", title: "🚗 My Garage" }),
+            new RCLink({ route: "my-bookings", title: "🎟️ My Bookings" }),
+            new RCLink({ route: "my-memberships", title: "🎫 My Memberships" }),
           ];
           if (user.admin) {
             links.push(new RCLink({ route: "des-admin", title: "⚙️ DES Admin" }));
