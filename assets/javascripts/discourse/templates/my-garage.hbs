@@ -149,15 +149,7 @@
                 <label>Transponder Number</label>
                 <input type="text" value={{this.editingCar.transponder_number}} {{on "input" (fn this.updateEditCarField "transponder_number")}} />
               </div>
-              <div class="org-form-field">
-                <label>Driveline</label>
-                <select {{on "change" (fn this.updateEditCarField "driveline")}}>
-                  <option value="">Select...</option>
-                  {{#each this.drivelines as |d|}}
-                    <option value={{d}} selected={{eq d this.editingCar.driveline}}>{{d}}</option>
-                  {{/each}}
-                </select>
-              </div>
+
               <div class="garage-car-actions">
                 <button class="btn btn-primary btn-small" {{on "click" this.saveEditCar}}>💾 Save</button>
                 <button class="btn btn-default btn-small" {{on "click" this.cancelEditCar}}>✕ Cancel</button>

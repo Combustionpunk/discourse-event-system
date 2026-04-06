@@ -27,6 +27,12 @@ export default class EventController extends Controller {
     }
   }
 
+  get maxClassesReached() {
+    const max = this.model.max_classes_per_booking;
+    if (!max) return false;
+    return this.selectedClasses.length >= max;
+  }
+
   get allCarsSelected() {
     return this.eligibleCars.every(cls => this.carSelections[cls.class_id]);
   }

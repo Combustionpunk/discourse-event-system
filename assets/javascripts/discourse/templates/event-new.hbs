@@ -126,6 +126,16 @@
               {{on "input" (fn this.updateField "refund_cutoff_days")}}
             />
           </div>
+          <div class="org-form-field">
+            <label>Max Classes Per Booking</label>
+            <input
+              type="number"
+              min="1"
+              placeholder="Leave blank for unlimited"
+              {{on "input" (fn this.updateField "max_classes_per_booking")}}
+            />
+            <p class="field-help">Limit how many classes a user can book in one booking. Leave blank for unlimited.</p>
+          </div>
         </div>
       {{/if}}
     </div>

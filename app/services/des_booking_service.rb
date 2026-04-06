@@ -206,6 +206,9 @@ class DesBookingService
 
   def validate_classes!(class_ids)
     raise "Please select at least one class" if class_ids.empty?
+    if @event.max_classes_per_booking.present? && class_ids.length > @event.max_classes_per_booking
+      raise "You can only book a maximum of #{@event.max_classes_per_booking} class(es) for this event"
+    end
     class_ids.each do |class_id|
       event_class = DesEventClass.find_by(id: class_id)
       raise "Invalid class selected" unless event_class

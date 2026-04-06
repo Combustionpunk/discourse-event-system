@@ -180,7 +180,6 @@ export default class MyGarageController extends Controller {
       id: car.id,
       friendly_name: car.friendly_name,
       transponder_number: car.transponder_number,
-      driveline: car.driveline,
     };
   }
 
