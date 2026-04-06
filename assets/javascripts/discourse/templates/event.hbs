@@ -54,8 +54,6 @@
               type="checkbox"
               id="class-{{cls.id}}"
               value={{cls.id}}
-              checked={{includes this.selectedClasses cls.id}}
-              disabled={{and (not (includes this.selectedClasses cls.id)) this.maxClassesReached}}
               {{on "change" (fn this.toggleClass cls.id)}}
             />
             <label for="class-{{cls.id}}">Select</label>

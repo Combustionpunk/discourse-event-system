@@ -227,7 +227,8 @@ module DiscourseEventSystem
         :title, :description, :organisation_id, :event_type_id,
         :start_date, :end_date, :location, :google_maps_url,
         :capacity, :refund_cutoff_days, :category_id, :booking_closing_date,
-        :booking_type, :external_booking_url, :external_booking_details
+        :booking_type, :external_booking_url, :external_booking_details,
+        :max_classes_per_booking
       )
     end
 
@@ -268,8 +269,19 @@ module DiscourseEventSystem
           flat_price: event.des_event_pricing_rule.flat_price,
           first_class_price: event.des_event_pricing_rule.first_class_price,
           subsequent_class_price: event.des_event_pricing_rule.subsequent_class_price
-        } : nil
+        } : nil,
+        max_classes_per_booking: event.max_classes_per_booking,
+        is_admin: current_user.present? && is_event_admin?(event),
+        formatted_date: event.start_date&.strftime('%A, %d %B %Y at %H:%M')
       }
+    end
+
+    def is_event_admin?(event)
+      return true if current_user.admin?
+      DesOrganisationMember.joins(:position)
+        .where(organisation_id: event.organisation_id, user_id: current_user.id)
+        .where(des_positions: { is_admin: true })
+        .exists?
     end
 
     def serialize_events(events)

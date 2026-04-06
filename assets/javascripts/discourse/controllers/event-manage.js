@@ -78,6 +78,7 @@ export default class EventManageController extends Controller {
             booking_closing_date: this.model.event.booking_closing_date,
             location: this.model.event.location,
             google_maps_url: this.model.event.google_maps_url,
+            max_classes_per_booking: this.model.event.max_classes_per_booking,
           }
         },
       });

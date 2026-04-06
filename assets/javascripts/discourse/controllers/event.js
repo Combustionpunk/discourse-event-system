@@ -42,6 +42,11 @@ export default class EventController extends Controller {
     if (this.selectedClasses.includes(classId)) {
       this.selectedClasses = this.selectedClasses.filter((id) => id !== classId);
     } else {
+      const max = this.model.max_classes_per_booking;
+      if (max && this.selectedClasses.length >= max) {
+        alert("You can only select a maximum of " + max + " class(es) for this event.");
+        return;
+      }
       this.selectedClasses = [...this.selectedClasses, classId];
     }
   }
