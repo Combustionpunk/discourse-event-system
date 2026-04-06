@@ -20,9 +20,11 @@
       <button class="manage-tab {{if (eq this.activeTab 'details') 'active'}}" {{on "click" this.showDetails}}>
         📋 Details
       </button>
+      {{#if this.model.is_admin}}
       <button class="manage-tab {{if (eq this.activeTab 'memberships') 'active'}}" {{on "click" this.showMemberships}}>
         🎫 Memberships
       </button>
+      {{/if}}
       {{#if this.model.is_admin}}
         <button class="manage-tab {{if (eq this.activeTab 'members') 'active'}}" {{on "click" this.showMembers}}>
           👥 Members
@@ -103,12 +105,16 @@
                 </div>
               </div>
               {{#if this.currentUser}}
-                <button
-                  class="btn btn-primary"
-                  {{on "click" (fn this.joinMembership mtype.id mtype.is_family mtype.max_members)}}
-                >
-                  {{if (eq this.joiningMembershipTypeId mtype.id) "Cancel" "Join"}}
-                </button>
+                {{#if this.model.is_member}}
+                  <span class="org-status org-status--active">✅ Member</span>
+                {{else}}
+                  <button
+                    class="btn btn-primary"
+                    {{on "click" (fn this.joinMembership mtype.id mtype.is_family mtype.max_members)}}
+                  >
+                    {{if (eq this.joiningMembershipTypeId mtype.id) "Cancel" "Join"}}
+                  </button>
+                {{/if}}
               {{else}}
                 <a href="/login" class="btn btn-default">Log in to Join</a>
               {{/if}}
