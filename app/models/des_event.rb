@@ -135,10 +135,7 @@ class DesEvent < ActiveRecord::Base
     content += "**Map:** #{google_maps_url}\n" if google_maps_url.present?
     content += "\n---\n\n"
     content += "#{description}\n\n" if description.present?
-    content += "---\n\n## Classes\n\n"
-    content += classes_list.present? ? classes_list : 'Classes to be announced'
     content += "\n\n## Pricing\n\n#{price_info}\n\n"
-    content += "---\n\n*To book your place, visit the event page.*\n"
     content
   end
 end
