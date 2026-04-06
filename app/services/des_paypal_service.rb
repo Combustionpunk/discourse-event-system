@@ -41,7 +41,8 @@ class DesPaypalService
     org = membership.organisation
     uri = URI("#{@base_url}/v2/checkout/orders")
     req = Net::HTTP::Post.new(uri)
-    req['Authorization'] = "Bearer \#{access_token}"
+    token = access_token
+    req['Authorization'] = "Bearer #{token}"
     req['Content-Type'] = 'application/json'
     req.body = {
       intent: 'CAPTURE',
