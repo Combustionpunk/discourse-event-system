@@ -1,4 +1,5 @@
 import Controller from "@ember/controller";
+import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
@@ -6,8 +7,27 @@ import { inject as service } from "@ember/service";
 
 export default class DesAdminController extends Controller {
   @service router;
-
+  @tracked activeTab = "organisations";
   drivelines = ["2WD", "4WD", "FWD", "Rear Motor"];
+
+  @action
+  setTab(tab) {
+    this.activeTab = tab;
+  }
+
+  @action
+  setTabOrganisations() { this.activeTab = "organisations"; }
+
+  @action
+  setTabManufacturers() { this.activeTab = "manufacturers"; }
+
+  @action
+  setTabModels() { this.activeTab = "models"; }
+
+  @action
+  setTabRules() { this.activeTab = "rules"; }
+
+
 
   @action
   async approveOrganisation(org) {

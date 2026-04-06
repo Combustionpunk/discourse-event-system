@@ -1497,3 +1497,71 @@
     font-size: 0.9em;
   }
 }
+
+.approved-manufacturers-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.manufacturer-tag {
+  background: var(--primary-low);
+  border: 1px solid var(--primary-medium);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.9em;
+}
+
+.models-manufacturer-group {
+  margin-bottom: 24px;
+}
+
+.models-manufacturer-heading {
+  font-size: 1em;
+  color: var(--primary-medium);
+  border-bottom: 1px solid var(--primary-low);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.models-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.model-card {
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+}
+
+.model-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.model-card-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 0.85em;
+  color: var(--primary-medium);
+}
+
+.model-card-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+}

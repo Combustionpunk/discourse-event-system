@@ -11,8 +11,10 @@ module DiscourseEventSystem
         approved_organisations: DesOrganisation.approved.map { |o| serialize_organisation(o) },
         rejected_organisations: DesOrganisation.rejected.map { |o| serialize_organisation(o) },
         pending_manufacturers: DesManufacturer.pending.map { |m| serialize_manufacturer(m) },
+        approved_manufacturers: DesManufacturer.approved.order(:name).map { |m| serialize_manufacturer(m) },
         pending_models: DesCarModel.pending.includes(:manufacturer).map { |m| serialize_model(m) },
         approved_models: DesCarModel.approved.includes(:manufacturer).map { |m| serialize_model(m) },
+        approved_models_by_manufacturer: DesCarModel.approved.includes(:manufacturer).order("des_manufacturers.name, des_car_models.name").group_by { |m| m.manufacturer&.name || "Unknown" }.map { |mfr, models| { manufacturer: mfr, models: models.map { |m| serialize_model(m) } } },
         class_types: DesEventClassType.all.map { |ct| { id: ct.id, name: ct.name } },
         global_rules: DesClassCompatibilityRule.global.includes(:class_type).map { |r| serialize_rule(r) }
       }

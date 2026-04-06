@@ -7,118 +7,209 @@
 
   <h1>Event System Admin</h1>
 
-  {{!-- Pending Organisations --}}
-  <div class="des-admin-section">
-    <h2>
-      Pending Organisations
+  <div class="des-admin-tabs">
+    <button class="btn {{if (eq this.activeTab 'organisations') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabOrganisations}}>
+      🏢 Organisations
       {{#if this.model.pending_organisations.length}}
         <span class="pending-badge">{{this.model.pending_organisations.length}}</span>
       {{/if}}
-    </h2>
-    {{#if this.model.pending_organisations.length}}
-      {{#each this.model.pending_organisations as |org|}}
-        <div class="admin-org-card admin-org-card--pending">
-          <div class="admin-org-info">
-            <h3>{{org.name}}</h3>
-            {{#if org.description}}<p>{{org.description}}</p>{{/if}}
-            <div class="admin-org-meta">
-              {{#if org.email}}<span>✉️ {{org.email}}</span>{{/if}}
-              {{#if org.website}}<span>🌐 {{org.website}}</span>{{/if}}
-              {{#if org.paypal_email}}<span>💰 {{org.paypal_email}}</span>{{/if}}
-              <span>👤 {{org.created_by}}</span>
+    </button>
+    <button class="btn {{if (eq this.activeTab 'manufacturers') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabManufacturers}}>
+      🏭 Manufacturers
+      {{#if this.model.pending_manufacturers.length}}
+        <span class="pending-badge">{{this.model.pending_manufacturers.length}}</span>
+      {{/if}}
+    </button>
+    <button class="btn {{if (eq this.activeTab 'models') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabModels}}>
+      🚗 Car Models
+      {{#if this.model.pending_models.length}}
+        <span class="pending-badge">{{this.model.pending_models.length}}</span>
+      {{/if}}
+    </button>
+    <button class="btn {{if (eq this.activeTab 'rules') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabRules}}>
+      📋 Class Rules
+    </button>
+  </div>
+
+  {{!-- ORGANISATIONS TAB --}}
+  {{#if (eq this.activeTab "organisations")}}
+    <div class="des-admin-section">
+      <h2>
+        Pending Organisations
+        {{#if this.model.pending_organisations.length}}
+          <span class="pending-badge">{{this.model.pending_organisations.length}}</span>
+        {{/if}}
+      </h2>
+      {{#if this.model.pending_organisations.length}}
+        {{#each this.model.pending_organisations as |org|}}
+          <div class="admin-org-card admin-org-card--pending">
+            <div class="admin-org-info">
+              <h3>{{org.name}}</h3>
+              <div class="admin-org-meta">
+                <span>👤 {{org.created_by}}</span>
+                {{#if org.contact_email}}<span>✉️ {{org.contact_email}}</span>{{/if}}
+              </div>
+            </div>
+            <div class="admin-org-actions">
+              <button class="btn btn-success" {{on "click" (fn this.approveOrganisation org)}}>✅ Approve</button>
+              <button class="btn btn-danger" {{on "click" (fn this.rejectOrganisation org)}}>❌ Reject</button>
             </div>
           </div>
-          <div class="admin-org-actions">
-            <button class="btn btn-success" {{on "click" (fn this.approveOrganisation org)}}>✅ Approve</button>
-            <button class="btn btn-danger" {{on "click" (fn this.rejectOrganisation org)}}>❌ Reject</button>
+        {{/each}}
+      {{else}}
+        <p class="no-pending">No pending organisations 🎉</p>
+      {{/if}}
+    </div>
+
+    <div class="des-admin-section">
+      <h2>Approved Organisations ({{this.model.approved_organisations.length}})</h2>
+      {{#each this.model.approved_organisations as |org|}}
+        <div class="admin-org-card admin-org-card--approved">
+          <div class="admin-org-info">
+            <h3>{{org.name}}</h3>
+            <div class="admin-org-meta">
+              <span>💰 Surcharge: {{org.surcharge_percentage}}%</span>
+              {{#if org.contact_email}}<span>✉️ {{org.contact_email}}</span>{{/if}}
+            </div>
           </div>
         </div>
       {{/each}}
-    {{else}}
-      <p class="no-pending">No pending organisations 🎉</p>
-    {{/if}}
-  </div>
+    </div>
 
-  {{!-- Approved Organisations --}}
-  <div class="des-admin-section">
-    <h2>Approved Organisations ({{this.model.approved_organisations.length}})</h2>
-    {{#each this.model.approved_organisations as |org|}}
-      <div class="admin-org-card admin-org-card--approved">
-        <div class="admin-org-info">
-          <h3>{{org.name}}</h3>
-          <div class="admin-org-meta">
-            <span>💰 Surcharge: {{org.surcharge_percentage}}%</span>
-            {{#if org.email}}<span>✉️ {{org.email}}</span>{{/if}}
-            {{#if org.paypal_email}}<span>🏦 {{org.paypal_email}}</span>{{/if}}
+    {{#if this.model.rejected_organisations.length}}
+      <div class="des-admin-section">
+        <h2>Rejected Organisations ({{this.model.rejected_organisations.length}})</h2>
+        {{#each this.model.rejected_organisations as |org|}}
+          <div class="admin-org-card admin-org-card--rejected">
+            <div class="admin-org-info">
+              <h3>{{org.name}}</h3>
+              {{#if org.rejection_reason}}
+                <p class="rejection-reason">Reason: {{org.rejection_reason}}</p>
+              {{/if}}
+            </div>
           </div>
-        </div>
+        {{/each}}
       </div>
-    {{/each}}
-  </div>
+    {{/if}}
+  {{/if}}
 
-  {{!-- Pending Manufacturers --}}
-  {{#if this.model.pending_manufacturers.length}}
+  {{!-- MANUFACTURERS TAB --}}
+  {{#if (eq this.activeTab "manufacturers")}}
     <div class="des-admin-section">
       <h2>
         Pending Manufacturers
-        <span class="pending-badge">{{this.model.pending_manufacturers.length}}</span>
+        {{#if this.model.pending_manufacturers.length}}
+          <span class="pending-badge">{{this.model.pending_manufacturers.length}}</span>
+        {{/if}}
       </h2>
-      {{#each this.model.pending_manufacturers as |manufacturer|}}
-        <div class="admin-org-card admin-org-card--pending">
-          <div class="admin-org-info">
-            <h3>{{manufacturer.name}}</h3>
-            <div class="admin-org-meta">
-              <span>👤 Suggested by: {{manufacturer.created_by}}</span>
+      {{#if this.model.pending_manufacturers.length}}
+        {{#each this.model.pending_manufacturers as |manufacturer|}}
+          <div class="admin-org-card admin-org-card--pending">
+            <div class="admin-org-info">
+              <h3>{{manufacturer.name}}</h3>
+              <div class="admin-org-meta">
+                <span>👤 Suggested by: {{manufacturer.created_by}}</span>
+              </div>
+            </div>
+            <div class="admin-org-actions">
+              <button class="btn btn-success" {{on "click" (fn this.approveManufacturer manufacturer)}}>✅ Approve</button>
+              <button class="btn btn-danger" {{on "click" (fn this.rejectManufacturer manufacturer)}}>❌ Reject</button>
             </div>
           </div>
-          <div class="admin-org-actions">
-            <button class="btn btn-success" {{on "click" (fn this.approveManufacturer manufacturer)}}>✅ Approve</button>
-            <button class="btn btn-danger" {{on "click" (fn this.rejectManufacturer manufacturer)}}>❌ Reject</button>
-          </div>
+        {{/each}}
+      {{else}}
+        <p class="no-pending">No pending manufacturers 🎉</p>
+      {{/if}}
+    </div>
+
+    <div class="des-admin-section">
+      <h2>Approved Manufacturers ({{this.model.approved_manufacturers.length}})</h2>
+      {{#if this.model.approved_manufacturers.length}}
+        <div class="approved-manufacturers-list">
+          {{#each this.model.approved_manufacturers as |manufacturer|}}
+            <span class="manufacturer-tag">{{manufacturer.name}}</span>
+          {{/each}}
         </div>
-      {{/each}}
+      {{else}}
+        <p class="no-pending">No approved manufacturers yet.</p>
+      {{/if}}
     </div>
   {{/if}}
 
-  {{!-- Pending Car Models --}}
-  {{#if this.model.pending_models.length}}
+  {{!-- CAR MODELS TAB --}}
+  {{#if (eq this.activeTab "models")}}
     <div class="des-admin-section">
       <h2>
         Pending Car Models
-        <span class="pending-badge">{{this.model.pending_models.length}}</span>
+        {{#if this.model.pending_models.length}}
+          <span class="pending-badge">{{this.model.pending_models.length}}</span>
+        {{/if}}
       </h2>
-      <p class="field-help">When approving, you will be asked to enter the year of first manufacture.</p>
-      {{#each this.model.pending_models as |model|}}
-        <div class="admin-org-card admin-org-card--pending">
-          <div class="admin-org-info">
-            <h3>{{model.manufacturer}} {{model.name}}</h3>
-            <div class="admin-org-meta">
-              {{#if model.year_released}}<span>📅 Year: {{model.year_released}}</span>{{/if}}
-              {{#if model.driveline}}<span>⚙️ Drive: {{model.driveline}}</span>{{/if}}
-              {{#if model.chassis_type}}<span>🚗 Chassis: {{model.chassis_type}}</span>{{/if}}
-              <span>👤 Suggested by: {{model.created_by}}</span>
+      {{#if this.model.pending_models.length}}
+        <p class="field-help">When approving, you will be asked to enter the year of first manufacture.</p>
+        {{#each this.model.pending_models as |model|}}
+          <div class="admin-org-card admin-org-card--pending">
+            <div class="admin-org-info">
+              <h3>{{model.manufacturer}} {{model.name}}</h3>
+              <div class="admin-org-meta">
+                <span>👤 Suggested by: {{model.created_by}}</span>
+                {{#if model.driveline}}<span>⚙️ {{model.driveline}}</span>{{/if}}
+              </div>
+            </div>
+            <div class="admin-org-actions">
+              <button class="btn btn-success" {{on "click" (fn this.approveModel model)}}>✅ Approve</button>
+              <button class="btn btn-danger" {{on "click" (fn this.rejectModel model)}}>❌ Reject</button>
             </div>
           </div>
-          <div class="admin-org-actions">
-            <button class="btn btn-success" {{on "click" (fn this.approveModel model)}}>✅ Approve</button>
-            <button class="btn btn-danger" {{on "click" (fn this.rejectModel model)}}>❌ Reject</button>
+        {{/each}}
+      {{else}}
+        <p class="no-pending">No pending car models 🎉</p>
+      {{/if}}
+    </div>
+
+    <div class="des-admin-section">
+      <h2>Approved Car Models ({{this.model.approved_models.length}})</h2>
+      <p class="field-help">Edit year, driveline or chassis type for any approved model.</p>
+      {{#each this.model.approved_models_by_manufacturer as |mfr|}}
+        <div class="models-manufacturer-group">
+          <h3 class="models-manufacturer-heading">🏭 {{mfr.manufacturer}}</h3>
+          <div class="models-grid">
+            {{#each mfr.models as |model|}}
+              <div class="model-card">
+                <div class="model-card-header">
+                  <strong>{{model.name}}</strong>
+                  {{#if model.chassis_type}}
+                    <span class="driveline-badge">{{model.chassis_type}}</span>
+                  {{else}}
+                    <span class="pending-tag">⚠️ No chassis</span>
+                  {{/if}}
+                </div>
+                <div class="model-card-meta">
+                  {{#if model.year_released}}<span>📅 {{model.year_released}}</span>{{/if}}
+                  {{#if model.driveline}}<span class="driveline-badge">{{model.driveline}}</span>{{/if}}
+                </div>
+                <div class="model-card-actions">
+                  <button class="btn btn-default btn-small" {{on "click" (fn this.editModel model)}}>
+                    ✏️ Edit
+                  </button>
+                </div>
+              </div>
+            {{/each}}
           </div>
         </div>
       {{/each}}
     </div>
   {{/if}}
 
-  {{!-- Rejected Organisations --}}
-  {{!-- Global Class Compatibility Rules --}}
-  <div class="des-admin-section">
-    <h2>Class Compatibility Rules</h2>
-    <p class="field-help">These rules apply globally to all organisations. They define which cars are eligible for each class type.</p>
+  {{!-- CLASS RULES TAB --}}
+  {{#if (eq this.activeTab "rules")}}
+    <div class="des-admin-section">
+      <h2>Class Compatibility Rules</h2>
+      <p class="field-help">These rules apply globally to all organisations. They define which cars are eligible for each class type.</p>
 
-    {{!-- Add new rule form --}}
-    <div class="admin-rule-form">
-      <h3>Add Global Rule</h3>
-      <div class="org-form-row">
-        <div class="org-form-field">
+      <div class="rule-form">
+        <h3>Add Global Rule</h3>
+        <div class="form-row">
           <label>Class Type</label>
           <select id="new-rule-class-type">
             <option value="">Select class type...</option>
@@ -127,83 +218,60 @@
             {{/each}}
           </select>
         </div>
-        <div class="org-form-field">
+        <div class="form-row">
           <label>Rule Type</label>
           <select id="new-rule-type">
             <option value="driveline">Driveline</option>
             <option value="chassis">Chassis Type</option>
           </select>
         </div>
-        <div class="org-form-field">
-          <label>Allowed Values <span class="field-help">(comma separated)</span></label>
-          <input type="text" id="new-rule-value" placeholder="e.g. 2WD,Rear Motor" />
+        <div class="form-row">
+          <label>Allowed Values (comma separated)</label>
+          <input type="text" id="new-rule-value" placeholder="e.g. 2WD,4WD" />
         </div>
-        <div class="org-form-field" style="justify-content: flex-end;">
-          <button class="btn btn-primary" {{on "click" this.addGlobalRule}}>
-            + Add Rule
-          </button>
-        </div>
+        <button class="btn btn-primary" {{on "click" this.addGlobalRule}}>+ Add Rule</button>
       </div>
-    </div>
 
-    {{!-- Existing rules grouped by class type --}}
-    {{#each this.groupedGlobalRules as |group|}}
-      <div class="rules-class-group">
-        <h4>{{group.class_type_name}}</h4>
-        {{#each group.rules as |rule|}}
-          <div class="rule-row">
-            <span class="rule-type-badge rule-type-badge--{{rule.rule_type}}">{{this.ruleTypeLabel rule.rule_type}}</span>
+      {{#each this.model.global_rules as |rule|}}
+        <div class="class-rules-group">
+          <div class="class-rule-row">
+            <span class="rule-class">{{rule.class_type_name}}</span>
+            <span class="rule-type">{{rule.rule_type}}</span>
             <span class="rule-value">{{rule.rule_value}}</span>
-            <button
-              class="btn btn-small btn-danger"
-              {{on "click" (fn this.deleteGlobalRule rule.id)}}
-            >
-              🗑
-            </button>
-          </div>
-        {{/each}}
-      </div>
-    {{else}}
-      <p class="field-help">No global rules set yet.</p>
-    {{/each}}
-  </div>
-
-  {{!-- Approved Models --}}
-  <div class="des-admin-section">
-    <h2>Approved Car Models ({{this.model.approved_models.length}})</h2>
-    <p class="field-help">Edit year, driveline or chassis type for any approved model.</p>
-    {{#each this.model.approved_models as |model|}}
-      <div class="admin-org-card admin-org-card--approved">
-        <div class="admin-org-info">
-          <h3>{{model.manufacturer}} {{model.name}}</h3>
-          <div class="admin-org-meta">
-            {{#if model.year_released}}<span>📅 {{model.year_released}}</span>{{/if}}
-            {{#if model.driveline}}<span>⚙️ {{model.driveline}}</span>{{/if}}
-            {{#if model.chassis_type}}<span>🚗 {{model.chassis_type}}</span>{{else}}<span class="rejection-reason">⚠️ No chassis type set!</span>{{/if}}
-          </div>
-        </div>
-        <div class="admin-org-actions">
-          <button class="btn btn-default btn-small" {{on "click" (fn this.editModel model)}}>
-            ✏️ Edit
-          </button>
-        </div>
-      </div>
-    {{/each}}
-  </div>
-
-  {{#if this.model.rejected_organisations.length}}
-    <div class="des-admin-section">
-      <h2>Rejected Organisations ({{this.model.rejected_organisations.length}})</h2>
-      {{#each this.model.rejected_organisations as |org|}}
-        <div class="admin-org-card admin-org-card--rejected">
-          <div class="admin-org-info">
-            <h3>{{org.name}}</h3>
-            {{#if org.rejection_reason}}
-              <p class="rejection-reason">Reason: {{org.rejection_reason}}</p>
-            {{/if}}
+            <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteGlobalRule rule.id)}}>🗑</button>
           </div>
         </div>
       {{/each}}
     </div>
   {{/if}}
+
+  {{!-- Edit Model Modal --}}
+  {{#if this.editingModel}}
+    <div class="car-selection-overlay">
+      <div class="car-selection-modal">
+        <h2>Edit {{this.editingModel.manufacturer}} {{this.editingModel.name}}</h2>
+        <div class="form-row">
+          <label>Year Released</label>
+          <input type="number" value={{this.editingModel.year_released}} {{on "input" this.updateEditYear}} />
+        </div>
+        <div class="form-row">
+          <label>Driveline</label>
+          <select {{on "change" this.updateEditDriveline}}>
+            {{#each this.drivelines as |d|}}
+              <option value={{d}} selected={{eq d this.editingModel.driveline}}>{{d}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Chassis Type</label>
+          <input type="text" value={{this.editingModel.chassis_type}} {{on "input" this.updateEditChassis}} />
+        </div>
+        <div class="car-selection-actions">
+          <button class="btn btn-primary" {{on "click" this.saveModel}}>Save</button>
+          <button class="btn btn-default" {{on "click" this.cancelEdit}}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+
 </div>
