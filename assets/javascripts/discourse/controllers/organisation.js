@@ -40,6 +40,38 @@ export default class OrganisationController extends Controller {
   showMemberships() { this.activeTab = "memberships"; }
 
   @action
+  showSettings() {
+    this.activeTab = "settings";
+    this.settingsForm = {
+      name: this.model.name,
+      email: this.model.email || "",
+      phone: this.model.phone || "",
+      website: this.model.website || "",
+      address: this.model.address || "",
+      google_maps_url: this.model.google_maps_url || "",
+      description: this.model.description || "",
+    };
+  }
+
+  @action
+  updateSettingsField(field, e) {
+    this.settingsForm = { ...this.settingsForm, [field]: e.target.value };
+  }
+
+  @action
+  async saveSettings() {
+    try {
+      await ajax("/des/organisations/" + this.model.id + ".json", {
+        type: "PUT",
+        data: { organisation: this.settingsForm },
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
   joinMembership(typeId, isFamily, maxMembers) {
     // Toggle off if already selected
     if (this.joiningMembershipTypeId === typeId) {
