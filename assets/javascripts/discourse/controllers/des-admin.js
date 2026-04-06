@@ -247,52 +247,40 @@ export default class DesAdminController extends Controller {
   }
 
   @action
-  async editModel(model) {
-    const year = window.prompt(
-      "Year of first manufacture for " + model.manufacturer + " " + model.name + ":",
-      model.year_released || ""
-    );
-    if (year === null) return;
+  @tracked editingModelId = null;
+  @tracked editingModel = null;
 
-    const drivelineOptions = ["2WD", "4WD", "FWD", "Rear Motor"];
-    const currentDrivelineIndex = drivelineOptions.indexOf(model.driveline) + 1;
-    const drivelineChoice = window.prompt(
-      "Driveline for " + model.manufacturer + " " + model.name + ":\n\n" +
-      "Enter number:\n1 = 2WD\n2 = 4WD\n3 = FWD\n4 = Rear Motor",
-      currentDrivelineIndex.toString() || "1"
-    );
-    if (drivelineChoice === null) return;
-    const driveline = drivelineOptions[parseInt(drivelineChoice) - 1];
-    if (!driveline) {
-      alert("Invalid driveline selection.");
-      return;
-    }
+  @action
+  editModel(model) {
+    this.editingModelId = model.id;
+    this.editingModel = { ...model };
+  }
 
-    const chassisOptions = [
-      "1/8 Buggy", "1/8 Truck",
-      "1/10 Buggy", "1/10 Stadium", "1/10 Short course",
-      "1/10 Touring Car", "1/10 Rally", "1/10 Pan car",
-      "1/12 Pan car", "1/28 Touring car", "1/28 Buggy", "1/28 Truck"
-    ];
-    const currentChassisIndex = model.chassis_type ? (chassisOptions.indexOf(model.chassis_type) + 1) : 3;
-    const chassisChoice = window.prompt(
-      "Chassis type for " + model.manufacturer + " " + model.name + ":\n\n" +
-      chassisOptions.map((c, i) => (i+1) + " = " + c).join("\n") +
-      "\n\nEnter number (1-12):",
-      currentChassisIndex.toString()
-    );
-    if (chassisChoice === null) return;
-    const chassisType = chassisOptions[parseInt(chassisChoice) - 1];
-    if (!chassisType) {
-      alert("Invalid chassis selection.");
-      return;
-    }
+  @action
+  updateEditField(field, e) {
+    this.editingModel = { ...this.editingModel, [field]: e.target.value };
+  }
 
+  @action
+  cancelEdit() {
+    this.editingModelId = null;
+    this.editingModel = null;
+  }
+
+  @action
+  async saveModel() {
     try {
-      await ajax("/des/admin/models/" + model.id + ".json", {
+      await ajax("/des/admin/models/" + this.editingModel.id + ".json", {
         type: "PUT",
-        data: { year_released: year, driveline: driveline, chassis_type: chassisType },
+        data: {
+          name: this.editingModel.name,
+          year_released: this.editingModel.year_released,
+          driveline: this.editingModel.driveline,
+          chassis_type: this.editingModel.chassis_type,
+        },
       });
+      this.editingModelId = null;
+      this.editingModel = null;
       this.router.refresh();
     } catch (error) {
       popupAjaxError(error);

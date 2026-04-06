@@ -229,24 +229,59 @@
           <h3 class="models-manufacturer-heading">🏭 {{mfr.manufacturer}}</h3>
           <div class="models-grid">
             {{#each mfr.models as |model|}}
-              <div class="model-card">
-                <div class="model-card-header">
-                  <strong>{{model.name}}</strong>
-                  {{#if model.chassis_type}}
-                    <span class="driveline-badge">{{model.chassis_type}}</span>
-                  {{else}}
-                    <span class="pending-tag">⚠️ No chassis</span>
-                  {{/if}}
-                </div>
-                <div class="model-card-meta">
-                  {{#if model.year_released}}<span>📅 {{model.year_released}}</span>{{/if}}
-                  {{#if model.driveline}}<span class="driveline-badge">{{model.driveline}}</span>{{/if}}
-                </div>
-                <div class="model-card-actions">
-                  <button class="btn btn-default btn-small" {{on "click" (fn this.editModel model)}}>
-                    ✏️ Edit
-                  </button>
-                </div>
+              <div class="model-card {{if (eq this.editingModelId model.id) 'model-card--editing'}}">
+                {{#if (eq this.editingModelId model.id)}}
+                  <div class="model-edit-form">
+                    <div class="org-form-field">
+                      <label>Name</label>
+                      <input type="text" value={{this.editingModel.name}} {{on "input" (fn this.updateEditField "name")}} />
+                    </div>
+                    <div class="org-form-field">
+                      <label>Year</label>
+                      <input type="number" value={{this.editingModel.year_released}} min="1970" max="2030" {{on "input" (fn this.updateEditField "year_released")}} />
+                    </div>
+                    <div class="org-form-field">
+                      <label>Driveline</label>
+                      <select {{on "change" (fn this.updateEditField "driveline")}}>
+                        <option value="">Select...</option>
+                        {{#each this.drivelines as |d|}}
+                          <option value={{d}} selected={{eq d this.editingModel.driveline}}>{{d}}</option>
+                        {{/each}}
+                      </select>
+                    </div>
+                    <div class="org-form-field">
+                      <label>Chassis Type</label>
+                      <select {{on "change" (fn this.updateEditField "chassis_type")}}>
+                        <option value="">Select...</option>
+                        {{#each this.chassisTypes as |c|}}
+                          <option value={{c}} selected={{eq c this.editingModel.chassis_type}}>{{c}}</option>
+                        {{/each}}
+                      </select>
+                    </div>
+                    <div class="model-card-actions">
+                      <button class="btn btn-primary btn-small" {{on "click" this.saveModel}}>💾 Save</button>
+                      <button class="btn btn-default btn-small" {{on "click" this.cancelEdit}}>✕ Cancel</button>
+                    </div>
+                  </div>
+                {{else}}
+                  <div class="model-card-header">
+                    <strong>{{model.name}}</strong>
+                    {{#if model.chassis_type}}
+                      <span class="driveline-badge">{{model.chassis_type}}</span>
+                    {{else}}
+                      <span class="pending-tag">⚠️ No chassis</span>
+                    {{/if}}
+                  </div>
+                  <div class="model-card-meta">
+                    {{#if model.year_released}}<span>📅 {{model.year_released}}</span>{{/if}}
+                    {{#if model.driveline}}<span class="driveline-badge">{{model.driveline}}</span>{{/if}}
+                  </div>
+                  <div class="model-card-actions">
+                    <button class="btn btn-default btn-small" {{on "click" (fn this.editModel model)}}>
+                      ✏️ Edit
+                    </button>
+                  </div>
+                {{/if}}
               </div>
             {{/each}}
           </div>
@@ -299,33 +334,6 @@
     </div>
   {{/if}}
 
-  {{!-- Edit Model Modal --}}
-  {{#if this.editingModel}}
-    <div class="car-selection-overlay">
-      <div class="car-selection-modal">
-        <h2>Edit {{this.editingModel.manufacturer}} {{this.editingModel.name}}</h2>
-        <div class="form-row">
-          <label>Year Released</label>
-          <input type="number" value={{this.editingModel.year_released}} {{on "input" this.updateEditYear}} />
-        </div>
-        <div class="form-row">
-          <label>Driveline</label>
-          <select {{on "change" this.updateEditDriveline}}>
-            {{#each this.drivelines as |d|}}
-              <option value={{d}} selected={{eq d this.editingModel.driveline}}>{{d}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Chassis Type</label>
-          <input type="text" value={{this.editingModel.chassis_type}} {{on "input" this.updateEditChassis}} />
-        </div>
-        <div class="car-selection-actions">
-          <button class="btn btn-primary" {{on "click" this.saveModel}}>Save</button>
-          <button class="btn btn-default" {{on "click" this.cancelEdit}}>Cancel</button>
-        </div>
-      </div>
-    </div>
-  {{/if}}
+
 
 </div>

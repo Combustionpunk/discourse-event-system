@@ -1584,3 +1584,30 @@
   padding: 16px;
   margin-bottom: 20px;
 }
+
+.model-card--editing {
+  border-color: var(--tertiary);
+  background: var(--tertiary-very-low);
+}
+
+.model-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .org-form-field {
+    label {
+      font-size: 0.8em;
+      color: var(--primary-medium);
+      display: block;
+      margin-bottom: 2px;
+    }
+    input, select {
+      width: 100%;
+      padding: 4px 8px;
+      border: 1px solid var(--primary-low);
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+  }
+}
