@@ -38,30 +38,28 @@ class DesPaypalService
   end
 
   def create_membership_order(membership, membership_type)
-    token = access_token
     org = membership.organisation
-    response = HTTParty.post(
-      "#{base_url}/v2/checkout/orders",
-      headers: {
-        'Content-Type' => 'application/json',
-        'Authorization' => "Bearer #{token}"
-      },
-      body: {
-        intent: 'CAPTURE',
-        purchase_units: [{
-          amount: {
-            currency_code: 'GBP',
-            value: membership_type.price.to_s
-          },
-          description: "#{org.name} - #{membership_type.name} Membership",
-          payee: { email_address: org.paypal_email }
-        }],
-        application_context: {
-          return_url: "#{Discourse.base_url}/memberships/#{membership.id}/confirm",
-          cancel_url: "#{Discourse.base_url}/memberships/#{membership.id}/cancel"
-        }
-      }.to_json
-    )
+    uri = URI("#{@base_url}/v2/checkout/orders")
+    req = Net::HTTP::Post.new(uri)
+    req['Authorization'] = "Bearer \#{access_token}"
+    req['Content-Type'] = 'application/json'
+    req.body = {
+      intent: 'CAPTURE',
+      purchase_units: [{
+        amount: {
+          currency_code: 'GBP',
+          value: membership_type.price.to_f.round(2).to_s
+        },
+        description: "#{org.name} - #{membership_type.name} Membership",
+        payee: { email_address: org.paypal_email }
+      }],
+      application_context: {
+        return_url: "#{Discourse.base_url}/memberships/#{membership.id}/confirm",
+        cancel_url: "#{Discourse.base_url}/memberships/#{membership.id}/cancel"
+      }
+    }.to_json
+    response = send_request(uri, req)
+    raise "PayPal order creation failed: #{response.body}" unless response.is_a?(Net::HTTPSuccess)
     JSON.parse(response.body)
   end
 

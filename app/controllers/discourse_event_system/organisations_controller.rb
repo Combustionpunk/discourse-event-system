@@ -534,7 +534,9 @@ module DiscourseEventSystem
             }
           }
         },
-        positions: DesPosition.all.map { |p| { id: p.id, name: p.name, is_admin: p.is_admin } }
+        positions: DesPosition.all.map { |p| { id: p.id, name: p.name, is_admin: p.is_admin } },
+        membership_types: org.des_organisation_membership_types.active.map { |t| serialize_membership_type(t) },
+        is_member: current_user.present? && DesOrganisationMembership.where(user_id: current_user.id, organisation_id: org.id).active.exists?
       }
     end
 
