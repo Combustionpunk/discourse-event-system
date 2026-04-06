@@ -89,14 +89,25 @@
               <input type="number" placeholder="e.g. 1987" min="1970" max="2030" value={{this.suggestModelYear}} {{on "input" (fn this.updateSuggestField "suggestModelYear")}} />
             </div>
           </div>
-          <div class="org-form-field">
-            <label>Driveline</label>
-            <select {{on "change" (fn this.updateSuggestField "suggestModelDriveline")}}>
-              <option value="">Select driveline...</option>
-              {{#each this.drivelines as |d|}}
-                <option value={{d}}>{{d}}</option>
-              {{/each}}
-            </select>
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Driveline</label>
+              <select {{on "change" (fn this.updateSuggestField "suggestModelDriveline")}}>
+                <option value="">Select driveline...</option>
+                {{#each this.drivelines as |d|}}
+                  <option value={{d}}>{{d}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="org-form-field">
+              <label>Chassis Type</label>
+              <select {{on "change" (fn this.updateSuggestField "suggestModelChassisType")}}>
+                <option value="">Select chassis type...</option>
+                {{#each this.chassisTypes as |c|}}
+                  <option value={{c}}>{{c}}</option>
+                {{/each}}
+              </select>
+            </div>
           </div>
           <button class="btn btn-primary" disabled={{this.isSaving}} {{on "click" this.submitModelAndAddCar}}>
             {{if this.isSaving "Saving..." "Submit & Add to Garage"}}

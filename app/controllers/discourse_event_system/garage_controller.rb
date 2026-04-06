@@ -79,6 +79,7 @@ module DiscourseEventSystem
         name: normalised_name,
         year_released: params[:year_released].present? ? params[:year_released].to_i : nil,
         driveline: params[:driveline].present? ? params[:driveline] : nil,
+        chassis_type: params[:chassis_type].present? ? params[:chassis_type] : nil,
         status: 'pending',
         created_by: current_user.id
       )

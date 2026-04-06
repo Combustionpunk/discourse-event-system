@@ -26,6 +26,8 @@ export default class MyGarageController extends Controller {
   };
 
   drivelines = ["2WD", "4WD", "FWD", "Rear Motor"];
+  chassisTypes = ["1/10 Buggy", "1/10 Stadium", "1/10 Short Course", "1/10 Truggy", "1/8 Buggy", "1/8 Truggy", "1/10 Rally", "Other"];
+  @tracked suggestModelChassisType = "";
 
   @action
   toggleAddForm() {
@@ -41,6 +43,7 @@ export default class MyGarageController extends Controller {
     this.suggestModelName = "";
     this.suggestModelYear = "";
     this.suggestModelDriveline = "";
+    this.suggestModelChassisType = "";
     this.newCar = {
       manufacturer_id: "", car_model_id: "", class_type_id: "",
       driveline: "", transponder_number: "", friendly_name: "",
@@ -113,6 +116,7 @@ export default class MyGarageController extends Controller {
           name: this.suggestModelName,
           year_released: this.suggestModelYear,
           driveline: this.suggestModelDriveline,
+          chassis_type: this.suggestModelChassisType,
         },
       });
 
