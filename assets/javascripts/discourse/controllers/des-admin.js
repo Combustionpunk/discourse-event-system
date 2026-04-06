@@ -246,7 +246,7 @@ export default class DesAdminController extends Controller {
     }
   }
 
-  @action
+
   @tracked editingModelId = null;
   @tracked editingModel = null;
 
