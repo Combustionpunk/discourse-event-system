@@ -1,3 +1,23 @@
+// All DES page containers share same base styles
+.events-container,
+.event-detail-container,
+.event-new-container,
+.event-manage-container,
+.my-bookings-container,
+.my-memberships-container,
+.my-organisations-container,
+.garage-container,
+.racing-profile-container,
+.organisations-container,
+.organisation-container,
+.organisation-new-container,
+.booking-confirm-container,
+.booking-cancel-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
 .events-container {
   max-width: 900px;
   margin: 0 auto;
@@ -84,7 +104,7 @@
 }
 
 .event-detail-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -156,7 +176,7 @@
 // Booking confirm page
 .booking-confirm-container,
 .booking-cancel-container {
-  max-width: 600px;
+  max-width: 900px;
   margin: 40px auto;
   padding: 20px;
   text-align: center;
@@ -207,7 +227,7 @@
 
 // My bookings page
 .my-bookings-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -280,7 +300,7 @@
 // Organisations
 .organisations-container,
 .organisation-new-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -383,7 +403,7 @@
 
 // Racing profile
 .racing-profile-container {
-  max-width: 700px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -646,7 +666,7 @@
 
 // Event creation form
 .event-new-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -1435,4 +1455,13 @@
   border-top: 1px solid var(--primary-low);
   display: flex;
   justify-content: flex-end;
+}
+
+// Standardised page containers
+.my-memberships-container,
+.my-organisations-container,
+.garage-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
 }
