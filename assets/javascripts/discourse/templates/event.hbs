@@ -89,10 +89,6 @@
       </button>
     {{/if}}
     {{#if this.currentUser}}
-      <LinkTo @route="event-manage" @model={{this.model.id}} class="btn btn-default">
-        ⚙️ Manage Event
-      </LinkTo>
-    {{else if this.currentUser}}
       <button
         class="btn btn-primary"
         disabled={{eq this.selectedClasses.length 0}}
@@ -100,6 +96,11 @@
       >
         {{if this.isBooking "Processing..." "Book Now"}}
       </button>
+      {{#if this.model.is_admin}}
+        <LinkTo @route="event-manage" @model={{this.model.id}} class="btn btn-default">
+          ⚙️ Manage Event
+        </LinkTo>
+      {{/if}}
     {{else}}
       <p>Please <a href="/login">log in</a> to book this event.</p>
     {{/if}}
