@@ -52,6 +52,30 @@ module DiscourseEventSystem
       )
     end
 
+    def membership_expiry_reminder(membership, days)
+      @user = membership.user
+      @organisation = membership.organisation
+      @membership_type = membership.membership_type
+      @days_left = days
+      @expires_at = membership.expires_at
+
+      mail(
+        to: @user.email,
+        subject: "Membership Expiring Soon - #{@organisation.name}"
+      )
+    end
+
+    def membership_expired(membership)
+      @user = membership.user
+      @organisation = membership.organisation
+      @membership_type = membership.membership_type
+
+      mail(
+        to: @user.email,
+        subject: "Membership Expired - #{@organisation.name}"
+      )
+    end
+
     def event_updated(booking, changes)
       @booking = booking
       @user = booking.user

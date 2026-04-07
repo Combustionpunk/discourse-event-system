@@ -28,6 +28,12 @@ class DesEventWaitlist < ActiveRecord::Base
 
   def notify!
     update!(status: 'notified')
+
+    begin
+      DiscourseEventSystem::EventMailer.waitlist_promoted(self).deliver_later
+    rescue => e
+      Rails.logger.error "Failed to send waitlist promoted email: #{e.message}"
+    end
   end
 
   def convert!

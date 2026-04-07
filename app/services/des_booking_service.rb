@@ -67,12 +67,27 @@ class DesBookingService
     capture_id = capture_response.dig('purchase_units', 0, 'payments', 'captures', 0, 'id')
     raise "Capture failed" unless capture_id
     payment.complete!(capture_id)
+    booking.update!(status: 'confirmed')
+
+    begin
+      DiscourseEventSystem::EventMailer.booking_confirmed(booking).deliver_later
+    rescue => e
+      Rails.logger.error "Failed to send booking confirmed email: #{e.message}"
+    end
+
     booking
   end
 
   def cancel_booking(booking)
     booking.cancel!
     booking.payments.pending.each(&:fail!)
+
+    begin
+      DiscourseEventSystem::EventMailer.booking_cancelled(booking).deliver_later
+    rescue => e
+      Rails.logger.error "Failed to send booking cancelled email: #{e.message}"
+    end
+
     booking
   end
 
@@ -138,6 +153,14 @@ class DesBookingService
     end
 
     booking.reload
+
+    begin
+      DiscourseEventSystem::EventMailer.booking_cancelled(booking, reason).deliver_later
+    rescue => e
+      Rails.logger.error "Failed to send booking cancelled email: #{e.message}"
+    end
+
+    booking
   end
 
   def cancel_event_and_refund(cancellation_reason, initiated_by)
