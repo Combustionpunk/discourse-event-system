@@ -49,8 +49,10 @@ class DesEventBooking < ActiveRecord::Base
 
     base_amount = pricing_rule.calculate_price(total_classes)
 
+    # For family bookings, check the parent's membership instead of the child's
+    membership_user_id = booked_by_user_id || user_id
     is_member = DesOrganisationMembership
-      .where(user_id: user.id, organisation_id: event.organisation_id)
+      .where(user_id: membership_user_id, organisation_id: event.organisation_id)
       .active.exists?
 
     is_junior = if user.date_of_birth.present?
