@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :export_csv]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :export_csv, :add_class, :update_class, :toggle_class_status]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
@@ -237,6 +237,41 @@ module DiscourseEventSystem
       render json: { event: serialize_event(@event), refund_summary: result.summary }
     end
 
+    def add_class
+      ensure_organisation_admin!(@event.organisation)
+      class_type = DesEventClassType.find(params[:class_type_id])
+      event_class = DesEventClass.create!(
+        event_id: @event.id,
+        class_type_id: class_type.id,
+        name: class_type.name,
+        capacity: params[:capacity].to_i,
+        status: 'active'
+      )
+      render json: serialize_class(event_class), status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def update_class
+      ensure_organisation_admin!(@event.organisation)
+      event_class = @event.des_event_classes.find(params[:class_id])
+      event_class.update!(capacity: params[:capacity].to_i)
+      event_class.update_status!
+      render json: serialize_class(event_class)
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def toggle_class_status
+      ensure_organisation_admin!(@event.organisation)
+      event_class = @event.des_event_classes.find(params[:class_id])
+      new_status = event_class.status == 'inactive' ? 'active' : 'inactive'
+      event_class.update!(status: new_status)
+      render json: serialize_class(event_class)
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     private
 
     def set_event
@@ -319,6 +354,16 @@ module DiscourseEventSystem
         .where(organisation_id: event.organisation_id, user_id: current_user.id)
         .where(des_positions: { is_admin: true })
         .exists?
+    end
+
+    def serialize_class(event_class)
+      {
+        id: event_class.id,
+        name: event_class.class_type&.name || event_class.name,
+        capacity: event_class.capacity,
+        status: event_class.status,
+        spaces_remaining: event_class.spaces_remaining
+      }
     end
 
     def serialize_events(events)

@@ -30,6 +30,9 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/des/events/:id/entrants" => "events#entrants"
   get "/des/events/:id/export-csv" => "events#export_csv"
   get "/des/events/:id/export-csv.csv" => "events#export_csv"
+  post "/des/events/:id/classes" => "events#add_class"
+  put "/des/events/:id/classes/:class_id" => "events#update_class"
+  post "/des/events/:id/classes/:class_id/toggle-status" => "events#toggle_class_status"
 
   get "/des/bookings" => "bookings#index"
   post "/des/waitlist" => "bookings#join_waitlist"

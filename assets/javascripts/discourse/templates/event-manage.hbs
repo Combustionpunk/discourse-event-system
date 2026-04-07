@@ -42,6 +42,12 @@
       🏎️ Entrants
     </button>
     <button
+      class="manage-tab {{if (eq this.activeTab 'classes') 'active'}}"
+      {{on "click" this.showClasses}}
+    >
+      🏁 Classes
+    </button>
+    <button
       class="manage-tab {{if (eq this.activeTab 'pricing') 'active'}}"
       {{on "click" this.showPricing}}
     >
@@ -136,6 +142,103 @@
     </div>
   {{/if}}
 
+  {{!-- Classes Tab --}}
+  {{#if (eq this.activeTab "classes")}}
+    <div class="manage-section">
+      <h2>Classes</h2>
+
+      <table class="entrants-table">
+        <thead>
+          <tr>
+            <th>Class Name</th>
+            <th>Capacity</th>
+            <th>Spaces Remaining</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each this.model.event.classes as |cls|}}
+            <tr>
+              <td>{{cls.name}}</td>
+              <td>
+                {{#if (eq this.editingClassId cls.id)}}
+                  <input
+                    type="number"
+                    min="1"
+                    value={{this.editingClassCapacity}}
+                    {{on "input" this.updateEditingCapacity}}
+                    class="inline-edit-input"
+                  />
+                {{else}}
+                  {{cls.capacity}}
+                {{/if}}
+              </td>
+              <td>{{cls.spaces_remaining}}</td>
+              <td>
+                <span class="org-status org-status--{{cls.status}}">{{cls.status}}</span>
+              </td>
+              <td>
+                {{#if (eq this.editingClassId cls.id)}}
+                  <button class="btn btn-small btn-primary" {{on "click" (fn this.saveClassCapacity cls)}}>
+                    Save
+                  </button>
+                  <button class="btn btn-small btn-default" {{on "click" this.cancelEditClass}}>
+                    Cancel
+                  </button>
+                {{else}}
+                  <button class="btn btn-small btn-default" {{on "click" (fn this.startEditClass cls)}}>
+                    Edit Capacity
+                  </button>
+                  {{#if (eq cls.status "inactive")}}
+                    <button class="btn btn-small btn-primary" {{on "click" (fn this.toggleClassStatus cls)}}>
+                      Reopen
+                    </button>
+                  {{else}}
+                    <button class="btn btn-small btn-danger" {{on "click" (fn this.toggleClassStatus cls)}}>
+                      Close
+                    </button>
+                  {{/if}}
+                {{/if}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+
+      <h3>Add Class</h3>
+      {{#if this.classTypes}}
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Class Type</label>
+            <select {{on "change" this.updateNewClassTypeId}}>
+              {{#each this.classTypes as |ct|}}
+                <option value={{ct.id}} selected={{eq ct.id this.newClassTypeId}}>{{ct.name}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="org-form-field">
+            <label>Capacity</label>
+            <input
+              type="number"
+              min="1"
+              placeholder="e.g. 20"
+              value={{this.newClassCapacity}}
+              {{on "input" this.updateNewClassCapacity}}
+            />
+          </div>
+          <div class="org-form-field" style="align-self: flex-end;">
+            <button class="btn btn-primary" {{on "click" this.addClass}}>
+              Add Class
+            </button>
+          </div>
+        </div>
+      {{else}}
+        <p class="field-help">Loading class types...</p>
+      {{/if}}
+    </div>
+  {{/if}}
+
   {{!-- Entrants Tab --}}
   {{#if (eq this.activeTab "entrants")}}
     <div class="manage-section">
@@ -164,7 +267,6 @@
               <tbody>
                 {{#each cls.entrants as |entrant index|}}
                   <tr>
-                    <td></td>
                     <td>{{entrant.username}}</td>
                     <td class="transponder-number">{{entrant.transponder}}</td>
                     <td>{{entrant.brca_number}}</td>

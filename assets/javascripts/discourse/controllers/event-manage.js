@@ -10,6 +10,11 @@ export default class EventManageController extends Controller {
   @tracked isSaving = false;
   @tracked activeTab = "details";
   @tracked editMode = false;
+  @tracked classTypes = null;
+  @tracked newClassTypeId = null;
+  @tracked newClassCapacity = "";
+  @tracked editingClassId = null;
+  @tracked editingClassCapacity = "";
 
   @action
   setTab(tab) {
@@ -79,6 +84,96 @@ export default class EventManageController extends Controller {
       await ajax("/des/events/" + this.model.event.id + "/pricing.json", {
         type: "PUT",
         data: { pricing: this.pricingForm },
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async showClasses() {
+    this.activeTab = "classes";
+    if (!this.classTypes) {
+      try {
+        const result = await ajax("/des/class-types.json");
+        this.classTypes = result.class_types;
+        if (this.classTypes.length) {
+          this.newClassTypeId = this.classTypes[0].id;
+        }
+      } catch (error) {
+        popupAjaxError(error);
+      }
+    }
+  }
+
+  @action
+  updateNewClassTypeId(e) {
+    this.newClassTypeId = parseInt(e.target.value, 10);
+  }
+
+  @action
+  updateNewClassCapacity(e) {
+    this.newClassCapacity = e.target.value;
+  }
+
+  @action
+  async addClass() {
+    if (!this.newClassTypeId || !this.newClassCapacity) return;
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/classes.json", {
+        type: "POST",
+        data: {
+          class_type_id: this.newClassTypeId,
+          capacity: this.newClassCapacity,
+        },
+      });
+      this.newClassCapacity = "";
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  startEditClass(cls) {
+    this.editingClassId = cls.id;
+    this.editingClassCapacity = cls.capacity;
+  }
+
+  @action
+  cancelEditClass() {
+    this.editingClassId = null;
+    this.editingClassCapacity = "";
+  }
+
+  @action
+  updateEditingCapacity(e) {
+    this.editingClassCapacity = e.target.value;
+  }
+
+  @action
+  async saveClassCapacity(cls) {
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/classes/" + cls.id + ".json", {
+        type: "PUT",
+        data: { capacity: this.editingClassCapacity },
+      });
+      this.editingClassId = null;
+      this.editingClassCapacity = "";
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async toggleClassStatus(cls) {
+    const action = cls.status === "inactive" ? "reopen" : "close";
+    if (!window.confirm(`Are you sure you want to ${action} ${cls.name}?`)) return;
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/classes/" + cls.id + "/toggle-status.json", {
+        type: "POST",
       });
       this.router.refresh();
     } catch (error) {
