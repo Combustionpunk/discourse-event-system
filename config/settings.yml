@@ -17,3 +17,15 @@ plugins:
   discourse_event_system_category_slug:
     default: "rc-meetings"
     client: true
+  discourse_event_system_email_from_name:
+    default: "RC Event System"
+    client: false
+  discourse_event_system_email_footer:
+    default: "This email was sent by the RC Event System"
+    client: false
+  discourse_event_system_email_logo_url:
+    default: ""
+    client: false
+  discourse_event_system_email_club_name:
+    default: "Our Club"
+    client: false

@@ -1,13 +1,25 @@
-<h2>Your membership is expiring soon</h2>
+<!DOCTYPE html>
+<html>
+<body>
+  <% if @logo_url.present? %>
+    <p><img src="<%= @logo_url %>" alt="<%= @club_name %>" style="max-height: 60px;"></p>
+  <% end %>
 
-<p>Hi <%= @user.username %>,</p>
+  <h2>Your membership is expiring soon</h2>
 
-<p>Your <strong><%= @membership_type.name %></strong> membership with <strong><%= @organisation.name %></strong> 
-expires in <strong><%= @days_left %> day<%= 's' if @days_left != 1 %></strong> 
-on <strong><%= @expires_at.strftime('%d %B %Y') %></strong>.</p>
+  <p>Hi <%= @user.username %>,</p>
 
-<p>To continue enjoying the benefits of membership, please renew as soon as possible.</p>
+  <p>Your <strong><%= @membership_type.name %></strong> membership with <strong><%= @organisation.name %></strong>
+  expires in <strong><%= @days_left %> day<%= 's' if @days_left != 1 %></strong>
+  on <strong><%= @expires_at.strftime('%d %B %Y') %></strong>.</p>
 
-<p><a href="<%= Discourse.base_url %>/organisations/<%= @organisation.id %>">Renew Membership</a></p>
+  <p>To continue enjoying the benefits of membership, please renew as soon as possible.</p>
 
-<p>Thanks,<br>The <%= @organisation.name %> Team</p>
+  <p><a href="<%= Discourse.base_url %>/organisations/<%= @organisation.id %>">Renew Membership</a></p>
+
+  <p>Thanks,<br>The <%= @organisation.name %> Team</p>
+
+  <hr>
+  <p style="color: #999; font-size: 12px;"><%= @footer %></p>
+</body>
+</html>

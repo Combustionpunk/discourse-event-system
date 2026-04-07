@@ -1,11 +1,23 @@
-<h2>Your membership has expired</h2>
+<!DOCTYPE html>
+<html>
+<body>
+  <% if @logo_url.present? %>
+    <p><img src="<%= @logo_url %>" alt="<%= @club_name %>" style="max-height: 60px;"></p>
+  <% end %>
 
-<p>Hi <%= @user.username %>,</p>
+  <h2>Your membership has expired</h2>
 
-<p>Your <strong><%= @membership_type.name %></strong> membership with <strong><%= @organisation.name %></strong> has now expired.</p>
+  <p>Hi <%= @user.username %>,</p>
 
-<p>We hope you enjoyed being a member! You can rejoin at any time.</p>
+  <p>Your <strong><%= @membership_type.name %></strong> membership with <strong><%= @organisation.name %></strong> has now expired.</p>
 
-<p><a href="<%= Discourse.base_url %>/organisations/<%= @organisation.id %>">Rejoin <%= @organisation.name %></a></p>
+  <p>We hope you enjoyed being a member! You can rejoin at any time.</p>
 
-<p>Thanks,<br>The <%= @organisation.name %> Team</p>
+  <p><a href="<%= Discourse.base_url %>/organisations/<%= @organisation.id %>">Rejoin <%= @organisation.name %></a></p>
+
+  <p>Thanks,<br>The <%= @organisation.name %> Team</p>
+
+  <hr>
+  <p style="color: #999; font-size: 12px;"><%= @footer %></p>
+</body>
+</html>

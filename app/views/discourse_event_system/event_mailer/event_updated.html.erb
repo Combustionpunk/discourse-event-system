@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 <body>
+  <% if @logo_url.present? %>
+    <p><img src="<%= @logo_url %>" alt="<%= @club_name %>" style="max-height: 60px;"></p>
+  <% end %>
+
   <h2>Event Updated</h2>
   <p>Hi <%= @user.username %>,</p>
   <p>Details for <strong><%= @event.title %></strong> have been updated.</p>
@@ -10,7 +14,7 @@
   <% @changes.each do |field, values| %>
     <li>
       <strong><%= field.to_s.humanize %>:</strong>
-      <%= values[:from] %> → <%= values[:to] %>
+      <%= values[:from] %> &rarr; <%= values[:to] %>
     </li>
   <% end %>
   </ul>
@@ -22,5 +26,8 @@
   <% end %>
 
   <p>If you have any questions please contact the event organiser.</p>
+
+  <hr>
+  <p style="color: #999; font-size: 12px;"><%= @footer %></p>
 </body>
 </html>

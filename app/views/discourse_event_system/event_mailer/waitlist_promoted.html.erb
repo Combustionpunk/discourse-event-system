@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <h2>Great news - a space is available! 🎉</h2>
+  <% if @logo_url.present? %>
+    <p><img src="<%= @logo_url %>" alt="<%= @club_name %>" style="max-height: 60px;"></p>
+  <% end %>
+
+  <h2>Great news - a space is available!</h2>
   <p>Hi <%= @user.username %>,</p>
   <p>A space has become available in <strong><%= @event_class.name %></strong> at <strong><%= @event.title %></strong>!</p>
 
@@ -16,5 +20,8 @@
   <p><strong>You have 24 hours to complete your booking before the space is offered to the next person on the waitlist.</strong></p>
 
   <p>Please log in and complete your booking as soon as possible!</p>
+
+  <hr>
+  <p style="color: #999; font-size: 12px;"><%= @footer %></p>
 </body>
 </html>

@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <h2>Booking Confirmed! 🎉</h2>
+  <% if @logo_url.present? %>
+    <p><img src="<%= @logo_url %>" alt="<%= @club_name %>" style="max-height: 60px;"></p>
+  <% end %>
+
+  <h2>Booking Confirmed!</h2>
   <p>Hi <%= @user.username %>,</p>
   <p>Your booking for <strong><%= @event.title %></strong> has been confirmed.</p>
 
@@ -20,17 +24,20 @@
       <% if bc.transponder_number.present? %>
         (Transponder: <%= bc.transponder_number %>)
       <% end %>
-      - £<%= bc.amount_charged %>
+      - &pound;<%= bc.amount_charged %>
     </li>
   <% end %>
   </ul>
 
-  <p><strong>Total Paid: £<%= @booking.amount_paid %></strong></p>
+  <p><strong>Total Paid: &pound;<%= @booking.amount_paid %></strong></p>
 
   <% if @booking.brca_membership_number.present? %>
     <p><strong>BRCA Number:</strong> <%= @booking.brca_membership_number %></p>
   <% end %>
 
   <p>We look forward to seeing you at the event!</p>
+
+  <hr>
+  <p style="color: #999; font-size: 12px;"><%= @footer %></p>
 </body>
 </html>

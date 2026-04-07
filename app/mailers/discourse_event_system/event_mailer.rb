@@ -2,7 +2,9 @@
 
 module DiscourseEventSystem
   class EventMailer < ActionMailer::Base
-    default from: SiteSetting.notification_email
+    default from: -> { email_address_with_name(SiteSetting.notification_email, SiteSetting.discourse_event_system_email_from_name) }
+
+    before_action :set_common_variables
 
     def booking_confirmed(booking)
       @booking = booking
@@ -86,6 +88,13 @@ module DiscourseEventSystem
         to: @user.email,
         subject: "Event Updated - #{@event.title}"
       )
+    end
+    private
+
+    def set_common_variables
+      @footer = SiteSetting.discourse_event_system_email_footer
+      @logo_url = SiteSetting.discourse_event_system_email_logo_url
+      @club_name = SiteSetting.discourse_event_system_email_club_name
     end
   end
 end

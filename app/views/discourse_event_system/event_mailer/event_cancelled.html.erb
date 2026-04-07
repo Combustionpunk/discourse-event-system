@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 <body>
+  <% if @logo_url.present? %>
+    <p><img src="<%= @logo_url %>" alt="<%= @club_name %>" style="max-height: 60px;"></p>
+  <% end %>
+
   <h2>Event Cancelled</h2>
   <p>Hi <%= @user.username %>,</p>
   <p>We're sorry to inform you that <strong><%= @event.title %></strong> has been cancelled.</p>
@@ -12,9 +16,12 @@
   <p><strong>Original Event Date:</strong> <%= @event.start_date.strftime("%A, %d %B %Y at %H:%M") %></p>
 
   <% if @booking.amount_paid.to_f > 0 %>
-    <p>A full refund of <strong>£<%= @booking.amount_paid %></strong> will be processed to your original payment method within 3-5 business days.</p>
+    <p>A full refund of <strong>&pound;<%= @booking.amount_paid %></strong> will be processed to your original payment method within 3-5 business days.</p>
   <% end %>
 
   <p>We apologise for any inconvenience caused.</p>
+
+  <hr>
+  <p style="color: #999; font-size: 12px;"><%= @footer %></p>
 </body>
 </html>
