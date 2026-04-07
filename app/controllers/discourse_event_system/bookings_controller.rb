@@ -49,11 +49,40 @@ module DiscourseEventSystem
     def create
       event = DesEvent.find(params[:event_id])
       service = DesBookingService.new(current_user, event)
-      result = service.create_booking(params[:class_ids], params[:car_selections])
+
+      if params[:family_bookings].present?
+        family_bookings = params[:family_bookings].values.map do |fb|
+          { user_id: fb[:user_id].to_i, class_ids: fb[:class_ids] }
+        end
+
+        # Validate that all family members belong to the user's family membership
+        membership = DesOrganisationMembership
+          .where(user_id: current_user.id, organisation_id: event.organisation_id)
+          .active
+          .joins(:family_members)
+          .first
+        if membership
+          allowed_user_ids = membership.family_members.pluck(:user_id)
+          family_bookings.each do |fb|
+            unless allowed_user_ids.include?(fb[:user_id])
+              raise Discourse::InvalidAccess
+            end
+          end
+        else
+          raise Discourse::InvalidAccess
+        end
+
+        result = service.create_family_booking(params[:class_ids], family_bookings, params[:car_selections])
+      else
+        result = service.create_booking(params[:class_ids], params[:car_selections])
+      end
+
       render json: {
         booking: serialize_booking(result[:booking]),
         approval_url: result[:approval_url]
       }, status: :created
+    rescue Discourse::InvalidAccess
+      render json: { error: "You do not have permission to book for these users" }, status: :forbidden
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end

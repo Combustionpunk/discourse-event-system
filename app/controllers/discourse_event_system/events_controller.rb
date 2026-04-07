@@ -344,8 +344,26 @@ module DiscourseEventSystem
             false
           end
         end,
-        formatted_date: event.start_date&.strftime('%A, %d %B %Y at %H:%M')
+        formatted_date: event.start_date&.strftime('%A, %d %B %Y at %H:%M'),
+        family_members: current_user.present? ? family_members_for(event) : []
       }
+    end
+
+    def family_members_for(event)
+      membership = DesOrganisationMembership
+        .where(user_id: current_user.id, organisation_id: event.organisation_id)
+        .active
+        .includes(family_members: :user)
+        .first
+      return [] unless membership
+      return [] if membership.family_members.empty?
+
+      membership.family_members.map do |fm|
+        {
+          user_id: fm.user_id,
+          username: fm.user.username
+        }
+      end
     end
 
     def is_event_admin?(event)

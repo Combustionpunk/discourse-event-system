@@ -1,6 +1,7 @@
 class DesEventBooking < ActiveRecord::Base
   belongs_to :event, class_name: 'DesEvent', foreign_key: 'event_id'
   belongs_to :user, class_name: 'User', foreign_key: 'user_id'
+  belongs_to :booked_by, class_name: 'User', foreign_key: 'booked_by_user_id', optional: true
   has_many :booking_classes, class_name: 'DesEventBookingClass', foreign_key: 'booking_id'
   has_many :payments, class_name: 'DesEventBookingPayment', foreign_key: 'booking_id'
   has_many :refunds, class_name: 'DesEventBookingRefund', foreign_key: 'booking_id'

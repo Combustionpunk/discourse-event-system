@@ -85,6 +85,44 @@ class DesPaypalService
     JSON.parse(response.body)
   end
 
+  def create_family_order(bookings, event)
+    primary_booking = bookings.first
+    combined_total = bookings.sum { |b| b.amount_paid.to_f }
+    items = bookings.flat_map { |b| family_booking_items(b) }
+
+    uri = URI("#{@base_url}/v2/checkout/orders")
+    req = Net::HTTP::Post.new(uri)
+    req['Authorization'] = "Bearer #{access_token}"
+    req['Content-Type'] = 'application/json'
+    req.body = {
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          reference_id: "family_booking_#{primary_booking.id}",
+          description: "#{event.title} - Family Booking",
+          amount: {
+            currency_code: 'GBP',
+            value: format('%.2f', combined_total),
+            breakdown: {
+              item_total: {
+                currency_code: 'GBP',
+                value: format('%.2f', combined_total)
+              }
+            }
+          },
+          items: items
+        }
+      ],
+      application_context: {
+        return_url: "#{Discourse.base_url}/events/booking/#{primary_booking.id}/confirm",
+        cancel_url: "#{Discourse.base_url}/events/booking/#{primary_booking.id}/cancel"
+      }
+    }.to_json
+    response = send_request(uri, req)
+    raise "PayPal order creation failed: #{response.body}" unless response.is_a?(Net::HTTPSuccess)
+    JSON.parse(response.body)
+  end
+
   def create_payout(organisation, amount)
     uri = URI("#{@base_url}/v1/payments/payouts")
     req = Net::HTTP::Post.new(uri)
@@ -135,6 +173,19 @@ class DesPaypalService
     booking.booking_classes.map do |bc|
       {
         name: bc.event_class.name,
+        quantity: '1',
+        unit_amount: {
+          currency_code: 'GBP',
+          value: format('%.2f', bc.amount_charged)
+        }
+      }
+    end
+  end
+
+  def family_booking_items(booking)
+    booking.booking_classes.map do |bc|
+      {
+        name: "#{booking.user.username} - #{bc.event_class.name}",
         quantity: '1',
         unit_amount: {
           currency_code: 'GBP',

@@ -86,6 +86,55 @@
     </div>
   {{/if}}
 
+  {{!-- Family Booking Section --}}
+  {{#if this.model.family_members.length}}
+    <div class="event-family-booking">
+      <button
+        class="btn btn-default family-toggle"
+        {{on "click" this.toggleFamilySection}}
+      >
+        {{if this.familyExpanded "▼" "▶"}} Book Family Members
+      </button>
+
+      {{#if this.familyExpanded}}
+        <div class="family-members-list">
+          {{#each this.model.family_members as |member|}}
+            <div class="family-member-card">
+              <h3>{{member.username}}</h3>
+              <div class="family-class-grid">
+                {{#each this.model.classes as |cls|}}
+                  {{#unless (eq cls.status "sold_out")}}
+                    <div class="family-class-option">
+                      <input
+                        type="checkbox"
+                        id="family-{{member.user_id}}-class-{{cls.id}}"
+                        {{on "change" (fn this.toggleFamilyClass member.user_id cls.id)}}
+                      />
+                      <label for="family-{{member.user_id}}-class-{{cls.id}}">
+                        {{cls.name}}
+                        <span class="field-help">({{cls.spaces_remaining}} spaces)</span>
+                      </label>
+                    </div>
+                  {{/unless}}
+                {{/each}}
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{!-- Updated booking summary --}}
+  {{#if this.model.pricing}}
+    {{#if this.hasFamilySelections}}
+      <div class="event-booking-summary family-summary">
+        <strong>Combined Total (you + family): {{this.totalClassCount}} classes</strong>
+        <strong>Total: &pound;{{this.calculatedTotal}}</strong>
+      </div>
+    {{/if}}
+  {{/if}}
+
   <div class="event-detail-actions">
     {{#if (eq this.model.status "draft")}}
       <button class="btn btn-warning" {{on "click" this.publishEvent}}>

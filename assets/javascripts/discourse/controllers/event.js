@@ -13,13 +13,12 @@ export default class EventController extends Controller {
   @tracked showCarSelection = false;
   @tracked eligibleCars = [];
   @tracked carSelections = {};
+  @tracked familyExpanded = false;
+  @tracked familySelections = {};
 
-  get calculatedTotal() {
+  _calculateForClasses(count, isMember, isJunior) {
     const pricing = this.model.pricing;
-    if (!pricing || this.selectedClasses.length === 0) return 0;
-
-    const isMember = this.model.user_is_member || false;
-    const isJunior = this.model.user_is_junior || false;
+    if (!pricing || count === 0) return 0;
 
     let firstDiscount = 0;
     let subsequentDiscount = 0;
@@ -33,7 +32,6 @@ export default class EventController extends Controller {
       subsequentDiscount += parseFloat(pricing.junior_subsequent_discount || 0);
     }
 
-    const count = this.selectedClasses.length;
     if (pricing.rule_type === "tiered") {
       const first = Math.max(parseFloat(pricing.first_class_price) - firstDiscount, 0);
       const subsequent = Math.max(parseFloat(pricing.subsequent_class_price) - subsequentDiscount, 0);
@@ -44,6 +42,40 @@ export default class EventController extends Controller {
       const subsequent = Math.max(base - subsequentDiscount, 0);
       return count === 1 ? first : first + subsequent * (count - 1);
     }
+  }
+
+  get calculatedTotal() {
+    const pricing = this.model.pricing;
+    if (!pricing) return 0;
+
+    const isMember = this.model.user_is_member || false;
+    const isJunior = this.model.user_is_junior || false;
+
+    // Primary user total
+    let total = this._calculateForClasses(this.selectedClasses.length, isMember, isJunior);
+
+    // Family member totals (family members share the membership so they are also members)
+    const familySelections = this.familySelections;
+    Object.keys(familySelections).forEach(userId => {
+      const classIds = familySelections[userId] || [];
+      if (classIds.length > 0) {
+        total += this._calculateForClasses(classIds.length, isMember, false);
+      }
+    });
+
+    return total;
+  }
+
+  get totalClassCount() {
+    let count = this.selectedClasses.length;
+    Object.values(this.familySelections).forEach(classIds => {
+      count += (classIds || []).length;
+    });
+    return count;
+  }
+
+  get hasFamilySelections() {
+    return Object.values(this.familySelections).some(ids => ids && ids.length > 0);
   }
 
   get maxClassesReached() {
@@ -144,6 +176,25 @@ export default class EventController extends Controller {
   }
 
   @action
+  toggleFamilySection() {
+    this.familyExpanded = !this.familyExpanded;
+  }
+
+  @action
+  toggleFamilyClass(userId, classId) {
+    const current = { ...this.familySelections };
+    const userClasses = current[userId] || [];
+
+    if (userClasses.includes(classId)) {
+      current[userId] = userClasses.filter((id) => id !== classId);
+    } else {
+      current[userId] = [...userClasses, classId];
+    }
+
+    this.familySelections = current;
+  }
+
+  @action
   cancelCarSelection() {
     this.showCarSelection = false;
     this.eligibleCars = [];
@@ -154,13 +205,32 @@ export default class EventController extends Controller {
   async confirmBooking() {
     this.isBooking = true;
     try {
+      const data = {
+        event_id: this.model.id,
+        class_ids: this.selectedClasses,
+        car_selections: this.carSelections,
+      };
+
+      // Include family bookings if any selected
+      if (this.hasFamilySelections) {
+        const familyBookings = {};
+        let index = 0;
+        Object.keys(this.familySelections).forEach(userId => {
+          const classIds = this.familySelections[userId];
+          if (classIds && classIds.length > 0) {
+            familyBookings[index] = {
+              user_id: userId,
+              class_ids: classIds,
+            };
+            index++;
+          }
+        });
+        data.family_bookings = familyBookings;
+      }
+
       const response = await ajax("/des/bookings.json", {
         type: "POST",
-        data: {
-          event_id: this.model.id,
-          class_ids: this.selectedClasses,
-          car_selections: this.carSelections,
-        },
+        data,
       });
       window.location.href = response.approval_url;
     } catch (error) {
