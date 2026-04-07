@@ -301,8 +301,30 @@
                 <input type="number" min="0" step="0.01" placeholder="0" value={{this.newMembershipAmountPaid}} {{on "input" (fn this.updateNewMembershipField "amount_paid")}} />
               </div>
             </div>
+            {{#if this.selectedTypeIsFamily}}
+              <div class="org-form-field">
+                <label>Family Members (up to {{this.selectedTypeMaxFamilyMembers}})</label>
+                {{#each this.newMembershipFamilyUsernames as |username index|}}
+                  <div class="family-username-row" style="display:flex; gap:8px; margin-bottom:4px;">
+                    <input
+                      type="text"
+                      placeholder="Username"
+                      value={{username}}
+                      {{on "input" (fn this.updateFamilyUsername index)}}
+                    />
+                    <button class="btn btn-small btn-danger" {{on "click" (fn this.removeFamilyUsernameField index)}}>
+                      Remove
+                    </button>
+                  </div>
+                {{/each}}
+                <button class="btn btn-small btn-default" {{on "click" this.addFamilyUsernameField}}>
+                  + Add Family Member
+                </button>
+              </div>
+            {{/if}}
+
             <button class="btn btn-primary" {{on "click" this.saveAdminMembership}}>
-              ✅ Add Membership
+              Add Membership
             </button>
           </div>
         {{/if}}
@@ -315,18 +337,58 @@
                 <span>{{m.membership_type}}</span>
                 <span class="org-status org-status--{{m.status}}">{{m.status}}</span>
                 {{#if m.expires_at}}<span>Expires: {{m.expires_at}}</span>{{/if}}
+                {{#if m.is_family}}
+                  <span>Family: {{m.family_members.length}}/{{m.max_members}} members</span>
+                {{/if}}
               </div>
             </div>
             <div class="admin-org-actions">
               {{#if (eq this.editingMembershipId m.id)}}
                 <input type="date" value={{this.editingMembershipExpiry}} {{on "change" this.updateEditingExpiry}} />
-                <button class="btn btn-primary btn-small" {{on "click" this.saveEditMembership}}>💾</button>
-                <button class="btn btn-default btn-small" {{on "click" this.cancelEditMembership}}>✕</button>
+                <button class="btn btn-primary btn-small" {{on "click" this.saveEditMembership}}>Save</button>
+                <button class="btn btn-default btn-small" {{on "click" this.cancelEditMembership}}>Cancel</button>
               {{else}}
-                <button class="btn btn-small btn-default" {{on "click" (fn this.editMembership m)}}>✏️ Edit</button>
+                <button class="btn btn-small btn-default" {{on "click" (fn this.editMembership m)}}>Edit</button>
+                {{#if m.is_family}}
+                  <button class="btn btn-small btn-default" {{on "click" (fn this.toggleManageFamily m.id)}}>
+                    Manage Family
+                  </button>
+                {{/if}}
               {{/if}}
             </div>
           </div>
+
+          {{#if m.is_family}}
+            {{#if (eq this.managingFamilyMembershipId m.id)}}
+              <div class="family-manage-panel" style="margin-left:16px; padding:8px; border-left:3px solid var(--primary-low,#ddd); margin-bottom:8px;">
+                <h4>Family Members</h4>
+                {{#if m.family_members.length}}
+                  {{#each m.family_members as |fm|}}
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                      <span>{{fm.username}}</span>
+                      <button class="btn btn-small btn-danger" {{on "click" (fn this.removeAdminFamilyMember m.id fm.user_id)}}>
+                        Remove
+                      </button>
+                    </div>
+                  {{/each}}
+                {{else}}
+                  <p class="field-help">No family members added yet.</p>
+                {{/if}}
+
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                  <input
+                    type="text"
+                    placeholder="Username"
+                    value={{this.newFamilyMemberUsername}}
+                    {{on "input" this.updateNewFamilyMemberUsername}}
+                  />
+                  <button class="btn btn-small btn-primary" {{on "click" (fn this.addAdminFamilyMember m.id)}}>
+                    Add
+                  </button>
+                </div>
+              </div>
+            {{/if}}
+          {{/if}}
         {{/each}}
       </div>
     {{/if}}

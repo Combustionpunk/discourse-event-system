@@ -39,31 +39,82 @@ export default class OrganisationController extends Controller {
     this.showAddMembership = !this.showAddMembership;
   }
 
+  get selectedMembershipType() {
+    if (!this.newMembershipTypeId) return null;
+    return (this.model.membership_types || []).find(
+      t => String(t.id) === String(this.newMembershipTypeId)
+    );
+  }
+
+  get selectedTypeIsFamily() {
+    return this.selectedMembershipType?.is_family || false;
+  }
+
+  get selectedTypeMaxFamilyMembers() {
+    const t = this.selectedMembershipType;
+    return t ? (t.max_members || 1) - 1 : 0;
+  }
+
   @action
   updateNewMembershipField(field, e) {
     if (field === "username") this.newMembershipUsername = e.target.value;
-    else if (field === "membership_type_id") this.newMembershipTypeId = e.target.value;
+    else if (field === "membership_type_id") {
+      this.newMembershipTypeId = e.target.value;
+      this.newMembershipFamilyUsernames = [];
+    }
     else if (field === "expires_at") this.newMembershipExpiresAt = e.target.value;
     else if (field === "amount_paid") this.newMembershipAmountPaid = e.target.value;
   }
 
   @action
+  addFamilyUsernameField() {
+    if (this.newMembershipFamilyUsernames.length < this.selectedTypeMaxFamilyMembers) {
+      this.newMembershipFamilyUsernames = [...this.newMembershipFamilyUsernames, ""];
+    }
+  }
+
+  @action
+  updateFamilyUsername(index, e) {
+    const updated = [...this.newMembershipFamilyUsernames];
+    updated[index] = e.target.value;
+    this.newMembershipFamilyUsernames = updated;
+  }
+
+  @action
+  removeFamilyUsernameField(index) {
+    const updated = [...this.newMembershipFamilyUsernames];
+    updated.splice(index, 1);
+    this.newMembershipFamilyUsernames = updated;
+  }
+
+  @action
   async saveAdminMembership() {
     try {
+      const data = {
+        username: this.newMembershipUsername,
+        membership_type_id: this.newMembershipTypeId,
+        expires_at: this.newMembershipExpiresAt,
+        amount_paid: this.newMembershipAmountPaid,
+      };
+
+      // Include family usernames if any
+      const familyNames = this.newMembershipFamilyUsernames.filter(u => u.trim());
+      if (familyNames.length > 0) {
+        const familyUsernames = {};
+        familyNames.forEach((u, i) => { familyUsernames[i] = u; });
+        data.family_usernames = familyUsernames;
+      }
+
       await ajax("/des/organisations/" + this.model.id + "/admin-memberships.json", {
         type: "POST",
-        data: {
-          username: this.newMembershipUsername,
-          membership_type_id: this.newMembershipTypeId,
-          expires_at: this.newMembershipExpiresAt,
-          amount_paid: this.newMembershipAmountPaid,
-        },
+        data,
       });
       this.showAddMembership = false;
       this.newMembershipUsername = "";
       this.newMembershipTypeId = "";
       this.newMembershipExpiresAt = "";
       this.newMembershipAmountPaid = "";
+      this.newMembershipFamilyUsernames = [];
       this.loadAdminMemberships();
     } catch (error) {
       popupAjaxError(error);
@@ -445,6 +496,53 @@ export default class OrganisationController extends Controller {
   @tracked adminMemberships = [];
   @tracked editingMembershipId = null;
   @tracked editingMembershipExpiry = "";
+  @tracked newMembershipFamilyUsernames = [];
+  @tracked managingFamilyMembershipId = null;
+  @tracked newFamilyMemberUsername = "";
+
+  @action
+  toggleManageFamily(membershipId) {
+    if (this.managingFamilyMembershipId === membershipId) {
+      this.managingFamilyMembershipId = null;
+      this.newFamilyMemberUsername = "";
+    } else {
+      this.managingFamilyMembershipId = membershipId;
+      this.newFamilyMemberUsername = "";
+    }
+  }
+
+  @action
+  updateNewFamilyMemberUsername(e) {
+    this.newFamilyMemberUsername = e.target.value;
+  }
+
+  @action
+  async addAdminFamilyMember(membershipId) {
+    if (!this.newFamilyMemberUsername.trim()) return;
+    try {
+      await ajax("/des/organisations/" + this.model.id + "/admin-memberships/" + membershipId + "/family.json", {
+        type: "POST",
+        data: { username: this.newFamilyMemberUsername },
+      });
+      this.newFamilyMemberUsername = "";
+      this.loadAdminMemberships();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async removeAdminFamilyMember(membershipId, userId) {
+    if (!window.confirm("Remove this family member?")) return;
+    try {
+      await ajax("/des/organisations/" + this.model.id + "/admin-memberships/" + membershipId + "/family/" + userId + ".json", {
+        type: "DELETE",
+      });
+      this.loadAdminMemberships();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
 
   @action
   toggleAddMember() {

@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class OrganisationsController < ApplicationController
     before_action :ensure_logged_in
-    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership, :admin_memberships, :admin_add_membership, :admin_update_membership]
+    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership, :admin_memberships, :admin_add_membership, :admin_update_membership, :admin_add_family_member, :admin_remove_family_member]
 
     def index
       organisations = current_user.admin? ? DesOrganisation.all.order(:name) : DesOrganisation.approved.order(:name)
@@ -252,16 +252,22 @@ module DiscourseEventSystem
     def admin_memberships
       ensure_organisation_admin!
       memberships = DesOrganisationMembership.where(organisation_id: @organisation.id)
-        .includes(:user, :membership_type)
+        .includes(:user, :membership_type, family_members: :user)
         .order(created_at: :desc)
       render json: { memberships: memberships.map { |m|
         {
           id: m.id,
           username: m.user&.username,
           membership_type: m.membership_type&.name,
+          membership_type_id: m.membership_type_id,
+          is_family: m.membership_type&.is_family || false,
+          max_members: m.membership_type&.max_members || 1,
           status: m.status,
           starts_at: m.starts_at,
-          expires_at: m.expires_at
+          expires_at: m.expires_at,
+          family_members: m.family_members.map { |fm|
+            { user_id: fm.user_id, username: fm.user&.username }
+          }
         }
       }}
     end
@@ -281,6 +287,17 @@ module DiscourseEventSystem
         expires_at: expires_at,
         amount_paid: params[:amount_paid].presence || 0
       )
+
+      # Add family members if this is a family membership
+      if type.is_family && params[:family_usernames].present?
+        usernames = params[:family_usernames].values.map(&:strip).reject(&:blank?)
+        usernames.each do |username|
+          family_user = User.find_by(username: username)
+          raise Discourse::InvalidParameters, "Family member '#{username}' not found" unless family_user
+          membership.add_family_member!(family_user)
+        end
+      end
+
       render json: { success: true, membership_id: membership.id }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
@@ -294,6 +311,29 @@ module DiscourseEventSystem
         status: params[:status] || membership.status,
         expires_at: params[:expires_at].present? ? Date.parse(params[:expires_at]) : membership.expires_at
       )
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def admin_add_family_member
+      ensure_organisation_admin!
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], organisation_id: @organisation.id)
+      raise Discourse::InvalidAccess unless membership
+      new_user = User.find_by(username: params[:username])
+      return render json: { error: 'User not found' }, status: :not_found unless new_user
+      membership.add_family_member!(new_user)
+      render json: { success: true, user: { user_id: new_user.id, username: new_user.username } }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def admin_remove_family_member
+      ensure_organisation_admin!
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], organisation_id: @organisation.id)
+      raise Discourse::InvalidAccess unless membership
+      member_user = User.find(params[:user_id])
+      membership.remove_family_member!(member_user)
       render json: { success: true }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
