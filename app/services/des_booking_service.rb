@@ -144,6 +144,44 @@ class DesBookingService
     booking
   end
 
+  def admin_cancel_booking_class(booking, booking_class, initiated_by)
+    remaining_classes = booking.booking_classes.confirmed.where.not(id: booking_class.id)
+
+    if remaining_classes.empty?
+      # Last class — cancel the whole booking and refund everything
+      booking_class.update!(status: 'cancelled')
+      refund_booking(booking, initiated_by, "Class cancelled by admin")
+      cancel_booking(booking)
+    else
+      # Multiple classes — cancel just this one and partial refund
+      refund_amount = booking_class.amount_charged.to_f
+      booking_class.update!(status: 'cancelled')
+
+      if refund_amount > 0
+        payment = booking.payments.completed.first
+        if payment && payment.paypal_capture_id.present?
+          paypal_response = @paypal.refund_payment(payment.paypal_capture_id, refund_amount)
+          paypal_refund_id = paypal_response['id']
+
+          DesEventBookingRefund.create!(
+            booking_id: booking.id,
+            payment_id: payment.id,
+            amount: refund_amount,
+            reason: "Class cancelled by admin",
+            status: 'completed',
+            paypal_refund_id: paypal_refund_id,
+            event_cancellation: false,
+            initiated_by: initiated_by.id
+          ).complete!(paypal_refund_id)
+        end
+      end
+
+      booking.reload
+    end
+
+    booking
+  end
+
   def add_classes(booking, class_ids)
     raise "Booking is not confirmed" unless booking.status == 'confirmed'
 

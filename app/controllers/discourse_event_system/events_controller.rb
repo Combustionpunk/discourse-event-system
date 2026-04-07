@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :export_csv, :add_class, :update_class, :toggle_class_status]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
@@ -219,9 +219,12 @@ module DiscourseEventSystem
               bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
               {
                 booking_id: b.id,
+                booking_class_id: bc&.id,
+                event_class_id: ec.id,
                 username: b.user.username,
                 transponder: bc&.transponder_number,
                 status: b.status,
+                booking_class_status: bc&.status,
                 brca_number: b.brca_membership_number
               }
             end
@@ -268,6 +271,19 @@ module DiscourseEventSystem
       new_status = event_class.status == 'inactive' ? 'active' : 'inactive'
       event_class.update!(status: new_status)
       render json: serialize_class(event_class)
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def cancel_entrant
+      ensure_organisation_admin!(@event.organisation)
+      booking = DesEventBooking.find(params[:booking_id])
+      booking_class = booking.booking_classes.find(params[:booking_class_id])
+      raise "Booking does not belong to this event" unless booking.event_id == @event.id
+
+      service = DesBookingService.new(current_user, @event)
+      service.admin_cancel_booking_class(booking, booking_class, current_user)
+      render json: { success: true }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end

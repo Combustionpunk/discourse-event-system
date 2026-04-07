@@ -182,6 +182,23 @@ export default class EventManageController extends Controller {
   }
 
   @action
+  async cancelEntrant(entrant, className) {
+    if (!window.confirm(`Cancel ${entrant.username}'s booking for ${className}?`)) return;
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/cancel-entrant.json", {
+        type: "POST",
+        data: {
+          booking_id: entrant.booking_id,
+          booking_class_id: entrant.booking_class_id,
+        },
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
   toggleEdit() {
     this.editMode = !this.editMode;
   }
