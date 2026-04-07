@@ -101,21 +101,24 @@
           {{#each this.model.family_members as |member|}}
             <div class="family-member-card">
               <h3>{{member.username}}</h3>
-              <div class="family-class-grid">
+              <div class="event-classes-grid">
                 {{#each this.model.classes as |cls|}}
-                  {{#unless (eq cls.status "sold_out")}}
-                    <div class="family-class-option">
+                  <div class="event-class-card {{if (eq cls.status "sold_out") "sold-out"}}">
+                    <div class="event-class-name">{{cls.name}}</div>
+                    <div class="event-class-spaces">
+                      {{cls.spaces_remaining}} / {{cls.capacity}} spaces
+                    </div>
+                    {{#if (eq cls.status "sold_out")}}
+                      <span class="field-help">Sold out</span>
+                    {{else}}
                       <input
                         type="checkbox"
                         id="family-{{member.user_id}}-class-{{cls.id}}"
                         {{on "change" (fn this.toggleFamilyClass member.user_id cls.id)}}
                       />
-                      <label for="family-{{member.user_id}}-class-{{cls.id}}">
-                        {{cls.name}}
-                        <span class="field-help">({{cls.spaces_remaining}} spaces)</span>
-                      </label>
-                    </div>
-                  {{/unless}}
+                      <label for="family-{{member.user_id}}-class-{{cls.id}}">Select</label>
+                    {{/if}}
+                  </div>
                 {{/each}}
               </div>
             </div>
