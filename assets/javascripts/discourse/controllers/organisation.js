@@ -499,16 +499,21 @@ export default class OrganisationController extends Controller {
   @tracked newMembershipFamilyUsernames = [];
   @tracked managingFamilyMembershipId = null;
   @tracked newFamilyMemberUsername = "";
+  @tracked newFamilyMemberDob = "";
+  @tracked editingFamilyDobKey = null;
+  @tracked editingFamilyDobValue = "";
 
   @action
   toggleManageFamily(membershipId) {
     if (this.managingFamilyMembershipId === membershipId) {
       this.managingFamilyMembershipId = null;
-      this.newFamilyMemberUsername = "";
     } else {
       this.managingFamilyMembershipId = membershipId;
-      this.newFamilyMemberUsername = "";
     }
+    this.newFamilyMemberUsername = "";
+    this.newFamilyMemberDob = "";
+    this.editingFamilyDobKey = null;
+    this.editingFamilyDobValue = "";
   }
 
   @action
@@ -517,18 +522,60 @@ export default class OrganisationController extends Controller {
   }
 
   @action
+  updateNewFamilyMemberDob(e) {
+    this.newFamilyMemberDob = e.target.value;
+  }
+
+  @action
   async addAdminFamilyMember(membershipId) {
     if (!this.newFamilyMemberUsername.trim()) return;
     try {
+      const data = { username: this.newFamilyMemberUsername };
+      if (this.newFamilyMemberDob) {
+        data.date_of_birth = this.newFamilyMemberDob;
+      }
       await ajax("/des/organisations/" + this.model.id + "/admin-memberships/" + membershipId + "/family.json", {
         type: "POST",
-        data: { username: this.newFamilyMemberUsername },
+        data,
       });
       this.newFamilyMemberUsername = "";
+      this.newFamilyMemberDob = "";
       this.loadAdminMemberships();
     } catch (error) {
       popupAjaxError(error);
     }
+  }
+
+  @action
+  startEditFamilyDob(membershipId, userId, currentDob) {
+    this.editingFamilyDobKey = `${membershipId}_${userId}`;
+    this.editingFamilyDobValue = currentDob || "";
+  }
+
+  @action
+  updateEditingFamilyDob(e) {
+    this.editingFamilyDobValue = e.target.value;
+  }
+
+  @action
+  async saveEditFamilyDob(membershipId, userId) {
+    try {
+      await ajax("/des/organisations/" + this.model.id + "/admin-memberships/" + membershipId + "/family/" + userId + ".json", {
+        type: "PUT",
+        data: { date_of_birth: this.editingFamilyDobValue },
+      });
+      this.editingFamilyDobKey = null;
+      this.editingFamilyDobValue = "";
+      this.loadAdminMemberships();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  cancelEditFamilyDob() {
+    this.editingFamilyDobKey = null;
+    this.editingFamilyDobValue = "";
   }
 
   @action

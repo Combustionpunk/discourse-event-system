@@ -364,8 +364,24 @@
                 <h4>Family Members</h4>
                 {{#if m.family_members.length}}
                   {{#each m.family_members as |fm|}}
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                      <span>{{fm.username}}</span>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+                      <strong>{{fm.username}}</strong>
+                      {{#if (eq this.editingFamilyDobKey (concat m.id "_" fm.user_id))}}
+                        <input
+                          type="date"
+                          value={{this.editingFamilyDobValue}}
+                          {{on "change" this.updateEditingFamilyDob}}
+                        />
+                        <button class="btn btn-small btn-primary" {{on "click" (fn this.saveEditFamilyDob m.id fm.user_id)}}>Save</button>
+                        <button class="btn btn-small btn-default" {{on "click" this.cancelEditFamilyDob}}>Cancel</button>
+                      {{else}}
+                        <span class="field-help">
+                          DOB: {{if fm.date_of_birth fm.date_of_birth "Not set"}}
+                        </span>
+                        <button class="btn btn-small btn-default" {{on "click" (fn this.startEditFamilyDob m.id fm.user_id fm.date_of_birth)}}>
+                          {{if fm.date_of_birth "Edit DOB" "Set DOB"}}
+                        </button>
+                      {{/if}}
                       <button class="btn btn-small btn-danger" {{on "click" (fn this.removeAdminFamilyMember m.id fm.user_id)}}>
                         Remove
                       </button>
@@ -375,13 +391,24 @@
                   <p class="field-help">No family members added yet.</p>
                 {{/if}}
 
-                <div style="display:flex; gap:8px; margin-top:8px;">
-                  <input
-                    type="text"
-                    placeholder="Username"
-                    value={{this.newFamilyMemberUsername}}
-                    {{on "input" this.updateNewFamilyMemberUsername}}
-                  />
+                <div style="display:flex; gap:8px; margin-top:8px; align-items:flex-end;">
+                  <div>
+                    <label class="field-help">Username</label>
+                    <input
+                      type="text"
+                      placeholder="Username"
+                      value={{this.newFamilyMemberUsername}}
+                      {{on "input" this.updateNewFamilyMemberUsername}}
+                    />
+                  </div>
+                  <div>
+                    <label class="field-help">Date of Birth</label>
+                    <input
+                      type="date"
+                      value={{this.newFamilyMemberDob}}
+                      {{on "change" this.updateNewFamilyMemberDob}}
+                    />
+                  </div>
                   <button class="btn btn-small btn-primary" {{on "click" (fn this.addAdminFamilyMember m.id)}}>
                     Add
                   </button>

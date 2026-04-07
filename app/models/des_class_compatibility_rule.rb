@@ -13,9 +13,10 @@ class DesClassCompatibilityRule < ActiveRecord::Base
   validates :rule_value, presence: true
 
   def driver_eligible?(user)
-    dob = user.custom_fields['des_date_of_birth']
+    return true unless rule_type.in?(%w[max_age min_age])
+    dob = user.date_of_birth
     return true unless dob.present?
-    age = ((Time.now - Date.parse(dob).to_time) / 1.year.seconds).floor
+    age = ((Time.now - dob.to_time) / 1.year.seconds).floor
     case rule_type
     when 'max_age'
       age <= rule_value.to_i
@@ -24,8 +25,6 @@ class DesClassCompatibilityRule < ActiveRecord::Base
     else
       true
     end
-  rescue
-    true
   end
 
   def car_eligible?(car)

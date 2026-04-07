@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class OrganisationsController < ApplicationController
     before_action :ensure_logged_in
-    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership, :admin_memberships, :admin_add_membership, :admin_update_membership, :admin_add_family_member, :admin_remove_family_member]
+    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership, :admin_memberships, :admin_add_membership, :admin_update_membership, :admin_add_family_member, :admin_remove_family_member, :admin_update_family_member]
 
     def index
       organisations = current_user.admin? ? DesOrganisation.all.order(:name) : DesOrganisation.approved.order(:name)
@@ -266,7 +266,11 @@ module DiscourseEventSystem
           starts_at: m.starts_at,
           expires_at: m.expires_at,
           family_members: m.family_members.map { |fm|
-            { user_id: fm.user_id, username: fm.user&.username }
+            {
+              user_id: fm.user_id,
+              username: fm.user&.username,
+              date_of_birth: fm.user&.date_of_birth&.strftime('%Y-%m-%d')
+            }
           }
         }
       }}
@@ -322,8 +326,16 @@ module DiscourseEventSystem
       raise Discourse::InvalidAccess unless membership
       new_user = User.find_by(username: params[:username])
       return render json: { error: 'User not found' }, status: :not_found unless new_user
+      new_user.update!(date_of_birth: Date.parse(params[:date_of_birth])) if params[:date_of_birth].present?
       membership.add_family_member!(new_user)
-      render json: { success: true, user: { user_id: new_user.id, username: new_user.username } }
+      render json: {
+        success: true,
+        user: {
+          user_id: new_user.id,
+          username: new_user.username,
+          date_of_birth: new_user.date_of_birth&.strftime('%Y-%m-%d')
+        }
+      }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
@@ -335,6 +347,18 @@ module DiscourseEventSystem
       member_user = User.find(params[:user_id])
       membership.remove_family_member!(member_user)
       render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def admin_update_family_member
+      ensure_organisation_admin!
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], organisation_id: @organisation.id)
+      raise Discourse::InvalidAccess unless membership
+      member_user = User.find(params[:user_id])
+      raise Discourse::InvalidAccess unless membership.family_members.exists?(user_id: member_user.id)
+      member_user.update!(date_of_birth: Date.parse(params[:date_of_birth])) if params[:date_of_birth].present?
+      render json: { success: true, date_of_birth: member_user.date_of_birth&.strftime('%Y-%m-%d') }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
