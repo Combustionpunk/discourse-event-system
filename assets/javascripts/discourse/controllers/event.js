@@ -15,6 +15,8 @@ export default class EventController extends Controller {
   @tracked carSelections = {};
   @tracked familyExpanded = false;
   @tracked familySelections = {};
+  @tracked familyEligibleCars = null;
+  @tracked familyCarSelections = {};
 
   _calculateForClasses(count, isMember, isJunior) {
     const pricing = this.model.pricing;
@@ -85,7 +87,21 @@ export default class EventController extends Controller {
   }
 
   get allCarsSelected() {
-    return this.eligibleCars.every(cls => this.carSelections[cls.class_id]);
+    // Check parent's cars are selected
+    const parentOk = this.eligibleCars.every(cls => this.carSelections[cls.class_id]);
+    if (!parentOk) return false;
+
+    // Check family members' cars are selected
+    if (this.familyEligibleCars) {
+      for (const entry of this.familyEligibleCars) {
+        for (const cls of entry.classes) {
+          if (!this.familyCarSelections[`${entry.user_id}_${cls.class_id}`]) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
   }
 
   @action
@@ -139,8 +155,8 @@ export default class EventController extends Controller {
   async bookEvent() {
     if (this.selectedClasses.length === 0) return;
 
-    // Check if user has garage cars
     try {
+      // Fetch eligible cars for parent's classes (uses parent's garage)
       const response = await ajax("/des/bookings/eligible-cars.json", {
         data: {
           event_id: this.model.id,
@@ -161,6 +177,42 @@ export default class EventController extends Controller {
         }
       });
 
+      // Fetch eligible cars for family members' classes (also uses parent's garage)
+      this.familyEligibleCars = null;
+      this.familyCarSelections = {};
+
+      if (this.hasFamilySelections) {
+        const familyEntries = [];
+        for (const userId of Object.keys(this.familySelections)) {
+          const classIds = this.familySelections[userId];
+          if (classIds && classIds.length > 0) {
+            const familyResponse = await ajax("/des/bookings/eligible-cars.json", {
+              data: {
+                event_id: this.model.id,
+                class_ids: classIds,
+              },
+            });
+            const member = this.model.family_members.find(m => String(m.user_id) === String(userId));
+            familyEntries.push({
+              user_id: userId,
+              username: member ? member.username : `User ${userId}`,
+              classes: familyResponse.classes,
+            });
+
+            // Auto-select if only one car eligible
+            familyResponse.classes.forEach(cls => {
+              if (cls.eligible_cars.length === 1) {
+                this.familyCarSelections = {
+                  ...this.familyCarSelections,
+                  [`${userId}_${cls.class_id}`]: cls.eligible_cars[0].id
+                };
+              }
+            });
+          }
+        }
+        this.familyEligibleCars = familyEntries;
+      }
+
       this.showCarSelection = true;
     } catch (error) {
       popupAjaxError(error);
@@ -172,6 +224,14 @@ export default class EventController extends Controller {
     this.carSelections = {
       ...this.carSelections,
       [classId]: event.target.value
+    };
+  }
+
+  @action
+  selectFamilyCar(userId, classId, event) {
+    this.familyCarSelections = {
+      ...this.familyCarSelections,
+      [`${userId}_${classId}`]: event.target.value
     };
   }
 
@@ -199,6 +259,8 @@ export default class EventController extends Controller {
     this.showCarSelection = false;
     this.eligibleCars = [];
     this.carSelections = {};
+    this.familyEligibleCars = null;
+    this.familyCarSelections = {};
   }
 
   @action
@@ -218,9 +280,18 @@ export default class EventController extends Controller {
         Object.keys(this.familySelections).forEach(userId => {
           const classIds = this.familySelections[userId];
           if (classIds && classIds.length > 0) {
+            // Gather car selections for this family member
+            const memberCarSelections = {};
+            classIds.forEach(classId => {
+              const key = `${userId}_${classId}`;
+              if (this.familyCarSelections[key]) {
+                memberCarSelections[classId] = this.familyCarSelections[key];
+              }
+            });
             familyBookings[index] = {
               user_id: userId,
               class_ids: classIds,
+              car_selections: memberCarSelections,
             };
             index++;
           }

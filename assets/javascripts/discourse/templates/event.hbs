@@ -172,24 +172,25 @@
   {{#if this.showCarSelection}}
     <div class="car-selection-overlay">
       <div class="car-selection-modal">
-        <h2>Select Your Cars</h2>
-        <p class="field-help">Select which car you are entering for each class.</p>
+        <h2>Select Cars</h2>
+        <p class="field-help">Select which car to enter for each class. Your garage is used for all family members.</p>
 
+        <h3>Your Classes</h3>
         {{#each this.eligibleCars as |cls|}}
           <div class="car-selection-class">
-            <h3>{{cls.class_name}}</h3>
+            <h4>{{cls.class_name}}</h4>
             {{#if cls.eligible_cars.length}}
               <select {{on "change" (fn this.selectCar cls.class_id)}}>
                 <option value="">Select car...</option>
                 {{#each cls.eligible_cars as |car|}}
                   <option value={{car.id}}>
-                    {{car.friendly_name}} — {{car.driveline}} — 📡 {{car.transponder_number}}
+                    {{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}
                   </option>
                 {{/each}}
               </select>
             {{else}}
               <div class="no-eligible-cars">
-                ⚠️ No eligible cars in your garage for this class.
+                No eligible cars in your garage for this class.
                 <LinkTo @route="my-garage" class="btn btn-small btn-default">
                   Add a car
                 </LinkTo>
@@ -197,6 +198,31 @@
             {{/if}}
           </div>
         {{/each}}
+
+        {{#if this.familyEligibleCars}}
+          {{#each this.familyEligibleCars as |entry|}}
+            <h3>{{entry.username}}</h3>
+            {{#each entry.classes as |cls|}}
+              <div class="car-selection-class">
+                <h4>{{cls.class_name}}</h4>
+                {{#if cls.eligible_cars.length}}
+                  <select {{on "change" (fn this.selectFamilyCar entry.user_id cls.class_id)}}>
+                    <option value="">Select car...</option>
+                    {{#each cls.eligible_cars as |car|}}
+                      <option value={{car.id}}>
+                        {{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}
+                      </option>
+                    {{/each}}
+                  </select>
+                {{else}}
+                  <div class="no-eligible-cars">
+                    No eligible cars in your garage for this class.
+                  </div>
+                {{/if}}
+              </div>
+            {{/each}}
+          {{/each}}
+        {{/if}}
 
         <div class="car-selection-actions">
           <button

@@ -185,7 +185,9 @@ module DiscourseEventSystem
     end
 
     def ensure_booking_owner!
-      raise Discourse::InvalidAccess unless @booking.user_id == current_user.id || current_user.admin?
+      raise Discourse::InvalidAccess unless @booking.user_id == current_user.id ||
+        @booking.booked_by_user_id == current_user.id ||
+        current_user.admin?
     end
 
     def serialize_booking(booking)

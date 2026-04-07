@@ -309,7 +309,7 @@ class DesBookingService
         event_class_id: class_id,
         status: 'confirmed'
       )
-      booking_class.assign_transponder(user)
+      booking_class.assign_transponder(user, car_owner: booked_by)
     end
 
     booking

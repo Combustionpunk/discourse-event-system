@@ -12,10 +12,11 @@ class DesEventBookingClass < ActiveRecord::Base
   after_create :update_class_status
   after_update :update_class_status
 
-  def assign_transponder(user)
-    # Find a car in the user's garage that's eligible for this class
+  def assign_transponder(user, car_owner: nil)
+    # For family bookings, use the parent's garage (car_owner) instead of the child's
+    garage_user = car_owner || user
     car = DesUserCar.active
-      .where(user_id: user.id)
+      .where(user_id: garage_user.id)
       .joins(:car_model)
       .first
     if car.present? && car.transponder_number.present?
