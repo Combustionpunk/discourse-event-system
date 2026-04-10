@@ -66,6 +66,13 @@ after_initialize do
     next unless changes.include?(:discourse_event_system_category_slug)
   end
 
+  # In development with Ember CLI on port 4200, PayPal return URLs must point
+  # to 4200 (not 3000) so the session cookie is valid on redirect back.
+  if Rails.env.development? && SiteSetting.port.blank?
+    SiteSetting.port = 4200
+    Rails.logger.info "Set SiteSetting.port to 4200 for PayPal return URLs (Ember CLI)"
+  end
+
   begin
     category_name = SiteSetting.discourse_event_system_category_name
     category_slug = SiteSetting.discourse_event_system_category_slug
