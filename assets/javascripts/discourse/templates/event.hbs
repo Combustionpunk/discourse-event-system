@@ -182,50 +182,53 @@
             <div class="entrants-class">
               <h3>{{cls.name}}</h3>
 
-              {{!-- Confirmed entrants --}}
-              <h4 class="entrant-status-heading entrant-status-heading--confirmed">Confirmed</h4>
-              <table class="entrants-table entrants-table--public">
-                <thead>
-                  <tr>
-                    <th class="avatar-col"></th>
-                    <th>Username</th>
-                    <th>Transponder</th>
-                    <th>BRCA No.</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{#each cls.entrants as |entrant|}}
-                    {{#if (eq entrant.status "confirmed")}}
+              {{#if cls.confirmed.length}}
+                <h4 class="entrant-status-heading entrant-status-heading--confirmed">✅ Confirmed</h4>
+                <table class="entrants-table entrants-table--public">
+                  <thead>
+                    <tr>
+                      <th class="avatar-col"></th>
+                      <th>Username</th>
+                      <th>Transponder</th>
+                      <th>BRCA No.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{#each cls.confirmed as |entrant|}}
                       <tr class="entrant-row entrant-row--confirmed">
                         <td class="avatar-col"><img src="{{entrant.avatar_template}}" class="entrant-avatar" alt="" /></td>
                         <td>{{entrant.username}}</td>
                         <td class="transponder-number">{{entrant.transponder}}</td>
                         <td>{{entrant.brca_number}}</td>
                       </tr>
-                    {{/if}}
-                  {{/each}}
-                </tbody>
-              </table>
+                    {{/each}}
+                  </tbody>
+                </table>
+              {{/if}}
 
-              {{!-- Pending entrants --}}
-              {{#each cls.entrants as |entrant|}}
-                {{#if (eq entrant.status "pending")}}
-                  {{#unless this._pendingHeaderShown}}
-                    <h4 class="entrant-status-heading entrant-status-heading--pending">Pending</h4>
-                    <table class="entrants-table entrants-table--public">
-                      <thead>
-                        <tr>
-                          <th class="avatar-col"></th>
-                          <th>Username</th>
-                          <th>Transponder</th>
-                          <th>BRCA No.</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                  {{/unless}}
-                {{/if}}
-              {{/each}}
-              {{!-- We need a different approach for pending since HBS doesn't support inline state --}}
+              {{#if cls.pending.length}}
+                <h4 class="entrant-status-heading entrant-status-heading--pending">⏳ Pending</h4>
+                <table class="entrants-table entrants-table--public">
+                  <thead>
+                    <tr>
+                      <th class="avatar-col"></th>
+                      <th>Username</th>
+                      <th>Transponder</th>
+                      <th>BRCA No.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{#each cls.pending as |entrant|}}
+                      <tr class="entrant-row entrant-row--pending">
+                        <td class="avatar-col"><img src="{{entrant.avatar_template}}" class="entrant-avatar" alt="" /></td>
+                        <td>{{entrant.username}}</td>
+                        <td class="transponder-number">{{entrant.transponder}}</td>
+                        <td>{{entrant.brca_number}}</td>
+                      </tr>
+                    {{/each}}
+                  </tbody>
+                </table>
+              {{/if}}
             </div>
           {{/if}}
         {{/each}}

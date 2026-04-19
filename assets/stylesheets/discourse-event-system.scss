@@ -60,9 +60,10 @@
   font-size: 0.8em;
   font-weight: bold;
   text-transform: uppercase;
+  display: inline-block;
 
   &--published { background: var(--success-low); color: var(--success); }
-  &--cancelled { background: var(--danger-low); color: var(--danger); }
+  &--cancelled { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
   &--completed { background: var(--primary-low); color: var(--primary-medium); }
   &--sold_out { background: var(--highlight-low); color: var(--highlight); }
 }
@@ -218,11 +219,13 @@
   font-size: 0.85em;
   font-weight: bold;
   text-transform: uppercase;
+  display: inline-block;
 
-  &--confirmed { background: var(--success-low); color: var(--success); }
-  &--pending { background: var(--highlight-low); color: var(--highlight); }
-  &--cancelled { background: var(--danger-low); color: var(--danger); }
-  &--refunded { background: var(--primary-low); color: var(--primary-medium); }
+  &--confirmed { background: rgba(46, 204, 113, 0.15); color: #27ae60; }
+  &--pending { background: rgba(243, 156, 18, 0.15); color: #e67e22; }
+  &--cancelled { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+  &--refunded { background: rgba(149, 165, 166, 0.15); color: #7f8c8d; }
+  &--waitlist { background: rgba(52, 152, 219, 0.15); color: #2980b9; }
 }
 
 // My bookings page
@@ -327,9 +330,10 @@
   font-size: 0.85em;
   font-weight: bold;
   text-transform: uppercase;
+  display: inline-block;
 
   &--approved { background: var(--success-low); color: var(--success); }
-  &--pending { background: var(--highlight-low); color: var(--highlight); }
+  &--pending { background: rgba(243, 156, 18, 0.15); color: #e67e22; }
   &--rejected { background: var(--danger-low); color: var(--danger); }
 }
 
@@ -1064,6 +1068,7 @@
   font-size: 0.8em;
   font-weight: bold;
   text-transform: uppercase;
+  display: inline-block;
 
   &--driveline {
     background: var(--tertiary-low);
@@ -1826,7 +1831,7 @@
     background: var(--primary-very-low);
     font-weight: 600;
     font-size: 0.85em;
-    text-transform: uppercase;
+  display: inline-block;
   }
 
   code {
@@ -1869,27 +1874,29 @@
 // Entrant row status styles
 .entrant-row {
   &--confirmed {
-    td { border-left: none; }
-    td:first-child { border-left: 4px solid var(--success); }
+    
+    td:first-child { box-shadow: inset 4px 0 0 #27ae60; }
   }
 
   &--pending {
-    td:first-child { border-left: 4px solid var(--highlight); }
+    td:first-child { box-shadow: inset 4px 0 0 #e67e22; }
   }
 
   &--cancelled {
     td {
-      opacity: 0.55;
-      color: var(--primary-medium);
+      opacity: 0.5;
+      color: #7f8c8d !important;
     }
     td:first-child {
-      border-left: 4px solid var(--primary-low-mid);
+      box-shadow: inset 4px 0 0 #bdc3c7;
+      } 
+    td:nth-child(2) {
       text-decoration: line-through;
     }
   }
 
   &--waitlist {
-    td:first-child { border-left: 4px solid var(--tertiary); }
+    td:first-child { box-shadow: inset 4px 0 0 #2980b9; }
   }
 }
 
@@ -1961,10 +1968,10 @@
   display: inline-block;
 
   &--confirmed {
-    color: var(--success);
+    color: #27ae60;
   }
 
   &--pending {
-    color: var(--highlight);
+    color: #e67e22;
   }
 }
