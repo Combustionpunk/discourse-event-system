@@ -360,10 +360,8 @@ module DiscourseEventSystem
       cal << "END:VEVENT"
       cal << "END:VCALENDAR"
 
-      send_data cal.join("\r\n"),
-        type: 'text/calendar; charset=UTF-8',
-        disposition: 'attachment',
-        filename: "#{event.title.parameterize}-event.ics"
+      response.headers['Content-Disposition'] = "attachment; filename=\"#{event.title.parameterize}-event.ics\""
+      render plain: cal.join("\r\n"), content_type: 'text/calendar'
     end
 
     private
