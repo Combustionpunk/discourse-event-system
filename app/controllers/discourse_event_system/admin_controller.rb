@@ -77,6 +77,28 @@ module DiscourseEventSystem
       render json: { success: true }
     end
 
+    def update_manufacturer
+      manufacturer = DesManufacturer.find(params[:id])
+      manufacturer.update!(name: params[:name].to_s.strip)
+      render json: { success: true, name: manufacturer.name }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_manufacturer
+      manufacturer = DesManufacturer.find(params[:id])
+      linked_models = DesCarModel.where(manufacturer_id: manufacturer.id, status: 'approved').count
+      if linked_models > 0
+        return render json: { error: "Cannot delete: #{linked_models} approved car model(s) are linked to this manufacturer. Delete or reassign them first." }, status: :unprocessable_entity
+      end
+      DesCarModel.where(manufacturer_id: manufacturer.id).destroy_all
+      manufacturer.destroy!
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+
     def create_model
       manufacturer = DesManufacturer.find(params[:manufacturer_id])
       model = DesCarModel.create!(

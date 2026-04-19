@@ -2016,3 +2016,14 @@
   gap: 6px;
   align-items: center;
 }
+
+// Manufacturer edit input
+.manufacturer-edit-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--primary-low);
+  border-radius: 4px;
+  background: var(--secondary);
+  color: var(--primary);
+  font-size: 0.95em;
+}

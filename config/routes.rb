@@ -109,6 +109,8 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/admin/organisations/:id/reject" => "admin#reject_organisation"
   post "/des/admin/manufacturers/:id/approve" => "admin#approve_manufacturer"
   post "/des/admin/manufacturers/:id/reject" => "admin#reject_manufacturer"
+  put "/des/admin/manufacturers/:id" => "admin#update_manufacturer"
+  delete "/des/admin/manufacturers/:id" => "admin#destroy_manufacturer"
   post "/des/admin/models" => "admin#create_model"
   post "/des/admin/models/:id/approve" => "admin#approve_model"
   post "/des/admin/models/:id/reject" => "admin#reject_model"

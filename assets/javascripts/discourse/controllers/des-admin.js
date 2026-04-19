@@ -119,6 +119,56 @@ export default class DesAdminController extends Controller {
     }
   }
 
+  @tracked editingManufacturerId = null;
+  @tracked editingManufacturerName = "";
+
+  @action
+  startEditManufacturer(manufacturer) {
+    this.editingManufacturerId = manufacturer.id;
+    this.editingManufacturerName = manufacturer.name;
+  }
+
+  @action
+  cancelEditManufacturer() {
+    this.editingManufacturerId = null;
+    this.editingManufacturerName = "";
+  }
+
+  @action
+  updateEditingManufacturerName(e) {
+    this.editingManufacturerName = e.target.value;
+  }
+
+  @action
+  async saveManufacturer() {
+    if (!this.editingManufacturerName.trim()) return;
+    try {
+      await ajax("/des/admin/manufacturers/" + this.editingManufacturerId + ".json", {
+        type: "PUT",
+        data: { name: this.editingManufacturerName },
+      });
+      this.editingManufacturerId = null;
+      this.editingManufacturerName = "";
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async deleteManufacturer(manufacturer) {
+    if (!window.confirm(`Delete ${manufacturer.name}? This will also affect any car models linked to this manufacturer.`)) return;
+    try {
+      await ajax("/des/admin/manufacturers/" + manufacturer.id + ".json", {
+        type: "DELETE",
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+
   ruleTypeLabel(ruleType) {
     const labels = {
       driveline: 'Driveline',
