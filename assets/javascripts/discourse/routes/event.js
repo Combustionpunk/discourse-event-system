@@ -16,19 +16,18 @@ export default class EventRoute extends Route {
 
     try {
       const entrantsData = await ajax(`/des/events/${params.event_id}/public-entrants.json`);
+      const statusOrder = { confirmed: 0, pending: 1, waitlist: 2, cancelled: 3 };
       event.public_entrants = (entrantsData.classes || []).map(cls => {
-        const confirmed = (cls.entrants || [])
-          .filter(e => e.status === "confirmed")
-          .sort((a, b) => a.username.localeCompare(b.username));
-        const pending = (cls.entrants || [])
-          .filter(e => e.status === "pending")
-          .sort((a, b) => a.username.localeCompare(b.username));
+        const sorted = (cls.entrants || []).slice().sort((a, b) => {
+          const sa = statusOrder[a.status] ?? 99;
+          const sb = statusOrder[b.status] ?? 99;
+          if (sa !== sb) return sa - sb;
+          return a.username.localeCompare(b.username);
+        });
         return {
           id: cls.id,
           name: cls.name,
-          confirmed,
-          pending,
-          entrants: cls.entrants || []
+          entrants: sorted
         };
       });
     } catch {
