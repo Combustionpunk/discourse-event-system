@@ -1,12 +1,19 @@
 import Route from "@ember/routing/route";
 import { ajax } from "discourse/lib/ajax";
+import { inject as service } from "@ember/service";
 
 export default class MembershipConfirmRoute extends Route {
+  @service router;
+
   async model(params) {
     try {
       const response = await ajax("/des/memberships/" + params.membership_id + "/confirm.json", {
         type: "POST"
       });
+      if (response.is_family) {
+        this.router.transitionTo("family-setup", params.membership_id);
+        return { redirecting: true };
+      }
       return { success: true, organisation: response.organisation };
     } catch (e) {
       return { 

@@ -55,6 +55,9 @@ class DesPaypalService
       }],
       application_context: {
         return_url: "#{Discourse.base_url}/memberships/#{membership.id}/confirm",
+        locale: "en-GB",
+        landing_page: "BILLING",
+        shipping_preference: "NO_SHIPPING",
         cancel_url: "#{Discourse.base_url}/memberships/#{membership.id}/cancel"
       }
     }.to_json
@@ -115,6 +118,9 @@ class DesPaypalService
       ],
       application_context: {
         return_url: "#{Discourse.base_url}/events/booking/#{primary_booking.id}/confirm",
+        locale: "en-GB",
+        landing_page: "BILLING",
+        shipping_preference: "NO_SHIPPING",
         cancel_url: "#{Discourse.base_url}/events/booking/#{primary_booking.id}/cancel"
       }
     }.to_json
@@ -164,6 +170,9 @@ class DesPaypalService
       ],
       application_context: {
         return_url: "#{Discourse.base_url}/events/booking/#{booking.id}/confirm",
+        locale: "en-GB",
+        landing_page: "BILLING",
+        shipping_preference: "NO_SHIPPING",
         cancel_url: "#{Discourse.base_url}/events/booking/#{booking.id}/cancel"
       }
     }

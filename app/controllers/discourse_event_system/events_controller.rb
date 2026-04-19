@@ -141,7 +141,7 @@ module DiscourseEventSystem
         # Send update emails if significant changes
         if changes.any?
           bookings = DesEventBooking.where(event_id: @event.id)
-            .where.not(status: 'cancelled')
+    
           bookings.each do |booking|
             begin
               DiscourseEventSystem::EventMailer.event_updated(booking, changes).deliver_later
@@ -168,7 +168,7 @@ module DiscourseEventSystem
       ensure_organisation_admin!(@event.organisation)
       bookings = DesEventBooking.where(event_id: @event.id)
         .includes(:user, booking_classes: { event_class: :class_type })
-        .where.not(status: 'cancelled')
+
 
       csv_data = CSV.generate(headers: true) do |csv|
         csv << ['Name', 'BRCA Number', 'Class', 'PT No', 'Car Make', 'Paid Status', 'Entry Desc']
@@ -202,7 +202,7 @@ module DiscourseEventSystem
       ensure_organisation_admin!(@event.organisation)
       bookings = DesEventBooking.where(event_id: @event.id)
         .includes(:user, booking_classes: :event_class)
-        .where.not(status: 'cancelled')
+
 
       render json: {
         event: { id: @event.id, title: @event.title },

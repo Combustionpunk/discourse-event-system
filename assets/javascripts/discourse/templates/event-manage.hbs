@@ -267,7 +267,7 @@
               </thead>
               <tbody>
                 {{#each cls.entrants as |entrant index|}}
-                  <tr>
+                  <tr class="entrant-row entrant-row--{{entrant.status}}">
                     <td>{{entrant.username}}</td>
                     <td class="transponder-number">{{entrant.transponder}}</td>
                     <td>{{entrant.brca_number}}</td>
@@ -277,7 +277,7 @@
                       </span>
                     </td>
                     <td>
-                      {{#unless (eq entrant.booking_class_status "cancelled")}}
+                      {{#unless (eq entrant.status "cancelled")}}
                         <button
                           class="btn btn-small btn-danger"
                           {{on "click" (fn this.cancelEntrant entrant cls.name)}}

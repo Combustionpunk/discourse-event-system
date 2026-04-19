@@ -1638,3 +1638,257 @@
     }
   }
 }
+
+// Family Setup Page
+.family-setup-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.family-current-members {
+  margin: 20px 0;
+}
+
+.family-member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--primary-very-low);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.family-member-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+
+  .user-username {
+    font-weight: bold;
+    font-size: 0.95em;
+  }
+
+  .user-name {
+    color: var(--primary-medium);
+    font-size: 0.9em;
+  }
+
+  .member-detail {
+    font-size: 0.85em;
+    color: var(--primary-medium);
+    background: var(--primary-low);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+}
+
+.family-member-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.family-member-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+
+  .user-username {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  .family-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+.family-edit-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.family-add-section {
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--primary-very-low);
+  border-radius: 8px;
+}
+
+.family-search-box {
+  margin-bottom: 12px;
+
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+  }
+
+  .family-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--primary-low);
+    border-radius: 6px;
+    background: var(--secondary);
+    color: var(--primary);
+    font-size: 0.95em;
+  }
+}
+
+.family-or-divider {
+  text-align: center;
+  margin: 16px 0;
+  color: var(--primary-medium);
+  font-size: 0.85em;
+}
+
+.family-create-form {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--secondary);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+}
+
+.family-form-field {
+  margin-bottom: 12px;
+
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    font-size: 0.9em;
+
+    .required {
+      color: var(--danger);
+    }
+  }
+
+  input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--primary-low);
+    border-radius: 6px;
+    background: var(--secondary);
+    color: var(--primary);
+    font-size: 0.95em;
+  }
+}
+
+.family-loading {
+  padding: 8px;
+  color: var(--primary-medium);
+  font-style: italic;
+}
+
+.family-error {
+  padding: 10px 14px;
+  background: var(--danger-low);
+  color: var(--danger);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 0.9em;
+}
+
+.family-setup-actions {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--primary-low);
+}
+
+// Family accounts table (setup summary)
+.family-accounts-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+
+  th, td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--primary-low);
+  }
+
+  th {
+    background: var(--primary-very-low);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+  }
+
+  code {
+    background: var(--primary-very-low);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+}
+
+.created-accounts-summary {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--success-low, #d4edda);
+  border: 1px solid var(--success-medium, #c3e6cb);
+  border-radius: 8px;
+}
+
+.family-summary-table {
+  margin: 16px 0;
+}
+
+// Family manage panel (my-memberships page)
+.family-manage-panel {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--primary-very-low);
+  border-radius: 8px;
+  border: 1px solid var(--primary-low);
+
+  h4, h5 {
+    margin-top: 0;
+  }
+}
+
+.family-members-list {
+  margin-bottom: 16px;
+}
+
+// Entrant row status styles
+.entrant-row {
+  &--confirmed {
+    td { border-left: none; }
+    td:first-child { border-left: 4px solid var(--success); }
+  }
+
+  &--pending {
+    td:first-child { border-left: 4px solid var(--highlight); }
+  }
+
+  &--cancelled {
+    td {
+      opacity: 0.55;
+      color: var(--primary-medium);
+    }
+    td:first-child {
+      border-left: 4px solid var(--primary-low-mid);
+      text-decoration: line-through;
+    }
+  }
+
+  &--waitlist {
+    td:first-child { border-left: 4px solid var(--tertiary); }
+  }
+}

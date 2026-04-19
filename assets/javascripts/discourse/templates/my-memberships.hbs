@@ -34,11 +34,11 @@
             </div>
             <div class="membership-detail-item">
               <span class="membership-detail-label">⏰ Expires</span>
-              <span class="{{if this.isExpiringSoon membership.expires_at 'expiring-soon'}}">
+              <span class="{{if (this.isExpiringSoon membership.expires_at) 'expiring-soon'}}">
                 {{this.formatDate membership.expires_at}}
               </span>
             </div>
-            {{#if membership.family_members.length}}
+            {{#if membership.family_members_count}}
               <div class="membership-detail-item">
                 <span class="membership-detail-label">👨‍👩‍👧 Family</span>
                 <span>{{membership.family_members_count}} additional members</span>
@@ -50,7 +50,152 @@
             <LinkTo @route="organisation" @model={{membership.organisation.id}} class="btn btn-small btn-default">
               View Organisation
             </LinkTo>
+            {{#if membership.is_family}}
+              <button type="button" class="btn btn-small btn-default" {{on "click" (fn this.toggleFamilyPanel membership.id)}}>
+                👨‍👩‍👧 Manage Family
+              </button>
+            {{/if}}
           </div>
+
+          {{#if membership.is_family}}
+            {{#if (eq this.expandedFamilyId membership.id)}}
+              <div class="family-manage-panel">
+                <h4>👨‍👩‍👧 Family Members</h4>
+
+                {{#if this.familyError}}
+                  <div class="alert alert-error family-error">{{this.familyError}}</div>
+                {{/if}}
+
+                {{#if this.familyCreatedAccounts.length}}
+                  <div class="created-accounts-summary">
+                    <h5>📋 New Account Login Details</h5>
+                    <p class="field-help">Save these — passwords cannot be retrieved later.</p>
+                    <table class="family-accounts-table">
+                      <thead><tr><th>Username</th><th>Password</th></tr></thead>
+                      <tbody>
+                        {{#each this.familyCreatedAccounts as |account|}}
+                          <tr>
+                            <td><strong>{{account.username}}</strong></td>
+                            <td><code>{{account.password}}</code></td>
+                          </tr>
+                        {{/each}}
+                      </tbody>
+                    </table>
+                  </div>
+                {{/if}}
+
+                {{#if membership.family_members.length}}
+                  <div class="family-members-list">
+                    {{#each membership.family_members as |member|}}
+                      <div class="family-member-row">
+                        {{#if (eq this.editingMemberId member.user_id)}}
+                          <div class="family-member-edit">
+                            <span class="user-username">{{member.username}}</span>
+                            <div class="family-form-field">
+                              <label>Date of Birth</label>
+                              <input type="date" value={{this.editDob}} {{on "input" this.setEditDob}} />
+                            </div>
+                            <div class="family-form-field">
+                              <label>BRCA Number</label>
+                              <input type="text" value={{this.editBrca}} {{on "input" this.setEditBrca}} placeholder="Optional" />
+                            </div>
+                            <div class="family-edit-actions">
+                              <button type="button" class="btn btn-small btn-primary" {{on "click" (fn this.saveEditMember membership member)}}>Save</button>
+                              <button type="button" class="btn btn-small btn-default" {{on "click" this.cancelEditMember}}>Cancel</button>
+                            </div>
+                          </div>
+                        {{else}}
+                          <div class="family-member-info">
+                            {{#if member.avatar_url}}
+                              <img src="{{member.avatar_url}}" class="user-avatar" alt="" />
+                            {{/if}}
+                            <span class="user-username">{{member.username}}</span>
+                            {{#if member.date_of_birth}}<span class="member-detail">DOB: {{member.date_of_birth}}</span>{{/if}}
+                            {{#if member.brca_membership_number}}<span class="member-detail">BRCA: {{member.brca_membership_number}}</span>{{/if}}
+                          </div>
+                          <div class="family-member-actions">
+                            <button type="button" class="btn btn-small btn-default" {{on "click" (fn this.startEditMember member)}}>Edit</button>
+                            <button type="button" class="btn btn-small btn-danger" {{on "click" (fn this.removeFamilyMember membership member)}}>Remove</button>
+                          </div>
+                        {{/if}}
+                      </div>
+                    {{/each}}
+                  </div>
+                {{else}}
+                  <p class="field-help">No family members added yet.</p>
+                {{/if}}
+
+                {{#if (this.canAddMoreFamily membership)}}
+                  <div class="family-add-section">
+                    <h5>Add Family Member</h5>
+                    <div class="family-search-box">
+                      <label>Search existing user:</label>
+                      <input
+                        type="text"
+                        placeholder="Type username or name..."
+                        class="family-search-input"
+                        value={{this.familySearchTerm}}
+                        {{on "input" this.onFamilySearch}}
+                      />
+                    </div>
+
+                    {{#if this.familySearchResults.length}}
+                      <div class="family-search-results">
+                        {{#each this.familySearchResults as |user|}}
+                          <div class="family-search-result" role="button" {{on "click" (fn this.selectFamilyUser membership user)}}>
+                            {{#if user.avatar_template}}
+                              <img src="{{user.avatar_template}}" class="user-avatar" alt="" />
+                            {{/if}}
+                            <span class="user-username">{{user.username}}</span>
+                            {{#if user.name}}<span class="user-name">— {{user.name}}</span>{{/if}}
+                          </div>
+                        {{/each}}
+                      </div>
+                    {{/if}}
+
+                    {{#if this.familyAddingMember}}
+                      <div class="family-loading">Adding member...</div>
+                    {{/if}}
+
+                    <div class="family-or-divider"><span>— OR —</span></div>
+
+                    <button type="button" class="btn btn-default btn-small" {{on "click" this.toggleFamilyCreateForm}}>
+                      {{#if this.showFamilyCreateForm}}Hide Create Form{{else}}➕ Create New Account{{/if}}
+                    </button>
+
+                    {{#if this.showFamilyCreateForm}}
+                      <div class="family-create-form">
+                        <div class="family-form-field">
+                          <label>Username <span class="required">*</span></label>
+                          <input type="text" value={{this.familyNewUsername}} {{on "input" this.setFamilyNewUsername}} placeholder="username" />
+                        </div>
+                        <div class="family-form-field">
+                          <label>Full Name <span class="required">*</span></label>
+                          <input type="text" value={{this.familyNewName}} {{on "input" this.setFamilyNewName}} placeholder="Full Name" />
+                        </div>
+                        <div class="family-form-field">
+                          <label>Date of Birth <span class="required">*</span></label>
+                          <input type="date" value={{this.familyNewDob}} {{on "input" this.setFamilyNewDob}} />
+                        </div>
+                        <div class="family-form-field">
+                          <label>BRCA Number</label>
+                          <input type="text" value={{this.familyNewBrca}} {{on "input" this.setFamilyNewBrca}} placeholder="Optional" />
+                        </div>
+                        <div class="family-form-field">
+                          <label>Email</label>
+                          <input type="email" value={{this.familyNewEmail}} {{on "input" this.setFamilyNewEmail}} placeholder="Optional — auto-generated if blank" />
+                        </div>
+                        <button type="button" class="btn btn-primary" {{on "click" (fn this.createFamilyUser membership)}}
+                          disabled={{this.familyCreatingUser}}>
+                          {{#if this.familyCreatingUser}}Creating...{{else}}Create & Add Member{{/if}}
+                        </button>
+                      </div>
+                    {{/if}}
+                  </div>
+                {{/if}}
+              </div>
+            {{/if}}
+          {{/if}}
         </div>
       {{/each}}
     </div>

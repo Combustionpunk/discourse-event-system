@@ -421,7 +421,7 @@ module DiscourseEventSystem
       capture_id = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'id')
       amount = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'amount', 'value')
       membership.activate!(capture_id, amount)
-      render json: { success: true, organisation: { id: membership.organisation.id, name: membership.organisation.name } }
+      render json: { success: true, organisation: { id: membership.organisation.id, name: membership.organisation.name }, is_family: membership.membership_type&.is_family || false, max_members: membership.membership_type&.max_members || 1, membership_id: membership.id }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
@@ -441,6 +441,153 @@ module DiscourseEventSystem
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
+
+    def family_members
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], user_id: current_user.id)
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      members = membership.family_members.includes(:user)
+      render json: {
+        membership_id: membership.id,
+        is_family: membership.membership_type&.is_family || false,
+        max_members: membership.membership_type&.max_members || 1,
+        organisation_name: membership.organisation.name,
+        family_members: members.map { |fm|
+          {
+            user_id: fm.user_id,
+            username: fm.user&.username,
+            name: fm.user&.name,
+            avatar_url: fm.user&.avatar_template&.gsub('{size}', '45'),
+            date_of_birth: fm.user&.custom_fields&.dig('des_date_of_birth'),
+            brca_membership_number: fm.user&.custom_fields&.dig('brca_membership_number')
+          }
+        }
+      }
+    end
+
+    def add_family_member_self
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], user_id: current_user.id)
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      raise Discourse::InvalidAccess unless membership.membership_type&.is_family
+
+      if params[:create_user].present?
+        # Create a new Discourse user
+        username = params[:username]&.strip
+        name = params[:name]&.strip
+        raise Discourse::InvalidParameters, "Username is required" if username.blank?
+        raise Discourse::InvalidParameters, "Full name is required" if name.blank?
+
+        email = params[:email].present? ? params[:email].strip : "#{username}@rcmisfits.noreply"
+        password = SecureRandom.hex(8)
+
+        user = User.new(
+          username: username,
+          name: name,
+          email: email,
+          password: password,
+          active: true,
+          approved: true,
+          trust_level: 1
+        )
+        user.skip_email_validation = true if email.end_with?('@rcmisfits.noreply')
+
+        unless user.save
+          return render json: { error: user.errors.full_messages.join(', ') }, status: :unprocessable_entity
+        end
+
+        user.email_tokens.update_all(confirmed: true)
+        user.activate
+
+        # Set custom fields
+        if params[:date_of_birth].present?
+          user.custom_fields['des_date_of_birth'] = params[:date_of_birth]
+        end
+        if params[:brca_membership_number].present?
+          user.custom_fields['brca_membership_number'] = params[:brca_membership_number]
+        end
+        user.save_custom_fields
+
+        membership.add_family_member!(user)
+
+        render json: {
+          success: true,
+          created: true,
+          password: password,
+          user: {
+            user_id: user.id,
+            username: user.username,
+            name: user.name,
+            avatar_url: user.avatar_template&.gsub('{size}', '45'),
+            date_of_birth: user.custom_fields['des_date_of_birth'],
+            brca_membership_number: user.custom_fields['brca_membership_number']
+          }
+        }
+      else
+        # Link existing user
+        user = User.find_by(username: params[:username])
+        return render json: { error: 'User not found' }, status: :not_found unless user
+
+        if params[:date_of_birth].present?
+          user.custom_fields['des_date_of_birth'] = params[:date_of_birth]
+        end
+        if params[:brca_membership_number].present?
+          user.custom_fields['brca_membership_number'] = params[:brca_membership_number]
+        end
+        user.save_custom_fields if params[:date_of_birth].present? || params[:brca_membership_number].present?
+
+        membership.add_family_member!(user)
+
+        render json: {
+          success: true,
+          created: false,
+          user: {
+            user_id: user.id,
+            username: user.username,
+            name: user.name,
+            avatar_url: user.avatar_template&.gsub('{size}', '45'),
+            date_of_birth: user.custom_fields['des_date_of_birth'],
+            brca_membership_number: user.custom_fields['brca_membership_number']
+          }
+        }
+      end
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def remove_family_member_self
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], user_id: current_user.id)
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      member_user = User.find(params[:user_id])
+      membership.remove_family_member!(member_user)
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def update_family_member_self
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], user_id: current_user.id)
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      member_user = User.find(params[:user_id])
+      raise Discourse::InvalidAccess unless membership.family_members.exists?(user_id: member_user.id)
+
+      if params[:date_of_birth].present?
+        member_user.custom_fields['des_date_of_birth'] = params[:date_of_birth]
+      end
+      if params[:brca_membership_number].present?
+        member_user.custom_fields['brca_membership_number'] = params[:brca_membership_number]
+      elsif params.key?(:brca_membership_number)
+        member_user.custom_fields['brca_membership_number'] = nil
+      end
+      member_user.save_custom_fields
+
+      render json: {
+        success: true,
+        date_of_birth: member_user.custom_fields['des_date_of_birth'],
+        brca_membership_number: member_user.custom_fields['brca_membership_number']
+      }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
 
     def my_organisations
       # Orgs where user has active membership
@@ -486,7 +633,7 @@ module DiscourseEventSystem
     def my_memberships
       memberships = DesOrganisationMembership
         .where(user_id: current_user.id)
-        .includes(:organisation, :membership_type, :family_members)
+        .includes(:organisation, :membership_type, family_members: :user)
         .order(expires_at: :desc)
       render json: {
         memberships: memberships.map { |m|
@@ -494,11 +641,23 @@ module DiscourseEventSystem
             id: m.id,
             organisation: { id: m.organisation.id, name: m.organisation.name },
             membership_type: { name: m.membership_type.name, price: m.membership_type.price },
+            is_family: m.membership_type&.is_family || false,
+            max_members: m.membership_type&.max_members || 1,
             status: m.status,
             starts_at: m.starts_at,
             expires_at: m.expires_at,
             amount_paid: m.amount_paid,
-            family_members_count: m.family_members.count
+            family_members_count: m.family_members.count,
+            family_members: m.family_members.map { |fm|
+              {
+                user_id: fm.user_id,
+                username: fm.user&.username,
+                name: fm.user&.name,
+                avatar_url: fm.user&.avatar_template&.gsub('{size}', '45'),
+                date_of_birth: fm.user&.custom_fields&.dig('des_date_of_birth'),
+                brca_membership_number: fm.user&.custom_fields&.dig('brca_membership_number')
+              }
+            }
           }
         }
       }

@@ -8,8 +8,6 @@ export default function () {
   this.route("my-bookings", { path: "/my-bookings" });
   this.route("my-memberships", { path: "/my-memberships" });
   this.route("my-organisations", { path: "/my-organisations" });
-  this.route("my-memberships", { path: "/my-memberships" });
-  this.route("my-organisations", { path: "/my-organisations" });
   this.route("organisations", { path: "/organisations" });
   this.route("organisation-new", { path: "/organisations/new" });
   this.route("organisation", { path: "/organisations/:organisation_id" });
@@ -18,4 +16,5 @@ export default function () {
   this.route("my-garage", { path: "/my-garage" });
   this.route("membership-confirm", { path: "/memberships/:membership_id/confirm" });
   this.route("membership-cancel", { path: "/memberships/:membership_id/cancel" });
+  this.route("family-setup", { path: "/memberships/:membership_id/family-setup" });
 }

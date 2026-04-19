@@ -4,7 +4,11 @@
     <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
   </div>
 
-  {{#if this.model.success}}
+  {{#if this.model.redirecting}}
+    <div class="booking-success">
+      <p>Redirecting to family setup...</p>
+    </div>
+  {{else if this.model.success}}
     <div class="booking-success">
       <div class="booking-success-icon">🎉</div>
       <h1>Membership Confirmed!</h1>

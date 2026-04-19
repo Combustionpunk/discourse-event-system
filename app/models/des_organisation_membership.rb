@@ -66,6 +66,26 @@ class DesOrganisationMembership < ActiveRecord::Base
     Rails.logger.error "Failed to add user to group: #{e.message}"
   end
 
+  def add_user_to_discourse_group!(target_user)
+    group_id = organisation.discourse_group_id
+    return unless group_id
+    group = Group.find_by(id: group_id)
+    return unless group
+    group.add(target_user) unless group.users.include?(target_user)
+  rescue => e
+    Rails.logger.error "Failed to add user to group: #{e.message}"
+  end
+
+  def remove_user_from_discourse_group!(target_user)
+    group_id = organisation.discourse_group_id
+    return unless group_id
+    group = Group.find_by(id: group_id)
+    return unless group
+    group.remove(target_user)
+  rescue => e
+    Rails.logger.error "Failed to remove user from group: #{e.message}"
+  end
+
   def remove_from_discourse_group!
     group_id = organisation.discourse_group_id
     return unless group_id
