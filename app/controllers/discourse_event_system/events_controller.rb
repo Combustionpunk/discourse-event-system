@@ -217,6 +217,7 @@ module DiscourseEventSystem
             spaces_remaining: ec.spaces_remaining,
             entrants: class_bookings.map do |b|
               bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
+              car = bc&.transponder_number.present? ? DesUserCar.active.includes(:manufacturer, :car_model).find_by(user_id: b.user_id, transponder_number: bc.transponder_number) : nil
               {
                 booking_id: b.id,
                 booking_class_id: bc&.id,
@@ -224,6 +225,8 @@ module DiscourseEventSystem
                 username: b.user.username,
                 avatar_template: b.user.avatar_template&.gsub('{size}', '32'),
                 transponder: bc&.transponder_number,
+                manufacturer_name: car&.manufacturer&.name,
+                model_name: car&.car_model&.name || car&.custom_model_name,
                 status: b.status,
                 booking_class_status: bc&.status,
                 brca_number: b.brca_membership_number
@@ -248,10 +251,13 @@ module DiscourseEventSystem
             name: ec.name,
             entrants: class_bookings.map do |b|
               bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
+              car = bc&.transponder_number.present? ? DesUserCar.active.includes(:manufacturer, :car_model).find_by(user_id: b.user_id, transponder_number: bc.transponder_number) : nil
               {
                 username: b.user.username,
                 avatar_template: b.user.avatar_template&.gsub('{size}', '32'),
                 transponder: bc&.transponder_number,
+                manufacturer_name: car&.manufacturer&.name,
+                model_name: car&.car_model&.name || car&.custom_model_name,
                 status: b.status,
                 brca_number: b.brca_membership_number
               }
