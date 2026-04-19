@@ -7,6 +7,7 @@ import { inject as service } from "@ember/service";
 
 export default class EventManageController extends Controller {
   @service router;
+  @service currentUser;
   @tracked isSaving = false;
   @tracked activeTab = "details";
   @tracked editMode = false;
@@ -15,6 +16,35 @@ export default class EventManageController extends Controller {
   @tracked newClassCapacity = "";
   @tracked editingClassId = null;
   @tracked editingClassCapacity = "";
+  @tracked entrantsFilter = "all";
+
+  get filteredEntrantsClasses() {
+    const classes = this.model.entrants?.classes || [];
+    if (this.entrantsFilter === "all") return classes;
+    return classes.map(cls => ({
+      ...cls,
+      entrants: cls.entrants.filter(e => e.status === this.entrantsFilter)
+    }));
+  }
+
+  get entrantsStatusCounts() {
+    const classes = this.model.entrants?.classes || [];
+    const counts = { all: 0, confirmed: 0, pending: 0, cancelled: 0, waitlist: 0 };
+    classes.forEach(cls => {
+      (cls.entrants || []).forEach(e => {
+        counts.all++;
+        if (counts[e.status] !== undefined) {
+          counts[e.status]++;
+        }
+      });
+    });
+    return counts;
+  }
+
+  @action
+  setEntrantsFilter(filter) {
+    this.entrantsFilter = filter;
+  }
 
   @action
   setTab(tab) {
@@ -191,6 +221,19 @@ export default class EventManageController extends Controller {
           booking_id: entrant.booking_id,
           booking_class_id: entrant.booking_class_id,
         },
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async deleteBooking(entrant, className) {
+    if (!window.confirm(`Permanently delete ${entrant.username}'s booking for ${className}? This cannot be undone.`)) return;
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/bookings/" + entrant.booking_id + ".json", {
+        type: "DELETE",
       });
       this.router.refresh();
     } catch (error) {

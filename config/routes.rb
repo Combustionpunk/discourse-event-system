@@ -35,6 +35,7 @@ DiscourseEventSystem::Engine.routes.draw do
   put "/des/events/:id/classes/:class_id" => "events#update_class"
   post "/des/events/:id/classes/:class_id/toggle-status" => "events#toggle_class_status"
   post "/des/events/:id/cancel-entrant" => "events#cancel_entrant"
+  delete "/des/events/:id/bookings/:booking_id" => "events#delete_booking"
 
   get "/des/bookings" => "bookings#index"
   post "/des/waitlist" => "bookings#join_waitlist"

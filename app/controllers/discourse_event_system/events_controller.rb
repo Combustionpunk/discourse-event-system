@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show, :public_entrants]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
@@ -312,6 +312,19 @@ module DiscourseEventSystem
 
       service = DesBookingService.new(current_user, @event)
       service.admin_cancel_booking_class(booking, booking_class, current_user)
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+
+    def delete_booking
+      ensure_organisation_admin!(@event.organisation)
+      raise Discourse::InvalidAccess unless current_user.admin?
+      booking = DesEventBooking.find(params[:booking_id])
+      raise "Booking does not belong to this event" unless booking.event_id == @event.id
+      booking.booking_classes.destroy_all
+      booking.destroy!
       render json: { success: true }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
