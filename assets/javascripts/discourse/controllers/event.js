@@ -74,7 +74,7 @@ export default class EventController extends Controller {
   }
 
   get icsDownloadUrl() {
-    return "/des/events/" + this.model.id + "/calendar.ics";
+    return "/des/events/" + this.model.id + "/calendar";
   }
 
 

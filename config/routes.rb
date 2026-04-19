@@ -29,7 +29,8 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/events/:id/cancel" => "events#cancel"
   get "/des/events/:id/entrants" => "events#entrants"
   get "/des/events/:id/public-entrants" => "events#public_entrants"
-  get "/des/events/:id/calendar.ics" => "events#calendar_ics"
+  get "/des/events/:id/calendar" => "events#calendar_ics"
+  get "/des/events/:id/calendar.ics" => "events#calendar_ics", format: false
   get "/des/events/:id/export-csv" => "events#export_csv"
   get "/des/events/:id/export-csv.csv" => "events#export_csv"
   post "/des/events/:id/classes" => "events#add_class"
