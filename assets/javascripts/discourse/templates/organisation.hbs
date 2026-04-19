@@ -335,25 +335,34 @@
               <strong>{{m.username}}</strong>
               <div class="admin-org-meta">
                 <span>{{m.membership_type}}</span>
-                <span class="org-status org-status--{{m.status}}">{{m.status}}</span>
+                <span class="booking-status booking-status--{{m.status}}">{{m.status}}</span>
                 {{#if m.expires_at}}<span>Expires: {{m.expires_at}}</span>{{/if}}
                 {{#if m.is_family}}
-                  <span>Family: {{m.family_members.length}}/{{m.max_members}} members</span>
+                  <span>👨‍👩‍👧 {{m.family_members.length}}/{{m.max_members}} members</span>
                 {{/if}}
               </div>
             </div>
             <div class="admin-org-actions">
+              <select class="membership-status-select" {{on "change" (fn this.changeMembershipStatus m)}}>
+                <option value="active" selected={{eq m.status "active"}}>Active</option>
+                <option value="pending" selected={{eq m.status "pending"}}>Pending</option>
+                <option value="expired" selected={{eq m.status "expired"}}>Expired</option>
+                <option value="cancelled" selected={{eq m.status "cancelled"}}>Cancelled</option>
+              </select>
               {{#if (eq this.editingMembershipId m.id)}}
                 <input type="date" value={{this.editingMembershipExpiry}} {{on "change" this.updateEditingExpiry}} />
                 <button class="btn btn-primary btn-small" {{on "click" this.saveEditMembership}}>Save</button>
                 <button class="btn btn-default btn-small" {{on "click" this.cancelEditMembership}}>Cancel</button>
               {{else}}
-                <button class="btn btn-small btn-default" {{on "click" (fn this.editMembership m)}}>Edit</button>
+                <button class="btn btn-small btn-default" {{on "click" (fn this.editMembership m)}}>📅 Expiry</button>
                 {{#if m.is_family}}
                   <button class="btn btn-small btn-default" {{on "click" (fn this.toggleManageFamily m.id)}}>
-                    Manage Family
+                    👨‍👩‍👧 Family
                   </button>
                 {{/if}}
+                <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteMembership m)}}>
+                  🗑 Delete
+                </button>
               {{/if}}
             </div>
           </div>

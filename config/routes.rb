@@ -61,6 +61,7 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/des/organisations/:id/admin-memberships" => "organisations#admin_memberships"
   post "/des/organisations/:id/admin-memberships" => "organisations#admin_add_membership"
   put "/des/organisations/:id/admin-memberships/:membership_id" => "organisations#admin_update_membership"
+  delete "/des/organisations/:id/admin-memberships/:membership_id" => "organisations#admin_delete_membership"
   post "/des/organisations/:id/admin-memberships/:membership_id/family" => "organisations#admin_add_family_member"
   delete "/des/organisations/:id/admin-memberships/:membership_id/family/:user_id" => "organisations#admin_remove_family_member"
   put "/des/organisations/:id/admin-memberships/:membership_id/family/:user_id" => "organisations#admin_update_family_member"

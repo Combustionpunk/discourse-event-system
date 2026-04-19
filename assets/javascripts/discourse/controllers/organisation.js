@@ -153,6 +153,35 @@ export default class OrganisationController extends Controller {
   }
 
   @action
+  async deleteMembership(m) {
+    if (!window.confirm(`Permanently delete ${m.username}'s membership? This cannot be undone.`)) return;
+    try {
+      await ajax("/des/organisations/" + this.model.id + "/admin-memberships/" + m.id + ".json", {
+        type: "DELETE",
+      });
+      this.loadAdminMemberships();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async changeMembershipStatus(m, event) {
+    const newStatus = event.target.value;
+    if (newStatus === m.status) return;
+    try {
+      await ajax("/des/organisations/" + this.model.id + "/admin-memberships/" + m.id + ".json", {
+        type: "PUT",
+        data: { status: newStatus },
+      });
+      this.loadAdminMemberships();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+
+  @action
   showEvents() { this.activeTab = "events"; }
 
   @action

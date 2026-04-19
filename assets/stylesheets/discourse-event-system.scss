@@ -1998,3 +1998,21 @@
   gap: 4px;
   white-space: nowrap;
 }
+
+// Membership status select dropdown
+.membership-status-select {
+  padding: 4px 8px;
+  border: 1px solid var(--primary-low);
+  border-radius: 4px;
+  background: var(--secondary);
+  color: var(--primary);
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.admin-org-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
