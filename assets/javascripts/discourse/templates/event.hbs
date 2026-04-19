@@ -166,6 +166,25 @@
         💬 Discuss this Event
       </a>
     {{/if}}
+
+    <div class="calendar-dropdown-wrapper">
+      <button class="btn btn-default" type="button" {{on "click" this.toggleCalendarDropdown}}>
+        📅 Add to Calendar
+      </button>
+      {{#if this.showCalendarDropdown}}
+        <div class="calendar-dropdown">
+          <a href={{this.icsDownloadUrl}} class="calendar-dropdown-item" download>
+            📅 Download ICS (Apple/Outlook)
+          </a>
+          <a href={{this.googleCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">
+            📅 Google Calendar
+          </a>
+          <a href={{this.outlookCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">
+            📅 Outlook.com
+          </a>
+        </div>
+      {{/if}}
+    </div>
   </div>
 
 
@@ -187,6 +206,8 @@
                   <tr>
                     <th class="avatar-col"></th>
                     <th>Username</th>
+                    <th>Manufacturer</th>
+                    <th>Model</th>
                     <th>Transponder</th>
                     <th>BRCA No.</th>
                     <th>Status</th>
@@ -195,8 +216,10 @@
                 <tbody>
                   {{#each cls.entrants as |entrant|}}
                     <tr class="entrant-row entrant-row--{{entrant.status}}">
-                      <td class="avatar-col"><img src="{{entrant.avatar_template}}" class="entrant-avatar" alt="" /></td>
+                      <td class="avatar-col"><a data-user-card={{entrant.username}}><img src="{{entrant.avatar_template}}" class="entrant-avatar" alt="" /></a></td>
                       <td>{{entrant.username}}</td>
+                      <td>{{entrant.manufacturer_name}}</td>
+                      <td>{{entrant.model_name}}</td>
                       <td class="transponder-number">{{entrant.transponder}}</td>
                       <td>{{entrant.brca_number}}</td>
                       <td>

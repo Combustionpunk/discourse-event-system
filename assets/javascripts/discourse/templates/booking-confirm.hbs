@@ -72,6 +72,24 @@
     {{/if}}
   </div>
 
+
+  {{#if this.model.event.id}}
+    <div class="booking-calendar-prompt">
+      <h3>📅 Add to your calendar?</h3>
+      <div class="calendar-options">
+        <a href="/des/events/{{this.model.event.id}}/calendar.ics" class="btn btn-default" download>
+          📅 Download ICS
+        </a>
+        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{this.model.event.title}}" class="btn btn-default" target="_blank" rel="noopener">
+          📅 Google Calendar
+        </a>
+        <a href="https://outlook.live.com/calendar/0/deeplink/compose?rru=addevent&subject={{this.model.event.title}}" class="btn btn-default" target="_blank" rel="noopener">
+          📅 Outlook.com
+        </a>
+      </div>
+    </div>
+  {{/if}}
+
   <div class="booking-confirm-actions">
     <LinkTo @route="my-bookings" class="btn btn-primary">
       🎟 View My Bookings

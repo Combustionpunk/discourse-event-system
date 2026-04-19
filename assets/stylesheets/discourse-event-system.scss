@@ -2085,3 +2085,60 @@
   gap: 4px;
   margin-top: 6px;
 }
+
+// Clickable avatar in entrants table
+.entrant-avatar {
+  cursor: pointer;
+}
+
+// Calendar dropdown
+.calendar-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.calendar-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  min-width: 220px;
+  background: var(--secondary);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.calendar-dropdown-item {
+  display: block;
+  padding: 10px 14px;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.9em;
+  border-bottom: 1px solid var(--primary-very-low);
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--primary-very-low); }
+}
+
+// Booking confirm calendar prompt
+.booking-calendar-prompt {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--primary-very-low);
+  border-radius: 8px;
+  text-align: center;
+
+  h3 {
+    margin: 0 0 12px;
+  }
+}
+
+.calendar-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}

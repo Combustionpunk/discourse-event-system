@@ -18,6 +18,7 @@ export default class EventController extends Controller {
   @tracked familyEligibleCars = null;
   @tracked familyCarSelections = {};
   @tracked isWhosComingExpanded = false;
+  @tracked showCalendarDropdown = false;
 
   get totalEntrantCount() {
     if (!this.model.public_entrants) return 0;
@@ -31,6 +32,50 @@ export default class EventController extends Controller {
   @action
   toggleWhosComingSection() {
     this.isWhosComingExpanded = !this.isWhosComingExpanded;
+
+  @action
+  toggleCalendarDropdown() {
+    this.showCalendarDropdown = !this.showCalendarDropdown;
+  }
+
+  get googleCalendarUrl() {
+    const e = this.model;
+    if (!e.start_date) return "#";
+    const start = new Date(e.start_date);
+    const end = e.end_date ? new Date(e.end_date) : new Date(start.getTime() + 4 * 60 * 60 * 1000);
+    const fmt = (d) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const dates = fmt(start) + "/" + fmt(end);
+    const params = new URLSearchParams({
+      action: "TEMPLATE",
+      text: e.title,
+      dates: dates,
+      location: e.location || "",
+      details: (e.description || "") + "\n\n" + window.location.origin + "/events/" + e.id
+    });
+    return "https://calendar.google.com/calendar/render?" + params.toString();
+  }
+
+  get outlookCalendarUrl() {
+    const e = this.model;
+    if (!e.start_date) return "#";
+    const start = new Date(e.start_date).toISOString();
+    const end = e.end_date ? new Date(e.end_date).toISOString() : new Date(new Date(e.start_date).getTime() + 4 * 60 * 60 * 1000).toISOString();
+    const params = new URLSearchParams({
+      rru: "addevent",
+      subject: e.title,
+      startdt: start,
+      enddt: end,
+      location: e.location || "",
+      body: (e.description || "") + "\n\n" + window.location.origin + "/events/" + e.id,
+      path: "/calendar/action/compose"
+    });
+    return "https://outlook.live.com/calendar/0/deeplink/compose?" + params.toString();
+  }
+
+  get icsDownloadUrl() {
+    return "/des/events/" + this.model.id + "/calendar.ics";
+  }
+
   }
 
   _calculateForClasses(count, isMember, isJunior) {
