@@ -173,7 +173,7 @@
       </button>
       {{#if this.showCalendarDropdown}}
         <div class="calendar-dropdown">
-          <a href={{this.icsDownloadUrl}} class="calendar-dropdown-item" download>
+          <a href="#" class="calendar-dropdown-item" {{on "click" this.downloadICS}}>
             📅 Download ICS (Apple/Outlook)
           </a>
           <a href={{this.googleCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">

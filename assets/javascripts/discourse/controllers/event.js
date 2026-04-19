@@ -73,8 +73,38 @@ export default class EventController extends Controller {
     return "https://outlook.live.com/calendar/0/deeplink/compose?" + params.toString();
   }
 
-  get icsDownloadUrl() {
-    return "/des/events/" + this.model.id + "/calendar";
+  @action
+  downloadICS() {
+    const e = this.model;
+    if (!e.start_date) return;
+    const fmt = (d) => new Date(d).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const start = fmt(e.start_date);
+    const end = e.end_date ? fmt(e.end_date) : fmt(new Date(new Date(e.start_date).getTime() + 4 * 60 * 60 * 1000));
+    const ics = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//RC Event System//EN",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "BEGIN:VEVENT",
+      "SUMMARY:" + (e.title || ""),
+      "DTSTART:" + start,
+      "DTEND:" + end,
+      "LOCATION:" + (e.location || ""),
+      "DESCRIPTION:" + (e.description || "").replace(/\n/g, "\\n"),
+      "URL:" + window.location.origin + "/events/" + e.id,
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ].join("\r\n");
+    const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = (e.title || "event").replace(/[^a-z0-9]/gi, "-").toLowerCase() + ".ics";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
 

@@ -2,8 +2,8 @@
 
 module DiscourseEventSystem
   class EventsController < ApplicationController
-    before_action :ensure_logged_in, except: [:index, :show, :public_entrants, :calendar_ics]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :calendar_ics]
+    before_action :ensure_logged_in, except: [:index, :show, :public_entrants]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
@@ -336,34 +336,6 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
-
-    def calendar_ics
-      event = @event
-      cal = []
-      cal << "BEGIN:VCALENDAR"
-      cal << "VERSION:2.0"
-      cal << "PRODID:-//DiscourseEventSystem//EN"
-      cal << "CALSCALE:GREGORIAN"
-      cal << "METHOD:PUBLISH"
-      cal << "BEGIN:VEVENT"
-      cal << "UID:des-event-#{event.id}@#{Discourse.current_hostname}"
-      cal << "DTSTART:#{event.start_date.utc.strftime('%Y%m%dT%H%M%SZ')}"
-      if event.end_date.present?
-        cal << "DTEND:#{event.end_date.utc.strftime('%Y%m%dT%H%M%SZ')}"
-      else
-        cal << "DTEND:#{(event.start_date + 4.hours).utc.strftime('%Y%m%dT%H%M%SZ')}"
-      end
-      cal << "SUMMARY:#{ics_escape(event.title)}"
-      cal << "DESCRIPTION:#{ics_escape(event.description.to_s)}"
-      cal << "LOCATION:#{ics_escape(event.location.to_s)}" if event.location.present?
-      cal << "URL:#{Discourse.base_url}/events/#{event.id}"
-      cal << "END:VEVENT"
-      cal << "END:VCALENDAR"
-
-      response.headers['Content-Disposition'] = "attachment; filename=\"#{event.title.parameterize}-event.ics\""
-      render plain: cal.join("\r\n"), content_type: 'text/calendar'
-    end
-
     private
 
     def set_event
@@ -478,10 +450,6 @@ module DiscourseEventSystem
 
     def serialize_events(events)
       events.map { |e| serialize_event(e) }
-    end
-
-    def ics_escape(text)
-      text.to_s.gsub('\\', '\\\\').gsub("\n", '\n').gsub(',', '\,').gsub(';', '\;')
     end
 
   end
