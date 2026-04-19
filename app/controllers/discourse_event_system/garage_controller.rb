@@ -2,7 +2,7 @@
 
 module DiscourseEventSystem
   class GarageController < ApplicationController
-    before_action :ensure_logged_in
+    before_action :ensure_logged_in, except: [:public_garage]
 
     def index
       cars = DesUserCar.where(user_id: current_user.id)
@@ -16,6 +16,28 @@ module DiscourseEventSystem
         class_types: DesEventClassType.all.order(:name).map { |ct| { id: ct.id, name: ct.name } }
       }
     end
+
+    def public_garage
+      user = User.find_by(username: params[:username])
+      return render json: { cars: [] }, status: :not_found unless user
+      cars = DesUserCar.where(user_id: user.id)
+        .includes(:manufacturer, :car_model, :class_type)
+        .active
+        .select { |c| c.car_model.nil? || c.car_model.status == 'approved' }
+      render json: {
+        cars: cars.map { |c|
+          {
+            friendly_name: c.display_name,
+            manufacturer: c.manufacturer&.name || 'Unknown',
+            model: c.car_model&.name || c.custom_model_name || 'Unknown',
+            chassis_type: c.car_model&.chassis_type,
+            driveline: c.effective_driveline,
+            year_released: c.year_released
+          }
+        }
+      }
+    end
+
 
     def models
       manufacturer = DesManufacturer.find(params[:manufacturer_id])

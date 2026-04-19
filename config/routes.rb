@@ -100,6 +100,7 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/garage" => "garage#create"
   put "/des/garage/:id" => "garage#update"
   delete "/des/garage/:id" => "garage#destroy"
+  get "/des/garage/:username/public" => "garage#public_garage"
   get "/des/garage/models" => "garage#models"
   post "/des/garage/suggest-manufacturer" => "garage#suggest_manufacturer"
   post "/des/garage/suggest-model" => "garage#suggest_model"

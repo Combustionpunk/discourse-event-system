@@ -2027,3 +2027,49 @@
   color: var(--primary);
   font-size: 0.95em;
 }
+
+// User profile garage section
+.user-profile-garage {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--primary-low);
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 1.1em;
+  }
+}
+
+.profile-garage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.profile-garage-card {
+  padding: 10px 14px;
+  background: var(--primary-very-low);
+  border-radius: 8px;
+  border-left: 3px solid var(--tertiary);
+}
+
+.profile-garage-card-name {
+  font-weight: 600;
+  font-size: 0.95em;
+  margin-bottom: 4px;
+}
+
+.profile-garage-card-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.85em;
+  color: var(--primary-medium);
+}
+
+.profile-garage-tag {
+  background: var(--primary-low);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
