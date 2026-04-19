@@ -235,7 +235,7 @@ module DiscourseEventSystem
     end
 
     def public_entrants
-      bookings = DesEventBooking.where(event_id: @event.id, status: 'confirmed')
+      bookings = DesEventBooking.where(event_id: @event.id, status: ['confirmed', 'pending'])
         .includes(:user, booking_classes: :event_class)
 
       render json: {

@@ -17,6 +17,21 @@ export default class EventController extends Controller {
   @tracked familySelections = {};
   @tracked familyEligibleCars = null;
   @tracked familyCarSelections = {};
+  @tracked isWhosComingExpanded = false;
+
+  get totalEntrantCount() {
+    if (!this.model.public_entrants) return 0;
+    let count = 0;
+    this.model.public_entrants.forEach(cls => {
+      count += (cls.entrants || []).length;
+    });
+    return count;
+  }
+
+  @action
+  toggleWhosComingSection() {
+    this.isWhosComingExpanded = !this.isWhosComingExpanded;
+  }
 
   _calculateForClasses(count, isMember, isJunior) {
     const pricing = this.model.pricing;

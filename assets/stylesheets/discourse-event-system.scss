@@ -1922,3 +1922,49 @@
     }
   }
 }
+
+// Who's Coming collapsible toggle
+.whos-coming-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0;
+  width: 100%;
+  text-align: left;
+  color: var(--primary);
+
+  h2 {
+    margin: 0;
+    font-size: 1.3em;
+  }
+
+  .whos-coming-chevron {
+    font-size: 0.9em;
+    color: var(--primary-medium);
+  }
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+// Status group headings in Who's Coming
+.entrant-status-heading {
+  font-size: 0.9em;
+  font-weight: 600;
+  margin: 16px 0 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  display: inline-block;
+
+  &--confirmed {
+    color: var(--success);
+  }
+
+  &--pending {
+    color: var(--highlight);
+  }
+}
