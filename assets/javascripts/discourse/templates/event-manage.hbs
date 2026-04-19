@@ -258,6 +258,7 @@
             <table class="entrants-table">
               <thead>
                 <tr>
+                  <th class="avatar-col">Avatar</th>
                   <th>Username</th>
                   <th>Transponder</th>
                   <th>BRCA No.</th>
@@ -268,6 +269,7 @@
               <tbody>
                 {{#each cls.entrants as |entrant index|}}
                   <tr class="entrant-row entrant-row--{{entrant.status}}">
+                    <td class="avatar-col"><img src="{{entrant.avatar_template}}" class="entrant-avatar" alt="" /></td>
                     <td>{{entrant.username}}</td>
                     <td class="transponder-number">{{entrant.transponder}}</td>
                     <td>{{entrant.brca_number}}</td>

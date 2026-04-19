@@ -2,8 +2,8 @@
 
 module DiscourseEventSystem
   class EventsController < ApplicationController
-    before_action :ensure_logged_in, except: [:index, :show]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant]
+    before_action :ensure_logged_in, except: [:index, :show, :public_entrants]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
@@ -222,6 +222,7 @@ module DiscourseEventSystem
                 booking_class_id: bc&.id,
                 event_class_id: ec.id,
                 username: b.user.username,
+                avatar_template: b.user.avatar_template&.gsub('{size}', '32'),
                 transponder: bc&.transponder_number,
                 status: b.status,
                 booking_class_status: bc&.status,
@@ -232,6 +233,34 @@ module DiscourseEventSystem
         end
       }
     end
+
+    def public_entrants
+      bookings = DesEventBooking.where(event_id: @event.id, status: 'confirmed')
+        .includes(:user, booking_classes: :event_class)
+
+      render json: {
+        classes: @event.des_event_classes.map do |ec|
+          class_bookings = bookings.select { |b|
+            b.booking_classes.any? { |bc| bc.event_class_id == ec.id }
+          }
+          {
+            id: ec.id,
+            name: ec.name,
+            entrants: class_bookings.map do |b|
+              bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
+              {
+                username: b.user.username,
+                avatar_template: b.user.avatar_template&.gsub('{size}', '32'),
+                transponder: bc&.transponder_number,
+                status: b.status,
+                brca_number: b.brca_membership_number
+              }
+            end
+          }
+        end
+      }
+    end
+
 
     def cancel
       ensure_organisation_admin!(@event.organisation)

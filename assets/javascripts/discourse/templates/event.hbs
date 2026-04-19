@@ -138,6 +138,46 @@
     {{/if}}
   {{/if}}
 
+  {{!-- Who's Coming Section --}}
+  {{#if this.model.public_entrants.length}}
+    <div class="event-whos-coming">
+      <h2>Who's Coming?</h2>
+      {{#each this.model.public_entrants as |cls|}}
+        {{#if cls.entrants.length}}
+          <div class="entrants-class">
+            <h3>{{cls.name}}</h3>
+            <table class="entrants-table entrants-table--public">
+              <thead>
+                <tr>
+                  <th class="avatar-col"></th>
+                  <th>Username</th>
+                  <th>Transponder</th>
+                  <th>BRCA No.</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each cls.entrants as |entrant|}}
+                  <tr class="entrant-row entrant-row--confirmed">
+                    <td class="avatar-col"><img src="{{entrant.avatar_template}}" class="entrant-avatar" alt="" /></td>
+                    <td>{{entrant.username}}</td>
+                    <td class="transponder-number">{{entrant.transponder}}</td>
+                    <td>{{entrant.brca_number}}</td>
+                    <td>
+                      <span class="booking-status booking-status--confirmed">
+                        confirmed
+                      </span>
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+        {{/if}}
+      {{/each}}
+    </div>
+  {{/if}}
+
   <div class="event-detail-actions">
     {{#if (eq this.model.status "draft")}}
       <button class="btn btn-warning" {{on "click" this.publishEvent}}>
