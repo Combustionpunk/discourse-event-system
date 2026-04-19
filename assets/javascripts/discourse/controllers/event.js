@@ -32,6 +32,7 @@ export default class EventController extends Controller {
   @action
   toggleWhosComingSection() {
     this.isWhosComingExpanded = !this.isWhosComingExpanded;
+  }
 
   @action
   toggleCalendarDropdown() {
