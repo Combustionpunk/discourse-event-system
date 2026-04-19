@@ -77,7 +77,6 @@ export default class EventController extends Controller {
     return "/des/events/" + this.model.id + "/calendar.ics";
   }
 
-  }
 
   _calculateForClasses(count, isMember, isJunior) {
     const pricing = this.model.pricing;
