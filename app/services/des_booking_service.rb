@@ -32,12 +32,17 @@ class DesBookingService
       event_class = DesEventClass.find(class_id)
       raise "#{event_class.name} is full" if event_class.sold_out?
 
+      selected_car_id = car_selections[class_id.to_s] || car_selections[class_id]
+      selected_car = selected_car_id.present? ? DesUserCar.find_by(id: selected_car_id) : nil
+
       booking_class = DesEventBookingClass.create!(
         booking_id: booking.id,
         event_class_id: class_id,
+        car_id: selected_car&.id,
+        transponder_number: selected_car&.transponder_number,
         status: 'confirmed'
       )
-      booking_class.assign_transponder(@user)
+      booking_class.assign_transponder(@user) unless selected_car
     end
 
     total = booking.calculate_total
@@ -341,13 +346,17 @@ class DesBookingService
     class_ids.each do |class_id|
       event_class = DesEventClass.find(class_id)
       raise "#{event_class.name} is full" if event_class.sold_out?
+      selected_car_id = car_selections[class_id.to_s] || car_selections[class_id]
+      selected_car = selected_car_id.present? ? DesUserCar.find_by(id: selected_car_id) : nil
 
       booking_class = DesEventBookingClass.create!(
         booking_id: booking.id,
         event_class_id: class_id,
+        car_id: selected_car&.id,
+        transponder_number: selected_car&.transponder_number,
         status: 'confirmed'
       )
-      booking_class.assign_transponder(user, car_owner: booked_by)
+      booking_class.assign_transponder(user, car_owner: booked_by) unless selected_car
     end
 
     booking

@@ -201,7 +201,7 @@ module DiscourseEventSystem
     def entrants
       ensure_organisation_admin!(@event.organisation)
       bookings = DesEventBooking.where(event_id: @event.id)
-        .includes(:user, booking_classes: :event_class)
+        .includes(:user, booking_classes: [:event_class, { user_car: [:manufacturer, :car_model] }])
 
 
       render json: {
@@ -217,7 +217,7 @@ module DiscourseEventSystem
             spaces_remaining: ec.spaces_remaining,
             entrants: class_bookings.map do |b|
               bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
-              car = bc&.transponder_number.present? ? DesUserCar.active.includes(:manufacturer, :car_model).find_by(user_id: b.user_id, transponder_number: bc.transponder_number) : nil
+              car = bc&.user_car
               {
                 booking_id: b.id,
                 booking_class_id: bc&.id,
@@ -239,7 +239,7 @@ module DiscourseEventSystem
 
     def public_entrants
       bookings = DesEventBooking.where(event_id: @event.id, status: ['confirmed', 'pending'])
-        .includes(:user, booking_classes: :event_class)
+        .includes(:user, booking_classes: [:event_class, { user_car: [:manufacturer, :car_model] }])
 
       render json: {
         classes: @event.des_event_classes.map do |ec|
@@ -251,7 +251,7 @@ module DiscourseEventSystem
             name: ec.name,
             entrants: class_bookings.map do |b|
               bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
-              car = bc&.transponder_number.present? ? DesUserCar.active.includes(:manufacturer, :car_model).find_by(user_id: b.user_id, transponder_number: bc.transponder_number) : nil
+              car = bc&.user_car
               {
                 username: b.user.username,
                 avatar_template: b.user.avatar_template&.gsub('{size}', '32'),

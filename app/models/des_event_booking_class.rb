@@ -1,6 +1,7 @@
 class DesEventBookingClass < ActiveRecord::Base
   belongs_to :booking, class_name: 'DesEventBooking', foreign_key: 'booking_id'
   belongs_to :event_class, class_name: 'DesEventClass', foreign_key: 'event_class_id'
+  belongs_to :user_car, class_name: 'DesUserCar', foreign_key: 'car_id', optional: true
 
   validates :booking_id, presence: true
   validates :event_class_id, presence: true
