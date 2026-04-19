@@ -32,7 +32,8 @@ module DiscourseEventSystem
             model: c.car_model&.name || c.custom_model_name || 'Unknown',
             chassis_type: c.car_model&.chassis_type,
             driveline: c.effective_driveline,
-            year_released: c.year_released
+            year_released: c.year_released,
+            transponder_number: c.transponder_number
           }
         }
       }

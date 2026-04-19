@@ -1,0 +1,32 @@
+<div class="user-garage-tab">
+  {{#if this.model.cars.length}}
+    <div class="profile-garage-grid">
+      {{#each this.model.cars as |car|}}
+        <div class="profile-garage-card">
+          <div class="profile-garage-card-name">{{car.friendly_name}}</div>
+          <div class="profile-garage-card-details">
+            <span>{{car.manufacturer}} {{car.model}}</span>
+          </div>
+          <div class="profile-garage-card-tags">
+            {{#if car.driveline}}
+              <span class="profile-garage-tag">{{car.driveline}}</span>
+            {{/if}}
+            {{#if car.chassis_type}}
+              <span class="profile-garage-tag">{{car.chassis_type}}</span>
+            {{/if}}
+            {{#if car.year_released}}
+              <span class="profile-garage-tag">{{car.year_released}}</span>
+            {{/if}}
+            {{#if car.transponder_number}}
+              <span class="profile-garage-tag">📡 {{car.transponder_number}}</span>
+            {{/if}}
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="empty-state">
+      <p>No cars in garage yet.</p>
+    </div>
+  {{/if}}
+</div>

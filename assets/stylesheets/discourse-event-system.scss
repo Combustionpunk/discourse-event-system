@@ -2073,3 +2073,15 @@
   border-radius: 3px;
   font-size: 0.85em;
 }
+
+// User profile garage tab
+.user-garage-tab {
+  padding: 12px 0;
+}
+
+.profile-garage-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
