@@ -24,6 +24,7 @@ export default class EventBookingWidget extends Component {
   @tracked familyCarSelections = {};
   @tracked isWhosComingExpanded = false;
   @tracked showCalendarDropdown = false;
+  @tracked entrantsFilter = "all";
 
   constructor() {
     super(...arguments);
@@ -126,6 +127,26 @@ export default class EventBookingWidget extends Component {
     return c;
   }
 
+
+  get filteredEntrants() {
+    if (this.entrantsFilter === "all") return this.publicEntrants;
+    return this.publicEntrants.map(cls => ({
+      ...cls,
+      entrants: cls.entrants.filter(e => e.status === this.entrantsFilter)
+    }));
+  }
+
+  get entrantsStatusCounts() {
+    const counts = { all: 0, confirmed: 0, pending: 0, cancelled: 0, waitlist: 0 };
+    this.publicEntrants.forEach(cls => {
+      (cls.entrants || []).forEach(e => {
+        counts.all++;
+        if (counts[e.status] !== undefined) counts[e.status]++;
+      });
+    });
+    return counts;
+  }
+
   // --- Calendar ---
 
   get googleCalendarUrl() {
@@ -172,6 +193,7 @@ export default class EventBookingWidget extends Component {
   }
 
   @action toggleWhosComingSection() { this.isWhosComingExpanded = !this.isWhosComingExpanded; }
+  @action setEntrantsFilter(filter) { this.entrantsFilter = filter; }
   @action toggleCalendarDropdown() { this.showCalendarDropdown = !this.showCalendarDropdown; }
 
   @action downloadICS() {
@@ -397,7 +419,13 @@ export default class EventBookingWidget extends Component {
               <h3>👥 Who's Coming? ({{this.totalEntrantCount}} entries)</h3>
             </button>
             {{#if this.isWhosComingExpanded}}
-              {{#each this.publicEntrants as |cls|}}
+              <div class="entrants-filters">
+                <button class="btn btn-small {{if (eq this.entrantsFilter 'all') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setEntrantsFilter "all")}}>All ({{this.entrantsStatusCounts.all}})</button>
+                <button class="btn btn-small {{if (eq this.entrantsFilter 'confirmed') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setEntrantsFilter "confirmed")}}>✅ Confirmed ({{this.entrantsStatusCounts.confirmed}})</button>
+                <button class="btn btn-small {{if (eq this.entrantsFilter 'pending') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setEntrantsFilter "pending")}}>⏳ Pending ({{this.entrantsStatusCounts.pending}})</button>
+                <button class="btn btn-small {{if (eq this.entrantsFilter 'cancelled') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setEntrantsFilter "cancelled")}}>❌ Cancelled ({{this.entrantsStatusCounts.cancelled}})</button>
+              </div>
+              {{#each this.filteredEntrants as |cls|}}
                 {{#if cls.entrants.length}}
                   <div class="entrants-class">
                     <h4>{{cls.name}}</h4>
