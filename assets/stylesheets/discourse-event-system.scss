@@ -2355,3 +2355,15 @@ body.des-embedded-event {
   border-radius: 10px;
   border-left: 4px solid var(--tertiary);
 }
+
+// DEditor full width in form fields
+.org-form-field .d-editor {
+  width: 100%;
+  min-height: 200px;
+}
+
+.org-form-field .d-editor-textarea-wrapper,
+.org-form-field .d-editor-input {
+  width: 100% !important;
+  min-height: 180px;
+}
