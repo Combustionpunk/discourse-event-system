@@ -376,6 +376,8 @@ module DiscourseEventSystem
         capacity: event.capacity,
         status: event.status,
         topic_url: event.topic ? "/t/#{event.topic.slug}/#{event.topic.id}" : nil,
+        topic_id: event.topic_id,
+        topic_slug: event.topic&.slug,
         classes: event.des_event_classes.includes(:class_type).map do |ec|
           {
             id: ec.id,

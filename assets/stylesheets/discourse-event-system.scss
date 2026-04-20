@@ -2142,3 +2142,100 @@
   gap: 8px;
   justify-content: center;
 }
+
+// Event discussion thread
+.event-discussion {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid var(--primary-low);
+
+  h2 { margin-bottom: 16px; }
+}
+
+.event-discussion-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.event-post {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--primary-very-low);
+}
+
+.event-post-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.event-post-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.event-post-meta {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.event-post-username {
+  font-weight: 600;
+  font-size: 0.95em;
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover { color: var(--tertiary); }
+}
+
+.event-post-date {
+  font-size: 0.8em;
+  color: var(--primary-medium);
+}
+
+.event-post-likes {
+  font-size: 0.85em;
+  color: var(--primary-medium);
+}
+
+.event-post-body {
+  font-size: 0.95em;
+  line-height: 1.5;
+
+  img { max-width: 100%; border-radius: 4px; }
+  p:last-child { margin-bottom: 0; }
+}
+
+.event-discussion-more {
+  padding: 12px 0;
+  text-align: center;
+}
+
+.event-reply-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--primary-very-low);
+}
+
+.event-reply-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border: 1px solid var(--primary-low);
+  border-radius: 6px;
+  background: var(--secondary);
+  color: var(--primary);
+  font-size: 0.95em;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.event-reply-actions {
+  display: flex;
+  gap: 8px;
+}

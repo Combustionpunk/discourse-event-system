@@ -19,6 +19,9 @@ export default class EventController extends Controller {
   @tracked familyCarSelections = {};
   @tracked isWhosComingExpanded = false;
   @tracked showCalendarDropdown = false;
+  @tracked replyText = "";
+  @tracked isReplying = false;
+  @tracked replyExpanded = false;
 
   get totalEntrantCount() {
     if (!this.model.public_entrants) return 0;
@@ -106,6 +109,47 @@ export default class EventController extends Controller {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
+
+  @action
+  toggleReply() {
+    this.replyExpanded = !this.replyExpanded;
+  }
+
+  @action
+  updateReplyText(e) {
+    this.replyText = e.target.value;
+  }
+
+  @action
+  async submitReply() {
+    if (!this.replyText.trim() || !this.model.topic_id) return;
+    this.isReplying = true;
+    try {
+      await ajax("/posts.json", {
+        type: "POST",
+        data: {
+          topic_id: this.model.topic_id,
+          raw: this.replyText
+        }
+      });
+      this.replyText = "";
+      this.replyExpanded = false;
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    } finally {
+      this.isReplying = false;
+    }
+  }
+
+  formatPostDate(dateStr) {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "numeric", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit"
+    });
+  }
+
 
 
   _calculateForClasses(count, isMember, isJunior) {
