@@ -34,26 +34,6 @@ export default class EventRoute extends Route {
       event.public_entrants = [];
     }
 
-    // Load topic posts if event has a linked topic
-    if (event.topic_id) {
-      try {
-        const topic = await ajax(`/t/${event.topic_id}.json`);
-        event.topic_posts = (topic.post_stream?.posts || []).map(p => ({
-          id: p.id,
-          username: p.username,
-          avatar_template: p.avatar_template?.replace("{size}", "45"),
-          cooked: p.cooked,
-          created_at: p.created_at,
-          post_number: p.post_number,
-          reply_count: p.reply_count,
-          like_count: p.actions_summary?.find(a => a.id === 2)?.count || 0
-        }));
-        event.topic_posts_count = topic.posts_count || 0;
-        event.topic_reply_url = `/t/${event.topic_slug}/${event.topic_id}`;
-      } catch {
-        event.topic_posts = [];
-      }
-    }
 
     return event;
   }

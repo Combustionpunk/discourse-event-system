@@ -180,6 +180,12 @@
         </div>
       {{/if}}
     </div>
+
+    {{#if this.model.topic_url}}
+      <a href={{this.model.topic_url}} class="btn btn-primary">
+        💬 View Discussion & Comments
+      </a>
+    {{/if}}
   </div>
 
 
@@ -235,69 +241,6 @@
 
 
 
-  {{!-- Discussion Thread --}}
-  {{#if this.model.topic_posts.length}}
-    <div class="event-discussion">
-      <h2>💬 Discussion</h2>
-
-      <div class="event-discussion-posts">
-        {{#each this.model.topic_posts as |post|}}
-          {{#unless (eq post.post_number 1)}}
-            <div class="event-post">
-              <div class="event-post-header">
-                <a data-user-card={{post.username}}>
-                  <img src="{{post.avatar_template}}" class="event-post-avatar" alt="" />
-                </a>
-                <div class="event-post-meta">
-                  <a data-user-card={{post.username}} class="event-post-username">{{post.username}}</a>
-                  <span class="event-post-date">{{this.formatPostDate post.created_at}}</span>
-                </div>
-                {{#if post.like_count}}
-                  <span class="event-post-likes">❤️ {{post.like_count}}</span>
-                {{/if}}
-              </div>
-              <div class="event-post-body cooked">{{{post.cooked}}}</div>
-            </div>
-          {{/unless}}
-        {{/each}}
-      </div>
-
-      {{#if this.model.topic_reply_url}}
-        <div class="event-discussion-more">
-          <a href={{this.model.topic_reply_url}} class="btn btn-default">
-            View full discussion ({{this.model.topic_posts_count}} posts)
-          </a>
-        </div>
-      {{/if}}
-
-      {{#if this.currentUser}}
-        <div class="event-reply-section">
-          {{#if this.replyExpanded}}
-            <textarea
-              class="event-reply-textarea"
-              placeholder="Write a reply..."
-              value={{this.replyText}}
-              {{on "input" this.updateReplyText}}
-            ></textarea>
-            <div class="event-reply-actions">
-              <button
-                class="btn btn-primary"
-                disabled={{this.isReplying}}
-                {{on "click" this.submitReply}}
-              >
-                {{if this.isReplying "Posting..." "Post Reply"}}
-              </button>
-              <button class="btn btn-default" {{on "click" this.toggleReply}}>Cancel</button>
-            </div>
-          {{else}}
-            <button class="btn btn-default" {{on "click" this.toggleReply}}>
-              💬 Reply to this discussion
-            </button>
-          {{/if}}
-        </div>
-      {{/if}}
-    </div>
-  {{/if}}
 
   {{!-- Car Selection Modal --}}
   {{#if this.showCarSelection}}

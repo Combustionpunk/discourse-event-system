@@ -2239,3 +2239,40 @@
   display: flex;
   gap: 8px;
 }
+
+// Enhanced event booking widget (on topic page)
+.event-widget-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 12px;
+  font-size: 0.95em;
+}
+
+.event-widget-detail {
+  color: var(--primary-high);
+
+  a {
+    color: var(--tertiary);
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.event-widget-pricing {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 0.9em;
+  color: var(--primary-medium);
+
+  span { font-weight: 600; }
+}
+
+.event-widget-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 12px;
+}
