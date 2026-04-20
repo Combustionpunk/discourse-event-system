@@ -20,12 +20,6 @@ export default class EventController extends Controller {
   @tracked isWhosComingExpanded = false;
   @tracked showCalendarDropdown = false;
 
-  get topicEmbedUrl() {
-    if (!this.model.topic_url) return "";
-    return this.model.topic_url + "?hide_header=true";
-  }
-
-
   get totalEntrantCount() {
     if (!this.model.public_entrants) return 0;
     let count = 0;

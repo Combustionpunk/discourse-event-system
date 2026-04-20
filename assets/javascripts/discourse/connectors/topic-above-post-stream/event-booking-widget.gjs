@@ -12,7 +12,6 @@ export default class EventBookingWidget extends Component {
   @service currentUser;
   @tracked event = null;
   @tracked selectedClasses = [];
-  @tracked isLoading = true;
   @tracked isBooking = false;
   @tracked showCarSelection = false;
   @tracked eligibleCars = [];
@@ -26,12 +25,9 @@ export default class EventBookingWidget extends Component {
 
   async loadEvent() {
     try {
-      const post = this.args.outletArgs?.post;
-      if (!post) return;
-      if (post.post_number !== 1) return;
-      const topicId = post.topic?.id || post.topic_id;
-      if (!topicId) return;
-      const response = await ajax("/des/events/by-topic/" + topicId + ".json");
+      const topic = this.args.outletArgs?.model;
+      if (!topic?.id) return;
+      const response = await ajax("/des/events/by-topic/" + topic.id + ".json");
       this.event = response;
       if (response.start_date) {
         const d = new Date(response.start_date);
@@ -41,9 +37,7 @@ export default class EventBookingWidget extends Component {
         });
       }
     } catch (e) {
-      // No event for this topic
-    } finally {
-      this.isLoading = false;
+      // No event for this topic - widget won't render
     }
   }
 
@@ -215,6 +209,9 @@ export default class EventBookingWidget extends Component {
           {{/if}}
           {{#if this.event.location}}
             <div class="event-widget-detail">📍 {{this.event.location}}</div>
+          {{/if}}
+          {{#if this.event.organisation}}
+            <div class="event-widget-detail">🏢 {{this.event.organisation.name}}</div>
           {{/if}}
           {{#if this.event.google_maps_url}}
             <div class="event-widget-detail">

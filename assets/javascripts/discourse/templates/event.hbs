@@ -237,25 +237,14 @@
 
 
 
-
-  {{!-- Embedded Discussion Thread --}}
   {{#if this.model.topic_url}}
-    <div class="event-embedded-discussion">
-      <div class="event-discussion-header">
-        <h2>💬 Discussion</h2>
-        <a href={{this.model.topic_url}} class="btn btn-small btn-default" target="_blank" rel="noopener">
-          Open in new tab ↗
-        </a>
-      </div>
-      <iframe
-        src={{this.topicEmbedUrl}}
-        class="event-topic-iframe"
-        frameborder="0"
-        scrolling="yes"
-        title="Event Discussion"
-      ></iframe>
+    <div class="event-discussion-link">
+      <a href={{this.model.topic_url}} class="btn btn-primary">
+        💬 View Discussion & Comments
+      </a>
     </div>
   {{/if}}
+
 
   {{!-- Car Selection Modal --}}
   {{#if this.showCarSelection}}
