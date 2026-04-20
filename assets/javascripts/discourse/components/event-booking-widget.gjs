@@ -1,6 +1,4 @@
-/* eslint-disable ember/no-classic-components */
-import Component from "@ember/component";
-import { tagName } from "@ember-decorators/component";
+import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
@@ -10,7 +8,6 @@ import { fn } from "@ember/helper";
 import { eq } from "truth-helpers";
 import { service } from "@ember/service";
 
-@tagName("")
 export default class EventBookingWidget extends Component {
   @service currentUser;
   @tracked event = null;
@@ -29,10 +26,10 @@ export default class EventBookingWidget extends Component {
 
   async loadEvent() {
     try {
-      const post = this.model;
+      const post = this.args.outletArgs?.post;
       if (!post) return;
       if (post.post_number !== 1) return;
-      const topicId = post.topic?.id || post.topicId;
+      const topicId = post.topic?.id || post.topic_id;
       if (!topicId) return;
       const response = await ajax("/des/events/by-topic/" + topicId + ".json");
       this.event = response;
