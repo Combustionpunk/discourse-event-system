@@ -2276,3 +2276,64 @@
   align-items: flex-start;
   margin-top: 12px;
 }
+
+// Embedded discussion iframe on event page
+.event-embedded-discussion {
+  margin-top: 24px;
+  border-top: 2px solid var(--primary-low);
+  padding-top: 16px;
+}
+
+.event-discussion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+
+  h2 { margin: 0; }
+}
+
+.event-topic-iframe {
+  width: 100%;
+  min-height: 600px;
+  height: 80vh;
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  background: var(--secondary);
+}
+
+// When topic is loaded in embedded mode, hide Discourse chrome
+body.des-embedded-event {
+  .d-header-wrap,
+  .sidebar-wrapper,
+  #main-outlet-wrapper > .sidebar-wrapper,
+  .hamburger-panel,
+  .footer-message,
+  .topic-above-post-stream .title-wrapper,
+  .topic-map,
+  .suggested-topics,
+  .more-topics__container,
+  #topic-footer-buttons,
+  .timeline-container,
+  .topic-navigation,
+  .signup-cta,
+  .topic-above-suggested,
+  #main-outlet-wrapper > nav {
+    display: none !important;
+  }
+
+  #main-outlet {
+    padding-top: 10px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .container.posts {
+    max-width: 100% !important;
+  }
+
+  // Hide the booking widget inside the embedded view to avoid recursion
+  .event-booking-widget {
+    display: none !important;
+  }
+}
