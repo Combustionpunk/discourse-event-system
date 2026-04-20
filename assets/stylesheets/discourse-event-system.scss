@@ -440,7 +440,7 @@
 }
 
 .transponder-list {
-  margin-bottom: 20px;
+  margin: 0 0 20px 0;
 }
 
 .transponder-item {
@@ -1034,7 +1034,7 @@
   background: var(--secondary);
   border-radius: 8px;
   padding: 16px;
-  margin-bottom: 20px;
+  margin: 0 0 20px 0;
 
   h3 { font-size: 1em; margin: 0 0 12px 0; }
 }
@@ -1587,7 +1587,7 @@
   border: 1px solid var(--primary-low);
   border-radius: 8px;
   padding: 16px;
-  margin-bottom: 20px;
+  margin: 0 0 20px 0;
 }
 
 .model-card--editing {
@@ -2339,8 +2339,16 @@ body.des-embedded-event {
 }
 
 // Event widget on topic page
+// Topic page outlet wrapper - remove inherited gap
+.topic-above-post-stream > span,
+.topic-above-post-stream > div {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
 .event-topic-widget {
-  margin-bottom: 20px;
+  margin: 0 0 20px 0;
   padding: 20px;
   background: var(--primary-very-low);
   border: 1px solid var(--primary-low);
