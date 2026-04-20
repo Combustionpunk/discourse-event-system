@@ -2337,3 +2337,13 @@ body.des-embedded-event {
     display: none !important;
   }
 }
+
+// Event widget on topic page
+.event-topic-widget {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 10px;
+  border-left: 4px solid var(--tertiary);
+}
