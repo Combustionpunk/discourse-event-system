@@ -2355,27 +2355,31 @@ body.des-embedded-event {
   border-radius: 10px;
   border-left: 4px solid var(--tertiary);
 }
-// DEditor full width in form fields
+// DEditor full width in form fields — the editor uses display:flex + flex-grow
+// so its parent must also be flex for it to expand properly
+.org-form-field:has(.d-editor) {
+  display: flex;
+  flex-direction: column;
+}
+
 .org-form-field {
   .d-editor,
-  .d-editor-container,
-  .d-editor-overlay,
-  .d-editor-textarea-column,
-  .d-editor-preview-wrapper,
-  .d-editor-input,
-  .d-editor-textarea-wrapper {
+  .d-editor-container {
     width: 100% !important;
     max-width: 100% !important;
-    box-sizing: border-box;
+    min-height: 250px;
+    flex-grow: 1;
   }
 
-  .d-editor {
-    min-height: 250px;
+  .d-editor-textarea-column,
+  .d-editor-textarea-wrapper,
+  .d-editor-input {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .d-editor-input {
     min-height: 200px;
     resize: vertical;
   }
-}
 }
