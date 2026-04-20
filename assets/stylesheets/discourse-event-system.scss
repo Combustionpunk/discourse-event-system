@@ -2383,3 +2383,27 @@ body.des-embedded-event {
     resize: vertical;
   }
 }
+
+// Force DEditor full width by overriding the topic-body-width variable
+.des-editor-wrapper {
+  --topic-body-width: 100%;
+  --topic-body-width-padding: 0px;
+  width: 100%;
+
+  .d-editor,
+  .d-editor-container,
+  .d-editor-textarea-column,
+  .d-editor-textarea-wrapper,
+  .d-editor-input {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .d-editor {
+    min-height: 250px;
+  }
+
+  .d-editor-input {
+    min-height: 200px;
+  }
+}

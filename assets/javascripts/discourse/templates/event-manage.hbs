@@ -70,9 +70,11 @@
           <label>Title</label>
           <input type="text" value={{this.model.event.title}} {{on "input" (fn this.updateField "title")}} />
         </div>
-        <div class="org-form-field">
-          <label>Description</label>
-          <DEditor @value={{this.editDescription}} @processPreview={{false}} />
+        <div style="width:100%;margin-bottom:16px;">
+          <label style="display:block;font-weight:bold;margin-bottom:6px;">Description</label>
+          <div class="des-editor-wrapper">
+            <DEditor @value={{this.editDescription}} @processPreview={{false}} />
+          </div>
         </div>
         <div class="org-form-row">
           <div class="org-form-field">
