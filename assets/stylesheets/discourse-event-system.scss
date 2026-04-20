@@ -2355,15 +2355,27 @@ body.des-embedded-event {
   border-radius: 10px;
   border-left: 4px solid var(--tertiary);
 }
-
 // DEditor full width in form fields
-.org-form-field .d-editor {
-  width: 100%;
-  min-height: 200px;
-}
+.org-form-field {
+  .d-editor,
+  .d-editor-container,
+  .d-editor-overlay,
+  .d-editor-textarea-column,
+  .d-editor-preview-wrapper,
+  .d-editor-input,
+  .d-editor-textarea-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
 
-.org-form-field .d-editor-textarea-wrapper,
-.org-form-field .d-editor-input {
-  width: 100% !important;
-  min-height: 180px;
+  .d-editor {
+    min-height: 250px;
+  }
+
+  .d-editor-input {
+    min-height: 200px;
+    resize: vertical;
+  }
+}
 }
