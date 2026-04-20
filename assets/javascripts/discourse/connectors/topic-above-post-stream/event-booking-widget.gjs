@@ -302,11 +302,6 @@ export default class EventBookingWidget extends Component {
           {{/if}}
         </div>
 
-
-        {{#if this.event.description}}
-          <div class="event-detail-description">
-            {{this.event.description}}
-          </div>
         {{/if}}
 
         <div class="event-detail-classes">

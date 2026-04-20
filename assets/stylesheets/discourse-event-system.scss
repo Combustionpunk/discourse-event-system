@@ -2382,3 +2382,16 @@ body.des-embedded-event {
     min-height: 200px;
   }
 }
+
+// Event description box
+.event-description-box {
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  line-height: 1.6;
+
+  p:last-child { margin-bottom: 0; }
+  img { max-width: 100%; border-radius: 4px; }
+}

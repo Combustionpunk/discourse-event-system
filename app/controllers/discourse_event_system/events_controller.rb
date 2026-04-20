@@ -367,6 +367,7 @@ module DiscourseEventSystem
         id: event.id,
         title: event.title,
         description: event.description,
+        description_cooked: PrettyText.cook(event.description.to_s),
         organisation: { id: event.organisation.id, name: event.organisation.name },
         start_date: event.start_date,
         end_date: event.end_date,
