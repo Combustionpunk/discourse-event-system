@@ -11,6 +11,7 @@ export default class EventNewController extends Controller {
   @tracked classes = [];
   @tracked bookingType = "internal";
   @tracked pricingType = "tiered";
+  @tracked description = "";
 
   get pricingIsFlat() {
     return this.pricingType === "flat";
@@ -129,7 +130,7 @@ export default class EventNewController extends Controller {
           organisation_id: this.model.event.organisation_id,
           event: {
             title: this.model.event.title,
-            description: this.model.event.description,
+            description: this.description || this.model.event.description,
             organisation_id: this.model.event.organisation_id,
             event_type_id: this.model.event.event_type_id,
             start_date: this.model.event.start_date,

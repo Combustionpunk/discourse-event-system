@@ -11,6 +11,7 @@ export default class EventManageController extends Controller {
   @tracked isSaving = false;
   @tracked activeTab = "details";
   @tracked editMode = false;
+  @tracked editDescription = "";
   @tracked classTypes = null;
   @tracked newClassTypeId = null;
   @tracked newClassCapacity = "";
@@ -244,6 +245,7 @@ export default class EventManageController extends Controller {
   @action
   toggleEdit() {
     this.editMode = !this.editMode;
+    if (this.editMode) this.editDescription = this.model.event.description || "";
   }
 
   @action
@@ -260,7 +262,7 @@ export default class EventManageController extends Controller {
         data: {
           event: {
             title: this.model.event.title,
-            description: this.model.event.description,
+            description: this.editDescription,
             start_date: this.model.event.start_date,
             end_date: this.model.event.end_date,
             booking_closing_date: this.model.event.booking_closing_date,

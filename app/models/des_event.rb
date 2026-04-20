@@ -117,31 +117,10 @@ class DesEvent < ActiveRecord::Base
   end
 
   def build_post_content
-    classes_list = des_event_classes.map do |ec|
-      "- **#{ec.name}** --- #{ec.capacity} spaces"
-    end.join("\n")
-
-    pricing = des_event_pricing_rule
-    price_info = if pricing
-      case pricing.rule_type
-      when 'flat'
-        "£#{pricing.flat_price} per class"
-      when 'tiered'
-        "£#{pricing.first_class_price} first class, £#{pricing.subsequent_class_price} additional classes"
-      end
+    if description.present?
+      description
     else
-      'Free'
+      "Event details are shown in the booking widget above."
     end
-
-    content = "## #{title}\n\n"
-    content += "**Organisation:** #{organisation.name}\n"
-    content += "**Date:** #{start_date.strftime('%A %d %B %Y at %H:%M')}\n"
-    content += "**End Date:** #{end_date.strftime('%A %d %B %Y at %H:%M')}\n" if end_date.present?
-    content += "**Location:** #{location.presence || 'TBC'}\n"
-    content += "**Map:** #{google_maps_url}\n" if google_maps_url.present?
-    content += "\n---\n\n"
-    content += "#{description}\n\n" if description.present?
-    content += "\n\n## Pricing\n\n#{price_info}\n\n"
-    content
   end
 end

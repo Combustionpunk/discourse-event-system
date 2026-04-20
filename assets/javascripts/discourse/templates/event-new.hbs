@@ -43,10 +43,13 @@
 
       <div class="org-form-field">
         <label>Description</label>
-        <textarea
-          placeholder="Tell racers about this event..."
-          {{on "input" (fn this.updateField "description")}}
-        ></textarea>
+      <div class="org-form-field">
+        <label>Description</label>
+        <DEditor
+          @value={{this.description}}
+          @placeholder="Tell racers about this event..."
+          @processPreview={{false}}
+        />
       </div>
 
       <div class="org-form-field">

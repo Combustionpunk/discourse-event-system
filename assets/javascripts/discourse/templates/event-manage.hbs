@@ -72,7 +72,7 @@
         </div>
         <div class="org-form-field">
           <label>Description</label>
-          <textarea {{on "input" (fn this.updateField "description")}}>{{this.model.event.description}}</textarea>
+          <DEditor @value={{this.editDescription}} @processPreview={{false}} />
         </div>
         <div class="org-form-row">
           <div class="org-form-field">
