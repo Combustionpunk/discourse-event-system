@@ -417,22 +417,30 @@ module DiscourseEventSystem
     end
 
     def family_members_for(event)
+      members = {}
+
+      # From organisation membership family members
       membership = DesOrganisationMembership
         .where(user_id: current_user.id, organisation_id: event.organisation_id)
         .active
         .includes(family_members: :user)
         .first
-      return [] unless membership
-      return [] if membership.family_members.empty?
+      if membership
+        membership.family_members.each do |fm|
+          members[fm.user_id] = { user_id: fm.user_id, username: fm.user.username }
+        end
+      end
 
-      membership.family_members.map do |fm|
-        {
-          user_id: fm.user_id,
-          username: fm.user.username
+      # From racing profile family members
+      DesRacingFamilyMember.where(user_id: current_user.id).includes(:family_member).each do |rfm|
+        members[rfm.family_member_user_id] ||= {
+          user_id: rfm.family_member_user_id,
+          username: rfm.family_member.username
         }
       end
-    end
 
+      members.values
+    end
     def is_event_admin?(event)
       return true if current_user.admin?
       DesOrganisationMember.joins(:position)
