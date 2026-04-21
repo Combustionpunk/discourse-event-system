@@ -305,6 +305,7 @@ class DesBookingService
     end
 
     cancellation_record.complete!
+    @event.cancel_topic_content!(cancellation_reason)
     cancellation_record
   end
 

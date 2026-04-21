@@ -109,6 +109,31 @@ class DesEvent < ActiveRecord::Base
     post.revise(creator_user, { raw: build_post_content }, skip_validations: true)
   end
 
+
+  def cancel_topic_content!(reason = nil)
+    return unless topic_id.present?
+    creator_user = User.find(created_by)
+
+    # Prepend [CANCELLED] to topic title
+    unless topic.title.start_with?("[CANCELLED]")
+      topic.update!(title: "[CANCELLED] #{topic.title}")
+    end
+
+    # Post cancellation announcement
+    message = "⚠️ **This event has been cancelled.**"
+    message += "\n\n#{reason}" if reason.present?
+    message += "\n\nAll bookings have been cancelled and refunds have been processed."
+
+    PostCreator.new(
+      creator_user,
+      topic_id: topic_id,
+      raw: message,
+      skip_validations: true
+    ).create
+  rescue => e
+    Rails.logger.error "Failed to update topic for cancelled event #{id}: #{e.message}"
+  end
+
   private
 
   def update_topic_title!(new_title)
