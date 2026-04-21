@@ -9,7 +9,7 @@ module DiscourseEventSystem
         user: {
           id: current_user.id,
           username: current_user.username,
-          date_of_birth: current_user.date_of_birth,
+          date_of_birth: current_user.custom_fields['des_date_of_birth'] || current_user.date_of_birth&.to_s,
           brca_membership_number: current_user.custom_fields['brca_membership_number']
         }
       }
@@ -18,10 +18,12 @@ module DiscourseEventSystem
     def update
       if params[:date_of_birth].present?
         current_user.date_of_birth = Date.parse(params[:date_of_birth])
+        current_user.custom_fields['des_date_of_birth'] = params[:date_of_birth]
       end
       if params[:brca_membership_number].present?
         current_user.custom_fields['brca_membership_number'] = params[:brca_membership_number]
       end
+      current_user.save_custom_fields
       current_user.save!
       render json: { success: true }
     rescue => e
@@ -57,8 +59,10 @@ module DiscourseEventSystem
         user.email_tokens.update_all(confirmed: true)
         user.activate
 
-        user.date_of_birth = Date.parse(params[:date_of_birth]) if params[:date_of_birth].present?
-        user.custom_fields['des_date_of_birth'] = params[:date_of_birth] if params[:date_of_birth].present?
+        if params[:date_of_birth].present?
+          user.date_of_birth = Date.parse(params[:date_of_birth])
+          user.custom_fields['des_date_of_birth'] = params[:date_of_birth]
+        end
         user.custom_fields['brca_membership_number'] = params[:brca_membership_number] if params[:brca_membership_number].present?
         user.save_custom_fields
         user.save!
@@ -102,11 +106,13 @@ module DiscourseEventSystem
       return render json: { error: 'Not found' }, status: :not_found unless fm
       member_user = fm.user
 
-        member_user.date_of_birth = Date.parse(params[:date_of_birth]) if params[:date_of_birth].present?
-      member_user.custom_fields['des_date_of_birth'] = params[:date_of_birth] if params[:date_of_birth].present?
+      if params[:date_of_birth].present?
+        member_user.date_of_birth = Date.parse(params[:date_of_birth])
+        member_user.custom_fields['des_date_of_birth'] = params[:date_of_birth]
+      end
       member_user.custom_fields['brca_membership_number'] = params[:brca_membership_number].presence if params.key?(:brca_membership_number)
       member_user.save_custom_fields
-        member_user.save!
+      member_user.save!
 
       render json: { success: true, user: serialize_dependant(fm.reload) }
     rescue => e
@@ -136,7 +142,6 @@ module DiscourseEventSystem
       return render json: { error: 'User not found' }, status: :not_found unless guardian
       raise "Cannot set yourself as guardian" if guardian.id == current_user.id
 
-      # Remove existing guardian link
       DesRacingFamilyMember.for_child(current_user.id).where(created_by_guardian: false).destroy_all
 
       record = DesRacingFamilyMember.create!(
@@ -175,7 +180,7 @@ module DiscourseEventSystem
         username: u.username,
         name: u.name,
         avatar_url: u.avatar_template&.gsub('{size}', '45'),
-        date_of_birth: u.custom_fields&.dig('des_date_of_birth'),
+        date_of_birth: u.custom_fields&.dig('des_date_of_birth') || u.date_of_birth&.to_s,
         brca_membership_number: u.custom_fields&.dig('brca_membership_number'),
         created_by_guardian: fm.created_by_guardian
       }
