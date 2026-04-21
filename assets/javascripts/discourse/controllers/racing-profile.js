@@ -31,9 +31,14 @@ export default class RacingProfileController extends Controller {
   @tracked editingFamilyId = null;
   @tracked editFamDob = "";
   @tracked editFamBrca = "";
+  @tracked myGuardian = null;
+  @tracked guardianSearchTerm = "";
+  @tracked guardianSearchResults = [];
+  @tracked guardianError = null;
 
   setup() {
     this.loadFamilyMembers();
+    this.loadGuardian();
   }
 
   async loadFamilyMembers() {
@@ -204,4 +209,52 @@ export default class RacingProfileController extends Controller {
       this.familyError = e.jqXHR?.responseJSON?.error || "Failed to update member";
     }
   }
+
+  async loadGuardian() {
+    try {
+      const response = await ajax("/des/racing-profile/guardian.json");
+      this.myGuardian = response.guardian;
+    } catch {
+      this.myGuardian = null;
+    }
+  }
+
+  @action
+  async searchGuardian(e) {
+    const term = e.target.value;
+    this.guardianSearchTerm = term;
+    if (!term || term.length < 2) { this.guardianSearchResults = []; return; }
+    try {
+      const response = await ajax("/u/search/users.json", { data: { term: term } });
+      this.guardianSearchResults = response.users || [];
+    } catch { this.guardianSearchResults = []; }
+  }
+
+  @action
+  async selectGuardian(user) {
+    this.guardianSearchResults = [];
+    this.guardianSearchTerm = "";
+    this.guardianError = null;
+    try {
+      const response = await ajax("/des/racing-profile/guardian.json", {
+        type: "POST",
+        data: { username: user.username }
+      });
+      this.myGuardian = response.guardian;
+    } catch (e) {
+      this.guardianError = e.jqXHR?.responseJSON?.error || "Failed to set guardian";
+    }
+  }
+
+  @action
+  async removeGuardian() {
+    if (!confirm("Remove your guardian?")) return;
+    try {
+      await ajax("/des/racing-profile/guardian.json", { type: "DELETE" });
+      this.myGuardian = null;
+    } catch (e) {
+      this.guardianError = e.jqXHR?.responseJSON?.error || "Failed to remove guardian";
+    }
+  }
+
 }

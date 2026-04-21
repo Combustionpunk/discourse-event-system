@@ -431,16 +431,17 @@ module DiscourseEventSystem
         end
       end
 
-      # From racing profile family members
-      DesRacingFamilyMember.where(user_id: current_user.id).includes(:family_member).each do |rfm|
-        members[rfm.family_member_user_id] ||= {
-          user_id: rfm.family_member_user_id,
-          username: rfm.family_member.username
+      # From guardian relationship (users I am guardian of)
+      DesRacingFamilyMember.for_guardian(current_user.id).includes(:user).each do |rfm|
+        members[rfm.user_id] ||= {
+          user_id: rfm.user_id,
+          username: rfm.user.username
         }
       end
 
       members.values
     end
+
     def is_event_admin?(event)
       return true if current_user.admin?
       DesOrganisationMember.joins(:position)

@@ -38,10 +38,59 @@
     </button>
   </div>
 
+
+  {{!-- My Parent/Guardian Section --}}
+  <div class="profile-section" style="margin-top: 24px;">
+    <h2>🛡️ My Parent/Guardian</h2>
+    <p class="field-help">Set your parent or guardian so they can book events on your behalf.</p>
+
+    {{#if this.guardianError}}
+      <div class="alert alert-error family-error">{{this.guardianError}}</div>
+    {{/if}}
+
+    {{#if this.myGuardian}}
+      <div class="family-member-row">
+        <div class="family-member-info">
+          {{#if this.myGuardian.avatar_url}}
+            <img src="{{this.myGuardian.avatar_url}}" class="user-avatar" alt="" />
+          {{/if}}
+          <span class="user-username">{{this.myGuardian.username}}</span>
+          {{#if this.myGuardian.name}}<span class="user-name">— {{this.myGuardian.name}}</span>{{/if}}
+        </div>
+        <div class="family-member-actions">
+          <button class="btn btn-small btn-danger" {{on "click" this.removeGuardian}}>Remove</button>
+        </div>
+      </div>
+    {{else}}
+      <div class="family-search-box">
+        <label>Search for your parent/guardian:</label>
+        <input
+          type="text"
+          placeholder="Type their username..."
+          class="family-search-input"
+          {{on "input" this.searchGuardian}}
+        />
+      </div>
+      {{#if this.guardianSearchResults.length}}
+        <div class="family-search-results">
+          {{#each this.guardianSearchResults as |user|}}
+            <div class="family-search-result" role="button" {{on "click" (fn this.selectGuardian user)}}>
+              {{#if user.avatar_template}}
+                <img src="{{user.avatar_template}}" class="user-avatar" alt="" />
+              {{/if}}
+              <span class="user-username">{{user.username}}</span>
+              {{#if user.name}}<span class="user-name">— {{user.name}}</span>{{/if}}
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
+    {{/if}}
+  </div>
+
   {{!-- Family Members Section --}}
   <div class="profile-section" style="margin-top: 24px;">
-    <h2>👨‍👩‍👧 Family Members</h2>
-    <p class="field-help">Add family members so you can book events for them. No membership required.</p>
+    <h2>👨‍👩‍👧 My Dependants</h2>
+    <p class="field-help">Users you are guardian of. You can book events on their behalf.</p>
 
     {{#if this.familyError}}
       <div class="alert alert-error family-error">{{this.familyError}}</div>

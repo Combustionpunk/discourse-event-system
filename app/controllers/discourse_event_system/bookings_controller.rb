@@ -54,22 +54,21 @@ module DiscourseEventSystem
         family_bookings = params[:family_bookings].values.map do |fb|
           { user_id: fb[:user_id].to_i, class_ids: fb[:class_ids] }
         end
+        # Validate family members: must be in org membership OR guardian relationship
+        allowed_ids = Set.new
 
-        # Validate that all family members belong to the user's family membership
         membership = DesOrganisationMembership
           .where(user_id: current_user.id, organisation_id: event.organisation_id)
           .active
           .joins(:family_members)
           .first
-        if membership
-          allowed_user_ids = membership.family_members.pluck(:user_id)
-          family_bookings.each do |fb|
-            unless allowed_user_ids.include?(fb[:user_id])
-              raise Discourse::InvalidAccess
-            end
-          end
-        else
-          raise Discourse::InvalidAccess
+        allowed_ids.merge(membership.family_members.pluck(:user_id)) if membership
+
+        # Guardian relationship
+        allowed_ids.merge(DesRacingFamilyMember.for_guardian(current_user.id).pluck(:user_id))
+
+        family_bookings.each do |fb|
+          raise Discourse::InvalidAccess unless allowed_ids.include?(fb[:user_id])
         end
 
         result = service.create_family_booking(params[:class_ids], family_bookings, params[:car_selections])
