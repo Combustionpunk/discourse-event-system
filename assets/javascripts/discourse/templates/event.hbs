@@ -33,6 +33,14 @@
     </div>
   {{/if}}
 
+
+  {{#if (eq this.model.status "cancelled")}}
+    <div class="event-cancelled-banner">⚠️ This event has been cancelled.</div>
+  {{else if this.bookingClosed}}
+    <div class="event-closed-banner">⏰ Booking has closed for this event.</div>
+  {{/if}}
+
+  {{#unless this.bookingDisabled}}
   <div class="event-detail-classes">
     <h2>Classes</h2>
     <div class="event-classes-grid">
@@ -182,6 +190,7 @@
     </div>
 
   </div>
+  {{/unless}}
 
 
   {{!-- Who's Coming Section (collapsible) --}}

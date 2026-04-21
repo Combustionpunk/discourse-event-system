@@ -8,6 +8,8 @@ class DesBookingService
   end
 
   def create_booking(class_ids, car_selections = {})
+    raise "This event has been cancelled and is no longer accepting bookings" if @event.status == 'cancelled'
+    raise "Booking has closed for this event" if @event.booking_closing_date.present? && @event.booking_closing_date < Time.now
     validate_classes!(class_ids)
     # Check driver age eligibility
     class_ids.each do |class_id|
@@ -66,6 +68,8 @@ class DesBookingService
   end
 
   def create_family_booking(primary_class_ids, family_bookings, car_selections = {})
+    raise "This event has been cancelled and is no longer accepting bookings" if @event.status == 'cancelled'
+    raise "Booking has closed for this event" if @event.booking_closing_date.present? && @event.booking_closing_date < Time.now
     # family_bookings is an array of { user_id:, class_ids: }
     validate_classes!(primary_class_ids)
     family_bookings.each { |fb| validate_classes!(fb[:class_ids]) }

@@ -20,6 +20,16 @@ export default class EventController extends Controller {
   @tracked isWhosComingExpanded = false;
   @tracked showCalendarDropdown = false;
 
+
+  get bookingClosed() {
+    if (!this.model.booking_closing_date) return false;
+    return new Date(this.model.booking_closing_date) < new Date();
+  }
+
+  get bookingDisabled() {
+    return this.model.status === "cancelled" || this.bookingClosed;
+  }
+
   get totalEntrantCount() {
     if (!this.model.public_entrants) return 0;
     let count = 0;

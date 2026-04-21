@@ -121,6 +121,16 @@ export default class EventBookingWidget extends Component {
     return true;
   }
 
+
+  get bookingClosed() {
+    if (!this.event?.booking_closing_date) return false;
+    return new Date(this.event.booking_closing_date) < new Date();
+  }
+
+  get bookingDisabled() {
+    return this.event?.status === "cancelled" || this.bookingClosed;
+  }
+
   get totalEntrantCount() {
     let c = 0;
     this.publicEntrants.forEach(cls => { c += (cls.entrants || []).length; });
@@ -303,6 +313,13 @@ export default class EventBookingWidget extends Component {
         </div>
 
 
+        {{#if (eq this.event.status "cancelled")}}
+          <div class="event-cancelled-banner">⚠️ This event has been cancelled.</div>
+        {{else if this.bookingClosed}}
+          <div class="event-closed-banner">⏰ Booking has closed for this event.</div>
+        {{/if}}
+
+        {{#unless this.bookingDisabled}}
         <div class="event-detail-classes">
           <h3>Classes</h3>
           <div class="event-classes-grid">
@@ -411,6 +428,7 @@ export default class EventBookingWidget extends Component {
 
           <a href="/events/{{this.event.id}}" class="btn btn-default">📋 Full Event Page</a>
         </div>
+        {{/unless}}
 
         {{!-- Who's Coming --}}
         {{#if this.totalEntrantCount}}
