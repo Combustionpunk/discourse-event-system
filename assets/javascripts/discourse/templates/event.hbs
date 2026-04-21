@@ -155,7 +155,7 @@
     {{#if this.currentUser}}
       <button
         class="btn btn-primary"
-        disabled={{eq this.selectedClasses.length 0}}
+        disabled={{this.noClassesSelected}}
         {{on "click" this.bookEvent}}
       >
         {{if this.isBooking "Processing..." "Book Now"}}

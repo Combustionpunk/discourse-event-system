@@ -109,6 +109,10 @@ export default class EventBookingWidget extends Component {
     return Object.values(this.familySelections).some(ids => ids && ids.length > 0);
   }
 
+  get noClassesSelected() {
+    return this.selectedClasses.length === 0 && !this.hasFamilySelections;
+  }
+
   get allCarsSelected() {
     if (!this.eligibleCars.every(cls => this.carSelections[cls.class_id])) return false;
     if (this.familyEligibleCars) {
@@ -231,7 +235,7 @@ export default class EventBookingWidget extends Component {
   }
 
   @action async bookEvent() {
-    if (this.selectedClasses.length === 0) return;
+    if (this.selectedClasses.length === 0 && !this.hasFamilySelections) return;
     try {
       const response = await ajax("/des/bookings/eligible-cars.json", { data: { event_id: this.event.id, class_ids: this.selectedClasses } });
       this.eligibleCars = response.classes;
@@ -404,7 +408,7 @@ export default class EventBookingWidget extends Component {
 
         <div class="event-detail-actions">
           {{#if this.currentUser}}
-            <button class="btn btn-primary" disabled={{not this.selectedClasses.length}} {{on "click" this.bookEvent}}>
+            <button class="btn btn-primary" disabled={{this.noClassesSelected}} {{on "click" this.bookEvent}}>
               {{if this.isBooking "Processing..." "Book Now"}}
             </button>
           {{else}}

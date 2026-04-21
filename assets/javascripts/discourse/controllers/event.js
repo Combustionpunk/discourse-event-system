@@ -181,6 +181,10 @@ export default class EventController extends Controller {
     return Object.values(this.familySelections).some(ids => ids && ids.length > 0);
   }
 
+  get noClassesSelected() {
+    return this.selectedClasses.length === 0 && !this.hasFamilySelections;
+  }
+
   get maxClassesReached() {
     const max = this.model.max_classes_per_booking;
     if (!max) return false;
@@ -254,7 +258,7 @@ export default class EventController extends Controller {
 
   @action
   async bookEvent() {
-    if (this.selectedClasses.length === 0) return;
+    if (this.selectedClasses.length === 0 && !this.hasFamilySelections) return;
 
     try {
       // Fetch eligible cars for parent's classes (uses parent's garage)
