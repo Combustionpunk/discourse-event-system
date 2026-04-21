@@ -7,97 +7,115 @@
     <LinkTo @route="my-memberships" class="btn btn-default">🎫 My Memberships</LinkTo>
   </div>
 
-  <div class="my-bookings-header">
-    <h1>My Bookings</h1>
-  </div>
+  <h1>🎟️ My Bookings</h1>
 
-  {{#if this.model.bookings.length}}
-    <div class="my-bookings-list">
-      {{#each this.model.bookings as |booking|}}
-        <div class="booking-card booking-card--{{booking.status}}">
-          <div class="booking-card-header">
-            <h2>{{booking.event.title}}</h2>
-            <span class="booking-status booking-status--{{booking.status}}">
-              {{booking.status}}
+  {{#if this.model.upcoming.length}}
+    <h2>Upcoming Events</h2>
+    {{#each this.model.upcoming as |booking|}}
+      <div class="booking-card booking-card--{{booking.status}}">
+        <div class="booking-card-header">
+          <div>
+            <h3>{{booking.event.title}}</h3>
+            <span class="field-help">
+              {{booking.event.formatted_date}}
+              {{#if booking.event.organisation_name}} — {{booking.event.organisation_name}}{{/if}}
+              {{#unless booking.is_own}} — booked for <strong>{{booking.username}}</strong>{{/unless}}
             </span>
           </div>
-
-          <div class="booking-meta">
-            <div>📅 {{booking.event.formatted_date}}</div>
-            {{#if booking.event.location}}
-              <div>📍 {{booking.event.location}}</div>
-            {{/if}}
-          </div>
-
-          <div class="booking-classes">
-            {{#each booking.classes as |cls|}}
-              <div class="booking-class-item">
-                <span class="booking-class-badge">{{cls.class_name}}</span>
-                {{#if cls.transponder_number}}
-                  <span class="transponder-number">📡 {{cls.transponder_number}}</span>
-                {{/if}}
-                <span class="booking-class-amount">£{{cls.amount_charged}}</span>
-              </div>
-            {{/each}}
-          </div>
-
-          <div class="booking-footer">
-            <strong>Total paid: £{{booking.amount_paid}}</strong>
-            <div class="booking-actions">
-              {{#if booking.event.topic_url}}
-                <a href={{booking.event.topic_url}} class="btn btn-small btn-default">
-                  💬 Discussion
-                </a>
-              {{/if}}
+          <span class="booking-status booking-status--{{booking.status}}">{{booking.status}}</span>
+        </div>
+        <div class="booking-classes-list">
+          {{#each booking.classes as |bc|}}
+            <div class="booking-class-item">
+              <span class="booking-class-badge">{{bc.class_name}}</span>
+              {{#if bc.manufacturer_name}}<span class="field-help">{{bc.manufacturer_name}} {{bc.model_name}}</span>{{/if}}
+              {{#if bc.transponder_number}}<span class="transponder-number">📡 {{bc.transponder_number}}</span>{{/if}}
+              <span class="booking-status booking-status--{{bc.status}}">{{bc.status}}</span>
               {{#unless (eq booking.status "cancelled")}}
-                {{#unless (eq booking.status "refunded")}}
-                  <button
-                    class="btn btn-small btn-danger"
-                    {{on "click" (fn this.cancelBooking booking.id)}}
-                  >
-                    Cancel Booking
-                  </button>
-                {{/unless}}
+                <button class="btn btn-small btn-default" {{on "click" (fn this.startChangeCar booking bc)}}>🔄 Change Car</button>
               {{/unless}}
             </div>
-          </div>
+          {{/each}}
         </div>
-      {{/each}}
-    </div>
+        {{#unless (eq booking.status "cancelled")}}
+          <div class="booking-card-actions">
+            <button class="btn btn-small btn-danger" {{on "click" (fn this.cancelBooking booking.id)}}>Cancel Booking</button>
+          </div>
+        {{/unless}}
+      </div>
+    {{/each}}
   {{/if}}
 
-  {{!-- Waitlist --}}
-  {{#if this.model.waitlist.length}}
-    <div class="my-bookings-header" style="margin-top: 32px;">
-      <h2>My Waitlist</h2>
-    </div>
-    <div class="my-bookings-list">
-      {{#each this.model.waitlist as |entry|}}
-        <div class="booking-card booking-card--pending">
-          <div class="booking-card-header">
-            <h2>{{entry.event.title}}</h2>
-            <span class="booking-status booking-status--pending">waitlist #{{entry.position}}</span>
+  {{#if this.model.past.length}}
+    <h2>Past Events</h2>
+    {{#each this.model.past as |booking|}}
+      <div class="booking-card booking-card--past">
+        <div class="booking-card-header">
+          <div>
+            <h3>{{booking.event.title}}</h3>
+            <span class="field-help">
+              {{booking.event.formatted_date}}
+              {{#unless booking.is_own}} — <strong>{{booking.username}}</strong>{{/unless}}
+            </span>
           </div>
-          <div class="booking-meta">
-            <div>📅 {{entry.event.formatted_date}}</div>
-          </div>
-          <div class="booking-footer">
-            <span class="booking-class-badge">{{entry.class_name}}</span>
-            <button class="btn btn-small btn-danger" {{on "click" (fn this.leaveWaitlist entry.id)}}>
-              Leave Waitlist
-            </button>
-          </div>
+          <span class="booking-status booking-status--{{booking.status}}">{{booking.status}}</span>
         </div>
-      {{/each}}
-    </div>
+        <div class="booking-classes-list">
+          {{#each booking.classes as |bc|}}
+            <div class="booking-class-item">
+              <span class="booking-class-badge">{{bc.class_name}}</span>
+              {{#if bc.manufacturer_name}}<span class="field-help">{{bc.manufacturer_name}} {{bc.model_name}}</span>{{/if}}
+              {{#if bc.transponder_number}}<span class="transponder-number">📡 {{bc.transponder_number}}</span>{{/if}}
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/each}}
   {{/if}}
 
   {{#unless this.model.bookings.length}}
-    <div class="my-bookings-empty">
-      <p>You haven't made any bookings yet.</p>
-      <LinkTo @route="events" class="btn btn-primary">
-        Browse Events
-      </LinkTo>
+    <div class="empty-state">
+      <p>You don't have any bookings yet.</p>
+      <LinkTo @route="events" class="btn btn-primary">Browse Events</LinkTo>
     </div>
   {{/unless}}
+
+  {{!-- Waitlist --}}
+  {{#if this.model.waitlist.length}}
+    <h2>📋 Waitlist</h2>
+    {{#each this.model.waitlist as |entry|}}
+      <div class="booking-card">
+        <div class="booking-card-header">
+          <div>
+            <h3>{{entry.event.title}}</h3>
+            <span class="field-help">{{entry.event.formatted_date}} — {{entry.class_name}}</span>
+          </div>
+          <span class="booking-status booking-status--waitlist">Position #{{entry.position}}</span>
+        </div>
+        <div class="booking-card-actions">
+          <button class="btn btn-small btn-danger" {{on "click" (fn this.leaveWaitlist entry.id)}}>Leave Waitlist</button>
+        </div>
+      </div>
+    {{/each}}
+  {{/if}}
+
+  {{!-- Car Change Modal --}}
+  {{#if this.changingCarBookingId}}
+    <div class="car-selection-overlay">
+      <div class="car-selection-modal">
+        <h2>🔄 Change Car</h2>
+        {{#if this.changingCarOptions.length}}
+          {{#each this.changingCarOptions as |car|}}
+            <div class="family-search-result" role="button" {{on "click" (fn this.confirmChangeCar car.id)}}>
+              <strong>{{car.friendly_name}}</strong> — {{car.driveline}} — {{car.transponder_number}}
+              {{#if car.owner_username}} <span class="field-help">({{car.owner_username}})</span>{{/if}}
+            </div>
+          {{/each}}
+        {{else}}
+          <p class="field-help">No eligible cars found.</p>
+        {{/if}}
+        <button class="btn btn-default" style="margin-top:12px;" {{on "click" this.cancelChangeCar}}>Cancel</button>
+      </div>
+    </div>
+  {{/if}}
 </div>

@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show, :public_entrants]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
@@ -335,6 +335,24 @@ module DiscourseEventSystem
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
+
+    def change_entrant_car
+      ensure_organisation_admin!(@event.organisation)
+      booking = DesEventBooking.find(params[:booking_id])
+      raise "Booking does not belong to this event" unless booking.event_id == @event.id
+      bc = booking.booking_classes.find(params[:class_id])
+      car = DesUserCar.find(params[:car_id])
+      bc.update!(car_id: car.id, transponder_number: car.transponder_number)
+      render json: {
+        success: true,
+        transponder: car.transponder_number,
+        manufacturer_name: car.manufacturer&.name,
+        model_name: car.car_model&.name || car.custom_model_name
+      }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
 
     private
 

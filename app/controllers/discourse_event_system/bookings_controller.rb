@@ -199,6 +199,65 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+
+    def change_car
+      booking = DesEventBooking.find(params[:id])
+      # Must own booking or be guardian of booking user
+      unless booking.user_id == current_user.id ||
+             DesRacingFamilyMember.exists?(user_id: booking.user_id, guardian_user_id: current_user.id)
+        raise Discourse::InvalidAccess
+      end
+      bc = booking.booking_classes.find(params[:class_id])
+      car = DesUserCar.find(params[:car_id])
+      bc.update!(car_id: car.id, transponder_number: car.transponder_number)
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def my_bookings_with_dependants
+      user_ids = [current_user.id]
+      DesRacingFamilyMember.for_guardian(current_user.id).pluck(:user_id).each { |id| user_ids << id }
+
+      bookings = DesEventBooking.where(user_id: user_ids)
+        .includes(:user, :event, booking_classes: [{ event_class: :class_type }, { user_car: [:manufacturer, :car_model] }])
+        .select { |b| b.event.present? }
+        .sort_by { |b| b.event.start_date }.reverse
+
+      render json: {
+        bookings: bookings.map { |b|
+          {
+            id: b.id,
+            username: b.user&.username,
+            is_own: b.user_id == current_user.id,
+            event: {
+              id: b.event.id,
+              title: b.event.title,
+              start_date: b.event.start_date,
+              location: b.event.location,
+              organisation_name: b.event.organisation&.name,
+              status: b.event.status
+            },
+            status: b.status,
+            amount_paid: b.amount_paid,
+            classes: b.booking_classes.map { |bc|
+              car = bc.user_car
+              {
+                id: bc.id,
+                class_name: bc.event_class&.class_type&.name || bc.event_class&.name || 'Unknown',
+                event_class_id: bc.event_class_id,
+                status: bc.status,
+                transponder_number: bc.transponder_number,
+                manufacturer_name: car&.manufacturer&.name,
+                model_name: car&.car_model&.name || car&.custom_model_name,
+                car_id: bc.car_id
+              }
+            }
+          }
+        }
+      }
+    end
+
     private
 
     def set_booking

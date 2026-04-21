@@ -35,6 +35,7 @@ DiscourseEventSystem::Engine.routes.draw do
   put "/des/events/:id/classes/:class_id" => "events#update_class"
   post "/des/events/:id/classes/:class_id/toggle-status" => "events#toggle_class_status"
   post "/des/events/:id/cancel-entrant" => "events#cancel_entrant"
+  put "/des/events/:id/bookings/:booking_id/classes/:class_id/car" => "events#change_entrant_car"
   delete "/des/events/:id/bookings/:booking_id" => "events#delete_booking"
 
   get "/des/bookings" => "bookings#index"
@@ -48,6 +49,8 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/bookings/:id/cancel" => "bookings#cancel"
   post "/des/bookings/:id/refund" => "bookings#refund"
   post "/des/bookings/:id/add_classes" => "bookings#add_classes"
+  put "/des/bookings/:id/classes/:class_id/car" => "bookings#change_car"
+  get "/des/my-bookings-full" => "bookings#my_bookings_with_dependants"
 
   get "/des/organisations" => "organisations#index"
   get "/des/organisations/:id" => "organisations#show"

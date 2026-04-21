@@ -11,25 +11,34 @@ export default class MyBookingsRoute extends Route {
       });
     };
 
-    const [bookingsResponse, waitlistResponse] = await Promise.all([
-      ajax("/des/bookings.json"),
+    const [fullBookings, waitlistResponse] = await Promise.all([
+      ajax("/des/my-bookings-full.json"),
       ajax("/des/waitlist.json"),
     ]);
 
-    const bookings = Array.isArray(bookingsResponse) ? bookingsResponse : bookingsResponse.bookings || [];
+    const bookings = fullBookings.bookings || [];
+    const now = new Date();
+    const upcoming = [];
+    const past = [];
+
     bookings.forEach(b => {
-      if (b.event && b.event.start_date) {
+      if (b.event?.start_date) {
         b.event.formatted_date = formatDate(b.event.start_date);
+        if (new Date(b.event.start_date) > now) {
+          upcoming.push(b);
+        } else {
+          past.push(b);
+        }
       }
     });
 
     const waitlist = waitlistResponse.waitlist || [];
     waitlist.forEach(w => {
-      if (w.event && w.event.start_date) {
+      if (w.event?.start_date) {
         w.event.formatted_date = formatDate(w.event.start_date);
       }
     });
 
-    return { bookings, waitlist };
+    return { bookings, upcoming, past, waitlist };
   }
 }

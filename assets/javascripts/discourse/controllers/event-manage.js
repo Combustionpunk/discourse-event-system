@@ -18,6 +18,9 @@ export default class EventManageController extends Controller {
   @tracked editingClassId = null;
   @tracked editingClassCapacity = "";
   @tracked entrantsFilter = "all";
+  @tracked swapCarEntrant = null;
+  @tracked swapCarClassId = null;
+  @tracked swapCarOptions = [];
 
   get filteredEntrantsClasses() {
     const classes = this.model.entrants?.classes || [];
@@ -241,6 +244,41 @@ export default class EventManageController extends Controller {
       popupAjaxError(error);
     }
   }
+
+  @action
+  async startSwapCar(entrant, classId) {
+    this.swapCarEntrant = entrant;
+    this.swapCarClassId = classId;
+    try {
+      const response = await ajax("/des/bookings/eligible-cars.json", {
+        data: { event_id: this.model.event.id, class_ids: [classId] }
+      });
+      this.swapCarOptions = response.classes?.[0]?.eligible_cars || [];
+    } catch { this.swapCarOptions = []; }
+  }
+
+  @action cancelSwapCar() {
+    this.swapCarEntrant = null;
+    this.swapCarClassId = null;
+    this.swapCarOptions = [];
+  }
+
+  @action
+  async confirmSwapCar(carId) {
+    if (!this.swapCarEntrant) return;
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/bookings/" + this.swapCarEntrant.booking_id + "/classes/" + this.swapCarEntrant.booking_class_id + "/car.json", {
+        type: "PUT",
+        data: { car_id: carId }
+      });
+      this.swapCarEntrant = null;
+      this.swapCarOptions = [];
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
 
   @action
   toggleEdit() {
