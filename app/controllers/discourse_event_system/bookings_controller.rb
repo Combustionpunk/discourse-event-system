@@ -16,23 +16,46 @@ module DiscourseEventSystem
       event = DesEvent.find(params[:event_id])
       class_ids = params[:class_ids].is_a?(Array) ? params[:class_ids] : params[:class_ids].values
 
-      cars = DesUserCar.where(user_id: current_user.id)
-        .includes(:manufacturer, :car_model, :class_type)
+      # Collect cars from current user and family members (guardian + dependants)
+      family_user_ids = []
+      family_usernames = {}
+
+      # Users I am guardian of
+      DesRacingFamilyMember.for_guardian(current_user.id).includes(:user).each do |fm|
+        family_user_ids << fm.user_id
+        family_usernames[fm.user_id] = fm.user.username
+      end
+
+      # My guardian
+      DesRacingFamilyMember.for_child(current_user.id).includes(:guardian).each do |fm|
+        family_user_ids << fm.guardian_user_id
+        family_usernames[fm.guardian_user_id] = fm.guardian.username
+      end
+
+      all_user_ids = ([current_user.id] + family_user_ids).uniq
+      all_cars = DesUserCar.where(user_id: all_user_ids)
+        .includes(:manufacturer, :car_model, :class_type, :user)
         .active
 
       result = class_ids.map do |class_id|
         event_class = DesEventClass.find(class_id)
-        eligible = cars.select { |car| car.eligible_for_class?(event_class) }
+        eligible = all_cars.select { |car| car.eligible_for_class?(event_class) }
         {
           class_id: class_id,
           class_name: event_class.name,
           eligible_cars: eligible.map { |car|
+            owner = if car.user_id == current_user.id
+              nil
+            else
+              family_usernames[car.user_id] || car.user&.username
+            end
             {
               id: car.id,
               friendly_name: car.display_name,
               driveline: car.effective_driveline,
               transponder_number: car.transponder_number,
-              model: car.car_model&.name || car.custom_model_name
+              model: car.car_model&.name || car.custom_model_name,
+              owner_username: owner
             }
           }
         }
@@ -40,7 +63,6 @@ module DiscourseEventSystem
 
       render json: { classes: result }
     end
-
     def show
       ensure_booking_owner!
       render json: serialize_booking(@booking)

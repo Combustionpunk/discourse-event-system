@@ -495,7 +495,7 @@ export default class EventBookingWidget extends Component {
                     <select {{on "change" (fn this.selectCar cls.class_id)}}>
                       <option value="">Select car...</option>
                       {{#each cls.eligible_cars as |car|}}
-                        <option value={{car.id}}>{{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}</option>
+                        <option value={{car.id}}>{{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}{{#if car.owner_username}} ({{car.owner_username}}){{/if}}</option>
                       {{/each}}
                     </select>
                   {{else}}
@@ -513,7 +513,7 @@ export default class EventBookingWidget extends Component {
                         <select {{on "change" (fn this.selectFamilyCar entry.user_id cls.class_id)}}>
                           <option value="">Select car...</option>
                           {{#each cls.eligible_cars as |car|}}
-                            <option value={{car.id}}>{{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}</option>
+                            <option value={{car.id}}>{{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}{{#if car.owner_username}} ({{car.owner_username}}){{/if}}</option>
                           {{/each}}
                         </select>
                       {{else}}
