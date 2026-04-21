@@ -14,7 +14,7 @@ class DesClassCompatibilityRule < ActiveRecord::Base
 
   def driver_eligible?(user)
     return true unless rule_type.in?(%w[max_age min_age])
-    dob_str = user.custom_fields['des_date_of_birth'].presence rescue nil
+    dob_str = UserCustomField.find_by(user_id: user.id, name: 'des_date_of_birth')&.value.presence
     dob = dob_str ? Date.parse(dob_str) : user.date_of_birth
     return true unless dob.present?
     age = ((Time.now - dob.to_time) / 1.year.seconds).floor

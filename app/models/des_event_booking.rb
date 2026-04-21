@@ -55,7 +55,7 @@ class DesEventBooking < ActiveRecord::Base
       .where(user_id: membership_user_id, organisation_id: event.organisation_id)
       .active.exists?
 
-    dob_str = user.custom_fields['des_date_of_birth'].presence
+    dob_str = UserCustomField.find_by(user_id: user_id, name: 'des_date_of_birth')&.value.presence
     dob = dob_str ? Date.parse(dob_str) : user.date_of_birth
     is_junior = if dob.present?
       age = event.start_date.year - dob.year
