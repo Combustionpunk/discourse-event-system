@@ -308,7 +308,8 @@ export default class DesAdminController extends Controller {
 
   @action
   updateEditField(field, e) {
-    this.editingModel = { ...this.editingModel, [field]: e.target.value };
+    const val = field === "manufacturer_id" ? parseInt(e.target.value, 10) : e.target.value;
+    this.editingModel = { ...this.editingModel, [field]: val };
   }
 
   @action

@@ -260,7 +260,7 @@
                       <label>Manufacturer</label>
                       <select {{on "change" (fn this.updateEditField "manufacturer_id")}}>
                         {{#each this.model.approved_manufacturers as |mfr|}}
-                          <option value={{mfr.id}} selected={{eq mfr.id this.editingModel.manufacturer_id}}>{{mfr.name}}</option>
+                          <option value={{mfr.id}} selected={{eq (concat mfr.id "") (concat this.editingModel.manufacturer_id "")}}>{{mfr.name}}</option>
                         {{/each}}
                       </select>
                     </div>
