@@ -132,6 +132,57 @@ module DiscourseEventSystem
       render json: { success: true }
     end
 
+    def destroy_model
+      model = DesCarModel.find(params[:id])
+      DesUserCar.where(car_model_id: model.id).update_all(car_model_id: nil)
+      model.destroy!
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def orphaned_cars
+      cars = DesUserCar.active
+        .includes(:user, :manufacturer, :car_model)
+        .where("manufacturer_id IS NULL OR car_model_id IS NULL OR car_model_id IN (?)",
+          DesCarModel.where(status: 'rejected').pluck(:id).presence || [0])
+      render json: {
+        cars: cars.map { |c|
+          {
+            id: c.id,
+            username: c.user&.username,
+            friendly_name: c.display_name,
+            manufacturer_id: c.manufacturer_id,
+            manufacturer_name: c.manufacturer&.name,
+            car_model_id: c.car_model_id,
+            model_name: c.car_model&.name,
+            model_status: c.car_model&.status,
+            transponder_number: c.transponder_number
+          }
+        }
+      }
+    end
+
+    def update_car
+      car = DesUserCar.find(params[:id])
+      car.update!(
+        manufacturer_id: params[:manufacturer_id].present? ? params[:manufacturer_id].to_i : car.manufacturer_id,
+        car_model_id: params[:car_model_id].present? ? params[:car_model_id].to_i : car.car_model_id
+      )
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_car
+      car = DesUserCar.find(params[:id])
+      car.update!(status: 'inactive')
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+
     private
 
     def ensure_admin

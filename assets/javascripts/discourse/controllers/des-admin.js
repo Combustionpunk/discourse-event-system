@@ -59,6 +59,8 @@ export default class DesAdminController extends Controller {
 
   @action
   setTabRules() { this.activeTab = "rules"; }
+  @action
+  setTabCleanup() { this.activeTab = "cleanup"; this.loadOrphanedCars(); }
 
 
 
@@ -167,6 +169,100 @@ export default class DesAdminController extends Controller {
       popupAjaxError(error);
     }
   }
+
+  @tracked orphanedCars = [];
+  @tracked editingOrphanCarId = null;
+  @tracked editingOrphanMfr = null;
+  @tracked editingOrphanModel = null;
+  @tracked orphanModels = [];
+
+  async loadOrphanedCars() {
+    try {
+      const response = await ajax("/des/admin/orphaned-cars.json");
+      this.orphanedCars = response.cars || [];
+    } catch {
+      this.orphanedCars = [];
+    }
+  }
+
+  @action
+  async deleteModel(model) {
+    if (!window.confirm(`Delete ${model.name}? Cars using this model will lose their model reference.`)) return;
+    try {
+      await ajax("/des/admin/models/" + model.id + ".json", { type: "DELETE" });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  startEditOrphanCar(car) {
+    this.editingOrphanCarId = car.id;
+    this.editingOrphanMfr = car.manufacturer_id;
+    this.editingOrphanModel = car.car_model_id;
+    this.orphanModels = [];
+    if (car.manufacturer_id) this.loadOrphanModels(car.manufacturer_id);
+  }
+
+  @action
+  cancelEditOrphanCar() {
+    this.editingOrphanCarId = null;
+  }
+
+  @action
+  async updateOrphanMfr(e) {
+    this.editingOrphanMfr = parseInt(e.target.value, 10);
+    this.editingOrphanModel = null;
+    if (this.editingOrphanMfr) {
+      await this.loadOrphanModels(this.editingOrphanMfr);
+    } else {
+      this.orphanModels = [];
+    }
+  }
+
+  async loadOrphanModels(mfrId) {
+    try {
+      const response = await ajax("/des/garage/models.json", { data: { manufacturer_id: mfrId } });
+      this.orphanModels = response.models || [];
+    } catch {
+      this.orphanModels = [];
+    }
+  }
+
+  @action
+  updateOrphanModel(e) {
+    this.editingOrphanModel = parseInt(e.target.value, 10);
+  }
+
+  @action
+  async saveOrphanCar(car) {
+    try {
+      await ajax("/des/admin/cars/" + car.id + ".json", {
+        type: "PUT",
+        data: {
+          manufacturer_id: this.editingOrphanMfr,
+          car_model_id: this.editingOrphanModel,
+        },
+      });
+      this.editingOrphanCarId = null;
+      this.loadOrphanedCars();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async deleteOrphanCar(car) {
+    if (!window.confirm(`Delete ${car.friendly_name} (owned by ${car.username})?`)) return;
+    try {
+      await ajax("/des/admin/cars/" + car.id + ".json", { type: "DELETE" });
+      this.loadOrphanedCars();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
 
 
   ruleTypeLabel(ruleType) {

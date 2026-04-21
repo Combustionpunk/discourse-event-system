@@ -29,6 +29,9 @@
     <button class="btn {{if (eq this.activeTab 'rules') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabRules}}>
       📋 Class Rules
     </button>
+    <button class="btn {{if (eq this.activeTab 'cleanup') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabCleanup}}>
+      🔧 Cleanup
+    </button>
   </div>
 
   {{!-- ORGANISATIONS TAB --}}
@@ -312,6 +315,9 @@
                     <button class="btn btn-default btn-small" {{on "click" (fn this.editModel model)}}>
                       ✏️ Edit
                     </button>
+                    <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteModel model)}}>
+                      🗑 Delete
+                    </button>
                   </div>
                 {{/if}}
               </div>
@@ -367,5 +373,69 @@
   {{/if}}
 
 
+
+
+  {{!-- CLEANUP TAB --}}
+  {{#if (eq this.activeTab "cleanup")}}
+    <div class="des-admin-section">
+      <h2>🔧 Orphaned Cars</h2>
+      <p class="field-help">Cars with missing or rejected manufacturers/models.</p>
+
+      {{#if this.orphanedCars.length}}
+        {{#each this.orphanedCars as |car|}}
+          <div class="admin-org-card">
+            {{#if (eq this.editingOrphanCarId car.id)}}
+              <div class="orphan-edit-form" style="width:100%;">
+                <strong>{{car.friendly_name}}</strong> <span class="field-help">({{car.username}})</span>
+                <div class="org-form-row" style="margin-top:8px;">
+                  <div class="org-form-field">
+                    <label>Manufacturer</label>
+                    <select {{on "change" this.updateOrphanMfr}}>
+                      <option value="">Select...</option>
+                      {{#each this.model.approved_manufacturers as |mfr|}}
+                        <option value={{mfr.id}} selected={{eq (concat mfr.id "") (concat this.editingOrphanMfr "")}}>{{mfr.name}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                  <div class="org-form-field">
+                    <label>Model</label>
+                    <select {{on "change" this.updateOrphanModel}}>
+                      <option value="">Select...</option>
+                      {{#each this.orphanModels as |m|}}
+                        <option value={{m.id}} selected={{eq (concat m.id "") (concat this.editingOrphanModel "")}}>{{m.name}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:8px;">
+                  <button class="btn btn-primary btn-small" {{on "click" (fn this.saveOrphanCar car)}}>Save</button>
+                  <button class="btn btn-default btn-small" {{on "click" this.cancelEditOrphanCar}}>Cancel</button>
+                </div>
+              </div>
+            {{else}}
+              <div class="admin-org-info">
+                <strong>{{car.friendly_name}}</strong>
+                <div class="admin-org-meta">
+                  <span>👤 {{car.username}}</span>
+                  <span>🏭 {{if car.manufacturer_name car.manufacturer_name "⚠️ No manufacturer"}}</span>
+                  <span>🚗 {{if car.model_name car.model_name "⚠️ No model"}}
+                    {{#if car.model_status}}
+                      <span class="booking-status booking-status--{{car.model_status}}">{{car.model_status}}</span>
+                    {{/if}}
+                  </span>
+                </div>
+              </div>
+              <div class="admin-org-actions">
+                <button class="btn btn-default btn-small" {{on "click" (fn this.startEditOrphanCar car)}}>✏️ Fix</button>
+                <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteOrphanCar car)}}>🗑 Delete</button>
+              </div>
+            {{/if}}
+          </div>
+        {{/each}}
+      {{else}}
+        <p class="no-pending">No orphaned cars found 🎉</p>
+      {{/if}}
+    </div>
+  {{/if}}
 
 </div>
