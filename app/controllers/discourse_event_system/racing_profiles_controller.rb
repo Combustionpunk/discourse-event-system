@@ -102,11 +102,11 @@ module DiscourseEventSystem
       return render json: { error: 'Not found' }, status: :not_found unless fm
       member_user = fm.user
 
-        user.date_of_birth = Date.parse(params[:date_of_birth]) if params[:date_of_birth].present?
+        member_user.date_of_birth = Date.parse(params[:date_of_birth]) if params[:date_of_birth].present?
       member_user.custom_fields['des_date_of_birth'] = params[:date_of_birth] if params[:date_of_birth].present?
       member_user.custom_fields['brca_membership_number'] = params[:brca_membership_number].presence if params.key?(:brca_membership_number)
       member_user.save_custom_fields
-        user.save!
+        member_user.save!
 
       render json: { success: true, user: serialize_dependant(fm.reload) }
     rescue => e
