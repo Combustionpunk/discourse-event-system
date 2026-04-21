@@ -16,6 +16,8 @@ export default class RacingProfileController extends Controller {
   @tracked familyMembers = [];
   @tracked familySearchTerm = "";
   @tracked familySearchResults = [];
+  @tracked selectedFamilyUser = null;
+  @tracked searchTimeout = null;
   @tracked showCreateFamily = false;
   @tracked newFamUsername = "";
   @tracked newFamName = "";
@@ -69,28 +71,49 @@ export default class RacingProfileController extends Controller {
 
   // Family member actions
   @action
-  async onFamilySearch(e) {
-    const term = e.target.value;
-    this.familySearchTerm = term;
-    if (!term || term.length < 2) { this.familySearchResults = []; return; }
-    try {
-      const results = await ajax(`/users/search.json?term=${encodeURIComponent(term)}`);
-      this.familySearchResults = (results.users || results || []).slice(0, 8);
-    } catch { this.familySearchResults = []; }
+  updateFamilySearch(e) {
+    this.familySearchTerm = e.target.value;
+    clearTimeout(this.searchTimeout);
+    if (this.familySearchTerm.length < 2) {
+      this.familySearchResults = [];
+      return;
+    }
+    this.searchTimeout = setTimeout(async () => {
+      try {
+        const response = await ajax(`/users/search.json?term=${encodeURIComponent(this.familySearchTerm)}&include_staged_users=false`);
+        this.familySearchResults = response.users || [];
+      } catch(e) {
+        this.familySearchResults = [];
+      }
+    }, 300);
   }
 
   @action
-  async selectFamilyUser(user) {
+  selectFamilyUser(user) {
+    this.selectedFamilyUser = user;
+    this.familySearchTerm = user.username;
     this.familySearchResults = [];
+  }
+
+  @action
+  clearSelectedFamilyUser() {
+    this.selectedFamilyUser = null;
     this.familySearchTerm = "";
+  }
+
+  @action
+  async confirmAddFamilyUser() {
+    if (!this.selectedFamilyUser) return;
     this.familyError = null;
     this.familyAdding = true;
     try {
       const response = await ajax("/des/racing-profile/family-members.json", {
         type: "POST",
-        data: { username: user.username }
+        data: { username: this.selectedFamilyUser.username }
       });
       this.familyMembers = [...this.familyMembers, response.user];
+      this.selectedFamilyUser = null;
+      this.familySearchTerm = "";
     } catch (e) {
       this.familyError = e.jqXHR?.responseJSON?.error || "Failed to add member";
     }
