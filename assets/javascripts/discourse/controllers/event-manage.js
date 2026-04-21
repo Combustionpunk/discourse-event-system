@@ -251,7 +251,7 @@ export default class EventManageController extends Controller {
     this.swapCarClassId = classId;
     try {
       const response = await ajax("/des/bookings/eligible-cars.json", {
-        data: { event_id: this.model.event.id, class_ids: [classId] }
+        data: { event_id: this.model.event.id, class_ids: [classId], user_id: entrant.user_id }
       });
       this.swapCarOptions = response.classes?.[0]?.eligible_cars || [];
     } catch { this.swapCarOptions = []; }

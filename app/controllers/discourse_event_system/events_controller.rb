@@ -223,6 +223,7 @@ module DiscourseEventSystem
                 booking_class_id: bc&.id,
                 event_class_id: ec.id,
                 username: b.user.username,
+                user_id: b.user_id,
                 avatar_template: b.user.avatar_template&.gsub('{size}', '32'),
                 transponder: bc&.transponder_number,
                 manufacturer_name: car&.manufacturer&.name,
@@ -254,6 +255,7 @@ module DiscourseEventSystem
               car = bc&.user_car
               {
                 username: b.user.username,
+                user_id: b.user_id,
                 avatar_template: b.user.avatar_template&.gsub('{size}', '32'),
                 transponder: bc&.transponder_number,
                 manufacturer_name: car&.manufacturer&.name,
