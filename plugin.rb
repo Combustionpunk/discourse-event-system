@@ -59,6 +59,7 @@ after_initialize do
   load File.expand_path("../app/models/des_membership_family_member.rb", __FILE__)
   load File.expand_path("../app/models/des_organisation_membership.rb", __FILE__)
   load File.expand_path("../app/models/des_organisation_membership_type.rb", __FILE__)
+  load File.expand_path("../app/models/des_racing_family_member.rb", __FILE__)
   load File.expand_path("../db/seeds.rb", __FILE__) if DesPosition.count == 0
 
   # Auto-create events category if it doesn't exist

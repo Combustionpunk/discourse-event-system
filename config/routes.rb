@@ -95,6 +95,10 @@ DiscourseEventSystem::Engine.routes.draw do
 
   get "/des/racing-profile" => "racing_profiles#show"
   put "/des/racing-profile" => "racing_profiles#update"
+  get "/des/racing-profile/family-members" => "racing_profiles#family_members"
+  post "/des/racing-profile/family-members" => "racing_profiles#add_family_member"
+  delete "/des/racing-profile/family-members/:user_id" => "racing_profiles#remove_family_member"
+  put "/des/racing-profile/family-members/:user_id" => "racing_profiles#update_family_member"
 
   get "/des/garage" => "garage#index"
   post "/des/garage" => "garage#create"

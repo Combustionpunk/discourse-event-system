@@ -9,4 +9,9 @@ export default class RacingProfileRoute extends Route {
     ]);
     return { profile, garage };
   }
+
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    controller.setup();
+  }
 }
