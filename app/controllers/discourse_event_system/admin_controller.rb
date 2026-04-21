@@ -43,6 +43,7 @@ module DiscourseEventSystem
     def update_model
       model = DesCarModel.find(params[:id])
       model.update!(
+        manufacturer_id: params[:manufacturer_id].present? ? params[:manufacturer_id].to_i : model.manufacturer_id,
         name: params[:name].present? ? params[:name].strip : model.name,
         year_released: params[:year_released].present? ? params[:year_released].to_i : model.year_released,
         driveline: params[:driveline].present? ? params[:driveline] : model.driveline,
@@ -178,6 +179,7 @@ module DiscourseEventSystem
         id: model.id,
         name: model.name,
         manufacturer: model.manufacturer&.name || 'Unknown',
+        manufacturer_id: model.manufacturer_id,
         year_released: model.year_released,
         driveline: model.driveline,
         chassis_type: model.chassis_type,

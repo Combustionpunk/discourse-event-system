@@ -257,6 +257,14 @@
                 {{#if (eq this.editingModelId model.id)}}
                   <div class="model-edit-form">
                     <div class="org-form-field">
+                      <label>Manufacturer</label>
+                      <select {{on "change" (fn this.updateEditField "manufacturer_id")}}>
+                        {{#each this.model.approved_manufacturers as |mfr|}}
+                          <option value={{mfr.id}} selected={{eq mfr.id this.editingModel.manufacturer_id}}>{{mfr.name}}</option>
+                        {{/each}}
+                      </select>
+                    </div>
+                    <div class="org-form-field">
                       <label>Name</label>
                       <input type="text" value={{this.editingModel.name}} {{on "input" (fn this.updateEditField "name")}} />
                     </div>

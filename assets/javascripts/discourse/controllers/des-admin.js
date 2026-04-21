@@ -323,6 +323,7 @@ export default class DesAdminController extends Controller {
       await ajax("/des/admin/models/" + this.editingModel.id + ".json", {
         type: "PUT",
         data: {
+          manufacturer_id: this.editingModel.manufacturer_id,
           name: this.editingModel.name,
           year_released: this.editingModel.year_released,
           driveline: this.editingModel.driveline,
