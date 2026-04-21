@@ -2417,3 +2417,12 @@ body.des-embedded-event {
   color: #e67e22;
   border: 1px solid rgba(243, 156, 18, 0.3);
 }
+
+// Family member selected user confirmation
+.family-selected-user {
+  padding: 12px 16px;
+  background: var(--success-low, #d4edda);
+  border: 1px solid var(--success-medium, #c3e6cb);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
