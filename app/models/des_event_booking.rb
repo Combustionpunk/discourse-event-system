@@ -55,9 +55,11 @@ class DesEventBooking < ActiveRecord::Base
       .where(user_id: membership_user_id, organisation_id: event.organisation_id)
       .active.exists?
 
-    is_junior = if user.date_of_birth.present?
-      age = event.start_date.year - user.date_of_birth.year
-      age -= 1 if event.start_date < user.date_of_birth + age.years
+    dob_str = user.custom_fields['des_date_of_birth'].presence
+    dob = dob_str ? Date.parse(dob_str) : user.date_of_birth
+    is_junior = if dob.present?
+      age = event.start_date.year - dob.year
+      age -= 1 if event.start_date < dob + age.years
       age < 16
     else
       false

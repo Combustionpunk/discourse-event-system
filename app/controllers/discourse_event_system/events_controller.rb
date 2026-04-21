@@ -422,7 +422,8 @@ module DiscourseEventSystem
         is_admin: current_user.present? && is_event_admin?(event),
         user_is_member: current_user.present? && DesOrganisationMembership.where(user_id: current_user.id, organisation_id: event.organisation_id).active.exists?,
         user_is_junior: current_user.present? && begin
-          dob = current_user.date_of_birth
+          dob_str = current_user.custom_fields['des_date_of_birth'].presence
+          dob = dob_str ? Date.parse(dob_str) : current_user.date_of_birth
           if dob.present?
             age = event.start_date.year - dob.year
             age -= 1 if event.start_date < dob + age.years
