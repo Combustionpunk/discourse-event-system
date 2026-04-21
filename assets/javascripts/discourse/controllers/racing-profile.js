@@ -71,21 +71,21 @@ export default class RacingProfileController extends Controller {
 
   // Family member actions
   @action
-  updateFamilySearch(e) {
-    this.familySearchTerm = e.target.value;
-    clearTimeout(this.searchTimeout);
-    if (this.familySearchTerm.length < 2) {
+  async updateFamilySearch(e) {
+    const term = e.target.value;
+    this.familySearchTerm = term;
+    if (!term || term.length < 2) {
       this.familySearchResults = [];
       return;
     }
-    this.searchTimeout = setTimeout(async () => {
-      try {
-        const response = await ajax(`/users/search.json?term=${encodeURIComponent(this.familySearchTerm)}&include_staged_users=false`);
+    try {
+      const response = await ajax("/users/search.json?term=" + encodeURIComponent(term) + "&include_staged_users=false");
+      if (this.familySearchTerm === term) {
         this.familySearchResults = response.users || [];
-      } catch(e) {
-        this.familySearchResults = [];
       }
-    }, 300);
+    } catch (err) {
+      this.familySearchResults = [];
+    }
   }
 
   @action
