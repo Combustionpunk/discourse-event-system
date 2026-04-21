@@ -94,7 +94,10 @@ export default class EventBookingWidget extends Component {
     let total = this._calcForClasses(this.selectedClasses.length, isMember, isJunior);
     Object.keys(this.familySelections).forEach(uid => {
       const ids = this.familySelections[uid] || [];
-      if (ids.length > 0) total += this._calcForClasses(ids.length, isMember, false);
+      if (ids.length > 0) {
+        const member = (this.event.family_members || []).find(m => String(m.user_id) === String(uid));
+        total += this._calcForClasses(ids.length, isMember, member?.is_junior || false);
+      }
     });
     return total;
   }

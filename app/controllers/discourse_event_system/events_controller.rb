@@ -448,7 +448,7 @@ module DiscourseEventSystem
         .first
       if membership
         membership.family_members.each do |fm|
-          members[fm.user_id] = { user_id: fm.user_id, username: fm.user.username }
+          members[fm.user_id] = { user_id: fm.user_id, username: fm.user.username, is_junior: user_is_junior?(fm.user, event) }
         end
       end
 
@@ -456,11 +456,21 @@ module DiscourseEventSystem
       DesRacingFamilyMember.for_guardian(current_user.id).includes(:user).each do |rfm|
         members[rfm.user_id] ||= {
           user_id: rfm.user_id,
-          username: rfm.user.username
+          username: rfm.user.username,
+          is_junior: user_is_junior?(rfm.user, event)
         }
       end
 
       members.values
+    end
+
+    def user_is_junior?(user, event)
+      dob_str = UserCustomField.find_by(user_id: user.id, name: 'des_date_of_birth')&.value.presence
+      dob = dob_str ? Date.parse(dob_str) : user.date_of_birth
+      return false unless dob.present?
+      age = event.start_date.year - dob.year
+      age -= 1 if event.start_date < dob + age.years
+      age < 16
     end
 
     def is_event_admin?(event)

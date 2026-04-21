@@ -162,7 +162,9 @@ export default class EventController extends Controller {
     Object.keys(familySelections).forEach(userId => {
       const classIds = familySelections[userId] || [];
       if (classIds.length > 0) {
-        total += this._calculateForClasses(classIds.length, isMember, false);
+        const member = (this.model.family_members || []).find(m => String(m.user_id) === String(userId));
+        const memberIsJunior = member?.is_junior || false;
+        total += this._calculateForClasses(classIds.length, isMember, memberIsJunior);
       }
     });
 
