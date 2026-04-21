@@ -79,7 +79,7 @@ export default class RacingProfileController extends Controller {
       return;
     }
     try {
-      const response = await ajax("/users/search.json?term=" + encodeURIComponent(term) + "&include_staged_users=false");
+      const response = await ajax("/users/search.json", { data: { term: term, include_staged_users: false } });
       if (this.familySearchTerm === term) {
         this.familySearchResults = response.users || [];
       }
