@@ -137,6 +137,15 @@ class DesBookingService
       Rails.logger.error "Failed to send booking confirmed email: #{e.message}"
     end
 
+    # Check booking milestone badges
+    begin
+      DesBadgeService.check_booking_badges(booking.user)
+      linked_bookings.each { |lb| DesBadgeService.check_booking_badges(lb.user) }
+    rescue => e
+      Rails.logger.error "Badge check failed: #{e.message}"
+    end
+
+    booking
     booking
   end
 

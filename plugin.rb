@@ -91,4 +91,40 @@ after_initialize do
   rescue => e
     Rails.logger.error "Failed to create events category: #{e.message}"
   end
+
+  # Load badge service
+  load File.expand_path("../app/services/des_badge_service.rb", __FILE__)
+
+  # Create RC racing badges
+  begin
+    badge_defs = [
+      { name: "First Start", type_id: 3, icon: "flag-checkered", desc: "Completed your first race booking" },
+      { name: "Regular Racer", type_id: 2, icon: "flag-checkered", desc: "10 confirmed race bookings" },
+      { name: "Seasoned Racer", type_id: 2, icon: "trophy", desc: "25 confirmed race bookings" },
+      { name: "Veteran Racer", type_id: 1, icon: "trophy", desc: "50 confirmed race bookings" },
+      { name: "Elite Racer", type_id: 1, icon: "star", desc: "100 confirmed race bookings" },
+      { name: "Pit Crew", type_id: 3, icon: "wrench", desc: "Added your first car to the garage" },
+      { name: "Club Member", type_id: 3, icon: "id-card", desc: "Joined your first organisation" },
+      { name: "Family Racer", type_id: 3, icon: "users", desc: "Added a family member or dependant" },
+    ]
+    badge_defs.each do |bd|
+      Badge.find_or_create_by!(name: bd[:name]) do |b|
+        b.badge_type_id = bd[:type_id]
+        b.description = bd[:desc]
+        b.long_description = bd[:desc]
+        b.icon = bd[:icon]
+        b.allow_title = false
+        b.multiple_grant = false
+        b.listable = true
+        b.enabled = true
+        b.auto_revoke = false
+        b.show_posts = false
+        b.target_posts = false
+        b.system = false
+      end
+    end
+  rescue => e
+    Rails.logger.error "Failed to create RC racing badges: #{e.message}"
+  end
+
 end

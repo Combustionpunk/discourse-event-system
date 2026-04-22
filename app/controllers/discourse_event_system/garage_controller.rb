@@ -53,6 +53,7 @@ module DiscourseEventSystem
       car = DesUserCar.new(car_attributes)
       if car.save
         render json: serialize_car(car.reload), status: :created
+        DesBadgeService.check_garage_badge(current_user) rescue nil
       else
         render json: { errors: car.errors.full_messages }, status: :unprocessable_entity
       end

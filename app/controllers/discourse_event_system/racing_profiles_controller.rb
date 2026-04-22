@@ -74,6 +74,7 @@ module DiscourseEventSystem
           created_by_guardian: true
         )
 
+        DesBadgeService.check_family_badge(current_user) rescue nil
         render json: { success: true, created: true, password: password, user: serialize_dependant(record) }
       else
         user = User.find_by(username: params[:username])
@@ -86,6 +87,7 @@ module DiscourseEventSystem
           created_by_guardian: false
         )
 
+        DesBadgeService.check_family_badge(current_user) rescue nil
         render json: { success: true, created: false, user: serialize_dependant(record) }
       end
     rescue => e

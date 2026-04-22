@@ -387,6 +387,7 @@ module DiscourseEventSystem
       )
       if type.free?
         membership.activate!(nil, 0)
+        DesBadgeService.check_membership_badge(current_user) rescue nil
         render json: { success: true, membership_id: membership.id, free: true }
       else
         paypal = DesPaypalService.new
@@ -433,6 +434,7 @@ module DiscourseEventSystem
       capture_id = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'id')
       amount = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'amount', 'value')
       membership.activate!(capture_id, amount)
+      DesBadgeService.check_membership_badge(current_user) rescue nil
       render json: { success: true, organisation: { id: membership.organisation.id, name: membership.organisation.name }, is_family: membership.membership_type&.is_family || false, max_members: membership.membership_type&.max_members || 1, membership_id: membership.id }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
