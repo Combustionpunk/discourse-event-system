@@ -17,6 +17,7 @@ class DesEventClass < ActiveRecord::Base
   def confirmed_bookings_count
     DesEventBookingClass.joins(:booking)
       .where(event_class_id: id)
+      .where(status: 'confirmed')
       .where(des_event_bookings: { status: ['confirmed', 'pending'] })
       .count
   end
@@ -26,10 +27,11 @@ class DesEventClass < ActiveRecord::Base
   end
 
   def update_status!
+    return if status == 'inactive'
     if sold_out?
       update!(status: 'sold_out')
     else
-      update!(status: 'active')
+      update!(status: 'active') if status == 'sold_out'
     end
   end
 end
