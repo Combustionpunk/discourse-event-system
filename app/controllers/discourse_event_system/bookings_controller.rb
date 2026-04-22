@@ -56,6 +56,7 @@ module DiscourseEventSystem
               driveline: car.effective_driveline,
               transponder_number: car.transponder_number,
               model: car.car_model&.name || car.custom_model_name,
+              model_status: car.car_model&.status,
               owner_username: owner
             }
           }

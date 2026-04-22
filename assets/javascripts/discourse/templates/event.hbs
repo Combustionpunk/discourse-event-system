@@ -271,7 +271,7 @@
                 <option value="">Select car...</option>
                 {{#each cls.eligible_cars as |car|}}
                   <option value={{car.id}}>
-                    {{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}{{#if car.owner_username}} ({{car.owner_username}}){{/if}}
+                    {{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}{{#if car.owner_username}} ({{car.owner_username}}){{/if}}{{#if (eq car.model_status "pending")}} ⚠️ pending approval{{/if}}
                   </option>
                 {{/each}}
               </select>
@@ -297,7 +297,7 @@
                     <option value="">Select car...</option>
                     {{#each cls.eligible_cars as |car|}}
                       <option value={{car.id}}>
-                        {{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}{{#if car.owner_username}} ({{car.owner_username}}){{/if}}
+                        {{car.friendly_name}} — {{car.driveline}} — {{car.transponder_number}}{{#if car.owner_username}} ({{car.owner_username}}){{/if}}{{#if (eq car.model_status "pending")}} ⚠️ pending approval{{/if}}
                       </option>
                     {{/each}}
                   </select>
