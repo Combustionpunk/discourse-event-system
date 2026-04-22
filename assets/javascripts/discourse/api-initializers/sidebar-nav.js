@@ -81,6 +81,9 @@ export default apiInitializer("1.0", (api) => {
         get displaySection() {
           return true;
         }
+      }
+
+      return RCEventsSidebarSection;
     }
   );
 });
