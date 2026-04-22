@@ -211,6 +211,7 @@
                   <tr>
                     <th class="avatar-col"></th>
                     <th>Username</th>
+                    <th>Full Name</th>
                     <th>Manufacturer</th>
                     <th>Model</th>
                     <th>Transponder</th>
@@ -223,6 +224,7 @@
                     <tr class="entrant-row entrant-row--{{entrant.status}}">
                       <td class="avatar-col"><a data-user-card={{entrant.username}}><img src="{{entrant.avatar_template}}" class="entrant-avatar" alt="" /></a></td>
                       <td>{{entrant.username}}</td>
+                      <td>{{entrant.name}}</td>
                       <td>{{entrant.manufacturer_name}}</td>
                       <td>{{entrant.model_name}}</td>
                       <td class="transponder-number">{{entrant.transponder}}</td>
