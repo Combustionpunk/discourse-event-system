@@ -64,6 +64,7 @@ export default apiInitializer("1.0", (api) => {
           if (!user) return [];
           const links = [
             new RCLink({ route: "events", title: "📅 Events" }),
+            new RCLink({ route: "organisations", title: "🏢 Organisations" }),
             new RCLink({ route: "my-organisations", title: "🏢 My Organisations" }),
             new RCLink({ route: "racing-profile", title: "🏎️ My Racing Profile" }),
             new RCLink({ route: "my-garage", title: "🚗 My Garage" }),
