@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show, :public_entrants]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
@@ -375,6 +375,29 @@ module DiscourseEventSystem
       to_class.update_status!
 
       render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+
+    def sync_transponders
+      ensure_organisation_admin!(@event.organisation)
+      updated = 0
+      booking_classes = DesEventBookingClass.joins(:booking)
+        .where(des_event_booking_classes: { status: 'confirmed' })
+        .where(des_event_bookings: { event_id: @event.id, status: ['confirmed', 'pending'] })
+        .where.not(car_id: nil)
+        .includes(:user_car)
+
+      booking_classes.each do |bc|
+        car = bc.user_car
+        next unless car
+        next if car.transponder_number == bc.transponder_number
+        bc.update_columns(transponder_number: car.transponder_number)
+        updated += 1
+      end
+
+      render json: { success: true, updated: updated, message: "Updated #{updated} transponder number(s)" }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end

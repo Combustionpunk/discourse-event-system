@@ -318,6 +318,19 @@ export default class EventManageController extends Controller {
       .map(c => ({ id: c.id, name: c.name, spaces: c.spaces_remaining }));
   }
 
+  @action
+  async syncTransponders() {
+    if (!window.confirm("Sync transponder numbers from current car records for all bookings in this event?")) return;
+    try {
+      const response = await ajax("/des/events/" + this.model.event.id + "/sync-transponders.json", { type: "POST" });
+      alert(response.message);
+      if (response.updated > 0) this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+
 
 
   @action
