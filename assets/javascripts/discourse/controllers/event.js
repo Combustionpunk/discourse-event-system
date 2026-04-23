@@ -187,6 +187,21 @@ export default class EventController extends Controller {
     return this.selectedClasses.length === 0 && !this.hasFamilySelections;
   }
 
+
+  totalSelectionsForClass(classId) {
+    let count = this.selectedClasses.includes(classId) ? 1 : 0;
+    Object.values(this.familySelections).forEach(ids => {
+      if (ids && ids.includes(classId)) count++;
+    });
+    return count;
+  }
+
+  classHasSpace(classId) {
+    const cls = (this.model.classes || []).find(c => c.id === classId);
+    if (!cls) return false;
+    return this.totalSelectionsForClass(classId) < cls.spaces_remaining;
+  }
+
   get maxClassesReached() {
     const max = this.model.max_classes_per_booking;
     if (!max) return false;
@@ -219,6 +234,10 @@ export default class EventController extends Controller {
       const max = this.model.max_classes_per_booking;
       if (max && this.selectedClasses.length >= max) {
         alert("You can only select a maximum of " + max + " class(es) for this event.");
+        return;
+      }
+      if (!this.classHasSpace(classId)) {
+        alert("No spaces remaining in this class for additional racers.");
         return;
       }
       this.selectedClasses = [...this.selectedClasses, classId];
@@ -355,6 +374,10 @@ export default class EventController extends Controller {
     if (userClasses.includes(classId)) {
       current[userId] = userClasses.filter((id) => id !== classId);
     } else {
+      if (!this.classHasSpace(classId)) {
+        alert("No spaces remaining in this class for additional racers.");
+        return;
+      }
       current[userId] = [...userClasses, classId];
     }
 

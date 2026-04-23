@@ -2426,3 +2426,11 @@ body.des-embedded-event {
   border-radius: 8px;
   margin-bottom: 12px;
 }
+
+// Ensure Discourse error dialogs appear above our modals
+.dialog-overlay,
+.bootbox.modal,
+#discourse-modal,
+.modal-outer-container {
+  z-index: 10001 !important;
+}

@@ -116,6 +116,21 @@ export default class EventBookingWidget extends Component {
     return this.selectedClasses.length === 0 && !this.hasFamilySelections;
   }
 
+  totalSelectionsForClass(classId) {
+    let count = this.selectedClasses.includes(classId) ? 1 : 0;
+    Object.values(this.familySelections).forEach(ids => {
+      if (ids && ids.includes(classId)) count++;
+    });
+    return count;
+  }
+
+  classHasSpace(classId) {
+    const cls = (this.event?.classes || []).find(c => c.id === classId);
+    if (!cls) return false;
+    return this.totalSelectionsForClass(classId) < cls.spaces_remaining;
+  }
+
+
   get allCarsSelected() {
     if (!this.eligibleCars.every(cls => this.carSelections[cls.class_id])) return false;
     if (this.familyEligibleCars) {
@@ -196,6 +211,7 @@ export default class EventBookingWidget extends Component {
         alert("You can only select a maximum of " + max + " class(es) for this event.");
         return;
       }
+      if (!this.classHasSpace(classId)) { alert("No spaces remaining in this class for additional racers."); return; }
       this.selectedClasses = [...this.selectedClasses, classId];
     }
   }
@@ -205,7 +221,12 @@ export default class EventBookingWidget extends Component {
   @action toggleFamilyClass(userId, classId) {
     const c = { ...this.familySelections };
     const uc = c[userId] || [];
-    c[userId] = uc.includes(classId) ? uc.filter(id => id !== classId) : [...uc, classId];
+    if (uc.includes(classId)) {
+      c[userId] = uc.filter(id => id !== classId);
+    } else {
+      if (!this.classHasSpace(classId)) { alert("No spaces remaining in this class for additional racers."); return; }
+      c[userId] = [...uc, classId];
+    }
     this.familySelections = c;
   }
 
@@ -460,6 +481,7 @@ export default class EventBookingWidget extends Component {
                         <tr>
                           <th class="avatar-col"></th>
                           <th>Username</th>
+                          <th>Full Name</th>
                           <th>Manufacturer</th>
                           <th>Model</th>
                           <th>Transponder</th>
@@ -472,6 +494,7 @@ export default class EventBookingWidget extends Component {
                           <tr class="entrant-row entrant-row--{{entrant.status}}">
                             <td class="avatar-col"><a data-user-card={{entrant.username}}><img src="{{entrant.avatar_template}}" class="entrant-avatar" alt="" /></a></td>
                             <td>{{entrant.username}}</td>
+                            <td>{{entrant.name}}</td>
                             <td>{{entrant.manufacturer_name}}</td>
                             <td>{{entrant.model_name}}</td>
                             <td class="transponder-number">{{entrant.transponder}}</td>
