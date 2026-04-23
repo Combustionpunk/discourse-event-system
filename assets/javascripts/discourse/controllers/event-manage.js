@@ -21,6 +21,8 @@ export default class EventManageController extends Controller {
   @tracked swapCarEntrant = null;
   @tracked swapCarClassId = null;
   @tracked swapCarOptions = [];
+  @tracked moveClassEntrant = null;
+  @tracked moveClassFromId = null;
 
   get filteredEntrantsClasses() {
     const classes = this.model.entrants?.classes || [];
@@ -278,6 +280,44 @@ export default class EventManageController extends Controller {
       popupAjaxError(error);
     }
   }
+
+  @action
+  startMoveClass(entrant, fromClassId) {
+    this.moveClassEntrant = entrant;
+    this.moveClassFromId = fromClassId;
+  }
+
+  @action cancelMoveClass() {
+    this.moveClassEntrant = null;
+    this.moveClassFromId = null;
+  }
+
+  @action
+  async confirmMoveClass(toClassId) {
+    if (!this.moveClassEntrant) return;
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/bookings/" + this.moveClassEntrant.booking_id + "/move-class.json", {
+        type: "PUT",
+        data: {
+          from_class_id: this.moveClassFromId,
+          to_class_id: toClassId
+        }
+      });
+      this.moveClassEntrant = null;
+      this.moveClassFromId = null;
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  get moveClassOptions() {
+    if (!this.model.entrants?.classes) return [];
+    return this.model.entrants.classes
+      .filter(c => c.id !== this.moveClassFromId && c.spaces_remaining > 0)
+      .map(c => ({ id: c.id, name: c.name, spaces: c.spaces_remaining }));
+  }
+
 
 
   @action

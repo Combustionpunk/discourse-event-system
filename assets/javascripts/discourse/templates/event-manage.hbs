@@ -325,6 +325,7 @@
                       {{/if}}
                       {{#unless (eq entrant.status "cancelled")}}
                         <button class="btn btn-small btn-default" {{on "click" (fn this.startSwapCar entrant entrant.event_class_id)}}>🔄</button>
+                        <button class="btn btn-small btn-default" {{on "click" (fn this.startMoveClass entrant cls.id)}}>↔️</button>
                       {{/unless}}
                     </td>
                   </tr>
@@ -354,6 +355,25 @@
           <p class="field-help">No eligible cars found.</p>
         {{/if}}
         <button class="btn btn-default" style="margin-top:12px;" {{on "click" this.cancelSwapCar}}>Cancel</button>
+      </div>
+    </div>
+  {{/if}}
+
+
+  {{#if this.moveClassEntrant}}
+    <div class="car-selection-overlay">
+      <div class="car-selection-modal">
+        <h2>↔️ Move {{this.moveClassEntrant.username}} to another class</h2>
+        {{#if this.moveClassOptions.length}}
+          {{#each this.moveClassOptions as |cls|}}
+            <div class="family-search-result" role="button" {{on "click" (fn this.confirmMoveClass cls.id)}}>
+              <strong>{{cls.name}}</strong> <span class="field-help">({{cls.spaces}} spaces remaining)</span>
+            </div>
+          {{/each}}
+        {{else}}
+          <p class="field-help">No other classes with available spaces.</p>
+        {{/if}}
+        <button class="btn btn-default" style="margin-top:12px;" {{on "click" this.cancelMoveClass}}>Cancel</button>
       </div>
     </div>
   {{/if}}
