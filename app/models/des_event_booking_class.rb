@@ -11,7 +11,7 @@ class DesEventBookingClass < ActiveRecord::Base
   scope :cancelled, -> { where(status: 'cancelled') }
 
   after_create :update_class_status
-  after_update :update_class_status
+  after_update :update_class_status, if: -> { saved_change_to_status? }
 
   def assign_transponder(user, car_owner: nil)
     # For family bookings, use the parent's garage (car_owner) instead of the child's
