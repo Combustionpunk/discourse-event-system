@@ -142,6 +142,24 @@
           {{#if (eq this.editingCarId car.id)}}
             <div class="garage-car-edit-form">
               <div class="org-form-field">
+                <label>Manufacturer</label>
+                <select {{on "change" this.editSelectManufacturer}}>
+                  <option value="">Select...</option>
+                  {{#each this.model.garage.manufacturers as |mfr|}}
+                    <option value={{mfr.id}} selected={{eq (concat mfr.id "") (concat this.editingCar.manufacturer_id "")}}>{{mfr.name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="org-form-field">
+                <label>Model</label>
+                <select {{on "change" (fn this.updateEditCarField "car_model_id")}}>
+                  <option value="">Select...</option>
+                  {{#each this.editModels as |m|}}
+                    <option value={{m.id}} selected={{eq (concat m.id "") (concat this.editingCar.car_model_id "")}}>{{m.name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="org-form-field">
                 <label>Nickname</label>
                 <input type="text" value={{this.editingCar.friendly_name}} {{on "input" (fn this.updateEditCarField "friendly_name")}} />
               </div>

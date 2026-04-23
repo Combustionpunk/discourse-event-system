@@ -30,6 +30,7 @@ export default class MyGarageController extends Controller {
   @tracked suggestModelChassisType = "";
   @tracked editingCarId = null;
   @tracked editingCar = null;
+  @tracked editModels = [];
 
   @action
   toggleAddForm() {
@@ -174,19 +175,41 @@ export default class MyGarageController extends Controller {
   }
 
   @action
-  editCar(car) {
+  async editCar(car) {
     this.editingCarId = car.id;
-    this.editingCar = { 
+    this.editingCar = {
       id: car.id,
       friendly_name: car.friendly_name,
       transponder_number: car.transponder_number,
+      manufacturer_id: car.manufacturer?.id,
+      car_model_id: car.model?.id,
     };
+    this.editModels = [];
+    if (car.manufacturer?.id) {
+      try {
+        const response = await ajax("/des/garage/models.json?manufacturer_id=" + car.manufacturer.id);
+        this.editModels = response.models || [];
+      } catch { this.editModels = []; }
+    }
+  }
+
+  @action cancelEditCar() {
+    this.editingCarId = null;
+    this.editingCar = null;
+    this.editModels = [];
   }
 
   @action
-  cancelEditCar() {
-    this.editingCarId = null;
-    this.editingCar = null;
+  async editSelectManufacturer(e) {
+    const mfrId = e.target.value;
+    this.editingCar = { ...this.editingCar, manufacturer_id: mfrId, car_model_id: "" };
+    this.editModels = [];
+    if (mfrId) {
+      try {
+        const response = await ajax("/des/garage/models.json?manufacturer_id=" + mfrId);
+        this.editModels = response.models || [];
+      } catch { this.editModels = []; }
+    }
   }
 
   @action
@@ -201,18 +224,21 @@ export default class MyGarageController extends Controller {
         type: "PUT",
         data: {
           car: {
+            manufacturer_id: this.editingCar.manufacturer_id,
+            car_model_id: this.editingCar.car_model_id,
             friendly_name: this.editingCar.friendly_name,
             transponder_number: this.editingCar.transponder_number,
-            driveline: this.editingCar.driveline,
           }
         },
       });
       this.editingCarId = null;
       this.editingCar = null;
+      this.editModels = [];
       this.router.refresh();
     } catch (error) {
       popupAjaxError(error);
     }
+  }
   }
 
   @action
