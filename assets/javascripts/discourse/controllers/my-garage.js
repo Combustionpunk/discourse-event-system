@@ -62,7 +62,7 @@ export default class MyGarageController extends Controller {
 
     if (manufacturerId) {
       try {
-        const response = await ajax("/des/garage/models.json?manufacturer_id=" + manufacturerId);
+        const response = await ajax("/des/garage/models.json", { data: { manufacturer_id: manufacturerId } });
         this.availableModels = response.models || [];
       } catch {
         this.availableModels = [];
@@ -187,7 +187,7 @@ export default class MyGarageController extends Controller {
     this.editModels = [];
     if (car.manufacturer?.id) {
       try {
-        const response = await ajax("/des/garage/models.json?manufacturer_id=" + car.manufacturer.id);
+        const response = await ajax("/des/garage/models.json", { data: { manufacturer_id: car.manufacturer.id } });
         this.editModels = response.models || [];
       } catch { this.editModels = []; }
     }
@@ -206,7 +206,7 @@ export default class MyGarageController extends Controller {
     this.editModels = [];
     if (mfrId) {
       try {
-        const response = await ajax("/des/garage/models.json?manufacturer_id=" + mfrId);
+        const response = await ajax("/des/garage/models.json", { data: { manufacturer_id: mfrId } });
         this.editModels = response.models || [];
       } catch { this.editModels = []; }
     }
