@@ -239,7 +239,6 @@ export default class MyGarageController extends Controller {
       popupAjaxError(error);
     }
   }
-  }
 
   @action
   async suggestManufacturer() {

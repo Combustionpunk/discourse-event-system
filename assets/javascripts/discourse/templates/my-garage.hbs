@@ -145,7 +145,7 @@
                 <label>Manufacturer</label>
                 <select {{on "change" this.editSelectManufacturer}}>
                   <option value="">Select...</option>
-                  {{#each this.model.garage.manufacturers as |mfr|}}
+                  {{#each this.model.manufacturers as |mfr|}}
                     <option value={{mfr.id}} selected={{eq (concat mfr.id "") (concat this.editingCar.manufacturer_id "")}}>{{mfr.name}}</option>
                   {{/each}}
                 </select>
