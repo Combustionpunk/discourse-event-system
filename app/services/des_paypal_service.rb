@@ -37,7 +37,7 @@ class DesPaypalService
     JSON.parse(response.body)
   end
 
-  def create_membership_order(membership, membership_type)
+  def create_membership_order(membership, membership_type, renewal: false)
     org = membership.organisation
     uri = URI("#{@base_url}/v2/checkout/orders")
     req = Net::HTTP::Post.new(uri)
@@ -54,7 +54,7 @@ class DesPaypalService
         description: "#{org.name} - #{membership_type.name} Membership"
       }],
       application_context: {
-        return_url: "#{Discourse.base_url}/memberships/#{membership.id}/confirm",
+        return_url: renewal ? "#{Discourse.base_url}/memberships/#{membership.id}/renew-confirm" : "#{Discourse.base_url}/memberships/#{membership.id}/confirm",
         locale: "en-GB",
         landing_page: "BILLING",
         shipping_preference: "NO_SHIPPING",

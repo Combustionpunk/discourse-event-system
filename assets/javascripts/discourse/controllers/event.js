@@ -26,6 +26,12 @@ export default class EventController extends Controller {
     return new Date(this.model.booking_closing_date) < new Date();
   }
 
+
+  get refundPeriodEnded() {
+    if (!this.model.refund_cutoff_days || !this.model.start_date) return false;
+    const cutoff = new Date(new Date(this.model.start_date).getTime() - this.model.refund_cutoff_days * 86400000);
+    return new Date() > cutoff;
+  }
   get bookingDisabled() {
     return this.model.status === "cancelled" || this.bookingClosed;
   }

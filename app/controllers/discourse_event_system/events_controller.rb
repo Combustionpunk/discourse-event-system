@@ -497,6 +497,8 @@ module DiscourseEventSystem
             false
           end
         end,
+        refund_cutoff_days: event.refund_cutoff_days,
+        refund_cutoff_date: event.refund_cutoff_days.present? && event.start_date.present? ? (event.start_date - event.refund_cutoff_days.days).strftime('%A, %d %B %Y') : nil,
         formatted_date: event.start_date&.strftime('%A, %d %B %Y at %H:%M'),
         family_members: current_user.present? ? family_members_for(event) : []
       }

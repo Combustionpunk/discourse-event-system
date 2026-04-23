@@ -55,6 +55,9 @@
                 👨‍👩‍👧 Manage Family
               </button>
             {{/if}}
+            <button type="button" class="btn btn-small btn-primary" {{on "click" (fn this.renewMembership membership)}}>
+              🔄 Renew
+            </button>
           </div>
 
           {{#if membership.is_family}}

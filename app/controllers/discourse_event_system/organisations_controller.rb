@@ -391,7 +391,7 @@ module DiscourseEventSystem
         render json: { success: true, membership_id: membership.id, free: true }
       else
         paypal = DesPaypalService.new
-        response = paypal.create_membership_order(membership, type)
+        response = paypal.create_membership_order(membership, type, renewal: true)
         order_id = response['id']
         approval_url = response['links'].find { |l| l['rel'] == 'approve' }['href']
         membership.update!(paypal_order_id: order_id)
@@ -602,6 +602,52 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+
+
+    def renew_membership
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], user_id: current_user.id)
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      type = membership.membership_type
+      return render json: { error: 'Cannot renew a free membership' } if type.free?
+
+      paypal = DesPaypalService.new
+      response = paypal.create_membership_order(membership, type, renewal: true)
+      order_id = response['id']
+      approval_url = response['links'].find { |l| l['rel'] == 'approve' }['href']
+      membership.update!(paypal_order_id: order_id, status: 'pending')
+      render json: { approval_url: approval_url, membership_id: membership.id }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def confirm_renewal
+      membership = DesOrganisationMembership.find_by(id: params[:membership_id], user_id: current_user.id)
+      return render json: { error: 'Not found' }, status: :not_found unless membership
+      paypal = DesPaypalService.new
+      capture = paypal.capture_order(membership.paypal_order_id)
+      capture_id = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'id')
+      amount = capture.dig('purchase_units', 0, 'payments', 'captures', 0, 'amount', 'value')
+
+      # Extend from today if active, from current expiry if expired
+      base_date = if membership.expires_at.present? && membership.expires_at > Time.now
+        membership.expires_at
+      else
+        Time.now
+      end
+      new_expiry = base_date + membership.membership_type.duration_months.months
+
+      membership.update!(
+        status: 'active',
+        paypal_capture_id: capture_id,
+        amount_paid: amount,
+        expires_at: new_expiry
+      )
+      membership.send(:add_to_discourse_group!)
+
+      render json: { success: true, expires_at: new_expiry, organisation: { id: membership.organisation.id, name: membership.organisation.name } }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
 
     def my_organisations
       # Orgs where user has active membership

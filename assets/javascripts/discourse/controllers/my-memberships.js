@@ -2,6 +2,7 @@ import Controller from "@ember/controller";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
+import { popupAjaxError } from "discourse/lib/ajax-error";
 import { inject as service } from "@ember/service";
 
 export default class MyMembershipsController extends Controller {
@@ -201,4 +202,16 @@ export default class MyMembershipsController extends Controller {
     const max = (membership.max_members || 1) - 1;
     return used < max;
   }
+
+  @action
+  async renewMembership(membership) {
+    if (!window.confirm("Renew your " + membership.membership_type.name + " membership for £" + membership.membership_type.price + "?")) return;
+    try {
+      const response = await ajax("/des/memberships/" + membership.id + "/renew.json", { type: "POST" });
+      window.location.href = response.approval_url;
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
 }

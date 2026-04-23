@@ -170,6 +170,17 @@
     {{/if}}
 
 
+
+    {{#if this.model.refund_cutoff_date}}
+      <p class="refund-info {{if this.refundPeriodEnded 'refund-ended'}}">
+        {{#if this.refundPeriodEnded}}
+          ⚠️ Refund period has ended
+        {{else}}
+          💰 Refund available until: {{this.model.refund_cutoff_date}}
+        {{/if}}
+      </p>
+    {{/if}}
+
     <div class="calendar-dropdown-wrapper">
       <button class="btn btn-default" type="button" {{on "click" this.toggleCalendarDropdown}}>
         📅 Add to Calendar

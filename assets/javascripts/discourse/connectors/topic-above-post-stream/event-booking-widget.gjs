@@ -149,6 +149,12 @@ export default class EventBookingWidget extends Component {
     return new Date(this.event.booking_closing_date) < new Date();
   }
 
+
+  get refundPeriodEnded() {
+    if (!this.event?.refund_cutoff_days || !this.event?.start_date) return false;
+    const cutoff = new Date(new Date(this.event.start_date).getTime() - this.event.refund_cutoff_days * 86400000);
+    return new Date() > cutoff;
+  }
   get bookingDisabled() {
     return this.event?.status === "cancelled" || this.bookingClosed;
   }
@@ -437,6 +443,17 @@ export default class EventBookingWidget extends Component {
             </button>
           {{else}}
             <a href="/login" class="btn btn-primary">Log in to Book</a>
+          {{/if}}
+
+
+          {{#if this.event.refund_cutoff_date}}
+            <p class="refund-info {{if this.refundPeriodEnded 'refund-ended'}}">
+              {{#if this.refundPeriodEnded}}
+                ⚠️ Refund period has ended
+              {{else}}
+                💰 Refund available until: {{this.event.refund_cutoff_date}}
+              {{/if}}
+            </p>
           {{/if}}
 
           <div class="calendar-dropdown-wrapper">

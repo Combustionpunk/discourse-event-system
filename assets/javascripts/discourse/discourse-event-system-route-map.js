@@ -17,4 +17,5 @@ export default function () {
   this.route("membership-confirm", { path: "/memberships/:membership_id/confirm" });
   this.route("membership-cancel", { path: "/memberships/:membership_id/cancel" });
   this.route("family-setup", { path: "/memberships/:membership_id/family-setup" });
+  this.route("membership-renew-confirm", { path: "/memberships/:membership_id/renew-confirm" });
 }

@@ -2434,3 +2434,15 @@ body.des-embedded-event {
 .modal-outer-container {
   z-index: 10001 !important;
 }
+
+// Refund info
+.refund-info {
+  font-size: 0.9em;
+  color: var(--primary-medium);
+  margin: 8px 0;
+
+  &.refund-ended {
+    color: #e74c3c;
+    font-weight: 600;
+  }
+}

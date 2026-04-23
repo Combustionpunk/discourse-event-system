@@ -1,0 +1,25 @@
+<div class="booking-confirm-container">
+  {{#if this.model.success}}
+    <div class="booking-success">
+      <div class="booking-success-icon">🎉</div>
+      <h1>Membership Renewed!</h1>
+      <p>Your membership for <strong>{{this.model.organisation.name}}</strong> has been renewed.</p>
+      <div class="booking-success-actions">
+        <LinkTo @route="my-memberships" class="btn btn-primary">
+          🎫 View My Memberships
+        </LinkTo>
+      </div>
+    </div>
+  {{else}}
+    <div class="booking-error">
+      <div class="booking-success-icon">❌</div>
+      <h1>Renewal Failed</h1>
+      <p>{{this.model.error}}</p>
+      <div class="booking-success-actions">
+        <LinkTo @route="my-memberships" class="btn btn-default">
+          View My Memberships
+        </LinkTo>
+      </div>
+    </div>
+  {{/if}}
+</div>
