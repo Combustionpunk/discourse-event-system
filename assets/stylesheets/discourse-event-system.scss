@@ -2446,3 +2446,23 @@ body.des-embedded-event {
     font-weight: 600;
   }
 }
+
+// Booking dates info block
+.event-booking-dates {
+  margin: 8px 0;
+}
+
+.booking-date-info {
+  font-size: 0.9em;
+  color: var(--primary-medium);
+  margin: 4px 0;
+
+  &.booking-closed {
+    color: #e74c3c;
+    font-weight: 600;
+  }
+}
+
+.refund-info:not(.refund-ended) {
+  color: #27ae60;
+}

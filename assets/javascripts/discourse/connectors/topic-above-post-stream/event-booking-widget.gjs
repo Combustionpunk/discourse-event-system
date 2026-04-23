@@ -446,16 +446,28 @@ export default class EventBookingWidget extends Component {
           {{/if}}
 
 
-          {{#if this.event.refund_cutoff_date}}
-            <p class="refund-info {{if this.refundPeriodEnded 'refund-ended'}}">
-              {{#if this.refundPeriodEnded}}
-                ⚠️ Refund period has ended
-              {{else}}
-                💰 Refund available until: {{this.event.refund_cutoff_date}}
-              {{/if}}
-            </p>
-          {{/if}}
-
+          <div class="event-booking-dates">
+            {{#if this.event.booking_closing_date}}
+              <p class="booking-date-info {{if this.bookingClosed 'booking-closed'}}">
+                {{#if this.bookingClosed}}
+                  ⚠️ Booking is now closed
+                {{else}}
+                  📅 Booking closes: {{this.event.formatted_booking_closing_date}}
+                {{/if}}
+              </p>
+            {{/if}}
+            {{#if this.event.refund_cutoff_days}}
+              <p class="refund-info {{if this.refundPeriodEnded 'refund-ended'}}">
+                {{#if this.refundPeriodEnded}}
+                  ⚠️ Refund period has ended
+                {{else}}
+                  💰 Refund available until: {{this.event.refund_cutoff_date}}
+                {{/if}}
+              </p>
+            {{else}}
+              <p class="refund-info refund-ended">💰 No refunds available</p>
+            {{/if}}
+          </div>
           <div class="calendar-dropdown-wrapper">
             <button class="btn btn-default" type="button" {{on "click" this.toggleCalendarDropdown}}>📅 Add to Calendar</button>
             {{#if this.showCalendarDropdown}}

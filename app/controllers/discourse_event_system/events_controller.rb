@@ -457,6 +457,7 @@ module DiscourseEventSystem
         start_date: event.start_date,
         end_date: event.end_date,
         booking_closing_date: event.booking_closing_date,
+        formatted_booking_closing_date: event.booking_closing_date&.strftime('%A, %d %B %Y at %H:%M'),
         location: event.location,
         google_maps_url: event.google_maps_url,
         capacity: event.capacity,
