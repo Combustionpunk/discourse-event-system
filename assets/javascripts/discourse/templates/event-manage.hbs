@@ -199,6 +199,9 @@
                       Close
                     </button>
                   {{/if}}
+                  <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteClass cls)}}>
+                    🗑 Delete
+                  </button>
                 {{/if}}
               </td>
             </tr>

@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show, :public_entrants]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
@@ -313,6 +313,23 @@ module DiscourseEventSystem
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
+
+    def destroy_class
+      ensure_organisation_admin!(@event.organisation)
+      event_class = @event.des_event_classes.find(params[:class_id])
+      active_bookings = DesEventBookingClass.joins(:booking)
+        .where(event_class_id: event_class.id, des_event_booking_classes: { status: 'confirmed' })
+        .where(des_event_bookings: { status: ['confirmed', 'pending'] })
+        .count
+      if active_bookings > 0
+        return render json: { error: "Cannot delete - this class has #{active_bookings} active booking(s). Cancel all bookings first." }, status: :unprocessable_entity
+      end
+      event_class.destroy!
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
 
     def cancel_entrant
       ensure_organisation_admin!(@event.organisation)

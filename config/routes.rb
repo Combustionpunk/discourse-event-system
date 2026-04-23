@@ -34,6 +34,7 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/events/:id/classes" => "events#add_class"
   put "/des/events/:id/classes/:class_id" => "events#update_class"
   post "/des/events/:id/classes/:class_id/toggle-status" => "events#toggle_class_status"
+  delete "/des/events/:id/classes/:class_id" => "events#destroy_class"
   post "/des/events/:id/cancel-entrant" => "events#cancel_entrant"
   put "/des/events/:id/bookings/:booking_id/classes/:class_id/car" => "events#change_entrant_car"
   put "/des/events/:id/bookings/:booking_id/move-class" => "events#move_entrant_class"

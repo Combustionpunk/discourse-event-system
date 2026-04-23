@@ -218,6 +218,20 @@ export default class EventManageController extends Controller {
   }
 
   @action
+  async deleteClass(cls) {
+    if (!window.confirm(`Delete ${cls.name}? This cannot be undone.`)) return;
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/classes/" + cls.id + ".json", {
+        type: "DELETE",
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+
+  @action
   async cancelEntrant(entrant, className) {
     if (!window.confirm(`Cancel ${entrant.username}'s booking for ${className}?`)) return;
     try {
