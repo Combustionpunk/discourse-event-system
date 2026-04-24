@@ -2634,3 +2634,28 @@ body.des-embedded-event {
   background: rgba(243, 156, 18, 0.15);
   color: #e67e22;
 }
+
+// Event venue card (on event page and widget)
+.event-venue-card {
+  padding: 12px 16px;
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-left: 4px solid var(--tertiary);
+  border-radius: 8px;
+  margin: 12px 0;
+
+  h3 { margin: 0 0 6px; font-size: 1em; }
+  a { color: var(--tertiary); text-decoration: none; &:hover { text-decoration: underline; } }
+
+  &--compact { padding: 10px 12px; }
+}
+
+.event-venue-inline {
+  font-size: 0.9em;
+  color: var(--primary-medium);
+}
+
+.venue-badge--small {
+  font-size: 0.75em;
+  padding: 1px 5px;
+}

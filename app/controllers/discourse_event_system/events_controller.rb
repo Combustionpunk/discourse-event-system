@@ -454,7 +454,16 @@ module DiscourseEventSystem
         description: event.description,
         description_cooked: PrettyText.cook(event.description.to_s),
         organisation: { id: event.organisation.id, name: event.organisation.name, logo_url: event.organisation.logo_url },
-        venue: event.venue ? { id: event.venue.id, name: event.venue.name, address: event.venue.address, google_maps_url: event.venue.google_maps_url, track_category: event.venue.track_category, track_surface: event.venue.track_surface, track_environment: event.venue.track_environment } : nil,
+        venue: event.venue ? {
+          id: event.venue.id, name: event.venue.name, address: event.venue.address,
+          google_maps_url: event.venue.google_maps_url, website: event.venue.website,
+          track_category: event.venue.track_category, track_surface: event.venue.track_surface,
+          track_environment: event.venue.track_environment,
+          has_portaloos: event.venue.has_portaloos, has_permanent_toilets: event.venue.has_permanent_toilets,
+          has_bar: event.venue.has_bar, has_showers: event.venue.has_showers,
+          has_power_supply: event.venue.has_power_supply, has_water_supply: event.venue.has_water_supply,
+          has_camping: event.venue.has_camping, parking_info: event.venue.parking_info
+        } : nil,
         start_date: event.start_date,
         end_date: event.end_date,
         booking_closing_date: event.booking_closing_date,

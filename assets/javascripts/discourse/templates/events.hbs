@@ -66,6 +66,14 @@
             <span class="event-organisation">
               {{#if event.organisation.logo_url}}<img src={{event.organisation.logo_url}} class="org-logo org-logo--inline" alt="" />{{/if}} {{event.organisation.name}}
             </span>
+            {{#if event.venue}}
+              <span class="event-venue-inline">
+                📍 {{event.venue.name}}
+                {{#if event.venue.track_environment}}<span class="venue-badge venue-badge--environment venue-badge--small">{{#if (eq event.venue.track_environment "outdoor")}}🌳{{else}}🏠{{/if}}</span>{{/if}}
+                {{#if event.venue.track_category}}<span class="venue-badge venue-badge--category venue-badge--small">{{#if (eq event.venue.track_category "onroad")}}🛣️{{else}}🌿{{/if}}</span>{{/if}}
+                {{#if event.venue.track_surface}}<span class="venue-badge venue-badge--surface venue-badge--small">{{event.venue.track_surface}}</span>{{/if}}
+              </span>
+            {{/if}}
             <span class="event-date">
               📅 {{event.formatted_date}}
             </span>

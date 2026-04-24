@@ -93,14 +93,6 @@
           <input type="number" min="1" placeholder="Unlimited" value={{this.model.event.max_classes_per_booking}} {{on "input" (fn this.updateField "max_classes_per_booking")}} />
           <p class="field-help">Leave blank for unlimited.</p>
         </div>
-        <div class="org-form-field">
-          <label>Location</label>
-          <input type="text" value={{this.model.event.location}} {{on "input" (fn this.updateField "location")}} />
-        </div>
-        <div class="org-form-field">
-          <label>Google Maps URL</label>
-          <input type="url" value={{this.model.event.google_maps_url}} {{on "input" (fn this.updateField "google_maps_url")}} />
-        </div>
         <button
           class="btn btn-primary"
           disabled={{this.isSaving}}

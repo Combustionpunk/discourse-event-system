@@ -345,10 +345,24 @@ export default class EventBookingWidget extends Component {
             </div>
           {{/if}}
           {{#if this.event.venue}}
-            <div class="event-widget-detail">
-              📍 Venue: <a href="/venues/{{this.event.venue.id}}">{{this.event.venue.name}}</a>
-              {{#if this.event.venue.track_category}}<span class="venue-badge venue-badge--category">{{this.event.venue.track_category}}</span>{{/if}}
-              {{#if this.event.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.event.venue.track_surface}}</span>{{/if}}
+            <div class="event-venue-card event-venue-card--compact">
+              <strong><a href="/venues/{{this.event.venue.id}}">{{this.event.venue.name}}</a></strong>
+              {{#if this.event.venue.address}}<div class="venue-detail-item">📍 {{this.event.venue.address}}</div>{{/if}}
+              {{#if this.event.venue.google_maps_url}}<div class="venue-detail-item"><a href={{this.event.venue.google_maps_url}} target="_blank" rel="noopener">🗺️ Map</a></div>{{/if}}
+              <div class="venue-badges">
+                {{#if this.event.venue.track_environment}}<span class="venue-badge venue-badge--environment">{{#if (eq this.event.venue.track_environment "outdoor")}}🌳 Outdoor{{else}}🏠 Indoor{{/if}}</span>{{/if}}
+                {{#if this.event.venue.track_category}}<span class="venue-badge venue-badge--category">{{#if (eq this.event.venue.track_category "onroad")}}🛣️ On-Road{{else}}🌿 Off-Road{{/if}}</span>{{/if}}
+                {{#if this.event.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.event.venue.track_surface}}</span>{{/if}}
+              </div>
+              <div class="venue-facilities-icons">
+                {{#if this.event.venue.has_permanent_toilets}}🚻{{/if}}
+                {{#if this.event.venue.has_portaloos}}🚽{{/if}}
+                {{#if this.event.venue.has_bar}}🍺{{/if}}
+                {{#if this.event.venue.has_showers}}🚿{{/if}}
+                {{#if this.event.venue.has_power_supply}}⚡{{/if}}
+                {{#if this.event.venue.has_water_supply}}💧{{/if}}
+                {{#if this.event.venue.has_camping}}⛺{{/if}}
+              </div>
             </div>
           {{/if}}
         </div>

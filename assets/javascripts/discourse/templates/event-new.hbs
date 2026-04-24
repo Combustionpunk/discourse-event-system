@@ -69,24 +69,6 @@
         </select>
       </div>
 
-      <div class="org-form-field">
-        <label>Location</label>
-        <input
-          type="text"
-          placeholder="e.g. Midlands RC Circuit, Birmingham"
-          {{on "input" (fn this.updateField "location")}}
-        />
-      </div>
-
-      <div class="org-form-field">
-        <label>Google Maps URL</label>
-        <input
-          type="url"
-          placeholder="https://maps.google.com/..."
-          {{on "input" (fn this.updateField "google_maps_url")}}
-        />
-      </div>
-
       <div class="org-form-row">
         <div class="org-form-field">
           <label>Start Date & Time *</label>
