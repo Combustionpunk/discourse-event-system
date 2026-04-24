@@ -374,6 +374,7 @@ export default class EventManageController extends Controller {
             location: this.model.event.location,
             google_maps_url: this.model.event.google_maps_url,
             max_classes_per_booking: this.model.event.max_classes_per_booking,
+            venue_id: this.model.event.venue_id,
           }
         },
       });
