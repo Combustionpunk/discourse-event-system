@@ -3,7 +3,93 @@
     <LinkTo @route="venues" class="btn btn-default">📍 All Venues</LinkTo>
   </div>
 
+  {{#if this.model.venue.can_edit}}
+    <button class="btn btn-default btn-small" {{on "click" this.toggleEdit}}>{{if this.editMode "Cancel" "✏️ Edit Venue"}}</button>
+  {{/if}}
   <h1>{{this.model.venue.name}}</h1>
+
+  {{#if this.editMode}}
+    <div class="venue-form event-form-section">
+      <div class="org-form-field">
+        <label>Name *</label>
+        <input type="text" value={{this.editData.name}} {{on "input" (fn this.updateEditField "name")}} />
+      </div>
+      <div class="org-form-field">
+        <label>Address</label>
+        <input type="text" value={{this.editData.address}} {{on "input" (fn this.updateEditField "address")}} />
+      </div>
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Google Maps URL</label>
+          <input type="url" value={{this.editData.google_maps_url}} {{on "input" (fn this.updateEditField "google_maps_url")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Website</label>
+          <input type="url" value={{this.editData.website}} {{on "input" (fn this.updateEditField "website")}} />
+        </div>
+      </div>
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Track Category</label>
+          <select {{on "change" (fn this.updateEditField "track_category")}}>
+            <option value="">Select...</option>
+            {{#each this.trackCategories as |tc|}}
+              <option value={{tc}} selected={{eq tc this.editData.track_category}}>{{tc}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="org-form-field">
+          <label>Track Surface</label>
+          <select {{on "change" (fn this.updateEditField "track_surface")}}>
+            <option value="">Select...</option>
+            {{#each this.trackSurfaces as |ts|}}
+              <option value={{ts}} selected={{eq ts this.editData.track_surface}}>{{ts}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="org-form-field">
+          <label>Track Environment</label>
+          <select {{on "change" (fn this.updateEditField "track_environment")}}>
+            <option value="">Select...</option>
+            {{#each this.trackEnvironments as |te|}}
+              <option value={{te}} selected={{eq te this.editData.track_environment}}>{{te}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="org-form-field">
+        <label>Description</label>
+        <textarea {{on "input" (fn this.updateEditField "description")}}>{{this.editData.description}}</textarea>
+      </div>
+      <div class="org-form-field">
+        <label>Parking Info</label>
+        <textarea {{on "input" (fn this.updateEditField "parking_info")}}>{{this.editData.parking_info}}</textarea>
+      </div>
+      <div class="org-form-field">
+        <label>Access Notes</label>
+        <textarea {{on "input" (fn this.updateEditField "access_notes")}}>{{this.editData.access_notes}}</textarea>
+      </div>
+      <div class="org-form-field">
+        <label>Facilities</label>
+        <div class="venue-facilities-checkboxes">
+          <label><input type="checkbox" checked={{this.editData.has_portaloos}} {{on "change" (fn this.toggleEditFacility "has_portaloos")}} /> 🚽 Portaloos</label>
+          <label><input type="checkbox" checked={{this.editData.has_permanent_toilets}} {{on "change" (fn this.toggleEditFacility "has_permanent_toilets")}} /> 🚻 Permanent Toilets</label>
+          <label><input type="checkbox" checked={{this.editData.has_bar}} {{on "change" (fn this.toggleEditFacility "has_bar")}} /> 🍺 Bar</label>
+          <label><input type="checkbox" checked={{this.editData.has_showers}} {{on "change" (fn this.toggleEditFacility "has_showers")}} /> 🚿 Showers</label>
+          <label><input type="checkbox" checked={{this.editData.has_power_supply}} {{on "change" (fn this.toggleEditFacility "has_power_supply")}} /> ⚡ Power Supply</label>
+          <label><input type="checkbox" checked={{this.editData.has_water_supply}} {{on "change" (fn this.toggleEditFacility "has_water_supply")}} /> 💧 Water Supply</label>
+          <label><input type="checkbox" checked={{this.editData.has_camping}} {{on "change" (fn this.toggleEditFacility "has_camping")}} /> ⛺ Camping</label>
+        </div>
+      </div>
+      <div class="org-form-field">
+        <label><input type="checkbox" checked={{this.editData.is_shared}} {{on "change" (fn this.toggleEditFacility "is_shared")}} /> 🤝 Shared venue</label>
+      </div>
+      <button class="btn btn-primary" {{on "click" this.saveEdit}} disabled={{this.isSaving}}>
+        {{if this.isSaving "Saving..." "Save Changes"}}
+      </button>
+    </div>
+  {{/if}}
+
 
   <div class="venue-detail-meta">
     {{#if this.model.venue.address}}

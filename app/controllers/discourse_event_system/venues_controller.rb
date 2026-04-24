@@ -15,7 +15,7 @@ module DiscourseEventSystem
         .where('start_date > ?', Time.now)
         .order(:start_date).limit(10)
       render json: {
-        venue: serialize_venue(venue),
+        venue: serialize_venue(venue).merge(can_edit: current_user.present? && (current_user.admin? || (venue.created_by_organisation_id.present? && is_org_admin?(venue.created_by_organisation_id)))),
         upcoming_events: upcoming_events.map { |e|
           { id: e.id, title: e.title, start_date: e.start_date, organisation_name: e.organisation&.name }
         }
