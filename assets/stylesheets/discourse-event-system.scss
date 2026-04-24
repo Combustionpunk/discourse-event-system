@@ -2604,3 +2604,22 @@ body.des-embedded-event {
   border-bottom: 1px solid var(--primary-very-low);
   a { color: var(--tertiary); font-weight: 600; }
 }
+
+// Venue form
+.venue-form {
+  margin-bottom: 24px;
+}
+
+.venue-facilities-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+  }
+}
