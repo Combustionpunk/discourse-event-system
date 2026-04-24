@@ -6,6 +6,9 @@
 
   <div class="org-detail-header">
     <div>
+      {{#if this.model.logo_url}}
+        <img src={{this.model.logo_url}} class="org-logo org-logo--large" alt="" />
+      {{/if}}
       <h1>{{this.model.name}}</h1>
       <span class="org-status org-status--{{this.model.status}}">{{this.model.status}}</span>
     </div>

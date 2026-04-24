@@ -28,7 +28,7 @@ module DiscourseEventSystem
 
       render json: {
         events: serialize_events(events),
-        organisations: organisations.map { |o| { id: o.id, name: o.name } },
+        organisations: organisations.map { |o| { id: o.id, name: o.name, logo_url: o.logo_url } },
         event_types: event_types.map { |et| { id: et.id, name: et.name } }
       }
     end
@@ -453,7 +453,7 @@ module DiscourseEventSystem
         title: event.title,
         description: event.description,
         description_cooked: PrettyText.cook(event.description.to_s),
-        organisation: { id: event.organisation.id, name: event.organisation.name },
+        organisation: { id: event.organisation.id, name: event.organisation.name, logo_url: event.organisation.logo_url },
         start_date: event.start_date,
         end_date: event.end_date,
         booking_closing_date: event.booking_closing_date,

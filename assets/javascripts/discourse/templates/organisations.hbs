@@ -17,6 +17,7 @@
           <div class="org-card-header">
             <h2>
               <LinkTo @route="organisation" @model={{org.id}}>
+                {{#if org.logo_url}}<img src={{org.logo_url}} class="org-logo org-logo--small" alt="" />{{/if}}
                 {{org.name}}
               </LinkTo>
             </h2>

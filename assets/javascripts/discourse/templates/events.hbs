@@ -64,7 +64,7 @@
 
           <div class="event-meta">
             <span class="event-organisation">
-              🏢 {{event.organisation.name}}
+              {{#if event.organisation.logo_url}}<img src={{event.organisation.logo_url}} class="org-logo org-logo--inline" alt="" />{{/if}} {{event.organisation.name}}
             </span>
             <span class="event-date">
               📅 {{event.formatted_date}}

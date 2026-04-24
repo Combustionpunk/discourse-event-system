@@ -8,7 +8,7 @@
 
   <div class="event-detail-meta">
     <div class="event-detail-meta-item">
-      <strong>Organisation:</strong> {{this.model.organisation.name}}
+      {{#if this.model.organisation.logo_url}}<img src={{this.model.organisation.logo_url}} class="org-logo org-logo--inline" alt="" />{{/if}} <strong>Organisation:</strong> {{this.model.organisation.name}}
     </div>
     <div class="event-detail-meta-item">
       <strong>Date:</strong> {{this.model.formatted_date}}

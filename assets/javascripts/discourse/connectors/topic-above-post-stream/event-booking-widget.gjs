@@ -329,7 +329,7 @@ export default class EventBookingWidget extends Component {
 
         <div class="event-detail-meta">
           <div class="event-detail-meta-item">
-            <strong>Organisation:</strong> {{this.event.organisation.name}}
+            {{#if this.event.organisation.logo_url}}<img src={{this.event.organisation.logo_url}} class="org-logo org-logo--inline" alt="" />{{/if}} <strong>Organisation:</strong> {{this.event.organisation.name}}
           </div>
           <div class="event-detail-meta-item">
             <strong>Date:</strong> {{this.event.formatted_date}}

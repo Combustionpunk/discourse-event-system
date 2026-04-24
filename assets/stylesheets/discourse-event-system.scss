@@ -2466,3 +2466,28 @@ body.des-embedded-event {
 .refund-info:not(.refund-ended) {
   color: #27ae60;
 }
+
+// Organisation logos
+.org-logo {
+  object-fit: contain;
+  vertical-align: middle;
+
+  &--large {
+    max-height: 80px;
+    max-width: 200px;
+    margin-bottom: 8px;
+  }
+
+  &--small {
+    max-height: 40px;
+    max-width: 120px;
+    margin-right: 8px;
+  }
+
+  &--inline {
+    max-height: 32px;
+    max-width: 100px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+}
