@@ -6,7 +6,7 @@ module DiscourseEventSystem
     before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class]
 
     def index
-      events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes)
+      events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes, :venue)
 
       # Filter by time
       case params[:filter]
@@ -462,7 +462,9 @@ module DiscourseEventSystem
           has_portaloos: event.venue.has_portaloos, has_permanent_toilets: event.venue.has_permanent_toilets,
           has_bar: event.venue.has_bar, has_showers: event.venue.has_showers,
           has_power_supply: event.venue.has_power_supply, has_water_supply: event.venue.has_water_supply,
-          has_camping: event.venue.has_camping, parking_info: event.venue.parking_info
+          has_camping: event.venue.has_camping, is_shared: event.venue.is_shared,
+          parking_info: event.venue.parking_info, description: event.venue.description,
+          local_facilities: event.venue.local_facilities, access_notes: event.venue.access_notes
         } : nil,
         start_date: event.start_date,
         end_date: event.end_date,
