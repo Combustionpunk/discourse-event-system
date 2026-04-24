@@ -208,6 +208,7 @@ export default class OrganisationController extends Controller {
       website: this.model.website || "",
       address: this.model.address || "",
       google_maps_url: this.model.google_maps_url || "",
+      logo_url: this.model.logo_url || "",
       description: this.model.description || "",
     };
   }

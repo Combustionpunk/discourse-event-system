@@ -675,6 +675,13 @@
         </div>
       </div>
       <div class="org-form-field">
+        <label>Logo URL</label>
+        <input type="url" value={{this.settingsForm.logo_url}} placeholder="https://example.com/logo.png" {{on "input" (fn this.updateSettingsField "logo_url")}} />
+        {{#if this.settingsForm.logo_url}}
+          <img src={{this.settingsForm.logo_url}} class="org-logo org-logo--small" alt="Preview" style="margin-top:8px;" />
+        {{/if}}
+      </div>
+      <div class="org-form-field">
         <label>Address</label>
         <input type="text" value={{this.settingsForm.address}} {{on "input" (fn this.updateSettingsField "address")}} />
       </div>
