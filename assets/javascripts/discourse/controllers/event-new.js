@@ -23,6 +23,13 @@ export default class EventNewController extends Controller {
     return (this.model.venues || []).filter(v => v.is_shared);
   }
 
+  get otherVenues() {
+    const orgId = this.model.event.organisation_id;
+    const clubIds = new Set(this.clubVenues.map(v => v.id));
+    const sharedIds = new Set(this.sharedVenues.map(v => v.id));
+    return (this.model.venues || []).filter(v => !clubIds.has(v.id) && !sharedIds.has(v.id));
+  }
+
   get pricingIsFlat() {
     return this.pricingType === "flat";
   }
