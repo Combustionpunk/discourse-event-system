@@ -150,6 +150,30 @@ class DesBookingService
   end
 
   def cancel_booking(booking)
+    # Attempt refund if within refund period
+    if booking.event.refunds_allowed? && booking.payments.completed.any?
+      begin
+        booking.payments.completed.each do |payment|
+          refund_amount = payment.refundable_amount
+          next if refund_amount <= 0
+          paypal_response = @paypal.refund_payment(payment.paypal_capture_id, refund_amount)
+          paypal_refund_id = paypal_response['id']
+          DesEventBookingRefund.create!(
+            booking_id: booking.id,
+            payment_id: payment.id,
+            amount: refund_amount,
+            reason: "User cancelled booking",
+            status: 'completed',
+            paypal_refund_id: paypal_refund_id,
+            event_cancellation: false,
+            initiated_by: @user.id
+          ).complete!(paypal_refund_id)
+        end
+      rescue => e
+        Rails.logger.error "Refund failed during user cancellation: #{e.message}"
+      end
+    end
+
     booking.cancel!
     booking.payments.pending.each(&:fail!)
 
