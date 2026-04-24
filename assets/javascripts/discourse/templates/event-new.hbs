@@ -52,9 +52,20 @@
         <label>Venue</label>
         <select {{on "change" (fn this.updateField "venue_id")}}>
           <option value="">No venue selected</option>
-          {{#each this.model.venues as |venue|}}
-            <option value={{venue.id}}>{{venue.name}}</option>
-          {{/each}}
+          {{#if this.clubVenues.length}}
+            <optgroup label="Your Club's Venues">
+              {{#each this.clubVenues as |venue|}}
+                <option value={{venue.id}}>{{venue.name}}</option>
+              {{/each}}
+            </optgroup>
+          {{/if}}
+          {{#if this.sharedVenues.length}}
+            <optgroup label="Shared Venues">
+              {{#each this.sharedVenues as |venue|}}
+                <option value={{venue.id}}>{{venue.name}}</option>
+              {{/each}}
+            </optgroup>
+          {{/if}}
         </select>
       </div>
 

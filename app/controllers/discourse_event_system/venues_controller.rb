@@ -80,7 +80,7 @@ module DiscourseEventSystem
         :track_environment, :website, :description, :parking_info,
         :local_facilities, :access_notes, :created_by_organisation_id,
         :has_portaloos, :has_permanent_toilets, :has_bar, :has_showers,
-        :has_power_supply, :has_water_supply, :has_camping
+        :has_power_supply, :has_water_supply, :has_camping, :is_shared
       )
     end
 
@@ -107,7 +107,8 @@ module DiscourseEventSystem
         has_showers: venue.has_showers,
         has_power_supply: venue.has_power_supply,
         has_water_supply: venue.has_water_supply,
-        has_camping: venue.has_camping
+        has_camping: venue.has_camping,
+        is_shared: venue.is_shared
       }
     end
 

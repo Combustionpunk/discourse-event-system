@@ -18,6 +18,8 @@ class DesVenue < ActiveRecord::Base
 
   scope :approved, -> { where(status: 'approved') }
   scope :pending, -> { where(status: 'pending') }
+  scope :shared, -> { where(is_shared: true) }
+  scope :exclusive, -> { where(is_shared: false) }
 
   def approve!
     update!(status: 'approved')

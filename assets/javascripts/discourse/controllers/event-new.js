@@ -13,6 +13,16 @@ export default class EventNewController extends Controller {
   @tracked pricingType = "tiered";
   @tracked description = "";
 
+  get clubVenues() {
+    const orgId = this.model.event.organisation_id;
+    if (!orgId) return [];
+    return (this.model.venues || []).filter(v => !v.is_shared && String(v.created_by_organisation_id) === String(orgId));
+  }
+
+  get sharedVenues() {
+    return (this.model.venues || []).filter(v => v.is_shared);
+  }
+
   get pricingIsFlat() {
     return this.pricingType === "flat";
   }

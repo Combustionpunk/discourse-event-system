@@ -2623,3 +2623,14 @@ body.des-embedded-event {
     font-size: 0.95em;
   }
 }
+
+// Venue shared/exclusive badges
+.venue-badge--shared {
+  background: rgba(46, 204, 113, 0.15);
+  color: #27ae60;
+}
+
+.venue-badge--exclusive {
+  background: rgba(243, 156, 18, 0.15);
+  color: #e67e22;
+}

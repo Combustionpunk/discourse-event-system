@@ -107,6 +107,15 @@
         </div>
       </div>
 
+
+      <div class="org-form-field">
+        <label>
+          <input type="checkbox" checked={{this.newVenue.is_shared}} {{on "change" (fn this.toggleFacility "is_shared")}} />
+          🤝 Shared venue - other clubs and organisations also use this venue
+        </label>
+        <p class="field-help">Leave unchecked if this venue is exclusive to your club</p>
+      </div>
+
       <button class="btn btn-primary" {{on "click" this.saveVenue}} disabled={{this.isSaving}}>
         {{if this.isSaving "Submitting..." "Submit Venue"}}
       </button>
@@ -121,6 +130,7 @@
             <h3>{{venue.name}}</h3>
             {{#if venue.address}}<p class="venue-address">📍 {{venue.address}}</p>{{/if}}
             <div class="venue-badges">
+              {{#if venue.is_shared}}<span class="venue-badge venue-badge--shared">🤝 Shared</span>{{else}}<span class="venue-badge venue-badge--exclusive">🔒 Club Exclusive</span>{{/if}}
               {{#if venue.track_category}}<span class="venue-badge venue-badge--category">{{venue.track_category}}</span>{{/if}}
               {{#if venue.track_surface}}<span class="venue-badge venue-badge--surface">{{venue.track_surface}}</span>{{/if}}
               {{#if venue.track_environment}}<span class="venue-badge venue-badge--environment">{{venue.track_environment}}</span>{{/if}}
