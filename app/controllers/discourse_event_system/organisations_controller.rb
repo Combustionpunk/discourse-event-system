@@ -751,7 +751,7 @@ module DiscourseEventSystem
     def organisation_params
       params.require(:organisation).permit(
         :name, :description, :email, :phone,
-        :website, :address, :logo_url, :google_maps_url, :paypal_email
+        :website, :address, :logo_url, :google_maps_url, :paypal_email, :brca_affiliation_number, :rc_results_venue_id
       )
     end
 

@@ -5,6 +5,7 @@ class DesEvent < ActiveRecord::Base
   belongs_to :event_type, class_name: 'DesEventType', foreign_key: 'event_type_id'
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by'
   belongs_to :topic, class_name: 'Topic', foreign_key: 'topic_id', optional: true
+  belongs_to :venue, class_name: 'DesVenue', foreign_key: 'venue_id', optional: true
   belongs_to :category, class_name: 'Category', foreign_key: 'category_id', optional: true
 
   has_many :des_event_classes, foreign_key: 'event_id'

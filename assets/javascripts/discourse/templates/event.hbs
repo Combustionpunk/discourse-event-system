@@ -25,6 +25,14 @@
         </a>
       </div>
     {{/if}}
+    {{#if this.model.venue}}
+      <div class="event-detail-meta-item">
+        <strong>Venue:</strong>
+        <LinkTo @route="venue" @model={{this.model.venue.id}}>{{this.model.venue.name}}</LinkTo>
+        {{#if this.model.venue.track_category}}<span class="venue-badge venue-badge--category">{{this.model.venue.track_category}}</span>{{/if}}
+        {{#if this.model.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.model.venue.track_surface}}</span>{{/if}}
+      </div>
+    {{/if}}
   </div>
 
   {{#if this.model.description}}

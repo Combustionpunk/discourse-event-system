@@ -64,6 +64,7 @@ export default apiInitializer("1.0", (api) => {
           const links = [
             new RCLink({ route: "events", title: "📅 Events" }),
             new RCLink({ route: "organisations", title: "🏢 Organisations" }),
+            new RCLink({ route: "venues", title: "📍 Venues" }),
           ];
           if (user) {
             links.push(new RCLink({ route: "my-organisations", title: "🏢 My Organisations" }));

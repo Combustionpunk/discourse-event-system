@@ -11,6 +11,8 @@ export default function () {
   this.route("organisations", { path: "/organisations" });
   this.route("organisation-new", { path: "/organisations/new" });
   this.route("organisation", { path: "/organisations/:organisation_id" });
+  this.route("venues", { path: "/venues" });
+  this.route("venue", { path: "/venues/:venue_id" });
   this.route("des-admin", { path: "/des-admin" });
   this.route("racing-profile", { path: "/racing-profile" });
   this.route("my-garage", { path: "/my-garage" });

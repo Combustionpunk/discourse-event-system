@@ -62,6 +62,36 @@ export default class DesAdminController extends Controller {
   @action
   setTabCleanup() { this.activeTab = "cleanup"; this.loadOrphanedCars(); }
 
+  @tracked adminVenues = [];
+
+  @action
+  setTabVenues() { this.activeTab = "venues"; this.loadAdminVenues(); }
+
+  async loadAdminVenues() {
+    try {
+      const response = await ajax("/des/admin/venues.json");
+      this.adminVenues = response.venues || [];
+    } catch { this.adminVenues = []; }
+  }
+
+  @action
+  async approveVenue(venue) {
+    try {
+      await ajax("/des/admin/venues/" + venue.id + "/approve.json", { type: "PUT" });
+      this.loadAdminVenues();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async deleteVenue(venue) {
+    if (!window.confirm("Delete " + venue.name + "?")) return;
+    try {
+      await ajax("/des/venues/" + venue.id + ".json", { type: "DELETE" });
+      this.loadAdminVenues();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+
 
 
   @action

@@ -2491,3 +2491,116 @@ body.des-embedded-event {
     vertical-align: middle;
   }
 }
+
+// Venues
+.venues-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.venues-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.venue-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.venue-card {
+  padding: 16px;
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 10px;
+  transition: box-shadow 0.2s;
+
+  &:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  h3 { margin: 0 0 6px; font-size: 1.1em; }
+}
+
+.venue-address {
+  font-size: 0.9em;
+  color: var(--primary-medium);
+  margin: 4px 0;
+}
+
+.venue-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.venue-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: capitalize;
+
+  &--category { background: rgba(52,152,219,0.15); color: #2980b9; }
+  &--surface { background: rgba(46,204,113,0.15); color: #27ae60; }
+  &--environment { background: rgba(155,89,182,0.15); color: #8e44ad; }
+}
+
+.venue-facilities-icons {
+  margin-top: 8px;
+  font-size: 1.1em;
+  letter-spacing: 4px;
+}
+
+// Venue detail
+.venue-detail-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.venue-detail-meta {
+  margin: 12px 0;
+}
+
+.venue-detail-item {
+  margin: 4px 0;
+  font-size: 0.95em;
+  a { color: var(--tertiary); }
+}
+
+.venue-facilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.facility-item {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.9em;
+
+  &.facility--yes {
+    background: rgba(46,204,113,0.1);
+    color: #27ae60;
+  }
+
+  &.facility--no {
+    background: var(--primary-very-low);
+    color: var(--primary-low-mid);
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+}
+
+.venue-info-section {
+  margin: 16px 0;
+  h3 { margin-bottom: 4px; }
+}
+
+.venue-event-item {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--primary-very-low);
+  a { color: var(--tertiary); font-weight: 600; }
+}

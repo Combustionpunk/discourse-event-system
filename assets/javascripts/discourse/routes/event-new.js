@@ -36,6 +36,8 @@ export default class EventNewRoute extends Route {
       model.class_types = classTypes.class_types || [];
       const eventTypes = await ajax("/des/event-types.json");
       model.event_types = eventTypes.event_types || [];
+      const venuesData = await ajax("/des/venues.json");
+      model.venues = venuesData.venues || [];
       return model;
     });
   }

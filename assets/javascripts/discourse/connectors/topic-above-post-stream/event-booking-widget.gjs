@@ -344,6 +344,13 @@ export default class EventBookingWidget extends Component {
               <a href={{this.event.google_maps_url}} target="_blank" rel="noopener">📍 View on Google Maps</a>
             </div>
           {{/if}}
+          {{#if this.event.venue}}
+            <div class="event-widget-detail">
+              📍 Venue: <a href="/venues/{{this.event.venue.id}}">{{this.event.venue.name}}</a>
+              {{#if this.event.venue.track_category}}<span class="venue-badge venue-badge--category">{{this.event.venue.track_category}}</span>{{/if}}
+              {{#if this.event.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.event.venue.track_surface}}</span>{{/if}}
+            </div>
+          {{/if}}
         </div>
 
 

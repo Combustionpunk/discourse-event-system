@@ -1,0 +1,75 @@
+<div class="venue-detail-container">
+  <div class="events-nav">
+    <LinkTo @route="venues" class="btn btn-default">📍 All Venues</LinkTo>
+  </div>
+
+  <h1>{{this.model.venue.name}}</h1>
+
+  <div class="venue-detail-meta">
+    {{#if this.model.venue.address}}
+      <div class="venue-detail-item">📍 {{this.model.venue.address}}</div>
+    {{/if}}
+    {{#if this.model.venue.google_maps_url}}
+      <div class="venue-detail-item">
+        <a href={{this.model.venue.google_maps_url}} target="_blank" rel="noopener">🗺️ View on Google Maps</a>
+      </div>
+    {{/if}}
+    {{#if this.model.venue.website}}
+      <div class="venue-detail-item">
+        <a href={{this.model.venue.website}} target="_blank" rel="noopener">🌐 Website</a>
+      </div>
+    {{/if}}
+    {{#if this.model.venue.organisation_name}}
+      <div class="venue-detail-item">🏢 {{this.model.venue.organisation_name}}</div>
+    {{/if}}
+  </div>
+
+  <div class="venue-badges" style="margin:12px 0;">
+    {{#if this.model.venue.track_category}}<span class="venue-badge venue-badge--category">{{this.model.venue.track_category}}</span>{{/if}}
+    {{#if this.model.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.model.venue.track_surface}}</span>{{/if}}
+    {{#if this.model.venue.track_environment}}<span class="venue-badge venue-badge--environment">{{this.model.venue.track_environment}}</span>{{/if}}
+  </div>
+
+  {{#if this.model.venue.description}}
+    <div class="event-description-box">{{this.model.venue.description}}</div>
+  {{/if}}
+
+  <div class="venue-facilities">
+    <h3>Facilities</h3>
+    <div class="venue-facilities-grid">
+      <div class="facility-item {{if this.model.venue.has_permanent_toilets 'facility--yes' 'facility--no'}}">🚻 Permanent Toilets</div>
+      <div class="facility-item {{if this.model.venue.has_portaloos 'facility--yes' 'facility--no'}}">🚽 Portaloos</div>
+      <div class="facility-item {{if this.model.venue.has_bar 'facility--yes' 'facility--no'}}">🍺 Bar</div>
+      <div class="facility-item {{if this.model.venue.has_showers 'facility--yes' 'facility--no'}}">🚿 Showers</div>
+      <div class="facility-item {{if this.model.venue.has_power_supply 'facility--yes' 'facility--no'}}">⚡ Power Supply</div>
+      <div class="facility-item {{if this.model.venue.has_water_supply 'facility--yes' 'facility--no'}}">💧 Water Supply</div>
+      <div class="facility-item {{if this.model.venue.has_camping 'facility--yes' 'facility--no'}}">⛺ Camping</div>
+    </div>
+  </div>
+
+  {{#if this.model.venue.parking_info}}
+    <div class="venue-info-section">
+      <h3>🅿️ Parking</h3>
+      <p>{{this.model.venue.parking_info}}</p>
+    </div>
+  {{/if}}
+
+  {{#if this.model.venue.access_notes}}
+    <div class="venue-info-section">
+      <h3>ℹ️ Access Notes</h3>
+      <p>{{this.model.venue.access_notes}}</p>
+    </div>
+  {{/if}}
+
+  {{#if this.model.upcoming_events.length}}
+    <div class="venue-events">
+      <h3>📅 Upcoming Events</h3>
+      {{#each this.model.upcoming_events as |event|}}
+        <div class="venue-event-item">
+          <LinkTo @route="event" @model={{event.id}}>{{event.title}}</LinkTo>
+          <span class="field-help">{{event.organisation_name}}</span>
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+</div>

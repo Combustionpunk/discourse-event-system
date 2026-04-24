@@ -434,7 +434,7 @@ module DiscourseEventSystem
         :start_date, :end_date, :location, :google_maps_url,
         :capacity, :refund_cutoff_days, :category_id, :booking_closing_date,
         :booking_type, :external_booking_url, :external_booking_details,
-        :max_classes_per_booking
+        :max_classes_per_booking, :venue_id
       )
     end
 
@@ -454,6 +454,7 @@ module DiscourseEventSystem
         description: event.description,
         description_cooked: PrettyText.cook(event.description.to_s),
         organisation: { id: event.organisation.id, name: event.organisation.name, logo_url: event.organisation.logo_url },
+        venue: event.venue ? { id: event.venue.id, name: event.venue.name, address: event.venue.address, google_maps_url: event.venue.google_maps_url, track_category: event.venue.track_category, track_surface: event.venue.track_surface, track_environment: event.venue.track_environment } : nil,
         start_date: event.start_date,
         end_date: event.end_date,
         booking_closing_date: event.booking_closing_date,

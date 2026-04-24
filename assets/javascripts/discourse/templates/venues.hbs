@@ -1,0 +1,40 @@
+<div class="venues-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+    <LinkTo @route="venues" class="btn btn-default">📍 Venues</LinkTo>
+  </div>
+
+  <h1>📍 Venues</h1>
+
+  {{#if this.model.venues.length}}
+    <div class="venues-grid">
+      {{#each this.model.venues as |venue|}}
+        <LinkTo @route="venue" @model={{venue.id}} class="venue-card-link">
+          <div class="venue-card">
+            <h3>{{venue.name}}</h3>
+            {{#if venue.address}}<p class="venue-address">📍 {{venue.address}}</p>{{/if}}
+            <div class="venue-badges">
+              {{#if venue.track_category}}<span class="venue-badge venue-badge--category">{{venue.track_category}}</span>{{/if}}
+              {{#if venue.track_surface}}<span class="venue-badge venue-badge--surface">{{venue.track_surface}}</span>{{/if}}
+              {{#if venue.track_environment}}<span class="venue-badge venue-badge--environment">{{venue.track_environment}}</span>{{/if}}
+            </div>
+            <div class="venue-facilities-icons">
+              {{#if venue.has_permanent_toilets}}🚻{{/if}}
+              {{#if venue.has_portaloos}}🚽{{/if}}
+              {{#if venue.has_bar}}🍺{{/if}}
+              {{#if venue.has_showers}}🚿{{/if}}
+              {{#if venue.has_power_supply}}⚡{{/if}}
+              {{#if venue.has_water_supply}}💧{{/if}}
+              {{#if venue.has_camping}}⛺{{/if}}
+            </div>
+          </div>
+        </LinkTo>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="empty-state">
+      <p>No venues yet.</p>
+    </div>
+  {{/if}}
+</div>

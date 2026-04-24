@@ -29,6 +29,9 @@
     <button class="btn {{if (eq this.activeTab 'rules') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabRules}}>
       📋 Class Rules
     </button>
+    <button class="btn {{if (eq this.activeTab 'venues') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabVenues}}>
+      📍 Venues
+    </button>
     <button class="btn {{if (eq this.activeTab 'cleanup') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabCleanup}}>
       🔧 Cleanup
     </button>
@@ -435,6 +438,53 @@
       {{else}}
         <p class="no-pending">No orphaned cars found 🎉</p>
       {{/if}}
+    </div>
+  {{/if}}
+
+
+  {{!-- VENUES TAB --}}
+  {{#if (eq this.activeTab "venues")}}
+    <div class="des-admin-section">
+      <h2>Pending Venues</h2>
+      {{#if this.adminVenues.length}}
+        {{#each this.adminVenues as |venue|}}
+          {{#if (eq venue.status "pending")}}
+            <div class="admin-org-card admin-org-card--pending">
+              <div class="admin-org-info">
+                <h3>{{venue.name}}</h3>
+                <div class="admin-org-meta">
+                  <span>📍 {{venue.address}}</span>
+                  {{#if venue.organisation_name}}<span>🏢 {{venue.organisation_name}}</span>{{/if}}
+                  <span class="booking-status booking-status--pending">pending</span>
+                </div>
+              </div>
+              <div class="admin-org-actions">
+                <button class="btn btn-success" {{on "click" (fn this.approveVenue venue)}}>✅ Approve</button>
+                <button class="btn btn-danger" {{on "click" (fn this.deleteVenue venue)}}>❌ Delete</button>
+              </div>
+            </div>
+          {{/if}}
+        {{/each}}
+      {{/if}}
+
+      <h2>Approved Venues</h2>
+      {{#each this.adminVenues as |venue|}}
+        {{#if (eq venue.status "approved")}}
+          <div class="admin-org-card">
+            <div class="admin-org-info">
+              <strong>{{venue.name}}</strong>
+              <div class="admin-org-meta">
+                <span>📍 {{venue.address}}</span>
+                {{#if venue.track_category}}<span class="venue-badge venue-badge--category">{{venue.track_category}}</span>{{/if}}
+                {{#if venue.track_surface}}<span class="venue-badge venue-badge--surface">{{venue.track_surface}}</span>{{/if}}
+              </div>
+            </div>
+            <div class="admin-org-actions">
+              <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteVenue venue)}}>🗑 Delete</button>
+            </div>
+          </div>
+        {{/if}}
+      {{/each}}
     </div>
   {{/if}}
 

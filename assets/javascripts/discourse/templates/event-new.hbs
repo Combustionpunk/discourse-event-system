@@ -48,6 +48,15 @@
           @processPreview={{false}}
         />
       </div>
+      <div class="org-form-field">
+        <label>Venue</label>
+        <select {{on "change" (fn this.updateField "venue_id")}}>
+          <option value="">No venue selected</option>
+          {{#each this.model.venues as |venue|}}
+            <option value={{venue.id}}>{{venue.name}}</option>
+          {{/each}}
+        </select>
+      </div>
 
       <div class="org-form-field">
         <label>Location</label>
