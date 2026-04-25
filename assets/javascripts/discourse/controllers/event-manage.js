@@ -371,7 +371,11 @@ export default class EventManageController extends Controller {
 
   @action
   updateField(field, event) {
-    this.model.event[field] = event.target.value;
+    if (field === "editRcResultsMeetingId") {
+      this.editRcResultsMeetingId = event.target.value;
+    } else {
+      this.model.event[field] = event.target.value;
+    }
   }
 
   @action
