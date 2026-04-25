@@ -98,8 +98,12 @@ class DesResultsScraperService
 
   def fetch(url)
     uri = URI(url)
-    response = Net::HTTP.get_response(uri)
-    raise "Failed to fetch #{url}: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
-    response.body
+    Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https', open_timeout: 10, read_timeout: 30) do |http|
+      request = Net::HTTP::Get.new(uri)
+      request['User-Agent'] = 'Mozilla/5.0 (compatible; DiscourseBot/1.0)'
+      response = http.request(request)
+      raise "Failed to fetch #{url}: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+      response.body
+    end
   end
 end
