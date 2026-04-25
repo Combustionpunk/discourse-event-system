@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show, :public_entrants]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes, :venue)
@@ -251,6 +251,7 @@ module DiscourseEventSystem
               status: 'waitlist',
               booking_class_status: nil,
               brca_number: nil,
+              waitlist_id: w.id,
               waitlist_position: w.position
             }
           end
@@ -469,6 +470,17 @@ module DiscourseEventSystem
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
+
+    def remove_from_waitlist
+      ensure_organisation_admin!(@event.organisation)
+      entry = DesEventWaitlist.find(params[:waitlist_id])
+      raise "Entry does not belong to this event" unless entry.event_id == @event.id
+      entry.destroy!
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
 
 
 

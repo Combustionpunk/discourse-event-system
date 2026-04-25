@@ -314,26 +314,22 @@
                       </span>
                     </td>
                     <td class="entrant-actions">
-                      {{#unless (eq entrant.status "cancelled")}}
-                        <button
-                          class="btn btn-small btn-danger"
-                          {{on "click" (fn this.cancelEntrant entrant cls.name)}}
-                        >
-                          Cancel
+                      {{#if (eq entrant.status "waitlist")}}
+                        <button class="btn btn-small btn-danger" {{on "click" (fn this.removeFromWaitlist entrant)}}>
+                          Remove from Waitlist
                         </button>
-                      {{/unless}}
-                      {{#if this.currentUser.admin}}
-                        <button
-                          class="btn btn-small btn-danger"
-                          {{on "click" (fn this.deleteBooking entrant cls.name)}}
-                        >
-                          🗑 Delete
-                        </button>
+                      {{else}}
+                        {{#unless (eq entrant.status "cancelled")}}
+                          <button class="btn btn-small btn-danger" {{on "click" (fn this.cancelEntrant entrant cls.name)}}>Cancel</button>
+                        {{/unless}}
+                        {{#if this.currentUser.admin}}
+                          <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteBooking entrant cls.name)}}>🗑 Delete</button>
+                        {{/if}}
+                        {{#unless (eq entrant.status "cancelled")}}
+                          <button class="btn btn-small btn-default" {{on "click" (fn this.startSwapCar entrant entrant.event_class_id)}}>🔄</button>
+                          <button class="btn btn-small btn-default" {{on "click" (fn this.startMoveClass entrant cls.id)}}>↔️</button>
+                        {{/unless}}
                       {{/if}}
-                      {{#unless (eq entrant.status "cancelled")}}
-                        <button class="btn btn-small btn-default" {{on "click" (fn this.startSwapCar entrant entrant.event_class_id)}}>🔄</button>
-                        <button class="btn btn-small btn-default" {{on "click" (fn this.startMoveClass entrant cls.id)}}>↔️</button>
-                      {{/unless}}
                     </td>
                   </tr>
                 {{/each}}

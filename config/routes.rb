@@ -41,6 +41,7 @@ DiscourseEventSystem::Engine.routes.draw do
   put "/des/events/:id/bookings/:booking_id/classes/:class_id/car" => "events#change_entrant_car"
   put "/des/events/:id/bookings/:booking_id/move-class" => "events#move_entrant_class"
   post "/des/events/:id/sync-transponders" => "events#sync_transponders"
+  delete "/des/events/:id/waitlist/:waitlist_id" => "events#remove_from_waitlist"
   delete "/des/events/:id/bookings/:booking_id" => "events#delete_booking"
 
   get "/des/bookings" => "bookings#index"

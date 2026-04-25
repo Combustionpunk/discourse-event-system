@@ -262,6 +262,20 @@ export default class EventManageController extends Controller {
   }
 
   @action
+  async removeFromWaitlist(entrant) {
+    if (!window.confirm("Remove " + entrant.username + " from the waitlist?")) return;
+    try {
+      await ajax("/des/events/" + this.model.event.id + "/waitlist/" + entrant.waitlist_id + ".json", {
+        type: "DELETE",
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+
+  @action
   async startSwapCar(entrant, classId) {
     this.swapCarEntrant = entrant;
     this.swapCarClassId = classId;
