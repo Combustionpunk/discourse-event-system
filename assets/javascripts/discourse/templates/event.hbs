@@ -192,6 +192,152 @@
   {{/unless}}
 
   {{!-- Discussion link --}}
+
+  {{#if this.isChampionshipRound}}
+    <div class="event-results-section">
+      <h2 class="results-heading">🏆 Championship Results</h2>
+
+      {{#if (eq this.results.status "none")}}
+        <div class="results-awaiting">
+          <p>⏳ Awaiting event results</p>
+        </div>
+
+      {{else if (eq this.results.status "pending_match")}}
+        <div class="results-awaiting">
+          <p>⏳ Results being processed</p>
+        </div>
+
+      {{else if (eq this.results.status "published")}}
+
+        {{!-- Podium Cards --}}
+        <div class="podium-cards">
+          {{#each this.results.class_summaries as |summary|}}
+            <div class="podium-card">
+              <h3 class="podium-class-name">{{summary.class_name}}</h3>
+              <div class="podium-positions">
+
+                {{!-- 1st Place --}}
+                <div class="podium-position podium-first">
+                  <div class="podium-trophy">🥇</div>
+                  {{#if summary.first.user}}
+                    <a href="/u/{{summary.first.user.username}}" data-user-card={{summary.first.user.username}}>
+                      <img
+                        src={{summary.first.user.avatar_template}}
+                        class="podium-avatar"
+                        alt={{summary.first.user.username}}
+                        width="60" height="60"
+                      />
+                    </a>
+                    <span class="podium-name">{{summary.first.user.username}}</span>
+                  {{else}}
+                    <div class="podium-avatar podium-avatar--unknown">?</div>
+                    <span class="podium-name">{{summary.first.driver_name}}</span>
+                  {{/if}}
+                </div>
+
+                {{!-- 2nd Place --}}
+                <div class="podium-position podium-second">
+                  <div class="podium-trophy">🥈</div>
+                  {{#if summary.second.user}}
+                    <a href="/u/{{summary.second.user.username}}" data-user-card={{summary.second.user.username}}>
+                      <img
+                        src={{summary.second.user.avatar_template}}
+                        class="podium-avatar"
+                        alt={{summary.second.user.username}}
+                        width="60" height="60"
+                      />
+                    </a>
+                    <span class="podium-name">{{summary.second.user.username}}</span>
+                  {{else}}
+                    <div class="podium-avatar podium-avatar--unknown">?</div>
+                    <span class="podium-name">{{summary.second.driver_name}}</span>
+                  {{/if}}
+                </div>
+
+                {{!-- 3rd Place --}}
+                <div class="podium-position podium-third">
+                  <div class="podium-trophy">🥉</div>
+                  {{#if summary.third.user}}
+                    <a href="/u/{{summary.third.user.username}}" data-user-card={{summary.third.user.username}}>
+                      <img
+                        src={{summary.third.user.avatar_template}}
+                        class="podium-avatar"
+                        alt={{summary.third.user.username}}
+                        width="60" height="60"
+                      />
+                    </a>
+                    <span class="podium-name">{{summary.third.user.username}}</span>
+                  {{else}}
+                    <div class="podium-avatar podium-avatar--unknown">?</div>
+                    <span class="podium-name">{{summary.third.driver_name}}</span>
+                  {{/if}}
+                </div>
+
+              </div>
+
+              {{!-- Fastest Lap --}}
+              {{#if summary.fastest_lap.driver_name}}
+                <div class="podium-fastest-lap">
+                  <span>⚡ Fastest Lap: </span>
+                  {{#if summary.fastest_lap.user}}
+                    <a href="/u/{{summary.fastest_lap.user.username}}" data-user-card={{summary.fastest_lap.user.username}}>
+                      {{summary.fastest_lap.user.username}}
+                    </a>
+                  {{else}}
+                    <span>{{summary.fastest_lap.driver_name}}</span>
+                  {{/if}}
+                  <span class="fastest-lap-time"> — {{summary.fastest_lap.extra}}s</span>
+                </div>
+              {{/if}}
+
+            </div>
+          {{/each}}
+        </div>
+
+        {{!-- Full Results Tables --}}
+        <div class="full-results">
+          <h3>Full Finals Results</h3>
+          {{#each this.results.races as |race|}}
+            <div class="results-race-section">
+              <h4>{{race.race_name}}</h4>
+              <table class="results-table">
+                <thead>
+                  <tr>
+                    <th>Pos</th>
+                    <th>Car</th>
+                    <th>Driver</th>
+                    <th>Laps / Time</th>
+                    <th>Best Lap</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each race.entries as |entry|}}
+                    <tr>
+                      <td>{{entry.position}}</td>
+                      <td>{{entry.car_number}}</td>
+                      <td>
+                        {{#if entry.user}}
+                          <a href="/u/{{entry.user.username}}" data-user-card={{entry.user.username}}>
+                            {{entry.user.username}}
+                          </a>
+                        {{else}}
+                          {{entry.driver_name}}
+                        {{/if}}
+                      </td>
+                      <td>{{entry.laps}} / {{entry.race_time}}</td>
+                      <td>{{entry.best_lap}}</td>
+                    </tr>
+                  {{/each}}
+                </tbody>
+              </table>
+            </div>
+          {{/each}}
+        </div>
+
+      {{/if}}
+    </div>
+  {{/if}}
+
   {{#if this.model.topic_url}}
     <div class="event-discussion-link">
       <a href={{this.model.topic_url}} class="btn btn-primary">💬 View Discussion & Comments</a>
