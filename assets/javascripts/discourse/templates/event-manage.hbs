@@ -310,7 +310,7 @@
                     <td>{{entrant.brca_number}}</td>
                     <td>
                       <span class="booking-status booking-status--{{entrant.status}}">
-                        {{entrant.status}}
+                        {{#if entrant.waitlist_position}}Waitlist #{{entrant.waitlist_position}}{{else}}{{entrant.status}}{{/if}}
                       </span>
                     </td>
                     <td class="entrant-actions">

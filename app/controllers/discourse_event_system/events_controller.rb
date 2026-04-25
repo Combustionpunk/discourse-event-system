@@ -203,39 +203,66 @@ module DiscourseEventSystem
       bookings = DesEventBooking.where(event_id: @event.id)
         .includes(:user, booking_classes: [:event_class, { user_car: [:manufacturer, :car_model] }])
 
+      waitlist_entries = DesEventWaitlist.where(event_id: @event.id, status: 'waiting')
+        .includes(:user)
+
+      status_order = { 'confirmed' => 0, 'pending' => 1, 'waitlist' => 2, 'cancelled' => 3 }
 
       render json: {
         event: { id: @event.id, title: @event.title },
         classes: @event.des_event_classes.map do |ec|
-          class_bookings = bookings.select { |b| 
+          class_bookings = bookings.select { |b|
             b.booking_classes.any? { |bc| bc.event_class_id == ec.id }
           }
+          class_waitlist = waitlist_entries.select { |w| w.event_class_id == ec.id }
+
+          entrants = class_bookings.map do |b|
+            bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
+            car = bc&.user_car
+            {
+              booking_id: b.id,
+              booking_class_id: bc&.id,
+              event_class_id: ec.id,
+              username: b.user.username,
+              name: b.user.name,
+              user_id: b.user_id,
+              avatar_template: b.user.avatar_template&.gsub('{'+'size}', '32'),
+              transponder: bc&.transponder_number,
+              manufacturer_name: car&.manufacturer&.name,
+              model_name: car&.car_model&.name || car&.custom_model_name,
+              status: b.status,
+              booking_class_status: bc&.status,
+              brca_number: b.brca_membership_number
+            }
+          end
+
+          class_waitlist.each do |w|
+            entrants << {
+              booking_id: nil,
+              booking_class_id: nil,
+              event_class_id: ec.id,
+              username: w.user.username,
+              name: w.user.name,
+              user_id: w.user_id,
+              avatar_template: w.user.avatar_template&.gsub('{'+'size}', '32'),
+              transponder: nil,
+              manufacturer_name: nil,
+              model_name: nil,
+              status: 'waitlist',
+              booking_class_status: nil,
+              brca_number: nil,
+              waitlist_position: w.position
+            }
+          end
+
+          entrants.sort_by! { |e| [status_order[e[:status]] || 99, e[:username]] }
+
           {
             id: ec.id,
             name: ec.name,
             capacity: ec.capacity,
             spaces_remaining: ec.spaces_remaining,
-            waitlist_count: DesEventWaitlist.where(event_class_id: ec.id, status: 'waiting').count,
-            user_waitlist_position: current_user.present? ? DesEventWaitlist.find_by(event_class_id: ec.id, user_id: current_user.id, status: 'waiting')&.position : nil,
-            entrants: class_bookings.map do |b|
-              bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
-              car = bc&.user_car
-              {
-                booking_id: b.id,
-                booking_class_id: bc&.id,
-                event_class_id: ec.id,
-                username: b.user.username,
-                name: b.user.name,
-                user_id: b.user_id,
-                avatar_template: b.user.avatar_template&.gsub('{size}', '32'),
-                transponder: bc&.transponder_number,
-                manufacturer_name: car&.manufacturer&.name,
-                model_name: car&.car_model&.name || car&.custom_model_name,
-                status: b.status,
-                booking_class_status: bc&.status,
-                brca_number: b.brca_membership_number
-              }
-            end
+            entrants: entrants
           }
         end
       }
