@@ -539,6 +539,7 @@ module DiscourseEventSystem
         description: event.description,
         description_cooked: PrettyText.cook(event.description.to_s),
         organisation: { id: event.organisation.id, name: event.organisation.name, logo_url: event.organisation.logo_url },
+        event_type: event.event_type ? { id: event.event_type.id, name: event.event_type.name } : nil,
         venue_id: event.venue_id,
         venue: event.venue ? {
           id: event.venue.id, name: event.venue.name, address: event.venue.address,
