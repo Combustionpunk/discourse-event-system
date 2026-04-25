@@ -33,6 +33,32 @@
       />
     </div>
 
+    <div class="org-form-row" style="margin-top: 16px;">
+      <div class="org-form-field">
+        <label>F Grade (Formula)</label>
+        <select {{on "change" this.setFGrade}}>
+          <option value="0" selected={{eq this.model.profile.user.f_grade "0"}}>0</option>
+          <option value="1" selected={{eq this.model.profile.user.f_grade "1"}}>1</option>
+          <option value="2" selected={{eq this.model.profile.user.f_grade "2"}}>2</option>
+          <option value="3" selected={{eq this.model.profile.user.f_grade "3"}}>3</option>
+          <option value="4" selected={{eq this.model.profile.user.f_grade "4"}}>4</option>
+          <option value="5" selected={{eq this.model.profile.user.f_grade "5"}}>5</option>
+        </select>
+      </div>
+      <div class="org-form-field">
+        <label>T Grade (Touring)</label>
+        <select {{on "change" this.setTGrade}}>
+          <option value="0" selected={{eq this.model.profile.user.t_grade "0"}}>0</option>
+          <option value="1" selected={{eq this.model.profile.user.t_grade "1"}}>1</option>
+          <option value="2" selected={{eq this.model.profile.user.t_grade "2"}}>2</option>
+          <option value="3" selected={{eq this.model.profile.user.t_grade "3"}}>3</option>
+          <option value="4" selected={{eq this.model.profile.user.t_grade "4"}}>4</option>
+          <option value="5" selected={{eq this.model.profile.user.t_grade "5"}}>5</option>
+        </select>
+      </div>
+    </div>
+
+
     <button class="btn btn-primary" style="margin-top: 16px;" {{on "click" this.saveProfile}}>
       Save Details
     </button>

@@ -11,6 +11,8 @@ export default class RacingProfileController extends Controller {
   @tracked successMessage = null;
   @tracked dateOfBirth = "";
   @tracked brcaNumber = "";
+  @tracked fGrade = "";
+  @tracked tGrade = "";
 
   // Family members
   @tracked familyMembers = [];
@@ -52,6 +54,8 @@ export default class RacingProfileController extends Controller {
 
   @action setDateOfBirth(event) { this.dateOfBirth = event.target.value; }
   @action setBrcaNumber(event) { this.brcaNumber = event.target.value; }
+  @action setFGrade(event) { this.fGrade = event.target.value; }
+  @action setTGrade(event) { this.tGrade = event.target.value; }
 
   @action
   async saveProfile() {
@@ -63,6 +67,8 @@ export default class RacingProfileController extends Controller {
         data: {
           date_of_birth: this.dateOfBirth || this.model.profile.user.date_of_birth,
           brca_membership_number: this.brcaNumber || this.model.profile.user.brca_membership_number,
+          f_grade: this.fGrade || this.model.profile.user.f_grade,
+          t_grade: this.tGrade || this.model.profile.user.t_grade,
         },
       });
       this.successMessage = "Profile saved successfully!";

@@ -171,14 +171,12 @@ module DiscourseEventSystem
 
 
       csv_data = CSV.generate(headers: true) do |csv|
-        csv << ['Name', 'BRCA Number', 'Class', 'PT No', 'Car Make', 'Paid Status', 'Entry Desc']
+        csv << ['Name', 'BRCA Number', 'Class', 'PT No', 'Car Make', 'Paid Status', 'Formula Number']
         bookings.each do |booking|
           booking.booking_classes.each do |bc|
             car = bc.car_id.present? ? bc.user_car : nil
-            car = bc.car_id.present? ? bc.user_car : nil
-            car = bc.car_id.present? ? bc.user_car : nil
-            car = bc.car_id.present? ? bc.user_car : nil
             manufacturer = car&.manufacturer&.name || ''
+            f_grade = UserCustomField.find_by(user_id: booking.user_id, name: 'des_f_grade')&.value || '0'
             csv << [
               booking.user.name.present? ? booking.user.name : booking.user.username,
               booking.brca_membership_number.presence || '0',
@@ -186,7 +184,7 @@ module DiscourseEventSystem
               bc.transponder_number.presence || '0',
               manufacturer,
               booking.status == 'confirmed' ? '1' : '0',
-              'entry'
+              f_grade
             ]
           end
         end

@@ -10,6 +10,8 @@ enabled_site_setting :discourse_event_system_enabled
 
 register_editable_user_custom_field :brca_membership_number
 register_editable_user_custom_field :des_date_of_birth
+register_editable_user_custom_field :des_f_grade
+register_editable_user_custom_field :des_t_grade
 
 module ::DiscourseEventSystem
   PLUGIN_NAME = "discourse-event-system"

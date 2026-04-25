@@ -10,7 +10,9 @@ module DiscourseEventSystem
           id: current_user.id,
           username: current_user.username,
           date_of_birth: current_user.custom_fields['des_date_of_birth'] || current_user.date_of_birth&.to_s,
-          brca_membership_number: current_user.custom_fields['brca_membership_number']
+          brca_membership_number: current_user.custom_fields['brca_membership_number'],
+          f_grade: current_user.custom_fields['des_f_grade'] || '0',
+          t_grade: current_user.custom_fields['des_t_grade'] || '0'
         }
       }
     end
@@ -22,6 +24,12 @@ module DiscourseEventSystem
       end
       if params[:brca_membership_number].present?
         current_user.custom_fields['brca_membership_number'] = params[:brca_membership_number]
+      end
+      if params[:f_grade].present?
+        current_user.custom_fields['des_f_grade'] = params[:f_grade]
+      end
+      if params[:t_grade].present?
+        current_user.custom_fields['des_t_grade'] = params[:t_grade]
       end
       current_user.save_custom_fields
       current_user.save!
