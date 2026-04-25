@@ -19,6 +19,26 @@ export default class EventController extends Controller {
   @tracked familyCarSelections = {};
   @tracked isWhosComingExpanded = false;
   @tracked showCalendarDropdown = false;
+  @tracked results = { status: 'none' };
+  @tracked isLoadingResults = false;
+
+  get isChampionshipRound() {
+    return this.model.event_type?.name?.toLowerCase().includes('championship');
+  }
+
+  @action
+  async loadResults() {
+    this.isLoadingResults = true;
+    try {
+      const response = await ajax("/des/events/" + this.model.id + "/results.json");
+      this.results = response;
+    } catch {
+      this.results = { status: 'none' };
+    } finally {
+      this.isLoadingResults = false;
+    }
+  }
+
 
 
   get bookingClosed() {
