@@ -209,6 +209,7 @@ export default class OrganisationController extends Controller {
       address: this.model.address || "",
       google_maps_url: this.model.google_maps_url || "",
       logo_url: this.model.logo_url || "",
+      rc_results_venue_id: this.model.rc_results_venue_id || "",
       description: this.model.description || "",
     };
   }

@@ -690,6 +690,10 @@
         <input type="url" value={{this.settingsForm.google_maps_url}} {{on "input" (fn this.updateSettingsField "google_maps_url")}} />
       </div>
       <div class="org-form-field">
+        <label>RC Results Venue ID</label>
+        <input type="number" value={{this.settingsForm.rc_results_venue_id}} {{on "input" (fn this.updateSettingsField "rc_results_venue_id")}} placeholder="e.g. 1075" />
+      </div>
+      <div class="org-form-field">
         <label>Description</label>
         <textarea rows="4" {{on "input" (fn this.updateSettingsField "description")}}>{{this.settingsForm.description}}</textarea>
       </div>
