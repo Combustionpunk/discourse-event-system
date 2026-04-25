@@ -504,7 +504,7 @@
                           type="text"
                           class="match-username-input"
                           placeholder="Type username..."
-                          value={{this.getMatchValue entry.id}}
+                          value={{get this.pendingMatches entry.id}}
                           {{on "input" (fn this.updateMatch entry.id)}}
                         />
                       </td>

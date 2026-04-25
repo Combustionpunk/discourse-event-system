@@ -488,7 +488,7 @@ export default class EventManageController extends Controller {
   }
 
   getMatchValue(entryId) {
-    return this.pendingMatches[entryId] || '';
+    return (this.pendingMatches || {})[entryId] || '';
   }
 
   @action
