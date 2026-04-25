@@ -14,7 +14,7 @@ module DiscourseEventSystem
 
     def eligible_cars
       event = DesEvent.find(params[:event_id])
-      class_ids = params[:class_ids].is_a?(Array) ? params[:class_ids] : params[:class_ids].values
+      class_ids = params[:class_ids].blank? ? [] : (params[:class_ids].is_a?(Array) ? params[:class_ids] : params[:class_ids].values)
 
       # Admin can fetch cars for a specific user
       target_user_id = if current_user.admin? && params[:user_id].present?
@@ -42,6 +42,7 @@ module DiscourseEventSystem
         .includes(:manufacturer, :car_model, :class_type, :user)
         .active
 
+      return render json: { classes: [] } if class_ids.empty?
       result = class_ids.map do |class_id|
         event_class = DesEventClass.find(class_id)
         eligible = all_cars.select { |car| car.eligible_for_class?(event_class) }
