@@ -91,8 +91,11 @@ class DesBookingService
       all_bookings << booking
     end
 
-    # Calculate combined total
-    combined_total = all_bookings.sum { |b| b.calculate_total }
+    # Calculate totals for all bookings (also persists amount_paid)
+    all_bookings.each { |b| b.calculate_total }
+    combined_total = all_bookings.sum { |b| b.amount_paid.to_f }
+
+
 
     # Create one PayPal order for the combined total
     paypal_response = @paypal.create_family_order(all_bookings, @event)
