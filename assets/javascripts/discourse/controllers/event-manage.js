@@ -19,6 +19,16 @@ export default class EventManageController extends Controller {
   @tracked editingClassId = null;
   @tracked editingClassCapacity = "";
   @tracked entrantsFilter = "all";
+  @tracked results = { status: 'none' };
+  @tracked isLoadingResults = false;
+  @tracked isImporting = false;
+  @tracked isPublishing = false;
+  @tracked isSavingMatches = false;
+  @tracked pendingMatches = {};
+
+  get isChampionshipRound() {
+    return this.model.event.event_type?.name?.toLowerCase().includes('championship');
+  }
   @tracked swapCarEntrant = null;
   @tracked swapCarClassId = null;
   @tracked swapCarOptions = [];
@@ -56,7 +66,13 @@ export default class EventManageController extends Controller {
   @action
   setTab(tab) {
     this.activeTab = tab;
+    if (tab === "results") {
+      this.loadResults();
+    }
   }
+
+
+
 
   @action
   async downloadCsv() {
@@ -436,4 +452,89 @@ export default class EventManageController extends Controller {
       popupAjaxError(error);
     }
   }
+
+  @action
+  async loadResults() {
+    this.isLoadingResults = true;
+    try {
+      const response = await ajax(`/des/events/${this.model.event.id}/results.json`);
+      this.results = response;
+    } catch {
+      this.results = { status: 'none' };
+    } finally {
+      this.isLoadingResults = false;
+    }
+  }
+
+  @action
+  async importResults() {
+    if (!window.confirm("Import results from RC Results? This will overwrite any existing results.")) return;
+    this.isImporting = true;
+    try {
+      const response = await ajax(`/des/events/${this.model.event.id}/results/import.json`, {
+        type: "POST"
+      });
+      this.results = response;
+    } catch (error) {
+      popupAjaxError(error);
+    } finally {
+      this.isImporting = false;
+    }
+  }
+
+  @action
+  updateMatch(entryId, event) {
+    this.pendingMatches = { ...this.pendingMatches, [entryId]: event.target.value };
+  }
+
+  getMatchValue(entryId) {
+    return this.pendingMatches[entryId] || '';
+  }
+
+  @action
+  async saveMatches() {
+    this.isSavingMatches = true;
+    try {
+      const matches = {};
+      for (const [entryId, username] of Object.entries(this.pendingMatches)) {
+        if (username.trim()) {
+          try {
+            const userResponse = await ajax(`/u/${username.trim()}.json`);
+            matches[entryId] = userResponse.user?.id;
+          } catch {
+            // Username not found, skip
+          }
+        } else {
+          matches[entryId] = null;
+        }
+      }
+      const response = await ajax(`/des/events/${this.model.event.id}/results/matches.json`, {
+        type: "PUT",
+        data: { matches }
+      });
+      this.results = response;
+      this.pendingMatches = {};
+    } catch (error) {
+      popupAjaxError(error);
+    } finally {
+      this.isSavingMatches = false;
+    }
+  }
+
+  @action
+  async publishResults() {
+    if (!window.confirm("Publish results and award badges? This cannot be undone.")) return;
+    this.isPublishing = true;
+    try {
+      const response = await ajax(`/des/events/${this.model.event.id}/results/publish.json`, {
+        type: "POST"
+      });
+      this.results = response;
+    } catch (error) {
+      popupAjaxError(error);
+    } finally {
+      this.isPublishing = false;
+    }
+  }
+
 }
