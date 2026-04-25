@@ -61,7 +61,6 @@
     <div class="event-closed-banner">⏰ Booking has closed for this event.</div>
   {{/if}}
 
-  {{#unless this.bookingDisabled}}
   <div class="event-detail-classes">
     <h2>Classes</h2>
     <div class="event-classes-grid">
@@ -88,6 +87,7 @@
               <span class="waitlist-count">{{cls.waitlist_count}} on waitlist</span>
             {{/if}}
           {{else}}
+            {{#unless this.bookingDisabled}}
             <input
               type="checkbox"
               id="class-{{cls.id}}"
@@ -95,12 +95,14 @@
               {{on "change" (fn this.toggleClass cls.id)}}
             />
             <label for="class-{{cls.id}}">Select</label>
+            {{/unless}}
           {{/if}}
         </div>
       {{/each}}
     </div>
   </div>
 
+  {{#unless this.bookingDisabled}}
   {{#if this.model.max_classes_per_booking}}
     <p class="field-help">⚠️ Maximum {{this.model.max_classes_per_booking}} class(es) per booking.</p>
   {{/if}}
