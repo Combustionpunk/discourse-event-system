@@ -71,13 +71,17 @@ class DesBookingService
     raise "This event has been cancelled and is no longer accepting bookings" if @event.status == 'cancelled'
     raise "Booking has closed for this event" if @event.booking_closing_date.present? && @event.booking_closing_date < Time.now
     # family_bookings is an array of { user_id:, class_ids: }
-    validate_classes!(primary_class_ids)
     family_bookings.each { |fb| validate_classes!(fb[:class_ids]) }
 
     all_bookings = []
 
-    # Create primary booking
-    primary_booking = create_single_booking(@user, primary_class_ids, car_selections)
+    # Create primary booking only if classes selected
+    primary_booking = nil
+    if primary_class_ids.present?
+      validate_classes!(primary_class_ids)
+      primary_booking = create_single_booking(@user, primary_class_ids, car_selections)
+      all_bookings << primary_booking
+    end
     all_bookings << primary_booking
 
     # Create family member bookings
@@ -107,7 +111,7 @@ class DesBookingService
       booking.update!(paypal_order_id: paypal_order_id)
     end
 
-    { booking: primary_booking, all_bookings: all_bookings, approval_url: approval_url }
+    { booking: primary_booking || all_bookings.first, all_bookings: all_bookings, approval_url: approval_url }
   rescue => e
     all_bookings&.each { |b| b&.destroy }
     raise e
