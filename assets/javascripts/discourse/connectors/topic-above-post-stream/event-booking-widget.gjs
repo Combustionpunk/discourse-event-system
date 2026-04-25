@@ -383,7 +383,12 @@ export default class EventBookingWidget extends Component {
                 <div class="event-class-name">{{cls.name}}</div>
                 <div class="event-class-spaces">{{cls.spaces_remaining}} / {{cls.capacity}} spaces</div>
                 {{#if (eq cls.status "sold_out")}}
-                  <button class="btn btn-small btn-default" {{on "click" (fn this.joinWaitlist cls.id)}}>📋 Join Waitlist</button>
+                  {{#if cls.user_waitlist_position}}
+                    <div class="waitlist-status">📋 Position #{{cls.user_waitlist_position}}</div>
+                  {{else}}
+                    <button class="btn btn-small btn-default" {{on "click" (fn this.joinWaitlist cls.id)}}>📋 Join Waitlist</button>
+                  {{/if}}
+                  {{#if cls.waitlist_count}}<span class="waitlist-count">{{cls.waitlist_count}} waiting</span>{{/if}}
                 {{else}}
                   <input type="checkbox" id="topic-class-{{cls.id}}" {{on "change" (fn this.toggleClass cls.id)}} />
                   <label for="topic-class-{{cls.id}}">Select</label>

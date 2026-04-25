@@ -215,6 +215,8 @@ module DiscourseEventSystem
             name: ec.name,
             capacity: ec.capacity,
             spaces_remaining: ec.spaces_remaining,
+            waitlist_count: DesEventWaitlist.where(event_class_id: ec.id, status: 'waiting').count,
+            user_waitlist_position: current_user.present? ? DesEventWaitlist.find_by(event_class_id: ec.id, user_id: current_user.id, status: 'waiting')&.position : nil,
             entrants: class_bookings.map do |b|
               bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
               car = bc&.user_car
@@ -484,7 +486,9 @@ module DiscourseEventSystem
             name: ec.class_type&.name || ec.name,
             capacity: ec.capacity,
             status: ec.status,
-            spaces_remaining: ec.spaces_remaining
+            spaces_remaining: ec.spaces_remaining,
+            waitlist_count: DesEventWaitlist.where(event_class_id: ec.id, status: 'waiting').count,
+            user_waitlist_position: current_user.present? ? DesEventWaitlist.find_by(event_class_id: ec.id, user_id: current_user.id, status: 'waiting')&.position : nil
           }
         end,
         pricing: event.des_event_pricing_rule ? {

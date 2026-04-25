@@ -72,12 +72,21 @@
             {{cls.spaces_remaining}} / {{cls.capacity}} spaces
           </div>
           {{#if (eq cls.status "sold_out")}}
-            <button
-              class="btn btn-small btn-default"
-              {{on "click" (fn this.joinWaitlist cls.id)}}
-            >
-              📋 Join Waitlist
-            </button>
+            {{#if cls.user_waitlist_position}}
+              <div class="waitlist-status">
+                📋 On waitlist - Position #{{cls.user_waitlist_position}}
+              </div>
+            {{else}}
+              <button
+                class="btn btn-small btn-default"
+                {{on "click" (fn this.joinWaitlist cls.id)}}
+              >
+                📋 Join Waitlist
+              </button>
+            {{/if}}
+            {{#if cls.waitlist_count}}
+              <span class="waitlist-count">{{cls.waitlist_count}} on waitlist</span>
+            {{/if}}
           {{else}}
             <input
               type="checkbox"

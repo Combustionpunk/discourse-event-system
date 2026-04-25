@@ -2676,3 +2676,16 @@ body.des-embedded-event {
   font-size: 0.75em;
   padding: 1px 5px;
 }
+
+// Waitlist display
+.waitlist-status {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #e67e22;
+  padding: 4px 0;
+}
+
+.waitlist-count {
+  font-size: 0.8em;
+  color: var(--primary-medium);
+}
