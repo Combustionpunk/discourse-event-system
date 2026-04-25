@@ -13,38 +13,30 @@ class DesResultsScraperService
     html = fetch(summary_url)
     doc = Nokogiri::HTML(html)
 
-    rounds = {}
+    result = []
     current_round = nil
 
-    doc.css('h4, a[href*="RaceResult"]').each do |node|
-      if node.name == 'h4'
+    doc.css("h4, a[href*='RaceResult']").each do |node|
+      if node.name == "h4"
         current_round = node.text.strip
-        rounds[current_round] ||= []
-      elsif node.name == 'a' && current_round
-        href = node['href']
+      elsif node.name == "a" && current_round
+        race_name = node.text.strip
+        next unless race_name.downcase.include?("final")
+
+        href = node["href"]
         race_id = href.match(/raceId=(\d+)/)&.[](1)&.to_i
         next unless race_id
-        rounds[current_round] << {
-          race_name: node.text.strip,
-          rc_results_race_id: race_id
-        }
-      end
-    end
 
-    finals_rounds = rounds.select { |round, _| round.downcase.include?('final') }
+        entries = scrape_race(race_id)
+        class_name = extract_class_name(race_name)
+        final_type = extract_final_type(race_name)
 
-    result = []
-    finals_rounds.each do |round_name, races|
-      races.each do |race|
-        entries = scrape_race(race[:rc_results_race_id])
-        class_name = extract_class_name(race[:race_name])
-        final_type = extract_final_type(race[:race_name])
         result << {
-          round_name: round_name,
-          race_name: race[:race_name],
+          round_name: current_round,
+          race_name: race_name,
           class_name: class_name,
           final_type: final_type,
-          rc_results_race_id: race[:rc_results_race_id],
+          rc_results_race_id: race_id,
           entries: entries
         }
       end
@@ -52,6 +44,7 @@ class DesResultsScraperService
 
     result
   end
+
 
   private
 
