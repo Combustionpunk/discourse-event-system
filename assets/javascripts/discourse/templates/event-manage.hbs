@@ -53,6 +53,14 @@
     >
       💷 Pricing & Discounts
     </button>
+    {{#if this.isChampionshipRound}}
+      <button
+        class="manage-tab {{if (eq this.activeTab 'results') 'active'}}"
+        {{on "click" (fn this.setTab "results")}}
+      >
+        🏆 Results
+      </button>
+    {{/if}}
   </div>
 
   {{!-- Details Tab --}}
@@ -439,5 +447,95 @@
       </button>
     </div>
   {{/if}}
+
+  {{#if (eq this.activeTab "results")}}
+    <div class="manage-section">
+      <div class="manage-section-header">
+        <h3>Race Results</h3>
+      </div>
+
+      {{#if this.isLoadingResults}}
+        <p>Loading results...</p>
+      {{else if (eq this.results.status "none")}}
+        <div class="results-empty">
+          {{#if this.model.event.rc_results_meeting_id}}
+            <p>No results imported yet for this event.</p>
+            <button class="btn btn-primary" {{on "click" this.importResults}} disabled={{this.isImporting}}>
+              {{if this.isImporting "Importing..." "📥 Import Results from RC Results"}}
+            </button>
+          {{else}}
+            <p>⚠️ No RC Results Meeting ID set on this event. Please add one in the Details tab before importing results.</p>
+          {{/if}}
+        </div>
+      {{else if (eq this.results.status "pending_match")}}
+        <div class="results-matching">
+          <p>✅ Results imported. Please review driver matches below, then publish.</p>
+          <button class="btn btn-default" {{on "click" this.importResults}} disabled={{this.isImporting}}>
+            {{if this.isImporting "Importing..." "🔄 Re-import Results"}}
+          </button>
+          <button class="btn btn-primary" style="margin-left: 8px;" {{on "click" this.publishResults}} disabled={{this.isPublishing}}>
+            {{if this.isPublishing "Publishing..." "🏆 Publish Results & Award Badges"}}
+          </button>
+
+          <h4 style="margin-top: 24px;">Driver Match Confirmation</h4>
+          <p class="field-help">Auto-matched drivers are shown below. Unmatched drivers are highlighted — please assign them manually before publishing.</p>
+
+          {{#each this.results.races as |race|}}
+            <div class="match-race-section">
+              <h5>{{race.race_name}}</h5>
+              <table class="results-table">
+                <thead>
+                  <tr>
+                    <th>Pos</th>
+                    <th>Car</th>
+                    <th>RC Results Name</th>
+                    <th>Matched User</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each race.entries as |entry|}}
+                    <tr class="{{unless entry.user_id 'unmatched-entry'}}">
+                      <td>{{entry.position}}</td>
+                      <td>{{entry.car_number}}</td>
+                      <td>{{entry.driver_name}}</td>
+                      <td>
+                        <input
+                          type="text"
+                          class="match-username-input"
+                          placeholder="Type username..."
+                          value={{this.getMatchValue entry.id}}
+                          {{on "input" (fn this.updateMatch entry.id)}}
+                        />
+                      </td>
+                      <td>
+                        {{#if entry.user}}
+                          <span class="match-status matched">✅ {{entry.user.username}}</span>
+                        {{else}}
+                          <span class="match-status unmatched">❓ Unmatched</span>
+                        {{/if}}
+                      </td>
+                    </tr>
+                  {{/each}}
+                </tbody>
+              </table>
+            </div>
+          {{/each}}
+
+          <button class="btn btn-default" {{on "click" this.saveMatches}} disabled={{this.isSavingMatches}}>
+            {{if this.isSavingMatches "Saving..." "💾 Save Matches"}}
+          </button>
+        </div>
+      {{else if (eq this.results.status "published")}}
+        <div class="results-published">
+          <p>✅ Results published and badges awarded.</p>
+          <button class="btn btn-default" {{on "click" this.importResults}} disabled={{this.isImporting}}>
+            {{if this.isImporting "Importing..." "🔄 Re-import Results"}}
+          </button>
+        </div>
+      {{/if}}
+    </div>
+  {{/if}}
+
 
 </div>
