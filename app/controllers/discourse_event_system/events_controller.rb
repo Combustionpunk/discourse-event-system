@@ -174,13 +174,13 @@ module DiscourseEventSystem
         csv << ['Name', 'BRCA Number', 'Class', 'PT No', 'Car Make', 'Paid Status', 'Entry Desc']
         bookings.each do |booking|
           booking.booking_classes.each do |bc|
-            car = DesUserCar.find_by(
-              user_id: booking.user_id,
-              transponder_number: bc.transponder_number
-            ) if bc.transponder_number.present?
+            car = bc.car_id.present? ? bc.user_car : nil
+            car = bc.car_id.present? ? bc.user_car : nil
+            car = bc.car_id.present? ? bc.user_car : nil
+            car = bc.car_id.present? ? bc.user_car : nil
             manufacturer = car&.manufacturer&.name || ''
             csv << [
-              booking.user.username,
+              booking.user.name.present? ? booking.user.name : booking.user.username,
               booking.brca_membership_number.presence || '0',
               bc.event_class.name,
               bc.transponder_number.presence || '0',
