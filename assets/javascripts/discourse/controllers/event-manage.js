@@ -458,7 +458,7 @@ export default class EventManageController extends Controller {
     this.isLoadingResults = true;
     try {
       const response = await ajax(`/des/events/${this.model.event.id}/results.json`);
-      this.results = response;
+      this.results = JSON.parse(JSON.stringify(response));
     } catch {
       this.results = { status: 'none' };
     } finally {
@@ -474,7 +474,7 @@ export default class EventManageController extends Controller {
       const response = await ajax(`/des/events/${this.model.event.id}/results/import.json`, {
         type: "POST"
       });
-      this.results = response;
+      this.results = JSON.parse(JSON.stringify(response));
     } catch (error) {
       popupAjaxError(error);
     } finally {
@@ -512,7 +512,7 @@ export default class EventManageController extends Controller {
         type: "PUT",
         data: { matches }
       });
-      this.results = response;
+      this.results = JSON.parse(JSON.stringify(response));
       this.pendingMatches = {};
     } catch (error) {
       popupAjaxError(error);
@@ -529,7 +529,7 @@ export default class EventManageController extends Controller {
       const response = await ajax(`/des/events/${this.model.event.id}/results/publish.json`, {
         type: "POST"
       });
-      this.results = response;
+      this.results = JSON.parse(JSON.stringify(response));
     } catch (error) {
       popupAjaxError(error);
     } finally {
