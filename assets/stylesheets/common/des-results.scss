@@ -1,0 +1,173 @@
+// Podium Cards
+.event-results-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid var(--primary-low);
+
+  .results-heading {
+    font-size: 1.4em;
+    margin-bottom: 20px;
+  }
+
+  .results-awaiting {
+    text-align: center;
+    padding: 24px;
+    color: var(--primary-medium);
+    font-style: italic;
+  }
+}
+
+.podium-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.podium-card {
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 220px;
+  flex: 1;
+
+  .podium-class-name {
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--primary-low);
+  }
+}
+
+.podium-positions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.podium-position {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .podium-trophy {
+    font-size: 1.4em;
+    width: 28px;
+    text-align: center;
+  }
+
+  .podium-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .podium-avatar--unknown {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-low);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    color: var(--primary-medium);
+    font-weight: bold;
+  }
+
+  .podium-name {
+    font-weight: 500;
+    font-size: 0.95em;
+  }
+}
+
+.podium-fastest-lap {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--primary-low);
+  font-size: 0.85em;
+  color: var(--primary-medium);
+
+  a {
+    font-weight: 500;
+    color: var(--tertiary);
+  }
+
+  .fastest-lap-time {
+    font-family: monospace;
+  }
+}
+
+// Full Results Tables
+.full-results {
+  h3 {
+    margin-bottom: 16px;
+  }
+}
+
+.results-race-section {
+  margin-bottom: 24px;
+
+  h4 {
+    margin-bottom: 8px;
+    font-size: 0.95em;
+    color: var(--primary-medium);
+  }
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+
+  th {
+    text-align: left;
+    padding: 6px 10px;
+    background: var(--primary-very-low);
+    border-bottom: 2px solid var(--primary-low);
+    font-weight: 600;
+  }
+
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--primary-very-low);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  a {
+    color: var(--tertiary);
+  }
+}
+
+// Match confirmation table (event manage)
+.match-race-section {
+  margin-bottom: 24px;
+
+  h5 {
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+}
+
+.unmatched-entry {
+  background: var(--danger-low);
+}
+
+.match-status {
+  font-size: 0.85em;
+
+  &.matched { color: var(--success); }
+  &.unmatched { color: var(--danger); }
+}
+
+.match-username-input {
+  width: 160px;
+  padding: 4px 6px;
+  font-size: 0.85em;
+}
