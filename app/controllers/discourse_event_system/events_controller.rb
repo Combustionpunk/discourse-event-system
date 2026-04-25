@@ -171,12 +171,34 @@ module DiscourseEventSystem
 
 
       csv_data = CSV.generate(headers: true) do |csv|
-        csv << ['Name', 'BRCA Number', 'Class', 'PT No', 'Car Make', 'Paid Status', 'Formula Number']
+        csv << ['Name', 'BRCA Number', 'Class', 'PT No', 'Car Make', 'Paid Status', 'Formula Number', 'Member Type']
         bookings.each do |booking|
           booking.booking_classes.each do |bc|
             car = bc.car_id.present? ? bc.user_car : nil
             manufacturer = car&.manufacturer&.name || ''
             f_grade = UserCustomField.find_by(user_id: booking.user_id, name: 'des_f_grade')&.value || '0'
+
+            # Member Type: 1=junior member, 2=adult member, 3=non-member
+            is_member = DesOrganisationMembership
+              .where(user_id: booking.user_id, organisation_id: @event.organisation_id)
+              .active.exists?
+            dob_str = UserCustomField.find_by(user_id: booking.user_id, name: 'des_date_of_birth')&.value.presence
+            dob = dob_str ? Date.parse(dob_str) : booking.user.date_of_birth
+            is_junior = if dob.present?
+              age = @event.start_date.year - dob.year
+              age -= 1 if @event.start_date < dob + age.years
+              age < 16
+            else
+              false
+            end
+            member_type = if is_member && is_junior
+              '1'
+            elsif is_member
+              '2'
+            else
+              '3'
+            end
+
             csv << [
               booking.user.name.present? ? booking.user.name : booking.user.username,
               booking.brca_membership_number.presence || '0',
@@ -184,12 +206,12 @@ module DiscourseEventSystem
               bc.transponder_number.presence || '0',
               manufacturer,
               booking.status == 'confirmed' ? '1' : '0',
-              f_grade
+              f_grade,
+              member_type
             ]
           end
         end
       end
-
       send_data csv_data,
         filename: "#{@event.title.parameterize}-entries.csv",
         type: 'text/csv',
