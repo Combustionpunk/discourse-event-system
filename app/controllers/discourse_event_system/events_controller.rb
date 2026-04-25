@@ -245,29 +245,51 @@ module DiscourseEventSystem
       bookings = DesEventBooking.where(event_id: @event.id, status: ['confirmed', 'pending'])
         .includes(:user, booking_classes: [:event_class, { user_car: [:manufacturer, :car_model] }])
 
+      waitlist_entries = DesEventWaitlist.where(event_id: @event.id, status: 'waiting')
+        .includes(:user)
+
       render json: {
         classes: @event.des_event_classes.map do |ec|
           class_bookings = bookings.select { |b|
             b.booking_classes.any? { |bc| bc.event_class_id == ec.id }
           }
+          class_waitlist = waitlist_entries.select { |w| w.event_class_id == ec.id }
+
+          entrants = class_bookings.map do |b|
+            bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
+            car = bc&.user_car
+            {
+              username: b.user.username,
+              name: b.user.name,
+              user_id: b.user_id,
+              avatar_template: b.user.avatar_template&.gsub('{'+'size}', '32'),
+              transponder: bc&.transponder_number,
+              manufacturer_name: car&.manufacturer&.name,
+              model_name: car&.car_model&.name || car&.custom_model_name,
+              status: b.status,
+              brca_number: b.brca_membership_number
+            }
+          end
+
+          class_waitlist.each do |w|
+            entrants << {
+              username: w.user.username,
+              name: w.user.name,
+              user_id: w.user_id,
+              avatar_template: w.user.avatar_template&.gsub('{'+'size}', '32'),
+              transponder: nil,
+              manufacturer_name: nil,
+              model_name: nil,
+              status: 'waitlist',
+              brca_number: nil,
+              waitlist_position: w.position
+            }
+          end
+
           {
             id: ec.id,
             name: ec.name,
-            entrants: class_bookings.map do |b|
-              bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
-              car = bc&.user_car
-              {
-                username: b.user.username,
-                name: b.user.name,
-                user_id: b.user_id,
-                avatar_template: b.user.avatar_template&.gsub('{size}', '32'),
-                transponder: bc&.transponder_number,
-                manufacturer_name: car&.manufacturer&.name,
-                model_name: car&.car_model&.name || car&.custom_model_name,
-                status: b.status,
-                brca_number: b.brca_membership_number
-              }
-            end
+            entrants: entrants
           }
         end
       }

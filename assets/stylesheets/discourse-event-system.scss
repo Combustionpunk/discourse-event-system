@@ -2689,3 +2689,13 @@ body.des-embedded-event {
   font-size: 0.8em;
   color: var(--primary-medium);
 }
+
+// Waitlist row styling in entrants table
+.entrant-row--waitlist {
+  td {
+    background: rgba(52, 152, 219, 0.06);
+  }
+  td:first-child {
+    box-shadow: inset 4px 0 0 #2980b9;
+  }
+}

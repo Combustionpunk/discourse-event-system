@@ -526,6 +526,7 @@ export default class EventBookingWidget extends Component {
                 <button class="btn btn-small {{if (eq this.entrantsFilter 'confirmed') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setEntrantsFilter "confirmed")}}>✅ Confirmed ({{this.entrantsStatusCounts.confirmed}})</button>
                 <button class="btn btn-small {{if (eq this.entrantsFilter 'pending') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setEntrantsFilter "pending")}}>⏳ Pending ({{this.entrantsStatusCounts.pending}})</button>
                 <button class="btn btn-small {{if (eq this.entrantsFilter 'cancelled') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setEntrantsFilter "cancelled")}}>❌ Cancelled ({{this.entrantsStatusCounts.cancelled}})</button>
+                <button class="btn btn-small {{if (eq this.entrantsFilter 'waitlist') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setEntrantsFilter "waitlist")}}>📋 Waitlist ({{this.entrantsStatusCounts.waitlist}})</button>
               </div>
               {{#each this.filteredEntrants as |cls|}}
                 {{#if cls.entrants.length}}
@@ -554,7 +555,7 @@ export default class EventBookingWidget extends Component {
                             <td>{{entrant.model_name}}</td>
                             <td class="transponder-number">{{entrant.transponder}}</td>
                             <td>{{entrant.brca_number}}</td>
-                            <td><span class="booking-status booking-status--{{entrant.status}}">{{entrant.status}}</span></td>
+                            <td><span class="booking-status booking-status--{{entrant.status}}">{{#if entrant.waitlist_position}}Waitlist #{{entrant.waitlist_position}}{{else}}{{entrant.status}}{{/if}}</span></td>
                           </tr>
                         {{/each}}
                       </tbody>
