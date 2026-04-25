@@ -519,7 +519,7 @@ module DiscourseEventSystem
         :start_date, :end_date, :location, :google_maps_url,
         :capacity, :refund_cutoff_days, :category_id, :booking_closing_date,
         :booking_type, :external_booking_url, :external_booking_details,
-        :max_classes_per_booking, :venue_id
+        :max_classes_per_booking, :venue_id, :rc_results_meeting_id
       )
     end
 

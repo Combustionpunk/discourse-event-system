@@ -83,6 +83,10 @@
             {{/each}}
           </select>
         </div>
+        <div class="org-form-field">
+          <label>RC Results Meeting ID</label>
+          <input type="number" value={{this.model.event.rc_results_meeting_id}} {{on "input" (fn this.updateField "rc_results_meeting_id")}} placeholder="e.g. 19668" />
+        </div>
         <div class="org-form-row">
           <div class="org-form-field">
             <label>Start Date</label>
