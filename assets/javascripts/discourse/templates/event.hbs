@@ -6,61 +6,90 @@
     </span>
   </div>
 
-  <div class="event-detail-meta">
-    <div class="event-detail-meta-item">
-      {{#if this.model.organisation.logo_url}}<img src={{this.model.organisation.logo_url}} class="org-logo org-logo--inline" alt="" />{{/if}} <strong>Organisation:</strong> {{this.model.organisation.name}}
+  {{!-- 1. Organisation Card --}}
+  <div class="event-section-card">
+    <div class="event-org-row">
+      {{#if this.model.organisation.logo_url}}
+        <img src={{this.model.organisation.logo_url}} class="org-logo org-logo--large" alt="" />
+      {{/if}}
+      <div>
+        <h3><LinkTo @route="organisation" @model={{this.model.organisation.id}}>{{this.model.organisation.name}}</LinkTo></h3>
+        <div class="event-detail-meta-item">📅 {{this.model.formatted_date}}</div>
+      </div>
     </div>
-    <div class="event-detail-meta-item">
-      <strong>Date:</strong> {{this.model.formatted_date}}
-    </div>
-    {{#if this.model.location}}
-      <div class="event-detail-meta-item">
-        <strong>Location:</strong> {{this.model.location}}
-      </div>
-    {{/if}}
-    {{#if this.model.google_maps_url}}
-      <div class="event-detail-meta-item">
-        <a href={{this.model.google_maps_url}} target="_blank" rel="noopener">
-          📍 View on Google Maps
-        </a>
-      </div>
-    {{/if}}
-    {{#if this.model.venue}}
-      <div class="event-venue-card">
-        <h3><LinkTo @route="venue" @model={{this.model.venue.id}}>{{this.model.venue.name}}</LinkTo></h3>
-        {{#if this.model.venue.address}}<div class="venue-detail-item">📍 {{this.model.venue.address}}</div>{{/if}}
-        {{#if this.model.venue.google_maps_url}}<div class="venue-detail-item"><a href={{this.model.venue.google_maps_url}} target="_blank" rel="noopener">🗺️ View on Google Maps</a></div>{{/if}}
-        <div class="venue-badges">
-          {{#if this.model.venue.track_environment}}<span class="venue-badge venue-badge--environment">{{#if (eq this.model.venue.track_environment "outdoor")}}🌳 Outdoor{{else}}🏠 Indoor{{/if}}</span>{{/if}}
-          {{#if this.model.venue.track_category}}<span class="venue-badge venue-badge--category">{{#if (eq this.model.venue.track_category "onroad")}}🛣️ On-Road{{else}}🌿 Off-Road{{/if}}</span>{{/if}}
-          {{#if this.model.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.model.venue.track_surface}}</span>{{/if}}
-        </div>
-        <div class="venue-facilities-icons">
-          {{#if this.model.venue.has_permanent_toilets}}🚻{{/if}}
-          {{#if this.model.venue.has_portaloos}}🚽{{/if}}
-          {{#if this.model.venue.has_bar}}🍺{{/if}}
-          {{#if this.model.venue.has_showers}}🚿{{/if}}
-          {{#if this.model.venue.has_power_supply}}⚡{{/if}}
-          {{#if this.model.venue.has_water_supply}}💧{{/if}}
-          {{#if this.model.venue.has_camping}}⛺{{/if}}
-        </div>
-      </div>
-    {{/if}}
   </div>
 
-  {{#if this.model.description}}
+  {{!-- 2. Venue Card --}}
+  {{#if this.model.venue}}
+    <div class="event-venue-card">
+      <h3><LinkTo @route="venue" @model={{this.model.venue.id}}>{{this.model.venue.name}}</LinkTo></h3>
+      {{#if this.model.venue.address}}<div class="venue-detail-item">📍 {{this.model.venue.address}}</div>{{/if}}
+      {{#if this.model.venue.google_maps_url}}<div class="venue-detail-item"><a href={{this.model.venue.google_maps_url}} target="_blank" rel="noopener">🗺️ View on Google Maps</a></div>{{/if}}
+      <div class="venue-badges">
+        {{#if this.model.venue.track_environment}}<span class="venue-badge venue-badge--environment">{{#if (eq this.model.venue.track_environment "outdoor")}}🌳 Outdoor{{else}}🏠 Indoor{{/if}}</span>{{/if}}
+        {{#if this.model.venue.track_category}}<span class="venue-badge venue-badge--category">{{#if (eq this.model.venue.track_category "onroad")}}🛣️ On-Road{{else}}🌿 Off-Road{{/if}}</span>{{/if}}
+        {{#if this.model.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.model.venue.track_surface}}</span>{{/if}}
+      </div>
+      <div class="venue-facilities-icons">
+        {{#if this.model.venue.has_permanent_toilets}}🚻{{/if}}
+        {{#if this.model.venue.has_portaloos}}🚽{{/if}}
+        {{#if this.model.venue.has_bar}}🍺{{/if}}
+        {{#if this.model.venue.has_showers}}🚿{{/if}}
+        {{#if this.model.venue.has_power_supply}}⚡{{/if}}
+        {{#if this.model.venue.has_water_supply}}💧{{/if}}
+        {{#if this.model.venue.has_camping}}⛺{{/if}}
+      </div>
+    </div>
+  {{/if}}
+
+  {{!-- 3. Description --}}
+  {{#if this.model.description_cooked}}
     <div class="event-description-box cooked">
       {{{this.model.description_cooked}}}
     </div>
   {{/if}}
 
-
+  {{!-- Status banners --}}
   {{#if (eq this.model.status "cancelled")}}
     <div class="event-cancelled-banner">⚠️ This event has been cancelled.</div>
   {{else if this.bookingClosed}}
     <div class="event-closed-banner">⏰ Booking has closed for this event.</div>
   {{/if}}
 
+  {{!-- 4. Pricing & Dates --}}
+  {{#if this.model.pricing}}
+    <div class="event-section-card">
+      <h3>Pricing</h3>
+      {{#if (eq this.model.pricing.rule_type "tiered")}}
+        <p>First class: £{{this.model.pricing.first_class_price}}</p>
+        <p>Additional classes: £{{this.model.pricing.subsequent_class_price}} each</p>
+      {{else}}
+        <p>£{{this.model.pricing.flat_price}} per class</p>
+      {{/if}}
+      {{#if this.selectedClasses.length}}
+        <div class="event-booking-summary">
+          <strong>Selected: {{this.selectedClasses.length}} classes</strong>
+          <strong>Total: £{{this.calculatedTotal}}</strong>
+        </div>
+      {{/if}}
+      <div class="event-booking-dates">
+        {{#if this.model.booking_closing_date}}
+          <p class="booking-date-info {{if this.bookingClosed 'booking-closed'}}">
+            {{#if this.bookingClosed}}⚠️ Booking is now closed{{else}}📅 Booking closes: {{this.model.formatted_booking_closing_date}}{{/if}}
+          </p>
+        {{/if}}
+        {{#if this.model.refund_cutoff_days}}
+          <p class="refund-info {{if this.refundPeriodEnded 'refund-ended'}}">
+            {{#if this.refundPeriodEnded}}⚠️ Refund period has ended{{else}}💰 Refund available until: {{this.model.refund_cutoff_date}}{{/if}}
+          </p>
+        {{else}}
+          <p class="refund-info refund-ended">💰 No refunds available</p>
+        {{/if}}
+      </div>
+    </div>
+  {{/if}}
+
+  {{!-- 5. Class Selection --}}
   <div class="event-detail-classes">
     <h2>Classes</h2>
     <div class="event-classes-grid">
@@ -72,29 +101,15 @@
           </div>
           {{#if (eq cls.status "sold_out")}}
             {{#if cls.user_waitlist_position}}
-              <div class="waitlist-status">
-                📋 On waitlist - Position #{{cls.user_waitlist_position}}
-              </div>
+              <div class="waitlist-status">📋 On waitlist - Position #{{cls.user_waitlist_position}}</div>
             {{else}}
-              <button
-                class="btn btn-small btn-default"
-                {{on "click" (fn this.joinWaitlist cls.id)}}
-              >
-                📋 Join Waitlist
-              </button>
+              <button class="btn btn-small btn-default" {{on "click" (fn this.joinWaitlist cls.id)}}>📋 Join Waitlist</button>
             {{/if}}
-            {{#if cls.waitlist_count}}
-              <span class="waitlist-count">{{cls.waitlist_count}} on waitlist</span>
-            {{/if}}
+            {{#if cls.waitlist_count}}<span class="waitlist-count">{{cls.waitlist_count}} on waitlist</span>{{/if}}
           {{else}}
             {{#unless this.bookingDisabled}}
-            <input
-              type="checkbox"
-              id="class-{{cls.id}}"
-              value={{cls.id}}
-              {{on "change" (fn this.toggleClass cls.id)}}
-            />
-            <label for="class-{{cls.id}}">Select</label>
+              <input type="checkbox" id="class-{{cls.id}}" value={{cls.id}} {{on "change" (fn this.toggleClass cls.id)}} />
+              <label for="class-{{cls.id}}">Select</label>
             {{/unless}}
           {{/if}}
         </div>
@@ -102,160 +117,94 @@
     </div>
   </div>
 
-  {{#unless this.bookingDisabled}}
   {{#if this.model.max_classes_per_booking}}
     <p class="field-help">⚠️ Maximum {{this.model.max_classes_per_booking}} class(es) per booking.</p>
   {{/if}}
 
-  {{#if this.model.pricing}}
-    <div class="event-detail-pricing">
-      <h2>Pricing</h2>
-      {{#if (eq this.model.pricing.rule_type "tiered")}}
-        <p>First class: £{{this.model.pricing.first_class_price}}</p>
-        <p>Additional classes: £{{this.model.pricing.subsequent_class_price}} each</p>
-      {{else}}
-        <p>£{{this.model.pricing.flat_price}} per class</p>
-      {{/if}}
-
-      {{#if this.selectedClasses.length}}
-        <div class="event-booking-summary">
-          <strong>Selected: {{this.selectedClasses.length}} classes</strong>
-          <strong>Total: £{{this.calculatedTotal}}</strong>
-        </div>
-      {{/if}}
-    </div>
-  {{/if}}
-
-  {{!-- Family Booking Section --}}
-  {{#if this.model.family_members.length}}
-    <div class="event-family-booking">
-      <button
-        class="btn btn-default family-toggle"
-        {{on "click" this.toggleFamilySection}}
-      >
-        {{if this.familyExpanded "▼" "▶"}} Book Family Members
-      </button>
-
-      {{#if this.familyExpanded}}
-        <div class="family-members-list">
-          {{#each this.model.family_members as |member|}}
-            <div class="family-member-card">
-              <h3>{{member.username}}</h3>
-              <div class="event-classes-grid">
-                {{#each this.model.classes as |cls|}}
-                  <div class="event-class-card {{if (eq cls.status "sold_out") "sold-out"}}">
-                    <div class="event-class-name">{{cls.name}}</div>
-                    <div class="event-class-spaces">
-                      {{cls.spaces_remaining}} / {{cls.capacity}} spaces
+  {{!-- 6. Family Booking & Book Now --}}
+  {{#unless this.bookingDisabled}}
+    {{#if this.model.family_members.length}}
+      <div class="event-family-booking">
+        <button class="btn btn-default family-toggle" {{on "click" this.toggleFamilySection}}>
+          {{if this.familyExpanded "▼" "▶"}} Book Family Members
+        </button>
+        {{#if this.familyExpanded}}
+          <div class="family-members-list">
+            {{#each this.model.family_members as |member|}}
+              <div class="family-member-card">
+                <h3>{{member.username}}</h3>
+                <div class="event-classes-grid">
+                  {{#each this.model.classes as |cls|}}
+                    <div class="event-class-card {{if (eq cls.status "sold_out") "sold-out"}}">
+                      <div class="event-class-name">{{cls.name}}</div>
+                      <div class="event-class-spaces">{{cls.spaces_remaining}} / {{cls.capacity}} spaces</div>
+                      {{#if (eq cls.status "sold_out")}}
+                        <span class="field-help">Sold out</span>
+                      {{else}}
+                        <input type="checkbox" id="family-{{member.user_id}}-class-{{cls.id}}" {{on "change" (fn this.toggleFamilyClass member.user_id cls.id)}} />
+                        <label for="family-{{member.user_id}}-class-{{cls.id}}">Select</label>
+                      {{/if}}
                     </div>
-                    {{#if (eq cls.status "sold_out")}}
-                      <span class="field-help">Sold out</span>
-                    {{else}}
-                      <input
-                        type="checkbox"
-                        id="family-{{member.user_id}}-class-{{cls.id}}"
-                        {{on "change" (fn this.toggleFamilyClass member.user_id cls.id)}}
-                      />
-                      <label for="family-{{member.user_id}}-class-{{cls.id}}">Select</label>
-                    {{/if}}
-                  </div>
-                {{/each}}
+                  {{/each}}
+                </div>
               </div>
-            </div>
-          {{/each}}
-        </div>
-      {{/if}}
-    </div>
-  {{/if}}
-
-  {{!-- Updated booking summary --}}
-  {{#if this.model.pricing}}
-    {{#if this.hasFamilySelections}}
-      <div class="event-booking-summary family-summary">
-        <strong>Combined Total (you + family): {{this.totalClassCount}} classes</strong>
-        <strong>Total: &pound;{{this.calculatedTotal}}</strong>
+            {{/each}}
+          </div>
+        {{/if}}
       </div>
     {{/if}}
-  {{/if}}
 
-  <div class="event-detail-actions">
-    {{#if (eq this.model.status "draft")}}
-      <button class="btn btn-warning" {{on "click" this.publishEvent}}>
-        📢 Publish Event
-      </button>
-    {{/if}}
-    {{#if this.currentUser}}
-      <button
-        class="btn btn-primary"
-        disabled={{this.noClassesSelected}}
-        {{on "click" this.bookEvent}}
-      >
-        {{if this.isBooking "Processing..." "Book Now"}}
-      </button>
-      {{#if this.model.is_admin}}
-        <LinkTo @route="event-manage" @model={{this.model.id}} class="btn btn-default">
-          ⚙️ Manage Event
-        </LinkTo>
-      {{/if}}
-    {{else}}
-      <p>Please <a href="/login">log in</a> to book this event.</p>
-    {{/if}}
-
-
-    <div class="event-booking-dates">
-      {{#if this.model.booking_closing_date}}
-        <p class="booking-date-info {{if this.bookingClosed 'booking-closed'}}">
-          {{#if this.bookingClosed}}
-            ⚠️ Booking is now closed
-          {{else}}
-            📅 Booking closes: {{this.model.formatted_booking_closing_date}}
-          {{/if}}
-        </p>
-      {{/if}}
-      {{#if this.model.refund_cutoff_days}}
-        <p class="refund-info {{if this.refundPeriodEnded 'refund-ended'}}">
-          {{#if this.refundPeriodEnded}}
-            ⚠️ Refund period has ended
-          {{else}}
-            💰 Refund available until: {{this.model.refund_cutoff_date}}
-          {{/if}}
-        </p>
-      {{else}}
-        <p class="refund-info refund-ended">💰 No refunds available</p>
-      {{/if}}
-    </div>
-
-    <div class="calendar-dropdown-wrapper">
-      <button class="btn btn-default" type="button" {{on "click" this.toggleCalendarDropdown}}>
-        📅 Add to Calendar
-      </button>
-      {{#if this.showCalendarDropdown}}
-        <div class="calendar-dropdown">
-          <a href="#" class="calendar-dropdown-item" {{on "click" this.downloadICS}}>
-            📅 Download ICS (Apple/Outlook)
-          </a>
-          <a href={{this.googleCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">
-            📅 Google Calendar
-          </a>
-          <a href={{this.outlookCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">
-            📅 Outlook.com
-          </a>
+    {{#if this.model.pricing}}
+      {{#if this.hasFamilySelections}}
+        <div class="event-booking-summary family-summary">
+          <strong>Combined Total (you + family): {{this.totalClassCount}} classes</strong>
+          <strong>Total: &pound;{{this.calculatedTotal}}</strong>
         </div>
       {{/if}}
-    </div>
+    {{/if}}
 
-  </div>
+    <div class="event-detail-actions">
+      {{#if (eq this.model.status "draft")}}
+        <button class="btn btn-warning" {{on "click" this.publishEvent}}>📢 Publish Event</button>
+      {{/if}}
+      {{#if this.currentUser}}
+        <button class="btn btn-primary" disabled={{this.noClassesSelected}} {{on "click" this.bookEvent}}>
+          {{if this.isBooking "Processing..." "Book Now"}}
+        </button>
+        {{#if this.model.is_admin}}
+          <LinkTo @route="event-manage" @model={{this.model.id}} class="btn btn-default">⚙️ Manage Event</LinkTo>
+        {{/if}}
+      {{else}}
+        <p>Please <a href="/login">log in</a> to book this event.</p>
+      {{/if}}
+
+      <div class="calendar-dropdown-wrapper">
+        <button class="btn btn-default" type="button" {{on "click" this.toggleCalendarDropdown}}>📅 Add to Calendar</button>
+        {{#if this.showCalendarDropdown}}
+          <div class="calendar-dropdown">
+            <a href="#" class="calendar-dropdown-item" {{on "click" this.downloadICS}}>📅 Download ICS (Apple/Outlook)</a>
+            <a href={{this.googleCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">📅 Google Calendar</a>
+            <a href={{this.outlookCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">📅 Outlook.com</a>
+          </div>
+        {{/if}}
+      </div>
+    </div>
   {{/unless}}
 
+  {{!-- Discussion link --}}
+  {{#if this.model.topic_url}}
+    <div class="event-discussion-link">
+      <a href={{this.model.topic_url}} class="btn btn-primary">💬 View Discussion & Comments</a>
+    </div>
+  {{/if}}
 
-  {{!-- Who's Coming Section (collapsible) --}}
+  {{!-- 7. Who's Coming (collapsible) --}}
   {{#if this.totalEntrantCount}}
     <div class="event-whos-coming">
       <button class="whos-coming-toggle" type="button" {{on "click" this.toggleWhosComingSection}}>
         <span class="whos-coming-chevron">{{if this.isWhosComingExpanded "▼" "▶"}}</span>
         <h2>👥 Who's Coming? ({{this.totalEntrantCount}} entries)</h2>
       </button>
-
       {{#if this.isWhosComingExpanded}}
         {{#each this.model.public_entrants as |cls|}}
           {{#if cls.entrants.length}}
@@ -300,25 +249,12 @@
     </div>
   {{/if}}
 
-
-
-
-  {{#if this.model.topic_url}}
-    <div class="event-discussion-link">
-      <a href={{this.model.topic_url}} class="btn btn-primary">
-        💬 View Discussion & Comments
-      </a>
-    </div>
-  {{/if}}
-
-
   {{!-- Car Selection Modal --}}
   {{#if this.showCarSelection}}
     <div class="car-selection-overlay">
       <div class="car-selection-modal">
         <h2>Select Cars</h2>
         <p class="field-help">Select which car to enter for each class. Your garage is used for all family members.</p>
-
         <h3>Your Classes</h3>
         {{#each this.eligibleCars as |cls|}}
           <div class="car-selection-class">
@@ -333,16 +269,10 @@
                 {{/each}}
               </select>
             {{else}}
-              <div class="no-eligible-cars">
-                No eligible cars in your garage for this class.
-                <LinkTo @route="my-garage" class="btn btn-small btn-default">
-                  Add a car
-                </LinkTo>
-              </div>
+              <div class="no-eligible-cars">No eligible cars in your garage for this class. <LinkTo @route="my-garage" class="btn btn-small btn-default">Add a car</LinkTo></div>
             {{/if}}
           </div>
         {{/each}}
-
         {{#if this.familyEligibleCars}}
           {{#each this.familyEligibleCars as |entry|}}
             <h3>{{entry.username}}</h3>
@@ -359,26 +289,17 @@
                     {{/each}}
                   </select>
                 {{else}}
-                  <div class="no-eligible-cars">
-                    No eligible cars in your garage for this class.
-                  </div>
+                  <div class="no-eligible-cars">No eligible cars in your garage for this class.</div>
                 {{/if}}
               </div>
             {{/each}}
           {{/each}}
         {{/if}}
-
         <div class="car-selection-actions">
-          <button
-            class="btn btn-primary"
-            disabled={{not this.allCarsSelected}}
-            {{on "click" this.confirmBooking}}
-          >
+          <button class="btn btn-primary" disabled={{not this.allCarsSelected}} {{on "click" this.confirmBooking}}>
             {{if this.isBooking "Processing..." "Confirm & Pay"}}
           </button>
-          <button class="btn btn-default" {{on "click" this.cancelCarSelection}}>
-            Cancel
-          </button>
+          <button class="btn btn-default" {{on "click" this.cancelCarSelection}}>Cancel</button>
         </div>
       </div>
     </div>
