@@ -82,7 +82,6 @@ class DesBookingService
       primary_booking = create_single_booking(@user, primary_class_ids, car_selections)
       all_bookings << primary_booking
     end
-    all_bookings << primary_booking
 
     # Create family member bookings
     family_bookings.each do |fb|
