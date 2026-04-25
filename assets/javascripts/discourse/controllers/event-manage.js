@@ -368,9 +368,9 @@ export default class EventManageController extends Controller {
           event: {
             title: this.model.event.title,
             description: this.editDescription,
-            start_date: this.model.event.start_date,
-            end_date: this.model.event.end_date,
-            booking_closing_date: this.model.event.booking_closing_date,
+            start_date: this.model.event.start_date ? new Date(this.model.event.start_date).toISOString() : null,
+            end_date: this.model.event.end_date ? new Date(this.model.event.end_date).toISOString() : null,
+            booking_closing_date: this.model.event.booking_closing_date ? new Date(this.model.event.booking_closing_date).toISOString() : null,
             location: this.model.event.location,
             google_maps_url: this.model.event.google_maps_url,
             max_classes_per_booking: this.model.event.max_classes_per_booking,
