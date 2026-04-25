@@ -585,6 +585,7 @@ module DiscourseEventSystem
           junior_subsequent_discount: event.des_event_pricing_rule.junior_subsequent_discount
         } : nil,
         max_classes_per_booking: event.max_classes_per_booking,
+        rc_results_meeting_id: event.rc_results_meeting_id,
         is_admin: current_user.present? && is_event_admin?(event),
         user_is_member: current_user.present? && DesOrganisationMembership.where(user_id: current_user.id, organisation_id: event.organisation_id).active.exists?,
         user_is_junior: current_user.present? && begin
