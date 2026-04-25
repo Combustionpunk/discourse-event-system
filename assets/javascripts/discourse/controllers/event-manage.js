@@ -12,6 +12,7 @@ export default class EventManageController extends Controller {
   @tracked activeTab = "details";
   @tracked editMode = false;
   @tracked editDescription = "";
+  @tracked editRcResultsMeetingId = null;
   @tracked classTypes = null;
   @tracked newClassTypeId = null;
   @tracked newClassCapacity = "";
@@ -365,6 +366,7 @@ export default class EventManageController extends Controller {
   toggleEdit() {
     this.editMode = !this.editMode;
     if (this.editMode) this.editDescription = this.model.event.description || "";
+    if (this.editMode) this.editRcResultsMeetingId = this.model.event.rc_results_meeting_id || null;
   }
 
   @action
@@ -389,7 +391,7 @@ export default class EventManageController extends Controller {
             google_maps_url: this.model.event.google_maps_url,
             max_classes_per_booking: this.model.event.max_classes_per_booking,
             venue_id: this.model.event.venue_id,
-            rc_results_meeting_id: this.model.event.rc_results_meeting_id,
+            rc_results_meeting_id: this.editRcResultsMeetingId,
           }
         },
       });
