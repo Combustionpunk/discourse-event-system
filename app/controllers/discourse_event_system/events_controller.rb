@@ -193,10 +193,12 @@ module DiscourseEventSystem
             end
             member_type = if is_member && is_junior
               '1'
-            elsif is_member
+            elsif is_member && !is_junior
               '2'
-            else
+            elsif !is_member && is_junior
               '3'
+            else
+              '4'
             end
 
             csv << [
