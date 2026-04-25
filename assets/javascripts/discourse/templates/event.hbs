@@ -167,13 +167,13 @@
       {{#if (eq this.model.status "draft")}}
         <button class="btn btn-warning" {{on "click" this.publishEvent}}>📢 Publish Event</button>
       {{/if}}
+      {{#if this.model.is_admin}}
+        <LinkTo @route="event-manage" @model={{this.model.id}} class="btn btn-default">⚙️ Manage Event</LinkTo>
+      {{/if}}
       {{#if this.currentUser}}
         <button class="btn btn-primary" disabled={{this.noClassesSelected}} {{on "click" this.bookEvent}}>
           {{if this.isBooking "Processing..." "Book Now"}}
         </button>
-        {{#if this.model.is_admin}}
-          <LinkTo @route="event-manage" @model={{this.model.id}} class="btn btn-default">⚙️ Manage Event</LinkTo>
-        {{/if}}
       {{else}}
         <p>Please <a href="/login">log in</a> to book this event.</p>
       {{/if}}
