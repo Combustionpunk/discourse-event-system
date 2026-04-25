@@ -122,6 +122,9 @@
   {{/if}}
 
   {{!-- 6. Family Booking & Book Now --}}
+  {{#if this.model.is_admin}}
+    <LinkTo @route="event-manage" @model={{this.model.id}} class="btn btn-default">⚙️ Manage Event</LinkTo>
+  {{/if}}
   {{#unless this.bookingDisabled}}
     {{#if this.model.family_members.length}}
       <div class="event-family-booking">
@@ -166,9 +169,6 @@
     <div class="event-detail-actions">
       {{#if (eq this.model.status "draft")}}
         <button class="btn btn-warning" {{on "click" this.publishEvent}}>📢 Publish Event</button>
-      {{/if}}
-      {{#if this.model.is_admin}}
-        <LinkTo @route="event-manage" @model={{this.model.id}} class="btn btn-default">⚙️ Manage Event</LinkTo>
       {{/if}}
       {{#if this.currentUser}}
         <button class="btn btn-primary" disabled={{this.noClassesSelected}} {{on "click" this.bookEvent}}>
