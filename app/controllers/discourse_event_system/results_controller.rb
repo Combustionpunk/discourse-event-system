@@ -129,7 +129,7 @@ module DiscourseEventSystem
         # Fastest lap across ALL finals for this class
         all_entries = races.flat_map(&:entries)
         fastest_entry = all_entries
-          .select { |e| e.best_lap.present? && e.best_lap.match?(/\d/) }
+          .select { |e| e.best_lap.present? && e.best_lap.match?(/\d/) && e.best_lap.to_f > 0 }
           .min_by { |e| e.best_lap.to_f }
 
         DesEventResultClassSummary.create!(
