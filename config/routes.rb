@@ -133,6 +133,7 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/events/:event_id/results/import" => "results#import"
   put "/des/events/:event_id/results/matches" => "results#update_matches"
   post "/des/events/:event_id/results/publish" => "results#publish"
+  put "/des/events/:event_id/results/entries/:entry_id/reject-lap" => "results#reject_lap"
   get "/des/admin/venues" => "venues#admin_index"
   put "/des/admin/venues/:id/approve" => "venues#admin_approve"
   get "/des/admin" => "admin#index"
