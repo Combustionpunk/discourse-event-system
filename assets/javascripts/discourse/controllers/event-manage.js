@@ -25,6 +25,7 @@ export default class EventManageController extends Controller {
   @tracked isPublishing = false;
   @tracked isSavingMatches = false;
   @tracked pendingMatches = {};
+  @tracked userSuggestions = {};
 
   get isChampionshipRound() {
     return this.model.event.event_type?.name?.toLowerCase().includes('championship');
@@ -564,6 +565,35 @@ export default class EventManageController extends Controller {
       popupAjaxError(error);
     }
   }
+
+  @action
+  async loadUserSuggestions(entryId, event) {
+    const query = event.target.value;
+    this.pendingMatches = { ...this.pendingMatches, [entryId]: query };
+    if (query.length < 2) {
+      this.userSuggestions = { ...this.userSuggestions, [entryId]: null };
+      return;
+    }
+    try {
+      const response = await ajax("/u/search/users.json", { data: { term: query } });
+      this.userSuggestions = {
+        ...this.userSuggestions,
+        [entryId]: (response.users || []).slice(0, 5).map(u => ({
+          username: u.username,
+          avatar: u.avatar_template.replace('{size}', '20')
+        }))
+      };
+    } catch {
+      this.userSuggestions = { ...this.userSuggestions, [entryId]: null };
+    }
+  }
+
+  @action
+  selectSuggestion(entryId, suggestion) {
+    this.pendingMatches = { ...this.pendingMatches, [entryId]: suggestion.username };
+    this.userSuggestions = { ...this.userSuggestions, [entryId]: null };
+  }
+
 
 
 }

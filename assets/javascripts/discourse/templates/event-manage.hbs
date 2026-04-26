@@ -500,14 +500,24 @@
                       <td>{{entry.position}}</td>
                       <td>{{entry.car_number}}</td>
                       <td>{{entry.driver_name}}</td>
-                      <td>
+                      <td style="position:relative;">
                         <input
                           type="text"
                           class="match-username-input"
                           placeholder="Type username..."
-                          value={{get this.pendingMatches entry.id}}
-                          {{on "input" (fn this.updateMatch entry.id)}}
+                          value={{or (get this.pendingMatches entry.id) entry.user.username}}
+                          {{on "input" (fn this.loadUserSuggestions entry.id)}}
                         />
+                        {{#if (get this.userSuggestions entry.id)}}
+                          <ul class="username-suggestions">
+                            {{#each (get this.userSuggestions entry.id) as |suggestion|}}
+                              <li {{on "click" (fn this.selectSuggestion entry.id suggestion)}}>
+                                <img src={{suggestion.avatar}} width="20" height="20" />
+                                {{suggestion.username}}
+                              </li>
+                            {{/each}}
+                          </ul>
+                        {{/if}}
                       </td>
                       <td>
                         {{#if entry.best_lap}}
