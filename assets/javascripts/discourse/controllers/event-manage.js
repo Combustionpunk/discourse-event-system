@@ -542,20 +542,11 @@ export default class EventManageController extends Controller {
     const reason = window.prompt("Reason for rejecting this lap time?");
     if (reason === null) return;
     try {
-      await ajax(`/des/events/${this.model.event.id}/results/entries/${entry.id}/reject-lap.json`, {
+      const response = await ajax(`/des/events/${this.model.event.id}/results/entries/${entry.id}/reject-lap.json`, {
         type: "PUT",
         data: { rejected: true, reason }
       });
-      this.results = JSON.parse(JSON.stringify({
-        ...this.results,
-        races: this.results.races.map(race => ({
-          ...race,
-          entries: race.entries.map(e => e.id === entry.id
-            ? { ...e, best_lap_rejected: true, best_lap_rejection_reason: reason }
-            : e
-          )
-        }))
-      }));
+      this.results = JSON.parse(JSON.stringify(response));
     } catch (error) {
       popupAjaxError(error);
     }
@@ -564,20 +555,11 @@ export default class EventManageController extends Controller {
   @action
   async unrejectLap(entry) {
     try {
-      await ajax(`/des/events/${this.model.event.id}/results/entries/${entry.id}/reject-lap.json`, {
+      const response = await ajax(`/des/events/${this.model.event.id}/results/entries/${entry.id}/reject-lap.json`, {
         type: "PUT",
         data: { rejected: false, reason: null }
       });
-      this.results = JSON.parse(JSON.stringify({
-        ...this.results,
-        races: this.results.races.map(race => ({
-          ...race,
-          entries: race.entries.map(e => e.id === entry.id
-            ? { ...e, best_lap_rejected: false, best_lap_rejection_reason: null }
-            : e
-          )
-        }))
-      }));
+      this.results = JSON.parse(JSON.stringify(response));
     } catch (error) {
       popupAjaxError(error);
     }

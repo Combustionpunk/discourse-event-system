@@ -106,7 +106,15 @@ module DiscourseEventSystem
         best_lap_rejected: params[:rejected],
         best_lap_rejection_reason: params[:reason]
       )
-      render json: { success: true }
+
+      # Rebuild class summary for the affected class
+      event_result = DesEventResult.find_by(event_id: @event.id)
+      race = entry.race
+      if event_result && race
+        rebuild_class_summary(event_result, race.class_name)
+      end
+
+      render json: serialize_result(event_result.reload)
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
@@ -160,6 +168,39 @@ module DiscourseEventSystem
         )
       end
     end
+
+    def rebuild_class_summary(event_result, class_name)
+      DesEventResultClassSummary.where(event_result_id: event_result.id, class_name: class_name).destroy_all
+
+      races = event_result.races.select { |r| r.class_name == class_name }
+      a_final = races.find { |r| r.final_type == 'A' } || races.first
+      return unless a_final
+
+      a_entries = a_final.entries.order(:position)
+      first_entry  = a_entries[0]
+      second_entry = a_entries[1]
+      third_entry  = a_entries[2]
+
+      all_entries = races.flat_map(&:entries)
+      fastest_entry = all_entries
+        .select { |e| e.best_lap.present? && e.best_lap.match?(/\d/) && e.best_lap.to_f > 0 && !e.best_lap_rejected }
+        .min_by { |e| e.best_lap.to_f }
+
+      DesEventResultClassSummary.create!(
+        event_result_id: event_result.id,
+        class_name: class_name,
+        first_user_id: first_entry&.user_id,
+        second_user_id: second_entry&.user_id,
+        third_user_id: third_entry&.user_id,
+        first_driver_name: first_entry&.driver_name,
+        second_driver_name: second_entry&.driver_name,
+        third_driver_name: third_entry&.driver_name,
+        fastest_lap_user_id: fastest_entry&.user_id,
+        fastest_lap_driver_name: fastest_entry&.driver_name,
+        fastest_lap_time: fastest_entry&.best_lap
+      )
+    end
+
 
     def award_badges(event_result)
       org = @event.organisation
