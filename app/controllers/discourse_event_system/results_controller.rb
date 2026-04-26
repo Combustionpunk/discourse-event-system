@@ -263,7 +263,7 @@ module DiscourseEventSystem
                   id: entry.user.id,
                   username: entry.user.username,
                   name: entry.user.name,
-                  avatar_template: entry.user.avatar_template
+                  avatar_url: entry.user.avatar_template&.gsub('{size}', '60')
                 } : nil
               }
             end
@@ -288,7 +288,7 @@ module DiscourseEventSystem
           id: user.id,
           username: user.username,
           name: user.name,
-          avatar_template: user.avatar_template
+          avatar_url: user.avatar_template&.gsub('{size}', '60')
         } : nil,
         extra: extra
       }
