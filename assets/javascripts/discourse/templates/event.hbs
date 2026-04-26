@@ -222,7 +222,7 @@
                   {{#if summary.first.user}}
                     <a href="/u/{{summary.first.user.username}}" data-user-card={{summary.first.user.username}}>
                       <img
-                        src={{summary.first.user.avatar_template}}
+                        src={{replace summary.first.user.avatar_template "{size}" "60"}}
                         class="podium-avatar"
                         alt={{summary.first.user.username}}
                         width="60" height="60"
@@ -241,7 +241,7 @@
                   {{#if summary.second.user}}
                     <a href="/u/{{summary.second.user.username}}" data-user-card={{summary.second.user.username}}>
                       <img
-                        src={{summary.second.user.avatar_template}}
+                        src={{replace summary.second.user.avatar_template "{size}" "60"}}
                         class="podium-avatar"
                         alt={{summary.second.user.username}}
                         width="60" height="60"
@@ -260,7 +260,7 @@
                   {{#if summary.third.user}}
                     <a href="/u/{{summary.third.user.username}}" data-user-card={{summary.third.user.username}}>
                       <img
-                        src={{summary.third.user.avatar_template}}
+                        src={{replace summary.third.user.avatar_template "{size}" "60"}}
                         class="podium-avatar"
                         alt={{summary.third.user.username}}
                         width="60" height="60"
