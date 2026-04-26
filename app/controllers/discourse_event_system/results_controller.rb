@@ -181,7 +181,7 @@ module DiscourseEventSystem
       second_entry = a_entries[1]
       third_entry  = a_entries[2]
 
-      all_entries = races.flat_map(&:entries)
+      all_entries = DesEventResultEntry.joins(:race).where(des_event_result_races: { event_result_id: event_result.id, class_name: class_name })
       fastest_entry = all_entries
         .select { |e| e.best_lap.present? && e.best_lap.match?(/\d/) && e.best_lap.to_f > 0 && !e.best_lap_rejected }
         .min_by { |e| e.best_lap.to_f }
