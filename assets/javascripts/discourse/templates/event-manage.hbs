@@ -490,6 +490,7 @@
                     <th>Car</th>
                     <th>RC Results Name</th>
                     <th>Matched User</th>
+                    <th>Best Lap</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -507,6 +508,19 @@
                           value={{get this.pendingMatches entry.id}}
                           {{on "input" (fn this.updateMatch entry.id)}}
                         />
+                      </td>
+                      <td>
+                        {{#if entry.best_lap}}
+                          {{#if entry.best_lap_rejected}}
+                            <span class="lap-rejected">❌ {{entry.best_lap}}</span>
+                            <button class="btn btn-small btn-default" {{on "click" (fn this.unrejectLap entry)}}>Restore</button>
+                          {{else}}
+                            <span>{{entry.best_lap}}</span>
+                            <button class="btn btn-small btn-danger" {{on "click" (fn this.rejectLap entry)}}>❌ Reject</button>
+                          {{/if}}
+                        {{else}}
+                          <span class="field-help">—</span>
+                        {{/if}}
                       </td>
                       <td>
                         {{#if entry.user}}

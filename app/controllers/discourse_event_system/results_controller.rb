@@ -98,6 +98,19 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+
+    def reject_lap
+      ensure_event_admin!
+      entry = DesEventResultEntry.find(params[:entry_id])
+      entry.update!(
+        best_lap_rejected: params[:rejected],
+        best_lap_rejection_reason: params[:reason]
+      )
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     private
 
     def set_event
@@ -129,7 +142,7 @@ module DiscourseEventSystem
         # Fastest lap across ALL finals for this class
         all_entries = races.flat_map(&:entries)
         fastest_entry = all_entries
-          .select { |e| e.best_lap.present? && e.best_lap.match?(/\d/) && e.best_lap.to_f > 0 }
+          .select { |e| e.best_lap.present? && e.best_lap.match?(/\d/) && e.best_lap.to_f > 0 && !e.best_lap_rejected }
           .min_by { |e| e.best_lap.to_f }
 
         DesEventResultClassSummary.create!(
@@ -201,6 +214,8 @@ module DiscourseEventSystem
                 laps: entry.laps,
                 race_time: entry.race_time,
                 best_lap: entry.best_lap,
+                best_lap_rejected: entry.best_lap_rejected,
+                best_lap_rejection_reason: entry.best_lap_rejection_reason,
                 user_id: entry.user_id,
                 match_confirmed: entry.match_confirmed,
                 user: entry.user ? {
