@@ -4,3 +4,4 @@ tmp/
 node_modules/
 *.zip
 *Zone.Identifier
+assets/javascripts/discourse/connectors/topic-above-post-stream-old/

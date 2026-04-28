@@ -84,6 +84,13 @@ export default class DesAdminController extends Controller {
   setTabCleanup() { this.activeTab = "cleanup"; this.loadOrphanedCars(); }
 
   @tracked adminVenues = [];
+  @tracked showAddVenueForm = false;
+  @tracked newVenue = {
+    name: "", address: "", google_maps_url: "", track_environment: "",
+    track_category: "", track_surface: "",
+    has_permanent_toilets: false, has_portaloos: false, has_bar: false,
+    has_showers: false, has_power_supply: false, has_water_supply: false, has_camping: false
+  };
 
   @action
   setTabVenues() { this.activeTab = "venues"; this.loadAdminVenues(); }
@@ -110,6 +117,45 @@ export default class DesAdminController extends Controller {
       await ajax("/des/venues/" + venue.id + ".json", { type: "DELETE" });
       this.loadAdminVenues();
     } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  toggleAddVenueForm() {
+    this.showAddVenueForm = !this.showAddVenueForm;
+    this.newVenue = {
+      name: "", address: "", google_maps_url: "", track_environment: "",
+      track_category: "", track_surface: "",
+      has_permanent_toilets: false, has_portaloos: false, has_bar: false,
+      has_showers: false, has_power_supply: false, has_water_supply: false, has_camping: false
+    };
+  }
+
+  @action
+  updateNewVenue(field, e) {
+    this.newVenue = { ...this.newVenue, [field]: e.target.value };
+  }
+
+  @action
+  toggleVenueFacility(field, e) {
+    this.newVenue = { ...this.newVenue, [field]: e.target.checked };
+  }
+
+  @action
+  async createVenue() {
+    if (!this.newVenue.name.trim()) {
+      alert("Please enter a venue name");
+      return;
+    }
+    try {
+      await ajax("/des/venues.json", {
+        type: "POST",
+        data: this.newVenue
+      });
+      this.showAddVenueForm = false;
+      this.loadAdminVenues();
+    } catch (error) {
+      popupAjaxError(error);
+    }
   }
 
   @action
