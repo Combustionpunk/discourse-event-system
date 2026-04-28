@@ -15,7 +15,11 @@ module DiscourseEventSystem
         pending_models: DesCarModel.pending.includes(:manufacturer).map { |m| serialize_model(m) },
         approved_models: DesCarModel.approved.includes(:manufacturer).map { |m| serialize_model(m) },
         approved_models_by_manufacturer: DesCarModel.approved.includes(:manufacturer).order("des_manufacturers.name, des_car_models.name").group_by { |m| m.manufacturer&.name || "Unknown" }.map { |mfr, models| { manufacturer: mfr, models: models.map { |m| serialize_model(m) } } },
-        class_types: DesEventClassType.all.map { |ct| serialize_class_type(ct) },
+        global_class_types: DesEventClassType.global.map { |ct| serialize_class_type(ct) },
+        org_class_type_groups: DesEventClassType.where.not(organisation_id: nil).includes(:organisation).group_by(&:organisation_id).map { |org_id, cts|
+          org = cts.first.organisation
+          { organisation_id: org_id, organisation_name: org&.name || "Unknown", class_types: cts.map { |ct| serialize_class_type(ct) } }
+        }.sort_by { |g| g[:organisation_name] },
         global_rules: DesClassCompatibilityRule.global.includes(:class_type).map { |r| serialize_rule(r) }
       }
     end

@@ -382,7 +382,8 @@
         </div>
       {{/if}}
 
-      {{#each this.model.class_types as |ct|}}
+      <h3 style="margin-top: 16px;">Global Class Types</h3>
+      {{#each this.model.global_class_types as |ct|}}
         <div class="admin-org-card">
           <div class="admin-org-info">
             <strong>{{ct.name}}</strong>
@@ -414,6 +415,40 @@
           />
         {{/if}}
       {{/each}}
+
+      {{#if this.model.org_class_type_groups.length}}
+        <h3 style="margin-top: 32px;">Organisation Class Types</h3>
+        <p class="field-help">Class types created by each organisation for their own events.</p>
+        {{#each this.model.org_class_type_groups as |group|}}
+          <div class="admin-org-card" style="margin-bottom: 8px;">
+            <div class="admin-org-info" style="cursor: pointer;" role="button" {{on "click" (fn this.toggleOrgClassGroup group.organisation_id)}}>
+              <strong>{{group.organisation_name}}</strong>
+              <span class="field-help" style="margin-left: 8px;">{{group.class_types.length}} class type(s)</span>
+              <span style="float: right;">{{if (includes this.expandedOrgGroups group.organisation_id) "▼" "▶"}}</span>
+            </div>
+          </div>
+          {{#if (includes this.expandedOrgGroups group.organisation_id)}}
+            {{#each group.class_types as |ct|}}
+              <div class="admin-org-card" style="margin-left: 24px; margin-bottom: 8px;">
+                <div class="admin-org-info">
+                  <strong>{{ct.name}}</strong>
+                  <div class="admin-org-meta">
+                    {{#if ct.track_environment}}<span>{{if (eq ct.track_environment "onroad") "🛣️ On-Road" "🌿 Off-Road"}}</span>{{/if}}
+                    {{#if ct.scale}}<span>📏 {{ct.scale}}</span>{{/if}}
+                    {{#if ct.chassis_types.length}}<span>🚗 {{ct.chassis_types}}</span>{{/if}}
+                    {{#if ct.drivelines.length}}<span>⚙️ {{ct.drivelines}}</span>{{/if}}
+                    {{#if ct.min_year}}<span>📅 From {{ct.min_year}}</span>{{/if}}
+                    {{#if ct.max_year}}<span>📅 Until {{ct.max_year}}</span>{{/if}}
+                    {{#if ct.manufacturer}}<span>🏭 {{ct.manufacturer}}</span>{{/if}}
+                    {{#if ct.min_age}}<span>👤 Age {{ct.min_age}}+</span>{{/if}}
+                    {{#if ct.max_age}}<span>👤 Age ≤{{ct.max_age}}</span>{{/if}}
+                  </div>
+                </div>
+              </div>
+            {{/each}}
+          {{/if}}
+        {{/each}}
+      {{/if}}
     </div>
   {{/if}}
 

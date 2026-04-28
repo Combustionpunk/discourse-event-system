@@ -608,6 +608,16 @@ export default class DesAdminController extends Controller {
   }
 
   @tracked editingClassTypeId = null;
+  @tracked expandedOrgGroups = [];
+
+  @action
+  toggleOrgClassGroup(orgId) {
+    if (this.expandedOrgGroups.includes(orgId)) {
+      this.expandedOrgGroups = this.expandedOrgGroups.filter(id => id !== orgId);
+    } else {
+      this.expandedOrgGroups = [...this.expandedOrgGroups, orgId];
+    }
+  }
 
   @action
   startEditClassType(ct) {
