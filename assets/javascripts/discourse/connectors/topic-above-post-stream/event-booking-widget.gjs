@@ -25,10 +25,29 @@ export default class EventBookingWidget extends Component {
   @tracked isWhosComingExpanded = false;
   @tracked showCalendarDropdown = false;
   @tracked entrantsFilter = "all";
+  @tracked showTransponderConfirm = false;
+  @tracked transponderConfirmations = {};
+  @tracked userTransponders = [];
+  @tracked transponderSelections = {};
 
   constructor() {
     super(...arguments);
     this.loadEvent();
+  }
+
+  async loadUserTransponders() {
+    try {
+      const response = await ajax("/des/transponders.json");
+      this.userTransponders = response.transponders;
+    } catch {
+      this.userTransponders = [];
+    }
+  }
+
+  transponderLabel(longCode) {
+    if (!longCode) return "None";
+    const t = this.userTransponders.find(tr => tr.long_code === longCode);
+    return t ? `#${t.shortcode} — ${longCode}` : longCode;
   }
 
   async loadEvent() {
@@ -267,6 +286,7 @@ export default class EventBookingWidget extends Component {
   @action async bookEvent() {
     if (this.selectedClasses.length === 0 && !this.hasFamilySelections) return;
     try {
+      await this.loadUserTransponders();
       const response = await ajax("/des/bookings/eligible-cars.json", { data: { event_id: this.event.id, class_ids: this.selectedClasses } });
       this.eligibleCars = response.classes;
       this.carSelections = {};
@@ -298,13 +318,99 @@ export default class EventBookingWidget extends Component {
   @action selectFamilyCar(userId, classId, event) { this.familyCarSelections = { ...this.familyCarSelections, [`${userId}_${classId}`]: event.target.value }; }
 
   @action cancelCarSelection() {
-    this.showCarSelection = false; this.eligibleCars = []; this.carSelections = {};
-    this.familyEligibleCars = null; this.familyCarSelections = {};
+    this.showCarSelection = false;
+    this.showTransponderConfirm = false;
+    this.eligibleCars = [];
+    this.carSelections = {};
+    this.transponderConfirmations = {};
+    this.transponderSelections = {};
+    this.familyEligibleCars = null;
+    this.familyCarSelections = {};
+  }
+
+  @action
+  proceedToTransponderConfirm() {
+    const confirmations = {};
+
+    for (const [classId, carId] of Object.entries(this.carSelections)) {
+      const cls = this.eligibleCars.find(c => c.class_id === parseInt(classId));
+      const car = cls?.eligible_cars.find(c => c.id === parseInt(carId));
+      if (car) {
+        confirmations[carId] = { car, classId, status: 'pending', isFamily: false };
+      }
+    }
+
+    if (this.familyEligibleCars) {
+      for (const entry of this.familyEligibleCars) {
+        for (const cls of entry.classes) {
+          const key = `${entry.user_id}_${cls.class_id}`;
+          const carId = this.familyCarSelections[key];
+          if (carId) {
+            const car = cls.eligible_cars.find(c => c.id === parseInt(carId));
+            if (car) {
+              confirmations[`family_${entry.user_id}_${carId}`] = {
+                car, classId: cls.class_id, userId: entry.user_id,
+                username: entry.username, status: 'pending', isFamily: true
+              };
+            }
+          }
+        }
+      }
+    }
+
+    this.transponderConfirmations = confirmations;
+    this.showTransponderConfirm = true;
+    this.showCarSelection = false;
+  }
+
+  @action
+  confirmTransponder(key) {
+    this.transponderConfirmations = {
+      ...this.transponderConfirmations,
+      [key]: { ...this.transponderConfirmations[key], status: 'confirmed' }
+    };
+  }
+
+  @action
+  changeTransponder(key) {
+    this.transponderConfirmations = {
+      ...this.transponderConfirmations,
+      [key]: { ...this.transponderConfirmations[key], status: 'changing' }
+    };
+  }
+
+  @action
+  selectNewTransponder(key, carId, event) {
+    const value = event.target.value;
+    if (!value) return;
+    const transponder = this.userTransponders.find(t => t.id === parseInt(value));
+    if (transponder) {
+      this.transponderSelections = { ...this.transponderSelections, [key]: transponder.long_code };
+      this.transponderConfirmations = {
+        ...this.transponderConfirmations,
+        [key]: { ...this.transponderConfirmations[key], status: 'confirmed', newTransponder: transponder }
+      };
+    }
+  }
+
+  get allTranspondersConfirmed() {
+    return Object.values(this.transponderConfirmations).every(c => c.status === 'confirmed');
   }
 
   @action async confirmBooking() {
     this.isBooking = true;
     try {
+      // Save any changed transponders back to car records
+      for (const [, confirmation] of Object.entries(this.transponderConfirmations)) {
+        if (confirmation.status === 'confirmed' && confirmation.newTransponder) {
+          try {
+            await ajax(`/des/garage/${confirmation.car.id}.json`, {
+              type: "PUT",
+              data: { car: { transponder_number: confirmation.newTransponder.long_code } }
+            });
+          } catch { /* continue with booking even if transponder update fails */ }
+        }
+      }
       const data = { event_id: this.event.id, class_ids: this.selectedClasses, car_selections: this.carSelections };
       if (this.hasFamilySelections) {
         const fb = {}; let idx = 0;
@@ -610,7 +716,60 @@ export default class EventBookingWidget extends Component {
                 {{/each}}
               {{/if}}
               <div class="car-selection-actions">
-                <button class="btn btn-primary" {{on "click" this.confirmBooking}}>{{if this.isBooking "Processing..." "Confirm & Pay"}}</button>
+                <button class="btn btn-primary" disabled={{not this.allCarsSelected}} {{on "click" this.proceedToTransponderConfirm}}>Next: Confirm Transponders →</button>
+                <button class="btn btn-default" {{on "click" this.cancelCarSelection}}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        {{/if}}
+
+        {{!-- Transponder Confirmation Modal --}}
+        {{#if this.showTransponderConfirm}}
+          <div class="car-selection-overlay">
+            <div class="car-selection-modal">
+              <h2>📡 Confirm Transponders</h2>
+              <p class="field-help">Please confirm the transponder for each car before booking.</p>
+
+              {{#each-in this.transponderConfirmations as |key confirmation|}}
+                <div class="transponder-confirm-card" style="background: var(--primary-very-low); border: 1px solid var(--primary-low); border-radius: 6px; padding: 12px 16px; margin-bottom: 8px;">
+                  <h4 style="margin: 0 0 8px;">{{confirmation.car.friendly_name}}{{#if confirmation.isFamily}} <span class="field-help">({{confirmation.username}})</span>{{/if}}</h4>
+
+                  {{#if (eq confirmation.status "confirmed")}}
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <span>✅ {{#if confirmation.newTransponder}}#{{confirmation.newTransponder.shortcode}} — {{confirmation.newTransponder.long_code}}{{else}}{{confirmation.car.transponder_number}}{{/if}}</span>
+                      <button class="btn btn-small btn-default" {{on "click" (fn this.changeTransponder key)}}>Change</button>
+                    </div>
+                  {{else if (eq confirmation.status "changing")}}
+                    <select {{on "change" (fn this.selectNewTransponder key confirmation.car.id)}}>
+                      <option value="">Select transponder...</option>
+                      {{#each this.userTransponders as |t|}}
+                        <option value={{t.id}}>#{{t.shortcode}} — {{t.long_code}}{{#if t.notes}} ({{t.notes}}){{/if}}</option>
+                      {{/each}}
+                    </select>
+                  {{else}}
+                    {{#if confirmation.car.transponder_number}}
+                      <p style="margin: 0 0 8px;">Current transponder: <strong>{{confirmation.car.transponder_number}}</strong></p>
+                      <div style="display:flex;gap:8px;">
+                        <button class="btn btn-primary btn-small" {{on "click" (fn this.confirmTransponder key)}}>✅ Yes, correct</button>
+                        <button class="btn btn-default btn-small" {{on "click" (fn this.changeTransponder key)}}>🔄 Change</button>
+                      </div>
+                    {{else}}
+                      <p class="field-help" style="margin: 0 0 8px;">⚠️ No transponder set. Please select one:</p>
+                      <select {{on "change" (fn this.selectNewTransponder key confirmation.car.id)}}>
+                        <option value="">Select transponder...</option>
+                        {{#each this.userTransponders as |t|}}
+                          <option value={{t.id}}>#{{t.shortcode}} — {{t.long_code}}{{#if t.notes}} ({{t.notes}}){{/if}}</option>
+                        {{/each}}
+                      </select>
+                    {{/if}}
+                  {{/if}}
+                </div>
+              {{/each-in}}
+
+              <div class="car-selection-actions" style="margin-top:16px;">
+                <button class="btn btn-primary" disabled={{not this.allTranspondersConfirmed}} {{on "click" this.confirmBooking}}>
+                  {{if this.isBooking "Processing..." "Confirm & Pay"}}
+                </button>
                 <button class="btn btn-default" {{on "click" this.cancelCarSelection}}>Cancel</button>
               </div>
             </div>
