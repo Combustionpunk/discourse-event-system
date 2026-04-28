@@ -247,7 +247,7 @@
               {{#if car.transponder_number}}
                 <div class="garage-car-row">
                   <span class="garage-car-label">📡 Transponder</span>
-                  <span class="transponder-number">{{car.transponder_number}}</span>
+                  <span class="transponder-number">{{transponder-display car.transponder_number this.userTransponders}}</span>
                 </div>
               {{/if}}
             </div>

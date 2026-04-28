@@ -5,4 +5,9 @@ export default class MyGarageRoute extends Route {
   model() {
     return ajax("/des/garage.json");
   }
+
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    controller.loadUserTransponders();
+  }
 }
