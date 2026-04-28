@@ -360,11 +360,10 @@
   {{!-- CLASS RULES TAB --}}
   {{#if (eq this.activeTab "rules")}}
     <div class="des-admin-section">
-      <h2>Class Types</h2>
-      <p class="field-help">Global class types with eligibility attributes. Cars must match these attributes to be eligible.</p>
+      <h2>Class Compatibility Rules</h2>
+      <p class="field-help">Define global class types with eligibility rules. All fields are optional — leave blank to allow any value.</p>
 
       <div class="section-header">
-        <h3>All Class Types</h3>
         <button class="btn btn-primary btn-small" {{on "click" this.toggleAddClassTypeForm}}>
           {{if this.showAddClassTypeForm "✕ Cancel" "+ Add Class Type"}}
         </button>
@@ -372,6 +371,8 @@
 
       {{#if this.showAddClassTypeForm}}
         <div class="add-model-form">
+          <h3>New Class Type</h3>
+
           <div class="org-form-row">
             <div class="org-form-field">
               <label>Name *</label>
@@ -395,26 +396,92 @@
               </select>
             </div>
           </div>
+
           <div class="org-form-row">
             <div class="org-form-field">
-              <label>Chassis Types (multi-select)</label>
+              <label>Chassis Types</label>
               <select multiple {{on "change" (fn this.updateClassTypeMultiField "chassis_types")}}>
                 {{#each this.chassisTypes as |c|}}
                   <option value={{c}}>{{c}}</option>
                 {{/each}}
               </select>
-              <p class="field-help">Hold Ctrl/Cmd to select multiple. Leave empty for any chassis type.</p>
+              <p class="field-help">Ctrl/Cmd to multi-select. Empty = any.</p>
             </div>
             <div class="org-form-field">
-              <label>Drivelines (multi-select)</label>
+              <label>Drivelines</label>
               <select multiple {{on "change" (fn this.updateClassTypeMultiField "drivelines")}}>
                 {{#each this.drivelines as |d|}}
                   <option value={{d}}>{{d}}</option>
                 {{/each}}
               </select>
-              <p class="field-help">Hold Ctrl/Cmd to select multiple. Leave empty for any driveline.</p>
+              <p class="field-help">Ctrl/Cmd to multi-select. Empty = any.</p>
             </div>
           </div>
+
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Min Year</label>
+              <select {{on "change" (fn this.updateClassTypeField "min_year")}}>
+                <option value="">Any</option>
+                {{#each this.yearOptions as |y|}}
+                  <option value={{y}}>{{y}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="org-form-field">
+              <label>Max Year</label>
+              <select {{on "change" (fn this.updateClassTypeField "max_year")}}>
+                <option value="">Any</option>
+                {{#each this.yearOptions as |y|}}
+                  <option value={{y}}>{{y}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Manufacturer</label>
+              <select {{on "change" (fn this.updateClassTypeField "manufacturer")}}>
+                <option value="">Any</option>
+                {{#each this.model.approved_manufacturers as |mfr|}}
+                  <option value={{mfr.name}}>{{mfr.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="org-form-field">
+              <label>Model</label>
+              <select {{on "change" (fn this.updateClassTypeField "model_id")}}>
+                <option value="">Any</option>
+                {{#each this.model.approved_models as |m|}}
+                  <option value={{m.id}}>{{m.manufacturer}} {{m.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+
+          <h4>Driver Eligibility</h4>
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Min Age</label>
+              <select {{on "change" (fn this.updateClassTypeField "min_age")}}>
+                <option value="">Any</option>
+                {{#each this.ageOptions as |a|}}
+                  <option value={{a}}>{{a}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="org-form-field">
+              <label>Max Age</label>
+              <select {{on "change" (fn this.updateClassTypeField "max_age")}}>
+                <option value="">Any</option>
+                {{#each this.ageOptions as |a|}}
+                  <option value={{a}}>{{a}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+
           <button class="btn btn-primary" {{on "click" this.createClassType}}>✅ Create Class Type</button>
         </div>
       {{/if}}
@@ -428,75 +495,15 @@
               {{#if ct.scale}}<span>📏 {{ct.scale}}</span>{{/if}}
               {{#if ct.chassis_types.length}}<span>🚗 {{ct.chassis_types}}</span>{{/if}}
               {{#if ct.drivelines.length}}<span>⚙️ {{ct.drivelines}}</span>{{/if}}
+              {{#if ct.min_year}}<span>📅 From {{ct.min_year}}</span>{{/if}}
+              {{#if ct.max_year}}<span>📅 Until {{ct.max_year}}</span>{{/if}}
+              {{#if ct.manufacturer}}<span>🏭 {{ct.manufacturer}}</span>{{/if}}
+              {{#if ct.min_age}}<span>👤 Age {{ct.min_age}}+</span>{{/if}}
+              {{#if ct.max_age}}<span>👤 Age ≤{{ct.max_age}}</span>{{/if}}
             </div>
           </div>
           <div class="admin-org-actions">
             <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteClassType ct)}}>🗑 Delete</button>
-          </div>
-        </div>
-      {{/each}}
-    </div>
-
-    <div class="des-admin-section">
-      <h2>Class Compatibility Rules</h2>
-      <p class="field-help">These rules apply globally to all organisations. They define which cars are eligible for each class type.</p>
-
-      <div class="rule-form">
-        <h3>Add Global Rule</h3>
-        <div class="form-row">
-          <label>Class Type</label>
-          <select id="new-rule-class-type">
-            <option value="">Select class type...</option>
-            {{#each this.model.class_types as |ct|}}
-              <option value={{ct.id}}>{{ct.name}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Rule Type</label>
-          <select {{on "change" this.updateRuleType}}>
-            <option value="max_year">Max Year</option>
-            <option value="min_year">Min Year</option>
-            <option value="max_age">Max Age</option>
-            <option value="min_age">Min Age</option>
-            <option value="manufacturer">Manufacturer</option>
-            <option value="model">Model</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Allowed Values</label>
-          {{#if (eq this.newRuleType "manufacturer")}}
-            <select {{on "change" this.updateRuleValueText}}>
-              <option value="">Select manufacturer...</option>
-              {{#each this.model.approved_manufacturers as |mfr|}}
-                <option value={{mfr.name}}>{{mfr.name}}</option>
-              {{/each}}
-            </select>
-          {{else if (eq this.newRuleType "model")}}
-            <select {{on "change" this.updateRuleValueText}}>
-              <option value="">Select model...</option>
-              {{#each this.model.approved_models as |m|}}
-                <option value={{m.id}}>{{m.manufacturer}} {{m.name}}</option>
-              {{/each}}
-            </select>
-          {{else}}
-            <input type="text"
-              placeholder={{if (eq this.newRuleType "max_year") "e.g. 2023" (if (eq this.newRuleType "min_year") "e.g. 2018" "e.g. 16")}}
-              value={{this.newRuleValue}}
-              {{on "input" this.updateRuleValueText}}
-            />
-          {{/if}}
-        </div>
-        <button class="btn btn-primary" {{on "click" this.addGlobalRule}}>+ Add Rule</button>
-      </div>
-
-      {{#each this.model.global_rules as |rule|}}
-        <div class="class-rules-group">
-          <div class="class-rule-row">
-            <span class="rule-class">{{rule.class_type_name}}</span>
-            <span class="rule-type">{{rule.rule_type}}</span>
-            <span class="rule-value">{{rule.rule_value}}</span>
-            <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteGlobalRule rule.id)}}>🗑</button>
           </div>
         </div>
       {{/each}}
