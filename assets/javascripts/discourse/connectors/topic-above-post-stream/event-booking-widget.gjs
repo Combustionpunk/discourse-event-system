@@ -330,11 +330,19 @@ export default class EventBookingWidget extends Component {
 
   @action
   proceedToTransponderConfirm() {
+    console.log('carSelections:', this.carSelections);
+    console.log('eligibleCars:', this.eligibleCars);
     const confirmations = {};
 
     for (const [classId, carId] of Object.entries(this.carSelections)) {
-      const cls = this.eligibleCars.find(c => c.class_id === parseInt(classId));
-      const car = cls?.eligible_cars.find(c => c.id === parseInt(carId));
+      console.log('looking for classId:', classId, 'carId:', carId);
+      const cls = this.eligibleCars.find(c => {
+        console.log('comparing class_id:', c.class_id, typeof c.class_id, 'vs', classId, typeof classId);
+        return String(c.class_id) === String(classId);
+      });
+      console.log('found cls:', cls);
+      const car = cls?.eligible_cars.find(c => String(c.id) === String(carId));
+      console.log('found car:', car);
       if (car) {
         confirmations[carId] = { car, classId, status: 'pending', isFamily: false };
       }
@@ -358,6 +366,7 @@ export default class EventBookingWidget extends Component {
       }
     }
 
+    console.log('confirmations:', confirmations);
     this.transponderConfirmations = confirmations;
     this.showTransponderConfirm = true;
     this.showCarSelection = false;
