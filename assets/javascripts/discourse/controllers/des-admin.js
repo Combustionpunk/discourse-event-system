@@ -403,7 +403,7 @@ export default class DesAdminController extends Controller {
     return Object.values(groups);
   }
 
-  @tracked newRuleType = "driveline";
+  @tracked newRuleType = "max_year";
   @tracked newRuleValue = "";
 
   @action
@@ -439,7 +439,7 @@ export default class DesAdminController extends Controller {
         data: { class_type_id: classTypeId, rule_type: this.newRuleType, rule_value: ruleValue },
       });
       document.getElementById('new-rule-class-type').value = '';
-      this.newRuleType = "driveline";
+      this.newRuleType = "max_year";
       this.newRuleValue = "";
       this.router.refresh();
     } catch (error) {

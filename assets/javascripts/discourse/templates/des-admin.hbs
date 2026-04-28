@@ -455,32 +455,36 @@
         <div class="form-row">
           <label>Rule Type</label>
           <select {{on "change" this.updateRuleType}}>
-            <option value="driveline">Driveline</option>
-            <option value="chassis">Chassis Type</option>
             <option value="max_year">Max Year</option>
             <option value="min_year">Min Year</option>
             <option value="max_age">Max Age</option>
             <option value="min_age">Min Age</option>
+            <option value="manufacturer">Manufacturer</option>
+            <option value="model">Model</option>
           </select>
         </div>
         <div class="form-row">
           <label>Allowed Values</label>
-          {{#if (eq this.newRuleType "driveline")}}
-            <select multiple {{on "change" this.updateRuleValueMulti}}>
-              {{#each this.drivelines as |d|}}
-                <option value={{d}}>{{d}}</option>
+          {{#if (eq this.newRuleType "manufacturer")}}
+            <select {{on "change" this.updateRuleValueText}}>
+              <option value="">Select manufacturer...</option>
+              {{#each this.model.approved_manufacturers as |mfr|}}
+                <option value={{mfr.name}}>{{mfr.name}}</option>
               {{/each}}
             </select>
-            <p class="field-help">Hold Ctrl/Cmd to select multiple.</p>
-          {{else if (eq this.newRuleType "chassis")}}
-            <select multiple {{on "change" this.updateRuleValueMulti}}>
-              {{#each this.chassisTypes as |c|}}
-                <option value={{c}}>{{c}}</option>
+          {{else if (eq this.newRuleType "model")}}
+            <select {{on "change" this.updateRuleValueText}}>
+              <option value="">Select model...</option>
+              {{#each this.model.approved_models as |m|}}
+                <option value={{m.id}}>{{m.manufacturer}} {{m.name}}</option>
               {{/each}}
             </select>
-            <p class="field-help">Hold Ctrl/Cmd to select multiple.</p>
           {{else}}
-            <input type="text" placeholder={{if (eq this.newRuleType "max_year") "e.g. 2023" (if (eq this.newRuleType "min_year") "e.g. 2018" "e.g. 16")}} value={{this.newRuleValue}} {{on "input" this.updateRuleValueText}} />
+            <input type="text"
+              placeholder={{if (eq this.newRuleType "max_year") "e.g. 2023" (if (eq this.newRuleType "min_year") "e.g. 2018" "e.g. 16")}}
+              value={{this.newRuleValue}}
+              {{on "input" this.updateRuleValueText}}
+            />
           {{/if}}
         </div>
         <button class="btn btn-primary" {{on "click" this.addGlobalRule}}>+ Add Rule</button>
