@@ -37,16 +37,14 @@ export default class VenuesController extends Controller {
     this.newVenue = { ...this.newVenue, [field]: e.target.value };
   }
 
-  @action toggleFacility(field) {
-    this.newVenue = { ...this.newVenue, [field]: !this.newVenue[field] };
-  }
-
   @action
-  async saveVenue() {
-    if (!this.newVenue.name) { alert("Name is required"); return; }
+  async saveVenue(formData) {
     this.isSaving = true;
     try {
-      await ajax("/des/venues.json", { type: "POST", data: this.newVenue });
+      await ajax("/des/venues.json", {
+        type: "POST",
+        data: { ...formData, created_by_organisation_id: this.newVenue?.created_by_organisation_id }
+      });
       this.showForm = false;
       this.router.refresh();
     } catch (error) {

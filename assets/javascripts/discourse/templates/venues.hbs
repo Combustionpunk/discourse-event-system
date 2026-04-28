@@ -18,7 +18,6 @@
     <div class="venue-form event-form-section">
       <h2>Suggest a Venue</h2>
       <p class="field-help">Your venue suggestion will be reviewed by an admin before appearing publicly.</p>
-
       <div class="org-form-field">
         <label>Organisation *</label>
         <select {{on "change" (fn this.updateField "created_by_organisation_id")}}>
@@ -27,98 +26,11 @@
           {{/each}}
         </select>
       </div>
-
-      <div class="org-form-field">
-        <label>Venue Name *</label>
-        <input type="text" value={{this.newVenue.name}} {{on "input" (fn this.updateField "name")}} placeholder="e.g. Midlands RC Circuit" />
-      </div>
-
-      <div class="org-form-field">
-        <label>Address</label>
-        <input type="text" value={{this.newVenue.address}} {{on "input" (fn this.updateField "address")}} placeholder="Full address" />
-      </div>
-
-      <div class="org-form-row">
-        <div class="org-form-field">
-          <label>Google Maps URL</label>
-          <input type="url" value={{this.newVenue.google_maps_url}} {{on "input" (fn this.updateField "google_maps_url")}} />
-        </div>
-        <div class="org-form-field">
-          <label>Website</label>
-          <input type="url" value={{this.newVenue.website}} {{on "input" (fn this.updateField "website")}} />
-        </div>
-      </div>
-
-      <div class="org-form-row">
-        <div class="org-form-field">
-          <label>Track Category</label>
-          <select {{on "change" (fn this.updateField "track_category")}}>
-            <option value="">Select...</option>
-            {{#each this.trackCategories as |tc|}}
-              <option value={{tc}}>{{tc}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="org-form-field">
-          <label>Track Surface</label>
-          <select {{on "change" (fn this.updateField "track_surface")}}>
-            <option value="">Select...</option>
-            {{#each this.trackSurfaces as |ts|}}
-              <option value={{ts}}>{{ts}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="org-form-field">
-          <label>Track Environment</label>
-          <select {{on "change" (fn this.updateField "track_environment")}}>
-            <option value="">Select...</option>
-            {{#each this.trackEnvironments as |te|}}
-              <option value={{te}}>{{te}}</option>
-            {{/each}}
-          </select>
-        </div>
-      </div>
-
-      <div class="org-form-field">
-        <label>Description</label>
-        <textarea placeholder="Describe the venue..." {{on "input" (fn this.updateField "description")}}>{{this.newVenue.description}}</textarea>
-      </div>
-
-      <div class="org-form-field">
-        <label>Parking Info</label>
-        <textarea placeholder="Parking details..." {{on "input" (fn this.updateField "parking_info")}}>{{this.newVenue.parking_info}}</textarea>
-      </div>
-
-      <div class="org-form-field">
-        <label>Access Notes</label>
-        <textarea placeholder="Any access notes..." {{on "input" (fn this.updateField "access_notes")}}>{{this.newVenue.access_notes}}</textarea>
-      </div>
-
-      <div class="org-form-field">
-        <label>Facilities</label>
-        <div class="venue-facilities-checkboxes">
-          <label><input type="checkbox" checked={{this.newVenue.has_portaloos}} {{on "change" (fn this.toggleFacility "has_portaloos")}} /> 🚽 Portaloos</label>
-          <label><input type="checkbox" checked={{this.newVenue.has_permanent_toilets}} {{on "change" (fn this.toggleFacility "has_permanent_toilets")}} /> 🚻 Permanent Toilets</label>
-          <label><input type="checkbox" checked={{this.newVenue.has_bar}} {{on "change" (fn this.toggleFacility "has_bar")}} /> 🍺 Bar</label>
-          <label><input type="checkbox" checked={{this.newVenue.has_showers}} {{on "change" (fn this.toggleFacility "has_showers")}} /> 🚿 Showers</label>
-          <label><input type="checkbox" checked={{this.newVenue.has_power_supply}} {{on "change" (fn this.toggleFacility "has_power_supply")}} /> ⚡ Power Supply</label>
-          <label><input type="checkbox" checked={{this.newVenue.has_water_supply}} {{on "change" (fn this.toggleFacility "has_water_supply")}} /> 💧 Water Supply</label>
-          <label><input type="checkbox" checked={{this.newVenue.has_camping}} {{on "change" (fn this.toggleFacility "has_camping")}} /> ⛺ Camping</label>
-        </div>
-      </div>
-
-
-      <div class="org-form-field">
-        <label>
-          <input type="checkbox" checked={{this.newVenue.is_shared}} {{on "change" (fn this.toggleFacility "is_shared")}} />
-          🤝 Shared venue - other clubs and organisations also use this venue
-        </label>
-        <p class="field-help">Leave unchecked if this venue is exclusive to your club</p>
-      </div>
-
-      <button class="btn btn-primary" {{on "click" this.saveVenue}} disabled={{this.isSaving}}>
-        {{if this.isSaving "Submitting..." "Submit Venue"}}
-      </button>
+      <DesVenueForm
+        @onSave={{this.saveVenue}}
+        @onCancel={{this.toggleForm}}
+        @saveLabel="Submit Venue"
+      />
     </div>
   {{/if}}
 
