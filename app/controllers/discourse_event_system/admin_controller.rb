@@ -47,6 +47,7 @@ module DiscourseEventSystem
         name: params[:name].present? ? params[:name].strip : model.name,
         year_released: params[:year_released].present? ? params[:year_released].to_i : model.year_released,
         driveline: params[:driveline].present? ? params[:driveline] : model.driveline,
+        scale: params[:scale].present? ? params[:scale] : model.scale,
         chassis_type: params[:chassis_type].present? ? params[:chassis_type] : model.chassis_type
       )
       render json: serialize_model(model)
@@ -107,6 +108,7 @@ module DiscourseEventSystem
         name: params[:name].to_s.strip,
         year_released: params[:year_released].present? ? params[:year_released].to_i : nil,
         driveline: params[:driveline].presence,
+        scale: params[:scale].presence,
         chassis_type: params[:chassis_type].presence,
         status: 'approved',
         created_by: current_user.id
@@ -121,7 +123,9 @@ module DiscourseEventSystem
       model.update!(
         status: 'approved',
         year_released: params[:year_released].present? ? params[:year_released].to_i : nil,
-        driveline: params[:driveline].present? ? params[:driveline] : nil
+        driveline: params[:driveline].present? ? params[:driveline] : nil,
+        scale: params[:scale].present? ? params[:scale] : nil,
+        chassis_type: params[:chassis_type].present? ? params[:chassis_type] : nil
       )
       render json: { success: true }
     end
@@ -233,6 +237,7 @@ module DiscourseEventSystem
         manufacturer_id: model.manufacturer_id,
         year_released: model.year_released,
         driveline: model.driveline,
+        scale: model.scale,
         chassis_type: model.chassis_type,
         created_by: model.creator&.username,
         status: model.status

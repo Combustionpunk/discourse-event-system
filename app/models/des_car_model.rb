@@ -6,17 +6,18 @@ class DesCarModel < ActiveRecord::Base
   has_many :user_cars, class_name: 'DesUserCar', foreign_key: 'car_model_id'
 
   DRIVELINES = ['2WD', '4WD', 'FWD', 'Rear Motor'].freeze
+  SCALES = ['1/8', '1/10', '1/12', '1/28'].freeze
+
   CHASSIS_TYPES = [
-    '1/8 Buggy', '1/8 Truck',
-    '1/10 Buggy', '1/10 Stadium', '1/10 Short course',
-    '1/10 Touring Car', '1/10 Rally', '1/10 Pan car',
-    '1/12 Pan car', '1/28 Touring car', '1/28 Buggy', '1/28 Truck'
+    'Buggy', 'Truck', 'Stadium', 'Short Course',
+    'Touring Car', 'Rally', 'Pan Car', 'Drift'
   ].freeze
 
   validates :manufacturer_id, presence: true
   validates :name, presence: true
   validates :status, inclusion: { in: %w[pending approved rejected] }
   validates :driveline, inclusion: { in: DRIVELINES }, allow_nil: true
+  validates :scale, inclusion: { in: SCALES }, allow_nil: true
 
   scope :approved, -> { where(status: 'approved') }
   scope :pending, -> { where(status: 'pending') }

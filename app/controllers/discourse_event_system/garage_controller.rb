@@ -30,6 +30,7 @@ module DiscourseEventSystem
             friendly_name: c.display_name,
             manufacturer: c.manufacturer&.name || 'Unknown',
             model: c.car_model&.name || c.custom_model_name || 'Unknown',
+            scale: c.car_model&.scale,
             chassis_type: c.car_model&.chassis_type,
             driveline: c.effective_driveline,
             year_released: c.year_released,
@@ -44,7 +45,7 @@ module DiscourseEventSystem
       manufacturer = DesManufacturer.find(params[:manufacturer_id])
       models = DesCarModel.where(manufacturer_id: manufacturer.id, status: ['approved', 'pending']).order(:name)
       render json: {
-        models: models.map { |m| { id: m.id, name: m.name, year_released: m.year_released, driveline: m.driveline, chassis_type: m.chassis_type, status: m.status } }
+        models: models.map { |m| { id: m.id, name: m.name, year_released: m.year_released, driveline: m.driveline, scale: m.scale, chassis_type: m.chassis_type, status: m.status } }
       }
     end
 
@@ -103,6 +104,7 @@ module DiscourseEventSystem
         name: normalised_name,
         year_released: params[:year_released].present? ? params[:year_released].to_i : nil,
         driveline: params[:driveline].present? ? params[:driveline] : nil,
+        scale: params[:scale].present? ? params[:scale] : nil,
         chassis_type: params[:chassis_type].present? ? params[:chassis_type] : nil,
         status: 'pending',
         created_by: current_user.id
@@ -158,6 +160,7 @@ module DiscourseEventSystem
           name: car.car_model.name,
           year_released: car.car_model.year_released,
           driveline: car.car_model.driveline,
+          scale: car.car_model.scale,
           chassis_type: car.car_model.chassis_type,
           status: car.car_model.status
         } : nil,

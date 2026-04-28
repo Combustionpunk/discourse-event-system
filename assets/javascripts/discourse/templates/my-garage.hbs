@@ -100,6 +100,15 @@
               </select>
             </div>
             <div class="org-form-field">
+              <label>Scale</label>
+              <select {{on "change" (fn this.updateSuggestField "suggestModelScale")}}>
+                <option value="">Select scale...</option>
+                {{#each this.scales as |s|}}
+                  <option value={{s}}>{{s}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="org-form-field">
               <label>Chassis Type</label>
               <select {{on "change" (fn this.updateSuggestField "suggestModelChassisType")}}>
                 <option value="">Select chassis type...</option>
@@ -201,9 +210,15 @@
                     {{/unless}}
                   </span>
                 </div>
+                {{#if car.model.scale}}
+                  <div class="garage-car-row">
+                    <span class="garage-car-label">📏 Scale</span>
+                    <span>{{car.model.scale}}</span>
+                  </div>
+                {{/if}}
                 {{#if car.model.chassis_type}}
                   <div class="garage-car-row">
-                    <span class="garage-car-label">🏎️ Class</span>
+                    <span class="garage-car-label">🏎️ Chassis</span>
                     <span>{{car.model.chassis_type}}</span>
                   </div>
                 {{/if}}

@@ -184,6 +184,7 @@
               <div class="admin-org-meta">
                 <span>👤 Suggested by: {{model.created_by}}</span>
                 {{#if model.driveline}}<span>⚙️ {{model.driveline}}</span>{{/if}}
+                {{#if model.scale}}<span>📏 {{model.scale}}</span>{{/if}}
                 {{#if model.chassis_type}}<span>🚗 {{model.chassis_type}}</span>{{/if}}
               </div>
             </div>
@@ -238,6 +239,15 @@
               </select>
             </div>
             <div class="org-form-field">
+              <label>Scale</label>
+              <select {{on "change" (fn this.updateNewModel "scale")}}>
+                <option value="">Select...</option>
+                {{#each this.scales as |s|}}
+                  <option value={{s}}>{{s}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="org-form-field">
               <label>Chassis Type</label>
               <select {{on "change" (fn this.updateNewModel "chassis_type")}}>
                 <option value="">Select...</option>
@@ -288,6 +298,15 @@
                       </select>
                     </div>
                     <div class="org-form-field">
+                      <label>Scale</label>
+                      <select {{on "change" (fn this.updateEditField "scale")}}>
+                        <option value="">Select...</option>
+                        {{#each this.scales as |s|}}
+                          <option value={{s}} selected={{eq s this.editingModel.scale}}>{{s}}</option>
+                        {{/each}}
+                      </select>
+                    </div>
+                    <div class="org-form-field">
                       <label>Chassis Type</label>
                       <select {{on "change" (fn this.updateEditField "chassis_type")}}>
                         <option value="">Select...</option>
@@ -304,8 +323,9 @@
                 {{else}}
                   <div class="model-card-header">
                     <strong>{{model.name}}</strong>
+                    {{#if model.scale}}<span class="driveline-badge">📏 {{model.scale}}</span>{{/if}}
                     {{#if model.chassis_type}}
-                      <span class="driveline-badge">{{model.chassis_type}}</span>
+                      <span class="driveline-badge">🚗 {{model.chassis_type}}</span>
                     {{else}}
                       <span class="pending-tag">⚠️ No chassis</span>
                     {{/if}}

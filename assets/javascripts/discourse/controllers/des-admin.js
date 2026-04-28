@@ -9,14 +9,15 @@ export default class DesAdminController extends Controller {
   @service router;
   @tracked activeTab = "organisations";
   drivelines = ["2WD", "4WD", "FWD", "Rear Motor"];
-  chassisTypes = ["1/10 Buggy", "1/10 Stadium", "1/10 Short Course", "1/10 Truggy", "1/8 Buggy", "1/8 Truggy", "1/10 Rally", "Other"];
+  scales = ["1/8", "1/10", "1/12", "1/28"];
+  chassisTypes = ["Buggy", "Truck", "Stadium", "Short Course", "Touring Car", "Rally", "Pan Car", "Drift"];
 
   @action
   setTab(tab) {
     this.activeTab = tab;
   }
 
-  @tracked newModel = { manufacturer_id: "", name: "", year_released: "", driveline: "", chassis_type: "" };
+  @tracked newModel = { manufacturer_id: "", name: "", year_released: "", driveline: "", scale: "", chassis_type: "" };
   @tracked showAddModelForm = false;
 
   @action
@@ -40,7 +41,7 @@ export default class DesAdminController extends Controller {
         type: "POST",
         data: this.newModel,
       });
-      this.newModel = { manufacturer_id: "", name: "", year_released: "", driveline: "", chassis_type: "" };
+      this.newModel = { manufacturer_id: "", name: "", year_released: "", driveline: "", scale: "", chassis_type: "" };
       this.showAddModelForm = false;
       this.router.refresh();
     } catch (error) {
@@ -380,29 +381,41 @@ export default class DesAdminController extends Controller {
       return;
     }
 
+    const scaleOptions = ["1/8", "1/10", "1/12", "1/28"];
+    const scaleChoice = window.prompt(
+      "Scale for " + model.manufacturer + " " + model.name + ":\n\n" +
+      scaleOptions.map((s, i) => (i+1) + " = " + s).join("\n") +
+      "\n\nEnter number (1-4):",
+      model.scale ? (scaleOptions.indexOf(model.scale) + 1).toString() : "2"
+    );
+    if (scaleChoice === null) return;
+    const scale = scaleOptions[parseInt(scaleChoice) - 1];
+    if (!scale) {
+      alert("Invalid scale selection. Please enter a number between 1 and 4.");
+      return;
+    }
+
     const chassisOptions = [
-      "1/8 Buggy", "1/8 Truck",
-      "1/10 Buggy", "1/10 Stadium", "1/10 Short course",
-      "1/10 Touring Car", "1/10 Rally", "1/10 Pan car",
-      "1/12 Pan car", "1/28 Touring car", "1/28 Buggy", "1/28 Truck"
+      "Buggy", "Truck", "Stadium", "Short Course",
+      "Touring Car", "Rally", "Pan Car", "Drift"
     ];
     const chassisChoice = window.prompt(
       "Chassis type for " + model.manufacturer + " " + model.name + ":\n\n" +
       chassisOptions.map((c, i) => (i+1) + " = " + c).join("\n") +
-      "\n\nEnter number (1-12):",
-      model.chassis_type ? (chassisOptions.indexOf(model.chassis_type) + 1).toString() : "3"
+      "\n\nEnter number (1-8):",
+      model.chassis_type ? (chassisOptions.indexOf(model.chassis_type) + 1).toString() : "1"
     );
     if (chassisChoice === null) return;
     const chassisType = chassisOptions[parseInt(chassisChoice) - 1];
     if (!chassisType) {
-      alert("Invalid chassis selection. Please enter a number between 1 and 12.");
+      alert("Invalid chassis selection. Please enter a number between 1 and 8.");
       return;
     }
 
     try {
       await ajax("/des/admin/models/" + model.id + "/approve.json", {
         type: "POST",
-        data: { year_released: year, driveline: driveline, chassis_type: chassisType },
+        data: { year_released: year, driveline: driveline, scale: scale, chassis_type: chassisType },
       });
       this.router.refresh();
     } catch (error) {
@@ -454,6 +467,7 @@ export default class DesAdminController extends Controller {
           name: this.editingModel.name,
           year_released: this.editingModel.year_released,
           driveline: this.editingModel.driveline,
+          scale: this.editingModel.scale,
           chassis_type: this.editingModel.chassis_type,
         },
       });
