@@ -14,12 +14,14 @@ export default class OrganisationRoute extends Route {
         org.global_class_types = classTypesData.global_class_types;
         org.org_class_types = classTypesData.org_class_types;
         org.manufacturers = classTypesData.manufacturers;
+        org.approved_models = classTypesData.approved_models || [];
         org.drivelines = classTypesData.drivelines;
         org.chassis_types = classTypesData.chassis_types;
       } catch (e) {
         org.global_class_types = [];
         org.org_class_types = [];
         org.manufacturers = [];
+        org.approved_models = [];
         org.drivelines = [];
         org.chassis_types = [];
       }

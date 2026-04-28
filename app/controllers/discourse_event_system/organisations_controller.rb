@@ -89,10 +89,14 @@ module DiscourseEventSystem
       global = DesEventClassType.global
       org_types = DesEventClassType.for_organisation(@organisation.id).includes(:compatibility_rules)
       manufacturers = DesManufacturer.all.order(:name)
+      approved_models = DesCarModel.approved.includes(:manufacturer).map do |m|
+        { id: m.id, name: m.name, manufacturer: m.manufacturer&.name }
+      end
       render json: {
         global_class_types: global.map { |ct| serialize_class_type(ct) },
         org_class_types: org_types.map { |ct| serialize_class_type_with_rules(ct) },
         manufacturers: manufacturers.map { |m| { id: m.id, name: m.name, status: m.status } },
+        approved_models: approved_models,
         drivelines: DesCarModel::DRIVELINES,
         chassis_types: DesCarModel::CHASSIS_TYPES
       }
