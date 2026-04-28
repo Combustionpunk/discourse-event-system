@@ -35,6 +35,12 @@
     <button class="btn {{if (eq this.activeTab 'cleanup') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabCleanup}}>
       🔧 Cleanup
     </button>
+    <button class="btn {{if (eq this.activeTab 'scales') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabScales}}>
+      📏 Scales
+    </button>
+    <button class="btn {{if (eq this.activeTab 'chassis_types') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabChassisTypes}}>
+      🚗 Chassis Types
+    </button>
   </div>
 
   {{!-- ORGANISATIONS TAB --}}
@@ -505,6 +511,44 @@
           </div>
         {{/if}}
       {{/each}}
+    </div>
+  {{/if}}
+
+  {{!-- SCALES TAB --}}
+  {{#if (eq this.activeTab "scales")}}
+    <div class="des-admin-section">
+      <h2>📏 Scales</h2>
+      <div class="admin-list">
+        {{#each this.scalesList as |scale|}}
+          <div class="admin-list-item">
+            <span>{{scale.name}}</span>
+            <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteScale scale)}}>🗑️ Delete</button>
+          </div>
+        {{/each}}
+      </div>
+      <div class="admin-add-form">
+        <input type="text" placeholder="New scale (e.g. 1/5)" value={{this.newScaleName}} {{on "input" (fn this.updateAdminField "newScaleName")}} />
+        <button class="btn btn-primary" {{on "click" this.addScale}}>➕ Add Scale</button>
+      </div>
+    </div>
+  {{/if}}
+
+  {{!-- CHASSIS TYPES TAB --}}
+  {{#if (eq this.activeTab "chassis_types")}}
+    <div class="des-admin-section">
+      <h2>🚗 Chassis Types</h2>
+      <div class="admin-list">
+        {{#each this.chassisTypesList as |ct|}}
+          <div class="admin-list-item">
+            <span>{{ct.name}}</span>
+            <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteChassisType ct)}}>🗑️ Delete</button>
+          </div>
+        {{/each}}
+      </div>
+      <div class="admin-add-form">
+        <input type="text" placeholder="New chassis type (e.g. Crawler)" value={{this.newChassisTypeName}} {{on "input" (fn this.updateAdminField "newChassisTypeName")}} />
+        <button class="btn btn-primary" {{on "click" this.addChassisType}}>➕ Add Chassis Type</button>
+      </div>
     </div>
   {{/if}}
 

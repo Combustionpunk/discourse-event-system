@@ -153,6 +153,12 @@ DiscourseEventSystem::Engine.routes.draw do
   put "/des/admin/models/:id" => "admin#update_model"
   post "/des/admin/rules" => "admin#create_rule"
   delete "/des/admin/rules/:id" => "admin#destroy_rule"
+  get "/des/admin/scales" => "admin#scales"
+  post "/des/admin/scales" => "admin#create_scale"
+  delete "/des/admin/scales/:id" => "admin#destroy_scale"
+  get "/des/admin/chassis-types" => "admin#chassis_types"
+  post "/des/admin/chassis-types" => "admin#create_chassis_type"
+  delete "/des/admin/chassis-types/:id" => "admin#destroy_chassis_type"
 end
 
 Discourse::Application.routes.draw do

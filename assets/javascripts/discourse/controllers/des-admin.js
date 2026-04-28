@@ -9,8 +9,12 @@ export default class DesAdminController extends Controller {
   @service router;
   @tracked activeTab = "organisations";
   drivelines = ["2WD", "4WD", "FWD", "Rear Motor"];
-  scales = ["1/8", "1/10", "1/12", "1/28"];
-  chassisTypes = ["Buggy", "Truck", "Stadium", "Short Course", "Touring Car", "Rally", "Pan Car", "Drift"];
+  @tracked scales = [];
+  @tracked chassisTypes = [];
+  @tracked scalesList = [];
+  @tracked chassisTypesList = [];
+  @tracked newScaleName = "";
+  @tracked newChassisTypeName = "";
 
   @action
   setTab(tab) {
@@ -56,7 +60,23 @@ export default class DesAdminController extends Controller {
   setTabManufacturers() { this.activeTab = "manufacturers"; }
 
   @action
-  setTabModels() { this.activeTab = "models"; }
+  async setTabModels() {
+    this.activeTab = "models";
+    await this.loadScalesAndChassisTypes();
+  }
+
+  async loadScalesAndChassisTypes() {
+    try {
+      const [scalesResp, chassisResp] = await Promise.all([
+        ajax("/des/admin/scales.json"),
+        ajax("/des/admin/chassis-types.json"),
+      ]);
+      this.scales = scalesResp.scales.map(s => s.name);
+      this.chassisTypes = chassisResp.chassis_types.map(c => c.name);
+    } catch {
+      // fall back to empty if endpoints unavailable
+    }
+  }
 
   @action
   setTabRules() { this.activeTab = "rules"; }
@@ -92,8 +112,66 @@ export default class DesAdminController extends Controller {
     } catch (error) { popupAjaxError(error); }
   }
 
+  @action
+  async setTabScales() {
+    this.activeTab = "scales";
+    try {
+      const response = await ajax("/des/admin/scales.json");
+      this.scalesList = response.scales;
+    } catch { this.scalesList = []; }
+  }
 
+  @action
+  async setTabChassisTypes() {
+    this.activeTab = "chassis_types";
+    try {
+      const response = await ajax("/des/admin/chassis-types.json");
+      this.chassisTypesList = response.chassis_types;
+    } catch { this.chassisTypesList = []; }
+  }
 
+  @action
+  updateAdminField(field, e) {
+    this[field] = e.target.value;
+  }
+
+  @action
+  async addScale() {
+    if (!this.newScaleName.trim()) return;
+    try {
+      const scale = await ajax("/des/admin/scales.json", { type: "POST", data: { name: this.newScaleName.trim() } });
+      this.scalesList = [...this.scalesList, scale];
+      this.newScaleName = "";
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async deleteScale(scale) {
+    if (!window.confirm(`Delete scale "${scale.name}"?`)) return;
+    try {
+      await ajax(`/des/admin/scales/${scale.id}.json`, { type: "DELETE" });
+      this.scalesList = this.scalesList.filter(s => s.id !== scale.id);
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async addChassisType() {
+    if (!this.newChassisTypeName.trim()) return;
+    try {
+      const ct = await ajax("/des/admin/chassis-types.json", { type: "POST", data: { name: this.newChassisTypeName.trim() } });
+      this.chassisTypesList = [...this.chassisTypesList, ct];
+      this.newChassisTypeName = "";
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async deleteChassisType(ct) {
+    if (!window.confirm(`Delete chassis type "${ct.name}"?`)) return;
+    try {
+      await ajax(`/des/admin/chassis-types/${ct.id}.json`, { type: "DELETE" });
+      this.chassisTypesList = this.chassisTypesList.filter(c => c.id !== ct.id);
+    } catch (error) { popupAjaxError(error); }
+  }
 
   @action
   async approveOrganisation(org) {
@@ -381,7 +459,7 @@ export default class DesAdminController extends Controller {
       return;
     }
 
-    const scaleOptions = ["1/8", "1/10", "1/12", "1/28"];
+    const scaleOptions = this.scales.length ? this.scales : ["1/8", "1/10", "1/12", "1/28"];
     const scaleChoice = window.prompt(
       "Scale for " + model.manufacturer + " " + model.name + ":\n\n" +
       scaleOptions.map((s, i) => (i+1) + " = " + s).join("\n") +
@@ -395,7 +473,7 @@ export default class DesAdminController extends Controller {
       return;
     }
 
-    const chassisOptions = [
+    const chassisOptions = this.chassisTypes.length ? this.chassisTypes : [
       "Buggy", "Truck", "Stadium", "Short Course",
       "Touring Car", "Rally", "Pan Car", "Drift"
     ];

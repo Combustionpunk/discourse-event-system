@@ -26,8 +26,8 @@ export default class MyGarageController extends Controller {
   };
 
   drivelines = ["2WD", "4WD", "FWD", "Rear Motor"];
-  scales = ["1/8", "1/10", "1/12", "1/28"];
-  chassisTypes = ["Buggy", "Truck", "Stadium", "Short Course", "Touring Car", "Rally", "Pan Car", "Drift"];
+  @tracked scales = [];
+  @tracked chassisTypes = [];
   @tracked suggestModelScale = "";
   @tracked suggestModelChassisType = "";
   @tracked editingCarId = null;
@@ -35,9 +35,25 @@ export default class MyGarageController extends Controller {
   @tracked editModels = [];
 
   @action
-  toggleAddForm() {
+  async toggleAddForm() {
     this.showAddForm = !this.showAddForm;
     this.resetForm();
+    if (this.showAddForm) {
+      await this.loadScalesAndChassisTypes();
+    }
+  }
+
+  async loadScalesAndChassisTypes() {
+    try {
+      const [scalesResp, chassisResp] = await Promise.all([
+        ajax("/des/admin/scales.json"),
+        ajax("/des/admin/chassis-types.json"),
+      ]);
+      this.scales = scalesResp.scales.map(s => s.name);
+      this.chassisTypes = chassisResp.chassis_types.map(c => c.name);
+    } catch {
+      // fall back to empty if endpoints unavailable
+    }
   }
 
   resetForm() {

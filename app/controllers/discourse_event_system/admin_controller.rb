@@ -186,6 +186,41 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def scales
+      render json: { scales: DesScale.order(:position, :name).map { |s| { id: s.id, name: s.name } } }
+    end
+
+    def create_scale
+      scale = DesScale.create!(name: params[:name].to_s.strip)
+      render json: { id: scale.id, name: scale.name }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_scale
+      DesScale.find(params[:id]).destroy!
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def chassis_types
+      render json: { chassis_types: DesChassisType.order(:position, :name).map { |c| { id: c.id, name: c.name } } }
+    end
+
+    def create_chassis_type
+      ct = DesChassisType.create!(name: params[:name].to_s.strip)
+      render json: { id: ct.id, name: ct.name }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_chassis_type
+      DesChassisType.find(params[:id]).destroy!
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
 
     private
 
