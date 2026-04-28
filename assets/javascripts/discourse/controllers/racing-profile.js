@@ -38,9 +38,27 @@ export default class RacingProfileController extends Controller {
   @tracked guardianSearchResults = [];
   @tracked guardianError = null;
 
+  // Transponders
+  @tracked transponders = [];
+  @tracked newTransponderCode = "";
+  @tracked newTransponderNotes = "";
+  @tracked editingTransponderId = null;
+  @tracked editTransponderCode = "";
+  @tracked editTransponderNotes = "";
+
   setup() {
     this.loadFamilyMembers();
     this.loadGuardian();
+    this.loadTransponders();
+  }
+
+  async loadTransponders() {
+    try {
+      const response = await ajax("/des/transponders.json");
+      this.transponders = response.transponders;
+    } catch {
+      this.transponders = [];
+    }
   }
 
   async loadFamilyMembers() {
@@ -263,4 +281,56 @@ export default class RacingProfileController extends Controller {
     }
   }
 
+  // Transponder actions
+  @action updateNewTransponderCode(e) { this.newTransponderCode = e.target.value; }
+  @action updateNewTransponderNotes(e) { this.newTransponderNotes = e.target.value; }
+
+  @action
+  async addTransponder() {
+    if (!this.newTransponderCode.trim()) {
+      alert("Please enter a transponder long code");
+      return;
+    }
+    try {
+      const t = await ajax("/des/transponders.json", {
+        type: "POST",
+        data: { long_code: this.newTransponderCode.trim(), notes: this.newTransponderNotes.trim() }
+      });
+      this.transponders = [...this.transponders, t];
+      this.newTransponderCode = "";
+      this.newTransponderNotes = "";
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  startEditTransponder(t) {
+    this.editingTransponderId = t.id;
+    this.editTransponderCode = t.long_code;
+    this.editTransponderNotes = t.notes || "";
+  }
+
+  @action cancelEditTransponder() { this.editingTransponderId = null; }
+  @action updateEditTransponderCode(e) { this.editTransponderCode = e.target.value; }
+  @action updateEditTransponderNotes(e) { this.editTransponderNotes = e.target.value; }
+
+  @action
+  async saveTransponder(t) {
+    try {
+      const updated = await ajax(`/des/transponders/${t.id}.json`, {
+        type: "PUT",
+        data: { long_code: this.editTransponderCode.trim(), notes: this.editTransponderNotes.trim() }
+      });
+      this.transponders = this.transponders.map(tr => tr.id === t.id ? updated : tr);
+      this.editingTransponderId = null;
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async deleteTransponder(t) {
+    if (!window.confirm(`Delete transponder #${t.shortcode} (${t.long_code})? This will also remove it from any cars using it.`)) return;
+    try {
+      await ajax(`/des/transponders/${t.id}.json`, { type: "DELETE" });
+      this.transponders = this.transponders.filter(tr => tr.id !== t.id);
+    } catch (error) { popupAjaxError(error); }
+  }
 }

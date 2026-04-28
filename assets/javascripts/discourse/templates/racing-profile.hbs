@@ -65,6 +65,65 @@
   </div>
 
 
+  {{!-- Transponder Registry --}}
+  <div class="profile-section" style="margin-top: 24px;">
+    <h2>📡 My Transponders</h2>
+    <p class="field-help">Your transponder registry. Use shortcodes when entering transponders on your cars.</p>
+
+    {{#if this.transponders.length}}
+      <div class="transponder-list">
+        {{#each this.transponders as |t|}}
+          <div class="admin-org-card">
+            {{#if (eq this.editingTransponderId t.id)}}
+              <div class="org-form-row">
+                <div class="org-form-field">
+                  <label>Long Code</label>
+                  <input type="text" value={{this.editTransponderCode}} {{on "input" this.updateEditTransponderCode}} />
+                </div>
+                <div class="org-form-field">
+                  <label>Notes</label>
+                  <input type="text" value={{this.editTransponderNotes}} placeholder="e.g. blue one" {{on "input" this.updateEditTransponderNotes}} />
+                </div>
+              </div>
+              <div class="admin-org-actions">
+                <button class="btn btn-primary btn-small" {{on "click" (fn this.saveTransponder t)}}>💾 Save</button>
+                <button class="btn btn-default btn-small" {{on "click" this.cancelEditTransponder}}>✕ Cancel</button>
+              </div>
+            {{else}}
+              <div class="admin-org-info">
+                <strong>#{{t.shortcode}} — {{t.long_code}}</strong>
+                {{#if t.notes}}<span class="field-help"> ({{t.notes}})</span>{{/if}}
+              </div>
+              <div class="admin-org-actions">
+                <button class="btn btn-default btn-small" {{on "click" (fn this.startEditTransponder t)}}>✏️ Edit</button>
+                <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteTransponder t)}}>🗑 Delete</button>
+              </div>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="field-help">No transponders registered yet.</p>
+    {{/if}}
+
+    <div class="transponder-add-form" style="margin-top: 16px;">
+      <h3>Add Transponder</h3>
+      <div class="org-form-row">
+        <div class="org-form-field">
+          <label>Long Code *</label>
+          <input type="text" placeholder="e.g. 7456985" value={{this.newTransponderCode}} {{on "input" this.updateNewTransponderCode}} />
+        </div>
+        <div class="org-form-field">
+          <label>Notes</label>
+          <input type="text" placeholder="e.g. blue one" value={{this.newTransponderNotes}} {{on "input" this.updateNewTransponderNotes}} />
+        </div>
+        <div class="org-form-field" style="justify-content: flex-end;">
+          <button class="btn btn-primary" {{on "click" this.addTransponder}}>➕ Add Transponder</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   {{!-- My Parent/Guardian Section --}}
   <div class="profile-section" style="margin-top: 24px;">
     <h2>🛡️ My Parent/Guardian</h2>
