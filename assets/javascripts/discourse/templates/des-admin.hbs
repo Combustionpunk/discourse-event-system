@@ -444,7 +444,21 @@
                     {{#if ct.max_age}}<span>👤 Age ≤{{ct.max_age}}</span>{{/if}}
                   </div>
                 </div>
+                <div class="admin-org-actions">
+                  <button class="btn btn-default btn-small" {{on "click" (fn this.startEditClassType ct)}}>✏️ Edit</button>
+                  <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteOrgClassType ct group.organisation_id)}}>🗑 Delete</button>
+                </div>
               </div>
+              {{#if (eq this.editingClassTypeId ct.id)}}
+                <DesClassTypeForm
+                  @classType={{ct}}
+                  @manufacturers={{this.model.approved_manufacturers}}
+                  @models={{this.model.approved_models}}
+                  @onSave={{this.saveEditClassType}}
+                  @onCancel={{this.cancelEditClassType}}
+                  @saveLabel="💾 Save Changes"
+                />
+              {{/if}}
             {{/each}}
           {{/if}}
         {{/each}}

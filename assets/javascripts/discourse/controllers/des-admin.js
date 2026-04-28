@@ -661,4 +661,15 @@ export default class DesAdminController extends Controller {
       popupAjaxError(error);
     }
   }
+
+  @action
+  async deleteOrgClassType(ct, organisationId) {
+    if (!window.confirm(`Delete class type "${ct.name}"?`)) return;
+    try {
+      await ajax(`/des/organisations/${organisationId}/class-types/${ct.id}.json`, { type: "DELETE" });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
 }
