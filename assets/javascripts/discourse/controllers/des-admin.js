@@ -607,6 +607,40 @@ export default class DesAdminController extends Controller {
     this.router.refresh();
   }
 
+  @tracked editingClassTypeId = null;
+
+  @action
+  startEditClassType(ct) {
+    this.editingClassTypeId = ct.id;
+  }
+
+  @action
+  cancelEditClassType() {
+    this.editingClassTypeId = null;
+  }
+
+  @action
+  async saveEditClassType(formData) {
+    await ajax(`/des/admin/class-types/${this.editingClassTypeId}.json`, {
+      type: "PUT",
+      data: {
+        name: formData.name,
+        track_environment: formData.track_environment || null,
+        scale: formData.scale || null,
+        chassis_types: formData.chassis_types,
+        drivelines: formData.drivelines,
+        min_year: formData.min_year || null,
+        max_year: formData.max_year || null,
+        manufacturer: formData.manufacturer || null,
+        model_id: formData.model_id || null,
+        min_age: formData.min_age || null,
+        max_age: formData.max_age || null,
+      },
+    });
+    this.editingClassTypeId = null;
+    this.router.refresh();
+  }
+
   @action
   async deleteClassType(ct) {
     if (!window.confirm(`Delete class type "${ct.name}"?`)) return;

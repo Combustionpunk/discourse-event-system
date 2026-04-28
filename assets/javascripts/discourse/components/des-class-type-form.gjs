@@ -4,7 +4,7 @@ import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { on } from "@ember/modifier";
-import { fn } from "@ember/helper";
+import { concat, fn } from "@ember/helper";
 import { eq } from "truth-helpers";
 
 export default class DesClassTypeForm extends Component {
@@ -64,9 +64,18 @@ export default class DesClassTypeForm extends Component {
     }
   }
 
+  get filteredModels() {
+    if (!this.formData.manufacturer) return this.args.models || [];
+    return (this.args.models || []).filter(m => m.manufacturer === this.formData.manufacturer);
+  }
+
   @action
   updateField(field, e) {
-    this.formData = { ...this.formData, [field]: e.target.value };
+    const newData = { ...this.formData, [field]: e.target.value };
+    if (field === 'manufacturer') {
+      newData.model_id = "";
+    }
+    this.formData = newData;
   }
 
   @action
@@ -147,7 +156,7 @@ export default class DesClassTypeForm extends Component {
           <select {{on "change" (fn this.updateField "min_year")}}>
             <option value="">Any</option>
             {{#each this.yearOptions as |y|}}
-              <option value={{y}} selected={{eq this.formData.min_year y}}>{{y}}</option>
+              <option value={{y}} selected={{eq (concat this.formData.min_year "") (concat y "")}}>{{y}}</option>
             {{/each}}
           </select>
         </div>
@@ -156,7 +165,7 @@ export default class DesClassTypeForm extends Component {
           <select {{on "change" (fn this.updateField "max_year")}}>
             <option value="">Any</option>
             {{#each this.yearOptions as |y|}}
-              <option value={{y}} selected={{eq this.formData.max_year y}}>{{y}}</option>
+              <option value={{y}} selected={{eq (concat this.formData.max_year "") (concat y "")}}>{{y}}</option>
             {{/each}}
           </select>
         </div>
@@ -176,8 +185,8 @@ export default class DesClassTypeForm extends Component {
           <label>Model</label>
           <select {{on "change" (fn this.updateField "model_id")}}>
             <option value="">Any</option>
-            {{#each @models as |m|}}
-              <option value={{m.id}} selected={{eq this.formData.model_id m.id}}>{{m.manufacturer}} {{m.name}}</option>
+            {{#each this.filteredModels as |m|}}
+              <option value={{m.id}} selected={{eq (concat this.formData.model_id "") (concat m.id "")}}>{{m.manufacturer}} {{m.name}}</option>
             {{/each}}
           </select>
         </div>
@@ -190,7 +199,7 @@ export default class DesClassTypeForm extends Component {
           <select {{on "change" (fn this.updateField "min_age")}}>
             <option value="">Any</option>
             {{#each this.ageOptions as |a|}}
-              <option value={{a}} selected={{eq this.formData.min_age a}}>{{a}}</option>
+              <option value={{a}} selected={{eq (concat this.formData.min_age "") (concat a "")}}>{{a}}</option>
             {{/each}}
           </select>
         </div>
@@ -199,7 +208,7 @@ export default class DesClassTypeForm extends Component {
           <select {{on "change" (fn this.updateField "max_age")}}>
             <option value="">Any</option>
             {{#each this.ageOptions as |a|}}
-              <option value={{a}} selected={{eq this.formData.max_age a}}>{{a}}</option>
+              <option value={{a}} selected={{eq (concat this.formData.max_age "") (concat a "")}}>{{a}}</option>
             {{/each}}
           </select>
         </div>
