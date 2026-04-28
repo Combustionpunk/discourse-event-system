@@ -100,6 +100,7 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/memberships/:membership_id/family-setup" => "frontend#index"
   get "/des/organisations/:id/class-types" => "organisations#class_types"
   post "/des/organisations/:id/class-types" => "organisations#create_class_type"
+  put "/des/organisations/:id/class-types/:class_type_id" => "organisations#update_class_type"
   delete "/des/organisations/:id/class-types/:class_type_id" => "organisations#destroy_class_type"
   post "/des/organisations/:id/class-types/:class_type_id/rules" => "organisations#create_class_type_rule"
   delete "/des/organisations/:id/class-types/:class_type_id/rules/:rule_id" => "organisations#destroy_class_type_rule"

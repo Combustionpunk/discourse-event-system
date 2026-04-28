@@ -389,13 +389,30 @@ export default class OrganisationController extends Controller {
     return Object.values(groups);
   }
 
+  @tracked showAddOrgClassTypeForm = false;
+  @tracked editingOrgClassTypeId = null;
+
+  @action
+  toggleAddOrgClassTypeForm() {
+    this.showAddOrgClassTypeForm = !this.showAddOrgClassTypeForm;
+  }
+
+  @action
+  startEditOrgClassType(ct) {
+    this.editingOrgClassTypeId = ct.id;
+  }
+
+  @action
+  cancelEditOrgClassType() {
+    this.editingOrgClassTypeId = null;
+  }
+
   @action
   async createOrgClassType(formData) {
     await ajax("/des/organisations/" + this.model.id + "/class-types.json", {
       type: "POST",
       data: {
         name: formData.name,
-        description: formData.description,
         track_environment: formData.track_environment || null,
         scale: formData.scale || null,
         chassis_types: formData.chassis_types,
@@ -408,108 +425,37 @@ export default class OrganisationController extends Controller {
         max_age: formData.max_age || null,
       },
     });
+    this.showAddOrgClassTypeForm = false;
+    this.router.refresh();
+  }
+
+  @action
+  async saveEditOrgClassType(formData) {
+    await ajax("/des/organisations/" + this.model.id + "/class-types/" + this.editingOrgClassTypeId + ".json", {
+      type: "PUT",
+      data: {
+        name: formData.name,
+        track_environment: formData.track_environment || null,
+        scale: formData.scale || null,
+        chassis_types: formData.chassis_types,
+        drivelines: formData.drivelines,
+        min_year: formData.min_year || null,
+        max_year: formData.max_year || null,
+        manufacturer: formData.manufacturer || null,
+        model_id: formData.model_id || null,
+        min_age: formData.min_age || null,
+        max_age: formData.max_age || null,
+      },
+    });
+    this.editingOrgClassTypeId = null;
     this.router.refresh();
   }
 
   @action
   async deleteClassType(classTypeId) {
-    if (!window.confirm("Delete this class type and all its rules?")) return;
+    if (!window.confirm("Delete this class type?")) return;
     try {
       await ajax("/des/organisations/" + this.model.id + "/class-types/" + classTypeId + ".json", {
-        type: "DELETE",
-      });
-      this.router.refresh();
-    } catch (error) {
-      popupAjaxError(error);
-    }
-  }
-
-  ruleTypeLabel(ruleType) {
-    const labels = {
-      driveline: 'Driveline',
-      chassis: 'Chassis',
-      manufacturer: 'Manufacturer',
-      max_year: 'Max Year',
-      min_year: 'Min Year',
-      max_age: 'Max Age',
-      min_age: 'Min Age',
-      model: 'Model'
-    };
-    return labels[ruleType] || ruleType;
-  }
-
-  get yearOptions() {
-    const years = [];
-    for (let y = new Date().getFullYear(); y >= 1970; y--) {
-      years.push(y);
-    }
-    return years;
-  }
-
-  @action
-  onRuleTypeChange(classTypeId) {
-    const id = String(classTypeId);
-    const typeSelect = document.querySelector('.rule-type-select[data-class-id="' + id + '"]');
-    const ruleType = typeSelect?.value;
-
-    // Hide all containers for this class
-    document.querySelectorAll('.rule-value-container[data-class-id="' + id + '"]').forEach(el => {
-      el.style.display = 'none';
-    });
-
-    // Show the relevant one
-    if (ruleType === 'driveline') {
-      document.querySelector('.rule-value-container--driveline[data-class-id="' + id + '"]').style.display = '';
-    } else if (ruleType === 'chassis') {
-      document.querySelector('.rule-value-container--chassis[data-class-id="' + id + '"]').style.display = '';
-    } else if (ruleType === 'manufacturer') {
-      document.querySelector('.rule-value-container--manufacturer[data-class-id="' + id + '"]').style.display = '';
-    } else if (ruleType === 'max_year' || ruleType === 'min_year') {
-      document.querySelector('.rule-value-container--year[data-class-id="' + id + '"]').style.display = '';
-    } else if (ruleType === 'max_age' || ruleType === 'min_age') {
-      document.querySelector('.rule-value-container--age[data-class-id="' + id + '"]').style.display = '';
-    }
-  }
-
-  @action
-  async addClassTypeRule(classTypeId) {
-    const id = String(classTypeId);
-    const typeSelect = document.querySelector('.rule-type-select[data-class-id="' + id + '"]');
-    const ruleType = typeSelect?.value;
-    let ruleValue = '';
-
-    if (ruleType === 'driveline' || ruleType === 'chassis' || ruleType === 'manufacturer') {
-      const multiSelect = document.querySelector('.rule-value-container[style=""] .rule-multiselect[data-class-id="' + id + '"], .rule-value-container:not([style*="none"]) .rule-multiselect[data-class-id="' + id + '"]');
-      if (multiSelect) {
-        const selected = Array.from(multiSelect.selectedOptions).map(o => o.value);
-        ruleValue = selected.join(',');
-      }
-    } else if (ruleType === 'max_year' || ruleType === 'min_year') {
-      const yearSelect = document.querySelector('.rule-year-select[data-class-id="' + id + '"]');
-      ruleValue = yearSelect?.value;
-    } else if (ruleType === 'max_age' || ruleType === 'min_age') {
-      const ageInput = document.querySelector('.rule-age-input[data-class-id="' + id + '"]');
-      ruleValue = ageInput?.value;
-    }
-
-    if (!ruleValue) { alert("Please select a value for the rule."); return; }
-
-    try {
-      await ajax("/des/organisations/" + this.model.id + "/class-types/" + classTypeId + "/rules.json", {
-        type: "POST",
-        data: { rule_type: ruleType, rule_value: ruleValue },
-      });
-      this.router.refresh();
-    } catch (error) {
-      popupAjaxError(error);
-    }
-  }
-
-  @action
-  async deleteClassTypeRule(classTypeId, ruleId) {
-    if (!window.confirm("Delete this rule?")) return;
-    try {
-      await ajax("/des/organisations/" + this.model.id + "/class-types/" + classTypeId + "/rules/" + ruleId + ".json", {
         type: "DELETE",
       });
       this.router.refresh();

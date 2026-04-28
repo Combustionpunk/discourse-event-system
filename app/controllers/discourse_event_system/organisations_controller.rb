@@ -107,9 +107,36 @@ module DiscourseEventSystem
         track_environment: params[:track_environment].presence,
         scale: params[:scale].presence,
         chassis_types: params[:chassis_types].present? ? Array(params[:chassis_types]).join(',') : nil,
-        drivelines: params[:drivelines].present? ? Array(params[:drivelines]).join(',') : nil
+        drivelines: params[:drivelines].present? ? Array(params[:drivelines]).join(',') : nil,
+        min_year: params[:min_year].presence,
+        max_year: params[:max_year].presence,
+        manufacturer: params[:manufacturer].presence,
+        model_id: params[:model_id].presence,
+        min_age: params[:min_age].presence,
+        max_age: params[:max_age].presence
       )
       render json: serialize_class_type_with_rules(ct), status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def update_class_type
+      ensure_organisation_admin!
+      ct = DesEventClassType.find_by!(id: params[:class_type_id], organisation_id: @organisation.id)
+      ct.update!(
+        name: params[:name].present? ? params[:name].to_s.strip : ct.name,
+        track_environment: params.key?(:track_environment) ? params[:track_environment].presence : ct.track_environment,
+        scale: params.key?(:scale) ? params[:scale].presence : ct.scale,
+        chassis_types: params.key?(:chassis_types) ? (params[:chassis_types].present? ? Array(params[:chassis_types]).join(',') : nil) : ct.chassis_types,
+        drivelines: params.key?(:drivelines) ? (params[:drivelines].present? ? Array(params[:drivelines]).join(',') : nil) : ct.drivelines,
+        min_year: params.key?(:min_year) ? params[:min_year].presence : ct.min_year,
+        max_year: params.key?(:max_year) ? params[:max_year].presence : ct.max_year,
+        manufacturer: params.key?(:manufacturer) ? params[:manufacturer].presence : ct.manufacturer,
+        model_id: params.key?(:model_id) ? params[:model_id].presence : ct.model_id,
+        min_age: params.key?(:min_age) ? params[:min_age].presence : ct.min_age,
+        max_age: params.key?(:max_age) ? params[:max_age].presence : ct.max_age
+      )
+      render json: serialize_class_type_with_rules(ct)
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
     end
@@ -199,13 +226,19 @@ module DiscourseEventSystem
         track_environment: ct.track_environment,
         scale: ct.scale,
         chassis_types: ct.chassis_types_list,
-        drivelines: ct.drivelines_list
+        drivelines: ct.drivelines_list,
+        min_year: ct.min_year,
+        max_year: ct.max_year,
+        manufacturer: ct.manufacturer,
+        model_id: ct.model_id,
+        min_age: ct.min_age,
+        max_age: ct.max_age
       }
     end
 
     def serialize_class_type_with_rules(ct)
       serialize_class_type(ct).merge(
-        rules: ct.compatibility_rules.map { |r| serialize_rule(r) }
+        rules: ct.compatibility_rules.map { |r| { id: r.id, rule_type: r.rule_type, rule_value: r.rule_value } }
       )
     end
 

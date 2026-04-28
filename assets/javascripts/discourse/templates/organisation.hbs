@@ -464,107 +464,80 @@
   {{#if (eq this.activeTab 'rules')}}
     <div class="manage-section">
       <h2>Organisation Class Types</h2>
-      <p class="field-help">Create custom class types for your organisation's events with their own eligibility rules.</p>
+      <p class="field-help">Create custom class types for your organisation's events. Leave fields blank to allow any value.</p>
 
-      <div class="admin-rule-form">
-        <h3>Create New Class Type</h3>
+      <button class="btn btn-primary btn-small" {{on "click" this.toggleAddOrgClassTypeForm}}>
+        {{if this.showAddOrgClassTypeForm "✕ Cancel" "+ Add Class Type"}}
+      </button>
+
+      {{#if this.showAddOrgClassTypeForm}}
         <DesClassTypeForm
           @manufacturers={{this.model.manufacturers}}
           @models={{this.model.approved_models}}
           @onSave={{this.createOrgClassType}}
+          @onCancel={{this.toggleAddOrgClassTypeForm}}
           @saveLabel="+ Create Class"
         />
-      </div>
-
-      {{#if this.model.org_class_types.length}}
-        {{#each this.model.org_class_types as |ct|}}
-          <div class="rules-class-group">
-            <div class="org-section-header">
-              <h4>{{ct.name}} {{#if ct.description}}<span class="field-help">— {{ct.description}}</span>{{/if}}</h4>
-              <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteClassType ct.id)}}>
-                🗑 Delete Class
-              </button>
-            </div>
-
-            {{#each ct.rules as |rule|}}
-              <div class="rule-row">
-                <span class="rule-type-badge rule-type-badge--{{rule.rule_type}}">{{this.ruleTypeLabel rule.rule_type}}</span>
-                <span class="rule-value">{{rule.rule_value}}</span>
-                <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteClassTypeRule ct.id rule.id)}}>
-                  🗑
-                </button>
-              </div>
-            {{/each}}
-
-            <div class="add-rule-inline">
-              <select class="rule-type-select" data-class-id={{ct.id}} {{on "change" (fn this.onRuleTypeChange ct.id)}}>
-                <option value="driveline">Driveline</option>
-                <option value="chassis">Chassis Type</option>
-                <option value="manufacturer">Manufacturer</option>
-                <option value="max_year">Max Year (on or before)</option>
-                <option value="min_year">Min Year (on or after)</option>
-                <option value="max_age">Max Driver Age</option>
-                <option value="min_age">Min Driver Age</option>
-              </select>
-
-              <div class="rule-value-container rule-value-container--driveline" data-class-id={{ct.id}}>
-                <select class="rule-multiselect" data-class-id={{ct.id}} multiple size="4">
-                  {{#each this.model.drivelines as |dl|}}
-                    <option value={{dl}}>{{dl}}</option>
-                  {{/each}}
-                </select>
-                <span class="field-help">Hold Ctrl/Cmd to select multiple</span>
-              </div>
-
-              <div class="rule-value-container rule-value-container--chassis" data-class-id={{ct.id}} style="display:none">
-                <select class="rule-multiselect" data-class-id={{ct.id}} multiple size="4">
-                  {{#each this.model.chassis_types as |ct2|}}
-                    <option value={{ct2}}>{{ct2}}</option>
-                  {{/each}}
-                </select>
-                <span class="field-help">Hold Ctrl/Cmd to select multiple</span>
-              </div>
-
-              <div class="rule-value-container rule-value-container--manufacturer" data-class-id={{ct.id}} style="display:none">
-                <select class="rule-multiselect" data-class-id={{ct.id}} multiple size="4">
-                  {{#each this.model.manufacturers as |m|}}
-                    <option value={{m.name}}>{{m.name}}{{#if (eq m.status 'pending')}} (pending){{/if}}</option>
-                  {{/each}}
-                </select>
-                <span class="field-help">Hold Ctrl/Cmd to select multiple</span>
-              </div>
-
-              <div class="rule-value-container rule-value-container--year" data-class-id={{ct.id}} style="display:none">
-                <select class="rule-year-select" data-class-id={{ct.id}}>
-                  {{#each this.yearOptions as |year|}}
-                    <option value={{year}}>{{year}}</option>
-                  {{/each}}
-                </select>
-              </div>
-
-              <div class="rule-value-container rule-value-container--age" data-class-id={{ct.id}} style="display:none">
-                <input type="number" class="rule-age-input" data-class-id={{ct.id}} min="1" max="100" placeholder="Age" style="width: 80px;" />
-              </div>
-
-              <button class="btn btn-small btn-default" {{on "click" (fn this.addClassTypeRule ct.id)}}>
-                + Add Rule
-              </button>
-            </div>
-          </div>
-        {{/each}}
-      {{else}}
-        <p class="field-help">No custom class types yet. Create one above!</p>
       {{/if}}
 
-      <div style="margin-top: 32px;">
-        <h3>Global Class Types</h3>
-        <p class="field-help">These are available to all organisations. You can also use these when setting up events.</p>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-          {{#each this.model.global_class_types as |ct|}}
-            <span class="booking-class-badge">{{ct.name}}</span>
-          {{/each}}
+      <h3 style="margin-top: 24px;">Your Organisation's Class Types</h3>
+      {{#if this.model.org_class_types.length}}
+        {{#each this.model.org_class_types as |ct|}}
+          <div class="admin-org-card">
+            <div class="admin-org-info">
+              <strong>{{ct.name}}</strong>
+              <div class="admin-org-meta">
+                {{#if ct.track_environment}}<span>{{if (eq ct.track_environment "onroad") "🛣️ On-Road" "🌿 Off-Road"}}</span>{{/if}}
+                {{#if ct.scale}}<span>📏 {{ct.scale}}</span>{{/if}}
+                {{#if ct.chassis_types.length}}<span>🚗 {{ct.chassis_types}}</span>{{/if}}
+                {{#if ct.drivelines.length}}<span>⚙️ {{ct.drivelines}}</span>{{/if}}
+                {{#if ct.min_year}}<span>📅 From {{ct.min_year}}</span>{{/if}}
+                {{#if ct.max_year}}<span>📅 Until {{ct.max_year}}</span>{{/if}}
+                {{#if ct.manufacturer}}<span>🏭 {{ct.manufacturer}}</span>{{/if}}
+                {{#if ct.min_age}}<span>👤 Age {{ct.min_age}}+</span>{{/if}}
+                {{#if ct.max_age}}<span>👤 Age ≤{{ct.max_age}}</span>{{/if}}
+              </div>
+            </div>
+            <div class="admin-org-actions">
+              <button class="btn btn-default btn-small" {{on "click" (fn this.startEditOrgClassType ct)}}>✏️ Edit</button>
+              <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteClassType ct.id)}}>🗑 Delete</button>
+            </div>
+          </div>
+          {{#if (eq this.editingOrgClassTypeId ct.id)}}
+            <DesClassTypeForm
+              @classType={{ct}}
+              @manufacturers={{this.model.manufacturers}}
+              @models={{this.model.approved_models}}
+              @onSave={{this.saveEditOrgClassType}}
+              @onCancel={{this.cancelEditOrgClassType}}
+              @saveLabel="💾 Save Changes"
+            />
+          {{/if}}
+        {{/each}}
+      {{else}}
+        <p class="field-help">No custom class types yet.</p>
+      {{/if}}
+
+      <h3 style="margin-top: 32px;">Global Class Types</h3>
+      <p class="field-help">Available to all organisations. Cannot be edited here.</p>
+      {{#each this.model.global_class_types as |ct|}}
+        <div class="admin-org-card">
+          <div class="admin-org-info">
+            <strong>{{ct.name}}</strong>
+            <div class="admin-org-meta">
+              {{#if ct.track_environment}}<span>{{if (eq ct.track_environment "onroad") "🛣️ On-Road" "🌿 Off-Road"}}</span>{{/if}}
+              {{#if ct.scale}}<span>📏 {{ct.scale}}</span>{{/if}}
+              {{#if ct.chassis_types.length}}<span>🚗 {{ct.chassis_types}}</span>{{/if}}
+              {{#if ct.drivelines.length}}<span>⚙️ {{ct.drivelines}}</span>{{/if}}
+              {{#if ct.min_year}}<span>📅 From {{ct.min_year}}</span>{{/if}}
+              {{#if ct.max_year}}<span>📅 Until {{ct.max_year}}</span>{{/if}}
+              {{#if ct.manufacturer}}<span>🏭 {{ct.manufacturer}}</span>{{/if}}
+              {{#if ct.min_age}}<span>👤 Age {{ct.min_age}}+</span>{{/if}}
+              {{#if ct.max_age}}<span>👤 Age ≤{{ct.max_age}}</span>{{/if}}
+            </div>
+          </div>
         </div>
-      </div>
+      {{/each}}
     </div>
   {{/if}}
 
