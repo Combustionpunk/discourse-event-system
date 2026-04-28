@@ -842,46 +842,46 @@
 
   h2 { font-size: 1.2em; margin-bottom: 16px; }
   h3 { font-size: 1em; margin: 20px 0 12px; }
+}
 
-  .admin-org-card {
-    background: var(--primary-very-low);
-    border: 1px solid var(--primary-low);
-    border-radius: 6px;
-    padding: 12px 16px;
-    margin-bottom: 8px;
+.admin-org-card {
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .admin-org-info {
+    flex: 1;
+
+    strong {
+      font-size: 1em;
+      display: block;
+      margin-bottom: 4px;
+    }
+  }
+
+  .admin-org-meta {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 6px;
+    margin-top: 4px;
 
-    .admin-org-info {
-      flex: 1;
-
-      strong {
-        font-size: 1em;
-        display: block;
-        margin-bottom: 4px;
-      }
+    span {
+      background: var(--primary-low);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.85em;
     }
+  }
 
-    .admin-org-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
-
-      span {
-        background: var(--primary-low);
-        border-radius: 4px;
-        padding: 2px 8px;
-        font-size: 0.85em;
-      }
-    }
-
-    .admin-org-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
-    }
+  .admin-org-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
   }
 }
 
