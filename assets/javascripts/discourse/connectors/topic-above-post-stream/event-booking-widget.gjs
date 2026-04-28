@@ -6,6 +6,7 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
 import { eq, not } from "truth-helpers";
+import transponderDisplay from "../../helpers/transponder-display";
 import { service } from "@ember/service";
 import { LinkTo } from "@ember/routing";
 
@@ -330,19 +331,11 @@ export default class EventBookingWidget extends Component {
 
   @action
   proceedToTransponderConfirm() {
-    console.log('carSelections:', this.carSelections);
-    console.log('eligibleCars:', this.eligibleCars);
     const confirmations = {};
 
     for (const [classId, carId] of Object.entries(this.carSelections)) {
-      console.log('looking for classId:', classId, 'carId:', carId);
-      const cls = this.eligibleCars.find(c => {
-        console.log('comparing class_id:', c.class_id, typeof c.class_id, 'vs', classId, typeof classId);
-        return String(c.class_id) === String(classId);
-      });
-      console.log('found cls:', cls);
+      const cls = this.eligibleCars.find(c => String(c.class_id) === String(classId));
       const car = cls?.eligible_cars.find(c => String(c.id) === String(carId));
-      console.log('found car:', car);
       if (car) {
         confirmations[carId] = { car, classId, status: 'pending', isFamily: false };
       }
@@ -354,7 +347,7 @@ export default class EventBookingWidget extends Component {
           const key = `${entry.user_id}_${cls.class_id}`;
           const carId = this.familyCarSelections[key];
           if (carId) {
-            const car = cls.eligible_cars.find(c => c.id === parseInt(carId));
+            const car = cls.eligible_cars.find(c => String(c.id) === String(carId));
             if (car) {
               confirmations[`family_${entry.user_id}_${carId}`] = {
                 car, classId: cls.class_id, userId: entry.user_id,
@@ -366,7 +359,6 @@ export default class EventBookingWidget extends Component {
       }
     }
 
-    console.log('confirmations:', confirmations);
     this.transponderConfirmations = confirmations;
     this.showTransponderConfirm = true;
     this.showCarSelection = false;
@@ -757,7 +749,7 @@ export default class EventBookingWidget extends Component {
                     </select>
                   {{else}}
                     {{#if confirmation.car.transponder_number}}
-                      <p style="margin: 0 0 8px;">Current transponder: <strong>{{confirmation.car.transponder_number}}</strong></p>
+                      <p style="margin: 0 0 8px;">Current transponder: <strong>{{transponderDisplay confirmation.car.transponder_number this.userTransponders}}</strong></p>
                       <div style="display:flex;gap:8px;">
                         <button class="btn btn-primary btn-small" {{on "click" (fn this.confirmTransponder key)}}>✅ Yes, correct</button>
                         <button class="btn btn-default btn-small" {{on "click" (fn this.changeTransponder key)}}>🔄 Change</button>
