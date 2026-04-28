@@ -159,6 +159,9 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/des/admin/chassis-types" => "admin#chassis_types"
   post "/des/admin/chassis-types" => "admin#create_chassis_type"
   delete "/des/admin/chassis-types/:id" => "admin#destroy_chassis_type"
+  post "/des/admin/class-types" => "admin#create_class_type"
+  put "/des/admin/class-types/:id" => "admin#update_class_type"
+  delete "/des/admin/class-types/:id" => "admin#destroy_class_type"
 end
 
 Discourse::Application.routes.draw do

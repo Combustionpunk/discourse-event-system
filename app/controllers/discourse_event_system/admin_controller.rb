@@ -15,7 +15,7 @@ module DiscourseEventSystem
         pending_models: DesCarModel.pending.includes(:manufacturer).map { |m| serialize_model(m) },
         approved_models: DesCarModel.approved.includes(:manufacturer).map { |m| serialize_model(m) },
         approved_models_by_manufacturer: DesCarModel.approved.includes(:manufacturer).order("des_manufacturers.name, des_car_models.name").group_by { |m| m.manufacturer&.name || "Unknown" }.map { |mfr, models| { manufacturer: mfr, models: models.map { |m| serialize_model(m) } } },
-        class_types: DesEventClassType.all.map { |ct| { id: ct.id, name: ct.name } },
+        class_types: DesEventClassType.all.map { |ct| serialize_class_type(ct) },
         global_rules: DesClassCompatibilityRule.global.includes(:class_type).map { |r| serialize_rule(r) }
       }
     end
@@ -222,6 +222,41 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def create_class_type
+      ct = DesEventClassType.create!(
+        name: params[:name].to_s.strip,
+        track_environment: params[:track_environment].presence,
+        scale: params[:scale].presence,
+        chassis_types: params[:chassis_types].present? ? Array(params[:chassis_types]).join(',') : nil,
+        drivelines: params[:drivelines].present? ? Array(params[:drivelines]).join(',') : nil
+      )
+      render json: serialize_class_type(ct), status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def update_class_type
+      ct = DesEventClassType.find(params[:id])
+      ct.update!(
+        name: params[:name].present? ? params[:name].to_s.strip : ct.name,
+        track_environment: params.key?(:track_environment) ? params[:track_environment].presence : ct.track_environment,
+        scale: params.key?(:scale) ? params[:scale].presence : ct.scale,
+        chassis_types: params.key?(:chassis_types) ? (params[:chassis_types].present? ? Array(params[:chassis_types]).join(',') : nil) : ct.chassis_types,
+        drivelines: params.key?(:drivelines) ? (params[:drivelines].present? ? Array(params[:drivelines]).join(',') : nil) : ct.drivelines
+      )
+      render json: serialize_class_type(ct)
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_class_type
+      ct = DesEventClassType.find(params[:id])
+      ct.destroy!
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     private
 
     def ensure_admin
@@ -241,6 +276,17 @@ module DiscourseEventSystem
         rejection_reason: org.rejection_reason,
         created_by: org.creator&.username,
         status: org.status
+      }
+    end
+
+    def serialize_class_type(ct)
+      {
+        id: ct.id,
+        name: ct.name,
+        track_environment: ct.track_environment,
+        scale: ct.scale,
+        chassis_types: ct.chassis_types_list,
+        drivelines: ct.drivelines_list
       }
     end
 

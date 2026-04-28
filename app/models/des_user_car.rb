@@ -40,6 +40,13 @@ class DesUserCar < ActiveRecord::Base
 
   def eligible_for_class?(event_class, organisation_id = nil)
     class_type_id = event_class.respond_to?(:class_type_id) ? event_class.class_type_id : event_class.id
+    class_type = event_class.respond_to?(:class_type) ? event_class.class_type : DesEventClassType.find_by(id: class_type_id)
+
+    # Check class type attribute-based eligibility
+    if class_type.present?
+      return false unless class_type.car_eligible?(self)
+    end
+
     rules = if organisation_id
       DesClassCompatibilityRule.applicable_to(organisation_id).where(class_type_id: class_type_id)
     else

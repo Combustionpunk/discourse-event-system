@@ -79,7 +79,7 @@ export default class DesAdminController extends Controller {
   }
 
   @action
-  setTabRules() { this.activeTab = "rules"; }
+  async setTabRules() { this.activeTab = "rules"; await this.loadScalesAndChassisTypes(); }
   @action
   setTabCleanup() { this.activeTab = "cleanup"; this.loadOrphanedCars(); }
 
@@ -551,6 +551,63 @@ export default class DesAdminController extends Controller {
       });
       this.editingModelId = null;
       this.editingModel = null;
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  // Class Type management
+  @tracked newClassType = { name: "", track_environment: "", scale: "", chassis_types: [], drivelines: [] };
+  @tracked showAddClassTypeForm = false;
+
+  @action
+  toggleAddClassTypeForm() {
+    this.showAddClassTypeForm = !this.showAddClassTypeForm;
+    this.newClassType = { name: "", track_environment: "", scale: "", chassis_types: [], drivelines: [] };
+  }
+
+  @action
+  updateClassTypeField(field, e) {
+    this.newClassType = { ...this.newClassType, [field]: e.target.value };
+  }
+
+  @action
+  updateClassTypeMultiField(field, event) {
+    const selected = Array.from(event.target.selectedOptions).map(o => o.value);
+    this.newClassType = { ...this.newClassType, [field]: selected };
+  }
+
+  @action
+  async createClassType() {
+    if (!this.newClassType.name.trim()) {
+      alert("Please enter a class type name");
+      return;
+    }
+    try {
+      await ajax("/des/admin/class-types.json", {
+        type: "POST",
+        data: {
+          name: this.newClassType.name,
+          track_environment: this.newClassType.track_environment || null,
+          scale: this.newClassType.scale || null,
+          chassis_types: this.newClassType.chassis_types,
+          drivelines: this.newClassType.drivelines,
+        },
+      });
+      this.showAddClassTypeForm = false;
+      this.newClassType = { name: "", track_environment: "", scale: "", chassis_types: [], drivelines: [] };
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async deleteClassType(ct) {
+    if (!window.confirm(`Delete class type "${ct.name}"?`)) return;
+    try {
+      await ajax(`/des/admin/class-types/${ct.id}.json`, { type: "DELETE" });
       this.router.refresh();
     } catch (error) {
       popupAjaxError(error);

@@ -41,7 +41,16 @@ module DiscourseEventSystem
 
     def class_types
       render json: {
-        class_types: DesEventClassType.all.order(:name).map { |ct| { id: ct.id, name: ct.name } }
+        class_types: DesEventClassType.all.order(:name).map { |ct|
+          {
+            id: ct.id,
+            name: ct.name,
+            track_environment: ct.track_environment,
+            scale: ct.scale,
+            chassis_types: ct.chassis_types_list,
+            drivelines: ct.drivelines_list
+          }
+        }
       }
     end
 

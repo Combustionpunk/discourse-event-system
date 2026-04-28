@@ -360,6 +360,84 @@
   {{!-- CLASS RULES TAB --}}
   {{#if (eq this.activeTab "rules")}}
     <div class="des-admin-section">
+      <h2>Class Types</h2>
+      <p class="field-help">Global class types with eligibility attributes. Cars must match these attributes to be eligible.</p>
+
+      <div class="section-header">
+        <h3>All Class Types</h3>
+        <button class="btn btn-primary btn-small" {{on "click" this.toggleAddClassTypeForm}}>
+          {{if this.showAddClassTypeForm "✕ Cancel" "+ Add Class Type"}}
+        </button>
+      </div>
+
+      {{#if this.showAddClassTypeForm}}
+        <div class="add-model-form">
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Name *</label>
+              <input type="text" placeholder="e.g. 2WD Buggy" {{on "input" (fn this.updateClassTypeField "name")}} />
+            </div>
+            <div class="org-form-field">
+              <label>Track Environment</label>
+              <select {{on "change" (fn this.updateClassTypeField "track_environment")}}>
+                <option value="">Any</option>
+                <option value="onroad">🛣️ On-Road</option>
+                <option value="offroad">🌿 Off-Road</option>
+              </select>
+            </div>
+            <div class="org-form-field">
+              <label>Scale</label>
+              <select {{on "change" (fn this.updateClassTypeField "scale")}}>
+                <option value="">Any Scale</option>
+                {{#each this.scales as |s|}}
+                  <option value={{s}}>{{s}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Chassis Types (multi-select)</label>
+              <select multiple {{on "change" (fn this.updateClassTypeMultiField "chassis_types")}}>
+                {{#each this.chassisTypes as |c|}}
+                  <option value={{c}}>{{c}}</option>
+                {{/each}}
+              </select>
+              <p class="field-help">Hold Ctrl/Cmd to select multiple. Leave empty for any chassis type.</p>
+            </div>
+            <div class="org-form-field">
+              <label>Drivelines (multi-select)</label>
+              <select multiple {{on "change" (fn this.updateClassTypeMultiField "drivelines")}}>
+                {{#each this.drivelines as |d|}}
+                  <option value={{d}}>{{d}}</option>
+                {{/each}}
+              </select>
+              <p class="field-help">Hold Ctrl/Cmd to select multiple. Leave empty for any driveline.</p>
+            </div>
+          </div>
+          <button class="btn btn-primary" {{on "click" this.createClassType}}>✅ Create Class Type</button>
+        </div>
+      {{/if}}
+
+      {{#each this.model.class_types as |ct|}}
+        <div class="admin-org-card">
+          <div class="admin-org-info">
+            <strong>{{ct.name}}</strong>
+            <div class="admin-org-meta">
+              {{#if ct.track_environment}}<span>{{if (eq ct.track_environment "onroad") "🛣️ On-Road" "🌿 Off-Road"}}</span>{{/if}}
+              {{#if ct.scale}}<span>📏 {{ct.scale}}</span>{{/if}}
+              {{#if ct.chassis_types.length}}<span>🚗 {{ct.chassis_types}}</span>{{/if}}
+              {{#if ct.drivelines.length}}<span>⚙️ {{ct.drivelines}}</span>{{/if}}
+            </div>
+          </div>
+          <div class="admin-org-actions">
+            <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteClassType ct)}}>🗑 Delete</button>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+
+    <div class="des-admin-section">
       <h2>Class Compatibility Rules</h2>
       <p class="field-help">These rules apply globally to all organisations. They define which cars are eligible for each class type.</p>
 

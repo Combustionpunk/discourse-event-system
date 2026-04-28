@@ -103,7 +103,11 @@ module DiscourseEventSystem
       ct = DesEventClassType.create!(
         name: params[:name],
         description: params[:description],
-        organisation_id: @organisation.id
+        organisation_id: @organisation.id,
+        track_environment: params[:track_environment].presence,
+        scale: params[:scale].presence,
+        chassis_types: params[:chassis_types].present? ? Array(params[:chassis_types]).join(',') : nil,
+        drivelines: params[:drivelines].present? ? Array(params[:drivelines]).join(',') : nil
       )
       render json: serialize_class_type_with_rules(ct), status: :created
     rescue => e
@@ -191,7 +195,11 @@ module DiscourseEventSystem
         id: ct.id,
         name: ct.name,
         description: ct.description,
-        organisation_id: ct.organisation_id
+        organisation_id: ct.organisation_id,
+        track_environment: ct.track_environment,
+        scale: ct.scale,
+        chassis_types: ct.chassis_types_list,
+        drivelines: ct.drivelines_list
       }
     end
 
