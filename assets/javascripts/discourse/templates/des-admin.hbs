@@ -372,117 +372,13 @@
       {{#if this.showAddClassTypeForm}}
         <div class="add-model-form">
           <h3>New Class Type</h3>
-
-          <div class="org-form-row">
-            <div class="org-form-field">
-              <label>Name *</label>
-              <input type="text" placeholder="e.g. 2WD Buggy" {{on "input" (fn this.updateClassTypeField "name")}} />
-            </div>
-            <div class="org-form-field">
-              <label>Track Environment</label>
-              <select {{on "change" (fn this.updateClassTypeField "track_environment")}}>
-                <option value="">Any</option>
-                <option value="onroad">🛣️ On-Road</option>
-                <option value="offroad">🌿 Off-Road</option>
-              </select>
-            </div>
-            <div class="org-form-field">
-              <label>Scale</label>
-              <select {{on "change" (fn this.updateClassTypeField "scale")}}>
-                <option value="">Any Scale</option>
-                {{#each this.scales as |s|}}
-                  <option value={{s}}>{{s}}</option>
-                {{/each}}
-              </select>
-            </div>
-          </div>
-
-          <div class="org-form-row">
-            <div class="org-form-field">
-              <label>Chassis Types</label>
-              <select multiple {{on "change" (fn this.updateClassTypeMultiField "chassis_types")}}>
-                {{#each this.chassisTypes as |c|}}
-                  <option value={{c}}>{{c}}</option>
-                {{/each}}
-              </select>
-              <p class="field-help">Ctrl/Cmd to multi-select. Empty = any.</p>
-            </div>
-            <div class="org-form-field">
-              <label>Drivelines</label>
-              <select multiple {{on "change" (fn this.updateClassTypeMultiField "drivelines")}}>
-                {{#each this.drivelines as |d|}}
-                  <option value={{d}}>{{d}}</option>
-                {{/each}}
-              </select>
-              <p class="field-help">Ctrl/Cmd to multi-select. Empty = any.</p>
-            </div>
-          </div>
-
-          <div class="org-form-row">
-            <div class="org-form-field">
-              <label>Min Year</label>
-              <select {{on "change" (fn this.updateClassTypeField "min_year")}}>
-                <option value="">Any</option>
-                {{#each this.yearOptions as |y|}}
-                  <option value={{y}}>{{y}}</option>
-                {{/each}}
-              </select>
-            </div>
-            <div class="org-form-field">
-              <label>Max Year</label>
-              <select {{on "change" (fn this.updateClassTypeField "max_year")}}>
-                <option value="">Any</option>
-                {{#each this.yearOptions as |y|}}
-                  <option value={{y}}>{{y}}</option>
-                {{/each}}
-              </select>
-            </div>
-          </div>
-
-          <div class="org-form-row">
-            <div class="org-form-field">
-              <label>Manufacturer</label>
-              <select {{on "change" (fn this.updateClassTypeField "manufacturer")}}>
-                <option value="">Any</option>
-                {{#each this.model.approved_manufacturers as |mfr|}}
-                  <option value={{mfr.name}}>{{mfr.name}}</option>
-                {{/each}}
-              </select>
-            </div>
-            <div class="org-form-field">
-              <label>Model</label>
-              <select {{on "change" (fn this.updateClassTypeField "model_id")}}>
-                <option value="">Any</option>
-                {{#each this.model.approved_models as |m|}}
-                  <option value={{m.id}}>{{m.manufacturer}} {{m.name}}</option>
-                {{/each}}
-              </select>
-            </div>
-          </div>
-
-          <h4>Driver Eligibility</h4>
-          <div class="org-form-row">
-            <div class="org-form-field">
-              <label>Min Age</label>
-              <select {{on "change" (fn this.updateClassTypeField "min_age")}}>
-                <option value="">Any</option>
-                {{#each this.ageOptions as |a|}}
-                  <option value={{a}}>{{a}}</option>
-                {{/each}}
-              </select>
-            </div>
-            <div class="org-form-field">
-              <label>Max Age</label>
-              <select {{on "change" (fn this.updateClassTypeField "max_age")}}>
-                <option value="">Any</option>
-                {{#each this.ageOptions as |a|}}
-                  <option value={{a}}>{{a}}</option>
-                {{/each}}
-              </select>
-            </div>
-          </div>
-
-          <button class="btn btn-primary" {{on "click" this.createClassType}}>✅ Create Class Type</button>
+          <DesClassTypeForm
+            @manufacturers={{this.model.approved_manufacturers}}
+            @models={{this.model.approved_models}}
+            @onSave={{this.createClassType}}
+            @onCancel={{this.toggleAddClassTypeForm}}
+            @saveLabel="✅ Create Class Type"
+          />
         </div>
       {{/if}}
 

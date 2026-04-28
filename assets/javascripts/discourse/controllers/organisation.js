@@ -390,21 +390,25 @@ export default class OrganisationController extends Controller {
   }
 
   @action
-  async createClassType() {
-    const name = document.getElementById('new-class-type-name').value.trim();
-    const description = document.getElementById('new-class-type-desc').value.trim();
-    if (!name) { alert("Please enter a class name."); return; }
-    try {
-      await ajax("/des/organisations/" + this.model.id + "/class-types.json", {
-        type: "POST",
-        data: { name, description },
-      });
-      document.getElementById('new-class-type-name').value = '';
-      document.getElementById('new-class-type-desc').value = '';
-      this.router.refresh();
-    } catch (error) {
-      popupAjaxError(error);
-    }
+  async createOrgClassType(formData) {
+    await ajax("/des/organisations/" + this.model.id + "/class-types.json", {
+      type: "POST",
+      data: {
+        name: formData.name,
+        description: formData.description,
+        track_environment: formData.track_environment || null,
+        scale: formData.scale || null,
+        chassis_types: formData.chassis_types,
+        drivelines: formData.drivelines,
+        min_year: formData.min_year || null,
+        max_year: formData.max_year || null,
+        manufacturer: formData.manufacturer || null,
+        model_id: formData.model_id || null,
+        min_age: formData.min_age || null,
+        max_age: formData.max_age || null,
+      },
+    });
+    this.router.refresh();
   }
 
   @action

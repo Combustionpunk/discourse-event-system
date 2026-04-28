@@ -578,81 +578,33 @@ export default class DesAdminController extends Controller {
   }
 
   // Class Type management
-  @tracked newClassType = {
-    name: "", track_environment: "", scale: "",
-    chassis_types: [], drivelines: [],
-    min_year: "", max_year: "", manufacturer: "", model_id: "",
-    min_age: "", max_age: ""
-  };
   @tracked showAddClassTypeForm = false;
-
-  get yearOptions() {
-    const current = new Date().getFullYear();
-    const years = [];
-    for (let y = current; y >= 1970; y--) years.push(y);
-    return years;
-  }
-
-  get ageOptions() {
-    return [10, 14, 16, 18, 30, 40, 45];
-  }
 
   @action
   toggleAddClassTypeForm() {
     this.showAddClassTypeForm = !this.showAddClassTypeForm;
-    this.newClassType = {
-      name: "", track_environment: "", scale: "",
-      chassis_types: [], drivelines: [],
-      min_year: "", max_year: "", manufacturer: "", model_id: "",
-      min_age: "", max_age: ""
-    };
   }
 
   @action
-  updateClassTypeField(field, e) {
-    this.newClassType = { ...this.newClassType, [field]: e.target.value };
-  }
-
-  @action
-  updateClassTypeMultiField(field, event) {
-    const selected = Array.from(event.target.selectedOptions).map(o => o.value);
-    this.newClassType = { ...this.newClassType, [field]: selected };
-  }
-
-  @action
-  async createClassType() {
-    if (!this.newClassType.name.trim()) {
-      alert("Please enter a class type name");
-      return;
-    }
-    try {
-      await ajax("/des/admin/class-types.json", {
-        type: "POST",
-        data: {
-          name: this.newClassType.name,
-          track_environment: this.newClassType.track_environment || null,
-          scale: this.newClassType.scale || null,
-          chassis_types: this.newClassType.chassis_types,
-          drivelines: this.newClassType.drivelines,
-          min_year: this.newClassType.min_year || null,
-          max_year: this.newClassType.max_year || null,
-          manufacturer: this.newClassType.manufacturer || null,
-          model_id: this.newClassType.model_id || null,
-          min_age: this.newClassType.min_age || null,
-          max_age: this.newClassType.max_age || null,
-        },
-      });
-      this.showAddClassTypeForm = false;
-      this.newClassType = {
-        name: "", track_environment: "", scale: "",
-        chassis_types: [], drivelines: [],
-        min_year: "", max_year: "", manufacturer: "", model_id: "",
-        min_age: "", max_age: ""
-      };
-      this.router.refresh();
-    } catch (error) {
-      popupAjaxError(error);
-    }
+  async createClassType(formData) {
+    await ajax("/des/admin/class-types.json", {
+      type: "POST",
+      data: {
+        name: formData.name,
+        track_environment: formData.track_environment || null,
+        scale: formData.scale || null,
+        chassis_types: formData.chassis_types,
+        drivelines: formData.drivelines,
+        min_year: formData.min_year || null,
+        max_year: formData.max_year || null,
+        manufacturer: formData.manufacturer || null,
+        model_id: formData.model_id || null,
+        min_age: formData.min_age || null,
+        max_age: formData.max_age || null,
+      },
+    });
+    this.showAddClassTypeForm = false;
+    this.router.refresh();
   }
 
   @action

@@ -468,21 +468,12 @@
 
       <div class="admin-rule-form">
         <h3>Create New Class Type</h3>
-        <div class="org-form-row">
-          <div class="org-form-field">
-            <label>Class Name</label>
-            <input type="text" id="new-class-type-name" placeholder="e.g. Our Fun Class" />
-          </div>
-          <div class="org-form-field">
-            <label>Description <span class="field-help">(optional)</span></label>
-            <input type="text" id="new-class-type-desc" placeholder="Brief description" />
-          </div>
-          <div class="org-form-field" style="justify-content: flex-end;">
-            <button class="btn btn-primary" {{on "click" this.createClassType}}>
-              + Create Class
-            </button>
-          </div>
-        </div>
+        <DesClassTypeForm
+          @manufacturers={{this.model.manufacturers}}
+          @models={{this.model.approved_models}}
+          @onSave={{this.createOrgClassType}}
+          @saveLabel="+ Create Class"
+        />
       </div>
 
       {{#if this.model.org_class_types.length}}
