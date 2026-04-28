@@ -24,8 +24,16 @@
           <input type="text" placeholder="e.g. Blue Bomber" {{on "input" (fn this.updateField "friendly_name")}} />
         </div>
         <div class="org-form-field">
-          <label>Transponder Number *</label>
-          <input type="text" placeholder="e.g. 1234567" {{on "input" (fn this.updateField "transponder_number")}} />
+          <label>Transponder</label>
+          <select {{on "change" this.setNewCarTransponderMode}}>
+            {{#each this.userTransponders as |t|}}
+              <option value={{t.id}}>#{{t.shortcode}} — {{t.long_code}}{{#if t.notes}} ({{t.notes}}){{/if}}</option>
+            {{/each}}
+            <option value="new">✏️ Enter new code...</option>
+          </select>
+          {{#if (eq this.newCarTransponderMode "new")}}
+            <input type="text" placeholder="e.g. 1234567" value={{this.newCarTransponderNew}} {{on "input" this.updateNewCarTransponderNew}} style="margin-top: 6px;" />
+          {{/if}}
         </div>
       </div>
 
@@ -173,8 +181,16 @@
                 <input type="text" value={{this.editingCar.friendly_name}} {{on "input" (fn this.updateEditCarField "friendly_name")}} />
               </div>
               <div class="org-form-field">
-                <label>Transponder Number</label>
-                <input type="text" value={{this.editingCar.transponder_number}} {{on "input" (fn this.updateEditCarField "transponder_number")}} />
+                <label>Transponder</label>
+                <select {{on "change" this.setEditCarTransponderMode}}>
+                  {{#each this.userTransponders as |t|}}
+                    <option value={{t.id}} selected={{eq this.editingCar.transponder_number t.long_code}}>#{{t.shortcode}} — {{t.long_code}}{{#if t.notes}} ({{t.notes}}){{/if}}</option>
+                  {{/each}}
+                  <option value="new" selected={{eq this.editCarTransponderMode "new"}}>✏️ Enter new code...</option>
+                </select>
+                {{#if (eq this.editCarTransponderMode "new")}}
+                  <input type="text" placeholder="e.g. 1234567" value={{this.editCarTransponderNew}} {{on "input" this.updateEditCarTransponderNew}} style="margin-top: 6px;" />
+                {{/if}}
               </div>
 
               <div class="garage-car-actions">

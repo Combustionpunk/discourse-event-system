@@ -33,6 +33,11 @@ export default class MyGarageController extends Controller {
   @tracked editingCarId = null;
   @tracked editingCar = null;
   @tracked editModels = [];
+  @tracked userTransponders = [];
+  @tracked newCarTransponderMode = "registry";
+  @tracked newCarTransponderNew = "";
+  @tracked editCarTransponderMode = "registry";
+  @tracked editCarTransponderNew = "";
 
   @action
   async toggleAddForm() {
@@ -40,6 +45,7 @@ export default class MyGarageController extends Controller {
     this.resetForm();
     if (this.showAddForm) {
       await this.loadScalesAndChassisTypes();
+      await this.loadUserTransponders();
     }
   }
 
@@ -56,6 +62,15 @@ export default class MyGarageController extends Controller {
     }
   }
 
+  async loadUserTransponders() {
+    try {
+      const response = await ajax("/des/transponders.json");
+      this.userTransponders = response.transponders;
+    } catch {
+      this.userTransponders = [];
+    }
+  }
+
   resetForm() {
     this.selectedModel = null;
     this.availableModels = [];
@@ -66,10 +81,16 @@ export default class MyGarageController extends Controller {
     this.suggestModelDriveline = "";
     this.suggestModelScale = "";
     this.suggestModelChassisType = "";
+    this.newCarTransponderMode = "registry";
+    this.newCarTransponderNew = "";
     this.newCar = {
       manufacturer_id: "", car_model_id: "", class_type_id: "",
       driveline: "", transponder_number: "", friendly_name: "",
     };
+    // Auto-select first transponder if available
+    if (this.userTransponders.length) {
+      this.newCar = { ...this.newCar, transponder_number: this.userTransponders[0].long_code };
+    }
   }
 
   @action
@@ -166,6 +187,58 @@ export default class MyGarageController extends Controller {
   }
 
   @action
+  setNewCarTransponderMode(e) {
+    this.newCarTransponderMode = e.target.value;
+    if (e.target.value !== "new") {
+      const t = this.userTransponders.find(t => t.id === parseInt(e.target.value));
+      if (t) this.newCar = { ...this.newCar, transponder_number: t.long_code };
+    } else {
+      this.newCar = { ...this.newCar, transponder_number: "" };
+    }
+  }
+
+  @action
+  updateNewCarTransponderNew(e) {
+    this.newCarTransponderNew = e.target.value;
+    this.newCar = { ...this.newCar, transponder_number: e.target.value };
+  }
+
+  @action
+  setEditCarTransponderMode(e) {
+    this.editCarTransponderMode = e.target.value;
+    if (e.target.value !== "new") {
+      const t = this.userTransponders.find(t => t.id === parseInt(e.target.value));
+      if (t) this.editingCar = { ...this.editingCar, transponder_number: t.long_code };
+    } else {
+      this.editingCar = { ...this.editingCar, transponder_number: "" };
+    }
+  }
+
+  @action
+  updateEditCarTransponderNew(e) {
+    this.editCarTransponderNew = e.target.value;
+    this.editingCar = { ...this.editingCar, transponder_number: e.target.value };
+  }
+
+  async maybeRegisterTransponder(code) {
+    if (!code || !code.trim()) return;
+    const exists = this.userTransponders.find(t => t.long_code === code.trim());
+    if (exists) return;
+    const nextShortcode = this.userTransponders.length > 0
+      ? Math.max(...this.userTransponders.map(t => t.shortcode)) + 1
+      : 1;
+    const save = window.confirm(`Save ${code.trim()} as transponder #${nextShortcode} in your racing profile?`);
+    if (save) {
+      try {
+        await ajax("/des/transponders.json", {
+          type: "POST",
+          data: { long_code: code.trim() }
+        });
+      } catch { /* ignore */ }
+    }
+  }
+
+  @action
   async saveCar() {
     this.isSaving = true;
     try {
@@ -173,6 +246,9 @@ export default class MyGarageController extends Controller {
         type: "POST",
         data: { car: this.newCar },
       });
+      if (this.newCarTransponderMode === "new" && this.newCarTransponderNew.trim()) {
+        await this.maybeRegisterTransponder(this.newCarTransponderNew);
+      }
       this.showAddForm = false;
       this.resetForm();
       this.router.refresh();
@@ -205,6 +281,15 @@ export default class MyGarageController extends Controller {
       car_model_id: car.model?.id,
     };
     this.editModels = [];
+    await this.loadUserTransponders();
+    // Determine if the current transponder is in the registry
+    const match = this.userTransponders.find(t => t.long_code === car.transponder_number);
+    if (match) {
+      this.editCarTransponderMode = String(match.id);
+    } else {
+      this.editCarTransponderMode = "new";
+      this.editCarTransponderNew = car.transponder_number || "";
+    }
     if (car.manufacturer?.id) {
       try {
         const response = await ajax("/des/garage/models.json", { data: { manufacturer_id: car.manufacturer.id } });
@@ -251,6 +336,9 @@ export default class MyGarageController extends Controller {
           }
         },
       });
+      if (this.editCarTransponderMode === "new" && this.editCarTransponderNew.trim()) {
+        await this.maybeRegisterTransponder(this.editCarTransponderNew);
+      }
       this.editingCarId = null;
       this.editingCar = null;
       this.editModels = [];
