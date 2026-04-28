@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class OrganisationsController < ApplicationController
     before_action :ensure_logged_in
-    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership, :admin_memberships, :admin_add_membership, :admin_update_membership, :admin_add_family_member, :admin_remove_family_member, :admin_update_family_member, :admin_delete_membership]
+    before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :update_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership, :admin_memberships, :admin_add_membership, :admin_update_membership, :admin_add_family_member, :admin_remove_family_member, :admin_update_family_member, :admin_delete_membership]
 
     def index
       organisations = current_user.admin? ? DesOrganisation.all.order(:name) : DesOrganisation.approved.order(:name)

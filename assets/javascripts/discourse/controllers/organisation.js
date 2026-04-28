@@ -431,6 +431,7 @@ export default class OrganisationController extends Controller {
 
   @action
   async saveEditOrgClassType(formData) {
+    if (!this.editingOrgClassTypeId) return;
     await ajax("/des/organisations/" + this.model.id + "/class-types/" + this.editingOrgClassTypeId + ".json", {
       type: "PUT",
       data: {
