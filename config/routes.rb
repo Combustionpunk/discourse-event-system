@@ -116,6 +116,12 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/racing-profile/guardian" => "racing_profiles#set_guardian"
   delete "/des/racing-profile/guardian" => "racing_profiles#remove_guardian"
 
+  get "/des/transponders" => "transponders#index"
+  post "/des/transponders" => "transponders#create"
+  put "/des/transponders/:id" => "transponders#update"
+  delete "/des/transponders/:id" => "transponders#destroy"
+  get "/des/transponders/user/:user_id" => "transponders#for_user"
+
   get "/des/garage" => "garage#index"
   post "/des/garage" => "garage#create"
   put "/des/garage/:id" => "garage#update"
