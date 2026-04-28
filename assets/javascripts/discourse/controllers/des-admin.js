@@ -403,11 +403,30 @@ export default class DesAdminController extends Controller {
     return Object.values(groups);
   }
 
+  @tracked newRuleType = "driveline";
+  @tracked newRuleValue = "";
+
+  @action
+  updateRuleType(e) {
+    this.newRuleType = e.target.value;
+    this.newRuleValue = "";
+  }
+
+  @action
+  updateRuleValueMulti(e) {
+    const selected = Array.from(e.target.selectedOptions).map(o => o.value);
+    this.newRuleValue = selected.join(',');
+  }
+
+  @action
+  updateRuleValueText(e) {
+    this.newRuleValue = e.target.value;
+  }
+
   @action
   async addGlobalRule() {
     const classTypeId = document.getElementById('new-rule-class-type').value;
-    const ruleType = document.getElementById('new-rule-type').value;
-    const ruleValue = document.getElementById('new-rule-value').value.trim();
+    const ruleValue = this.newRuleValue.trim();
 
     if (!classTypeId || !ruleValue) {
       alert("Please select a class type and enter a rule value.");
@@ -417,10 +436,11 @@ export default class DesAdminController extends Controller {
     try {
       await ajax("/des/admin/rules.json", {
         type: "POST",
-        data: { class_type_id: classTypeId, rule_type: ruleType, rule_value: ruleValue },
+        data: { class_type_id: classTypeId, rule_type: this.newRuleType, rule_value: ruleValue },
       });
       document.getElementById('new-rule-class-type').value = '';
-      document.getElementById('new-rule-value').value = '';
+      this.newRuleType = "driveline";
+      this.newRuleValue = "";
       this.router.refresh();
     } catch (error) {
       popupAjaxError(error);
