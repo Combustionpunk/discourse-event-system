@@ -16,6 +16,7 @@ export default function () {
   this.route("des-admin", { path: "/des-admin" });
   this.route("racing-profile", { path: "/racing-profile" });
   this.route("my-garage", { path: "/my-garage" });
+  this.route("car-models", { path: "/car-models" });
   this.route("membership-confirm", { path: "/memberships/:membership_id/confirm" });
   this.route("membership-cancel", { path: "/memberships/:membership_id/cancel" });
   this.route("family-setup", { path: "/memberships/:membership_id/family-setup" });
