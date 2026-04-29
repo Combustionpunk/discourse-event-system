@@ -132,8 +132,8 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/garage/suggest-manufacturer" => "garage#suggest_manufacturer"
   post "/des/garage/suggest-model" => "garage#suggest_model"
 
-  get "/des/car-models" => "discourse_event_system/car_models#index"
-  post "/des/car-models/suggest-manufacturer" => "discourse_event_system/car_models#suggest_manufacturer"
+  get "/des/car-models" => "car_models#index"
+  post "/des/car-models/suggest-manufacturer" => "car_models#suggest_manufacturer"
 
   get "/des/venues" => "venues#index"
   get "/des/venues/:id" => "venues#show"
