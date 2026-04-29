@@ -11,10 +11,6 @@ export default class VenueController extends Controller {
   @tracked editData = {};
   @tracked isSaving = false;
 
-  trackCategories = ["onroad", "offroad"];
-  trackSurfaces = ["carpet", "astroturf", "grass", "tarmac", "mixed"];
-  trackEnvironments = ["outdoor", "indoor_covered"];
-
   @action toggleEdit() {
     this.editMode = !this.editMode;
     if (this.editMode) {
@@ -22,21 +18,13 @@ export default class VenueController extends Controller {
     }
   }
 
-  @action updateEditField(field, e) {
-    this.editData = { ...this.editData, [field]: e.target.value };
-  }
-
-  @action toggleEditFacility(field) {
-    this.editData = { ...this.editData, [field]: !this.editData[field] };
-  }
-
   @action
-  async saveEdit() {
+  async saveVenue(formData) {
     this.isSaving = true;
     try {
       await ajax("/des/venues/" + this.model.venue.id + ".json", {
         type: "PUT",
-        data: this.editData
+        data: formData
       });
       this.editMode = false;
       this.router.refresh();
