@@ -500,63 +500,45 @@ export default class DesAdminController extends Controller {
     }
   }
 
+  @tracked approvingModelId = null;
+  @tracked approveModelForm = { year_released: "", driveline: "", scale: "", chassis_type: "" };
+
   @action
-  async approveModel(model) {
-    const year = window.prompt(
-      "Year of first manufacture for " + model.manufacturer + " " + model.name + ":",
-      model.year_released || ""
-    );
-    if (year === null) return;
+  startApproveModel(model) {
+    this.approvingModelId = model.id;
+    this.approveModelForm = {
+      year_released: model.year_released || "",
+      driveline: model.driveline || "",
+      scale: model.scale || "",
+      chassis_type: model.chassis_type || ""
+    };
+  }
 
-    const drivelineOptions = ["2WD", "4WD", "FWD", "Rear Motor"];
-    const drivelineChoice = window.prompt(
-      "Driveline for " + model.manufacturer + " " + model.name + ":\n\n" +
-      "Enter number:\n1 = 2WD\n2 = 4WD\n3 = FWD\n4 = Rear Motor",
-      "1"
-    );
-    if (drivelineChoice === null) return;
-    const driveline = drivelineOptions[parseInt(drivelineChoice) - 1];
-    if (!driveline) {
-      alert("Invalid selection. Please enter 1, 2, 3 or 4.");
-      return;
-    }
+  @action
+  cancelApproveModel() {
+    this.approvingModelId = null;
+    this.approveModelForm = { year_released: "", driveline: "", scale: "", chassis_type: "" };
+  }
 
-    const scaleOptions = this.scales.length ? this.scales : ["1/8", "1/10", "1/12", "1/28"];
-    const scaleChoice = window.prompt(
-      "Scale for " + model.manufacturer + " " + model.name + ":\n\n" +
-      scaleOptions.map((s, i) => (i+1) + " = " + s).join("\n") +
-      "\n\nEnter number (1-4):",
-      model.scale ? (scaleOptions.indexOf(model.scale) + 1).toString() : "2"
-    );
-    if (scaleChoice === null) return;
-    const scale = scaleOptions[parseInt(scaleChoice) - 1];
-    if (!scale) {
-      alert("Invalid scale selection. Please enter a number between 1 and 4.");
-      return;
-    }
+  @action
+  updateApproveField(field, e) {
+    this.approveModelForm = { ...this.approveModelForm, [field]: e.target.value };
+  }
 
-    const chassisOptions = this.chassisTypes.length ? this.chassisTypes : [
-      "Buggy", "Truck", "Stadium", "Short Course",
-      "Touring Car", "Rally", "Pan Car", "Drift"
-    ];
-    const chassisChoice = window.prompt(
-      "Chassis type for " + model.manufacturer + " " + model.name + ":\n\n" +
-      chassisOptions.map((c, i) => (i+1) + " = " + c).join("\n") +
-      "\n\nEnter number (1-8):",
-      model.chassis_type ? (chassisOptions.indexOf(model.chassis_type) + 1).toString() : "1"
-    );
-    if (chassisChoice === null) return;
-    const chassisType = chassisOptions[parseInt(chassisChoice) - 1];
-    if (!chassisType) {
-      alert("Invalid chassis selection. Please enter a number between 1 and 8.");
-      return;
-    }
-
+  @action
+  async confirmApproveModel() {
     try {
-      await ajax("/des/admin/models/" + model.id + "/approve.json", {
+      await ajax("/des/admin/models/" + this.approvingModelId + "/approve.json", {
         type: "POST",
-        data: { year_released: year, driveline: driveline, scale: scale, chassis_type: chassisType },
+        data: {
+          year_released: this.approveModelForm.year_released,
+          driveline: this.approveModelForm.driveline,
+          scale: this.approveModelForm.scale,
+          chassis_type: this.approveModelForm.chassis_type,
+        },
       });
+      this.approvingModelId = null;
+      this.approveModelForm = { year_released: "", driveline: "", scale: "", chassis_type: "" };
       this.router.refresh();
     } catch (error) {
       popupAjaxError(error);

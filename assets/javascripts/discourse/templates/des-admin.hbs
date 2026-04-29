@@ -182,7 +182,6 @@
         {{/if}}
       </h2>
       {{#if this.model.pending_models.length}}
-        <p class="field-help">When approving, you will be asked to enter the year of first manufacture.</p>
         {{#each this.model.pending_models as |model|}}
           <div class="admin-org-card admin-org-card--pending">
             <div class="admin-org-info">
@@ -195,10 +194,52 @@
               </div>
             </div>
             <div class="admin-org-actions">
-              <button class="btn btn-success" {{on "click" (fn this.approveModel model)}}>✅ Approve</button>
-              <button class="btn btn-danger" {{on "click" (fn this.rejectModel model)}}>❌ Reject</button>
+              <button class="btn btn-success btn-small" {{on "click" (fn this.startApproveModel model)}}>✅ Approve</button>
+              <button class="btn btn-danger btn-small" {{on "click" (fn this.rejectModel model)}}>❌ Reject</button>
             </div>
           </div>
+          {{#if (eq this.approvingModelId model.id)}}
+            <div class="add-model-form" style="margin-top: 8px;">
+              <h4>Approve: {{model.manufacturer}} {{model.name}}</h4>
+              <div class="org-form-row">
+                <div class="org-form-field">
+                  <label>Year of First Manufacture</label>
+                  <input type="number" placeholder="e.g. 2023" value={{this.approveModelForm.year_released}} {{on "input" (fn this.updateApproveField "year_released")}} />
+                </div>
+                <div class="org-form-field">
+                  <label>Driveline</label>
+                  <select {{on "change" (fn this.updateApproveField "driveline")}}>
+                    <option value="">Select...</option>
+                    {{#each this.drivelines as |d|}}
+                      <option value={{d}} selected={{eq this.approveModelForm.driveline d}}>{{d}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+                <div class="org-form-field">
+                  <label>Scale</label>
+                  <select {{on "change" (fn this.updateApproveField "scale")}}>
+                    <option value="">Select...</option>
+                    {{#each this.scales as |s|}}
+                      <option value={{s}} selected={{eq this.approveModelForm.scale s}}>{{s}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+                <div class="org-form-field">
+                  <label>Chassis Type</label>
+                  <select {{on "change" (fn this.updateApproveField "chassis_type")}}>
+                    <option value="">Select...</option>
+                    {{#each this.chassisTypes as |c|}}
+                      <option value={{c}} selected={{eq this.approveModelForm.chassis_type c}}>{{c}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <button class="btn btn-primary" {{on "click" this.confirmApproveModel}}>✅ Confirm Approval</button>
+                <button class="btn btn-default" {{on "click" this.cancelApproveModel}}>✕ Cancel</button>
+              </div>
+            </div>
+          {{/if}}
         {{/each}}
       {{else}}
         <p class="no-pending">No pending car models 🎉</p>
