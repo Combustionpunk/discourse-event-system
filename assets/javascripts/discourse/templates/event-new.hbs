@@ -121,24 +121,24 @@
           <div class="org-form-field">
             <label>Bookings Open</label>
             <select {{on "change" (fn this.updateField "booking_opens_days_before")}}>
-              <option value="">Immediately on creation</option>
-              <option value="7">1 week before event</option>
-              <option value="14">2 weeks before event</option>
-              <option value="21">3 weeks before event</option>
-              <option value="28">4 weeks before event</option>
-              <option value="42">6 weeks before event</option>
-              <option value="56">8 weeks before event</option>
+              <option value="" selected={{eq this.model.event.booking_opens_days_before null}}>Immediately on creation</option>
+              <option value="7" selected={{eq (concat this.model.event.booking_opens_days_before "") "7"}}>1 week before event</option>
+              <option value="14" selected={{eq (concat this.model.event.booking_opens_days_before "") "14"}}>2 weeks before event</option>
+              <option value="21" selected={{eq (concat this.model.event.booking_opens_days_before "") "21"}}>3 weeks before event</option>
+              <option value="28" selected={{eq (concat this.model.event.booking_opens_days_before "") "28"}}>4 weeks before event</option>
+              <option value="42" selected={{eq (concat this.model.event.booking_opens_days_before "") "42"}}>6 weeks before event</option>
+              <option value="56" selected={{eq (concat this.model.event.booking_opens_days_before "") "56"}}>8 weeks before event</option>
             </select>
           </div>
           <div class="org-form-field">
             <label>Bookings Close</label>
             <select {{on "change" (fn this.updateField "booking_closes_days_before")}}>
-              <option value="">On event day</option>
-              <option value="1">1 day before event</option>
-              <option value="2">2 days before event</option>
-              <option value="3">3 days before event</option>
-              <option value="7">1 week before event</option>
-              <option value="14">2 weeks before event</option>
+              <option value="" selected={{eq this.model.event.booking_closes_days_before null}}>On event day</option>
+              <option value="1" selected={{eq (concat this.model.event.booking_closes_days_before "") "1"}}>1 day before event</option>
+              <option value="2" selected={{eq (concat this.model.event.booking_closes_days_before "") "2"}}>2 days before event</option>
+              <option value="3" selected={{eq (concat this.model.event.booking_closes_days_before "") "3"}}>3 days before event</option>
+              <option value="7" selected={{eq (concat this.model.event.booking_closes_days_before "") "7"}}>1 week before event</option>
+              <option value="14" selected={{eq (concat this.model.event.booking_closes_days_before "") "14"}}>2 weeks before event</option>
             </select>
           </div>
         </div>
