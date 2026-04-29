@@ -14,6 +14,6 @@ export default class MyGarageRoute extends Route {
   setupController(controller, model) {
     super.setupController(controller, model);
     controller.loadUserTransponders();
-    controller.checkQueryParams();
+    setTimeout(() => controller.checkQueryParams(), 100);
   }
 }

@@ -84,23 +84,28 @@ export default class MyGarageController extends Controller {
       if (this.manufacturer_id) {
         this.newCar = { ...this.newCar, manufacturer_id: this.manufacturer_id };
         try {
-          const response = await ajax("/des/garage/models.json", { data: { manufacturer_id: this.manufacturer_id } });
+          const response = await ajax("/des/garage/models.json", {
+            data: { manufacturer_id: this.manufacturer_id }
+          });
           this.availableModels = response.models || [];
         } catch {
           this.availableModels = [];
         }
       }
 
-      if (this.model_id) {
-        this.newCar = { ...this.newCar, car_model_id: this.model_id };
+      if (this.model_id && this.availableModels.length) {
         const model = this.availableModels.find(m => String(m.id) === String(this.model_id));
         if (model) {
           this.selectedModel = model;
-          this.newCar = { ...this.newCar, driveline: model.driveline || "" };
+          this.newCar = {
+            ...this.newCar,
+            car_model_id: this.model_id,
+            driveline: model.driveline || ""
+          };
         }
       }
 
-      // Clear query params so they don't persist on refresh
+      // Clear query params
       this.manufacturer_id = null;
       this.model_id = null;
     }
