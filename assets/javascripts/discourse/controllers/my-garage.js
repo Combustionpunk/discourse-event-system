@@ -7,6 +7,9 @@ import { inject as service } from "@ember/service";
 
 export default class MyGarageController extends Controller {
   @service router;
+  queryParams = ["manufacturer_id", "model_id"];
+  @tracked manufacturer_id = null;
+  @tracked model_id = null;
   @tracked showAddForm = false;
   @tracked isSaving = false;
   @tracked availableModels = [];
@@ -68,6 +71,38 @@ export default class MyGarageController extends Controller {
       this.userTransponders = response.transponders;
     } catch {
       this.userTransponders = [];
+    }
+  }
+
+  @action
+  async checkQueryParams() {
+    if (this.manufacturer_id || this.model_id) {
+      this.showAddForm = true;
+      await this.loadScalesAndChassisTypes();
+      await this.loadUserTransponders();
+
+      if (this.manufacturer_id) {
+        this.newCar = { ...this.newCar, manufacturer_id: this.manufacturer_id };
+        try {
+          const response = await ajax("/des/garage/models.json", { data: { manufacturer_id: this.manufacturer_id } });
+          this.availableModels = response.models || [];
+        } catch {
+          this.availableModels = [];
+        }
+      }
+
+      if (this.model_id) {
+        this.newCar = { ...this.newCar, car_model_id: this.model_id };
+        const model = this.availableModels.find(m => String(m.id) === String(this.model_id));
+        if (model) {
+          this.selectedModel = model;
+          this.newCar = { ...this.newCar, driveline: model.driveline || "" };
+        }
+      }
+
+      // Clear query params so they don't persist on refresh
+      this.manufacturer_id = null;
+      this.model_id = null;
     }
   }
 

@@ -279,6 +279,11 @@ export default class CarModelsController extends Controller {
 
   @action
   addToGarage(model) {
-    this.router.transitionTo("my-garage");
+    this.router.transitionTo("my-garage", {
+      queryParams: {
+        manufacturer_id: String(model.manufacturer_id),
+        model_id: String(model.id)
+      }
+    });
   }
 }
