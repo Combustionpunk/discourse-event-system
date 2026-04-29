@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show, :public_entrants]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :update_booking_status, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :clone, :update_booking_status, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
 
     def index
       events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes, :venue)
@@ -360,6 +360,65 @@ module DiscourseEventSystem
       service = DesBookingService.new(current_user, @event)
       result = service.cancel_event_and_refund(params[:reason], current_user)
       render json: { event: serialize_event(@event), refund_summary: result.summary }
+    end
+
+    def clone
+      ensure_organisation_admin!(@event.organisation)
+
+      new_title = params[:title].to_s.strip
+      new_start_date = params[:start_date]
+
+      return render json: { error: "Title is required" }, status: :unprocessable_entity if new_title.blank?
+      return render json: { error: "Start date is required" }, status: :unprocessable_entity if new_start_date.blank?
+
+      new_event = DesEvent.create!(
+        organisation_id: @event.organisation_id,
+        event_type_id: @event.event_type_id,
+        venue_id: @event.venue_id,
+        title: new_title,
+        description: @event.description,
+        start_date: new_start_date,
+        end_date: @event.end_date ? (Time.parse(new_start_date) + (@event.end_date - @event.start_date)) : nil,
+        location: @event.location,
+        google_maps_url: @event.google_maps_url,
+        capacity: @event.capacity,
+        refund_cutoff_days: @event.refund_cutoff_days,
+        booking_type: @event.booking_type,
+        external_booking_url: @event.external_booking_url,
+        external_booking_details: @event.external_booking_details,
+        max_classes_per_booking: @event.max_classes_per_booking,
+        booking_opens_days_before: @event.booking_opens_days_before,
+        booking_closes_days_before: @event.booking_closes_days_before,
+        status: 'draft',
+        created_by: current_user.id
+      )
+
+      @event.des_event_classes.each do |cls|
+        new_event.des_event_classes.create!(
+          class_type_id: cls.class_type_id,
+          capacity: cls.capacity,
+          status: cls.status
+        )
+      end
+
+      if @event.des_event_pricing_rule
+        pr = @event.des_event_pricing_rule
+        DesEventPricingRule.create!(
+          event_id: new_event.id,
+          rule_type: pr.rule_type,
+          flat_price: pr.flat_price,
+          first_class_price: pr.first_class_price,
+          subsequent_class_price: pr.subsequent_class_price,
+          member_first_class_discount: pr.member_first_class_discount,
+          member_subsequent_discount: pr.member_subsequent_discount,
+          junior_first_class_discount: pr.junior_first_class_discount,
+          junior_subsequent_discount: pr.junior_subsequent_discount
+        )
+      end
+
+      render json: { success: true, event_id: new_event.id }, status: :created
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
 
     def update_booking_status
