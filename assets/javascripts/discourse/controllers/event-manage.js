@@ -11,6 +11,8 @@ export default class EventManageController extends Controller {
   @tracked isSaving = false;
   @tracked activeTab = "details";
   @tracked editMode = false;
+  @tracked bookingOpensDaysBefore = "";
+  @tracked bookingClosesDaysBefore = "";
   @tracked editDescription = "";
   @tracked editRcResultsMeetingId = null;
   @tracked classTypes = null;
@@ -382,8 +384,22 @@ export default class EventManageController extends Controller {
   @action
   toggleEdit() {
     this.editMode = !this.editMode;
-    if (this.editMode) this.editDescription = this.model.event.description || "";
-    if (this.editMode) this.editRcResultsMeetingId = this.model.event.rc_results_meeting_id || null;
+    if (this.editMode) {
+      this.editDescription = this.model.event.description || "";
+      this.editRcResultsMeetingId = this.model.event.rc_results_meeting_id || null;
+      this.bookingOpensDaysBefore = this.model.event.booking_opens_days_before ? String(this.model.event.booking_opens_days_before) : "";
+      this.bookingClosesDaysBefore = this.model.event.booking_closes_days_before ? String(this.model.event.booking_closes_days_before) : "";
+    }
+  }
+
+  @action
+  updateBookingOpens(e) {
+    this.bookingOpensDaysBefore = e.target.value;
+  }
+
+  @action
+  updateBookingCloses(e) {
+    this.bookingClosesDaysBefore = e.target.value;
   }
 
   @action
@@ -411,6 +427,8 @@ export default class EventManageController extends Controller {
             location: this.model.event.location,
             google_maps_url: this.model.event.google_maps_url,
             max_classes_per_booking: this.model.event.max_classes_per_booking,
+            booking_opens_days_before: this.bookingOpensDaysBefore ? parseInt(this.bookingOpensDaysBefore) : null,
+            booking_closes_days_before: this.bookingClosesDaysBefore ? parseInt(this.bookingClosesDaysBefore) : null,
             venue_id: this.model.event.venue_id,
             rc_results_meeting_id: this.editRcResultsMeetingId,
           }
