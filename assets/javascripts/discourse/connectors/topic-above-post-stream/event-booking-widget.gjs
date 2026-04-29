@@ -165,10 +165,19 @@ export default class EventBookingWidget extends Component {
 
 
   get bookingClosed() {
+    if (this.event?.booking_manually_closed) return true;
+    if (this.event?.booking_manually_open) return false;
+    if (this.event?.booking_open === false) return true;
     if (!this.event?.booking_closing_date) return false;
     return new Date(this.event.booking_closing_date) < new Date();
   }
 
+  get bookingNotOpenYet() {
+    if (this.event?.booking_manually_closed) return false;
+    if (this.event?.booking_manually_open) return false;
+    if (!this.event?.booking_opens_at) return false;
+    return new Date(this.event.booking_opens_at) > new Date();
+  }
 
   get refundPeriodEnded() {
     if (!this.event?.refund_cutoff_days || !this.event?.start_date) return false;
@@ -176,7 +185,7 @@ export default class EventBookingWidget extends Component {
     return new Date() > cutoff;
   }
   get bookingDisabled() {
-    return this.event?.status === "cancelled" || this.bookingClosed;
+    return this.event?.status === "cancelled" || this.bookingClosed || this.bookingNotOpenYet;
   }
 
   get totalEntrantCount() {
@@ -477,8 +486,18 @@ export default class EventBookingWidget extends Component {
 
         {{#if (eq this.event.status "cancelled")}}
           <div class="event-cancelled-banner">⚠️ This event has been cancelled.</div>
+        {{else if this.bookingNotOpenYet}}
+          <div class="event-closed-banner">⏳ Bookings are not yet open for this event.
+            {{#if this.event.booking_opens_at}}
+              <span class="field-help">Bookings open: {{this.event.booking_opens_at}}</span>
+            {{/if}}
+          </div>
         {{else if this.bookingClosed}}
-          <div class="event-closed-banner">⏰ Booking has closed for this event.</div>
+          <div class="event-closed-banner">⏰ Booking has closed for this event.
+            {{#if this.event.booking_manually_closed}}
+              <span class="field-help">Bookings have been manually closed by the organiser.</span>
+            {{/if}}
+          </div>
         {{/if}}
 
         {{#unless this.bookingDisabled}}
