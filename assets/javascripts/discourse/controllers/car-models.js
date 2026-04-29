@@ -136,8 +136,9 @@ export default class CarModelsController extends Controller {
   }
 
   @action
-  updateManufacturerLogoUrl(e) {
-    this.editManufacturerLogoUrl = e.target.value;
+  manufacturerLogoUploaded(upload) {
+    this.editManufacturerLogoUploadId = upload.id;
+    this.editManufacturerLogoUrl = upload.url;
   }
 
   @action

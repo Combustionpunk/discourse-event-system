@@ -112,14 +112,11 @@
             </div>
             <div class="org-form-field" style="margin-top:8px;">
               <label>Logo</label>
-              {{#if this.editManufacturerLogoUrl}}
-                <div style="margin-bottom:8px;">
-                  <img src={{this.editManufacturerLogoUrl}} alt={{mfr.name}} style="height:60px;width:auto;" />
-                  <button class="btn btn-small btn-danger" style="margin-left:8px;" {{on "click" this.removeManufacturerLogo}}>🗑 Remove</button>
-                </div>
-              {{/if}}
-              <p class="field-help">Upload a logo via the Discourse upload dialog, then paste the URL here:</p>
-              <input type="text" placeholder="Logo URL" value={{this.editManufacturerLogoUrl}} {{on "input" this.updateManufacturerLogoUrl}} />
+              <DesLogoUploader
+                @logoUrl={{this.editManufacturerLogoUrl}}
+                @onUpload={{this.manufacturerLogoUploaded}}
+                @onRemove={{this.removeManufacturerLogo}}
+              />
             </div>
             <div style="display:flex;gap:8px;margin-top:12px;">
               <button class="btn btn-primary" {{on "click" this.saveEditManufacturer}}>💾 Save</button>
