@@ -153,6 +153,8 @@ export default class EventNewController extends Controller {
             start_date: this.model.event.start_date,
             end_date: this.model.event.end_date,
             booking_closing_date: this.model.event.booking_closing_date,
+            booking_opens_days_before: this.model.event.booking_opens_days_before || null,
+            booking_closes_days_before: this.model.event.booking_closes_days_before || null,
             location: this.model.event.location,
             google_maps_url: this.model.event.google_maps_url,
             refund_cutoff_days: this.model.event.refund_cutoff_days || 7,

@@ -119,12 +119,30 @@
       {{else}}
         <div class="org-form-row">
           <div class="org-form-field">
-            <label>Booking Closing Date</label>
-            <input
-              type="datetime-local"
-              {{on "change" (fn this.updateField "booking_closing_date")}}
-            />
+            <label>Bookings Open</label>
+            <select {{on "change" (fn this.updateField "booking_opens_days_before")}}>
+              <option value="">Immediately on creation</option>
+              <option value="7">1 week before event</option>
+              <option value="14">2 weeks before event</option>
+              <option value="21">3 weeks before event</option>
+              <option value="28">4 weeks before event</option>
+              <option value="42">6 weeks before event</option>
+              <option value="56">8 weeks before event</option>
+            </select>
           </div>
+          <div class="org-form-field">
+            <label>Bookings Close</label>
+            <select {{on "change" (fn this.updateField "booking_closes_days_before")}}>
+              <option value="">On event day</option>
+              <option value="1">1 day before event</option>
+              <option value="2">2 days before event</option>
+              <option value="3">3 days before event</option>
+              <option value="7">1 week before event</option>
+              <option value="14">2 weeks before event</option>
+            </select>
+          </div>
+        </div>
+        <div class="org-form-row">
           <div class="org-form-field">
             <label>Refund Cutoff (days before event)</label>
             <input

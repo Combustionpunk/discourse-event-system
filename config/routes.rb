@@ -30,6 +30,7 @@ DiscourseEventSystem::Engine.routes.draw do
   put "/des/events/:id/pricing" => "events#update_pricing"
   post "/des/events/:id/publish" => "events#publish"
   post "/des/events/:id/cancel" => "events#cancel"
+  put "/des/events/:id/booking-status" => "events#update_booking_status"
   get "/des/events/:id/entrants" => "events#entrants"
   get "/des/events/:id/public-entrants" => "events#public_entrants"
   get "/des/events/:id/export-csv" => "events#export_csv"

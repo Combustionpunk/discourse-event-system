@@ -426,6 +426,51 @@ export default class EventManageController extends Controller {
   }
 
   @action
+  async closeBookings() {
+    if (!window.confirm("Close bookings for this event?")) return;
+    try {
+      await ajax(`/des/events/${this.model.event.id}/booking-status.json`, {
+        type: "PUT",
+        data: { booking_manually_closed: true, booking_manually_open: false }
+      });
+      this.router.refresh();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async reopenBookings() {
+    try {
+      await ajax(`/des/events/${this.model.event.id}/booking-status.json`, {
+        type: "PUT",
+        data: { booking_manually_closed: false, booking_manually_open: false }
+      });
+      this.router.refresh();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async forceOpenBookings() {
+    try {
+      await ajax(`/des/events/${this.model.event.id}/booking-status.json`, {
+        type: "PUT",
+        data: { booking_manually_closed: false, booking_manually_open: true }
+      });
+      this.router.refresh();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async clearManualBookingOverride() {
+    try {
+      await ajax(`/des/events/${this.model.event.id}/booking-status.json`, {
+        type: "PUT",
+        data: { booking_manually_closed: false, booking_manually_open: false }
+      });
+      this.router.refresh();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
   async publishEvent() {
     if (!window.confirm("Publish this event? It will become visible to all users.")) return;
     try {
