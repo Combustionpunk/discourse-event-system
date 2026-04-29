@@ -530,20 +530,24 @@ export default class EventManageController extends Controller {
   }
 
   @action
-  async confirmCloneEvent({ title, startDate }) {
+  async confirmCloneEvent(clones) {
     try {
-      const response = await ajax(`/des/events/${this.model.event.id}/clone.json`, {
-        type: "POST",
-        data: { title, start_date: startDate }
-      });
+      const results = await Promise.all(
+        clones.map(clone =>
+          ajax(`/des/events/${this.model.event.id}/clone.json`, {
+            type: "POST",
+            data: { title: clone.title, start_date: clone.startDate }
+          })
+        )
+      );
       this.showCloneModal = false;
-      if (response.event_id) {
-        const goToEvent = window.confirm(
-          "Event cloned successfully! Would you like to go to the new event?"
-        );
-        if (goToEvent) {
-          this.router.transitionTo("event-manage", response.event_id);
-        }
+      const count = results.length;
+      const lastId = results[results.length - 1].event_id;
+      const goToEvent = window.confirm(
+        `${count} event${count > 1 ? "s" : ""} cloned successfully! Would you like to go to the last created event?`
+      );
+      if (goToEvent) {
+        this.router.transitionTo("event-manage", lastId);
       }
     } catch (error) {
       popupAjaxError(error);
