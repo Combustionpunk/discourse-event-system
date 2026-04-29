@@ -7,9 +7,6 @@ import { inject as service } from "@ember/service";
 
 export default class MyGarageController extends Controller {
   @service router;
-  queryParams = ["manufacturer_id", "model_id"];
-  @tracked manufacturer_id = null;
-  @tracked model_id = null;
   @tracked showAddForm = false;
   @tracked isSaving = false;
   @tracked availableModels = [];
@@ -43,26 +40,14 @@ export default class MyGarageController extends Controller {
   @tracked editCarTransponderNew = "";
 
   @action
-  async toggleAddForm() {
+  toggleAddForm() {
     this.showAddForm = !this.showAddForm;
-    this.resetForm();
-    if (this.showAddForm) {
-      await this.loadScalesAndChassisTypes();
-      await this.loadUserTransponders();
-    }
   }
 
-  async loadScalesAndChassisTypes() {
-    try {
-      const [scalesResp, chassisResp] = await Promise.all([
-        ajax("/des/admin/scales.json"),
-        ajax("/des/admin/chassis-types.json"),
-      ]);
-      this.scales = scalesResp.scales.map(s => s.name);
-      this.chassisTypes = chassisResp.chassis_types.map(c => c.name);
-    } catch {
-      // fall back to empty if endpoints unavailable
-    }
+  @action
+  onCarAdded() {
+    this.showAddForm = false;
+    this.router.refresh();
   }
 
   async loadUserTransponders() {
@@ -71,43 +56,6 @@ export default class MyGarageController extends Controller {
       this.userTransponders = response.transponders;
     } catch {
       this.userTransponders = [];
-    }
-  }
-
-  @action
-  async checkQueryParams() {
-    if (this.manufacturer_id || this.model_id) {
-      this.showAddForm = true;
-      await this.loadScalesAndChassisTypes();
-      await this.loadUserTransponders();
-
-      if (this.manufacturer_id) {
-        this.newCar = { ...this.newCar, manufacturer_id: this.manufacturer_id };
-        try {
-          const response = await ajax("/des/garage/models.json", {
-            data: { manufacturer_id: this.manufacturer_id }
-          });
-          this.availableModels = response.models || [];
-        } catch {
-          this.availableModels = [];
-        }
-      }
-
-      if (this.model_id && this.availableModels.length) {
-        const model = this.availableModels.find(m => String(m.id) === String(this.model_id));
-        if (model) {
-          this.selectedModel = model;
-          this.newCar = {
-            ...this.newCar,
-            car_model_id: this.model_id,
-            driveline: model.driveline || ""
-          };
-        }
-      }
-
-      // Clear query params
-      this.manufacturer_id = null;
-      this.model_id = null;
     }
   }
 

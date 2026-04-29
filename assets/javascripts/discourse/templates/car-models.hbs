@@ -323,4 +323,13 @@
       </div>
     </div>
   {{/each}}
+
+  {{#if this.showAddCarModal}}
+    <DesAddCarModal
+      @manufacturerId={{this.addCarManufacturerId}}
+      @modelId={{this.addCarModelId}}
+      @onSave={{this.onCarAdded}}
+      @onClose={{this.closeAddCarModal}}
+    />
+  {{/if}}
 </div>

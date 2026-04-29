@@ -277,13 +277,28 @@ export default class CarModelsController extends Controller {
     } catch (error) { popupAjaxError(error); }
   }
 
+  @tracked showAddCarModal = false;
+  @tracked addCarManufacturerId = null;
+  @tracked addCarModelId = null;
+
   @action
   addToGarage(model) {
-    this.router.transitionTo("my-garage", {
-      queryParams: {
-        manufacturer_id: String(model.manufacturer_id),
-        model_id: String(model.id)
-      }
-    });
+    this.addCarManufacturerId = model.manufacturer_id;
+    this.addCarModelId = model.id;
+    this.showAddCarModal = true;
+  }
+
+  @action
+  closeAddCarModal() {
+    this.showAddCarModal = false;
+    this.addCarManufacturerId = null;
+    this.addCarModelId = null;
+  }
+
+  @action
+  onCarAdded() {
+    this.showAddCarModal = false;
+    this.addCarManufacturerId = null;
+    this.addCarModelId = null;
   }
 }
