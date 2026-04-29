@@ -211,11 +211,11 @@
               {{#if model.created_by}}<span class="field-help">Suggested by {{model.created_by}}</span>{{/if}}
             </div>
             <div class="model-card-actions">
-              {{#if (eq model.status "approved")}}
+              {{#unless (eq model.status "pending")}}
                 {{#if this.currentUser}}
                   <button class="btn btn-primary btn-small" {{on "click" (fn this.addToGarage model)}}>🚗 Add to My Garage</button>
                 {{/if}}
-              {{/if}}
+              {{/unless}}
               {{#if this.currentUser.admin}}
                 {{#if (eq model.status "pending")}}
                   <button class="btn btn-success btn-small" {{on "click" (fn this.startApproveModel model)}}>✅ Approve</button>
