@@ -582,15 +582,34 @@
             <div class="admin-org-info">
               <strong>{{venue.name}}</strong>
               <div class="admin-org-meta">
-                <span>📍 {{venue.address}}</span>
-                {{#if venue.track_category}}<span class="venue-badge venue-badge--category">{{venue.track_category}}</span>{{/if}}
-                {{#if venue.track_surface}}<span class="venue-badge venue-badge--surface">{{venue.track_surface}}</span>{{/if}}
+                {{#if venue.address}}<span>📍 {{venue.address}}</span>{{/if}}
+                {{#if venue.track_category}}<span>{{venue.track_category}}</span>{{/if}}
+                {{#if venue.track_surface}}<span>{{venue.track_surface}}</span>{{/if}}
+                {{#if venue.track_environment}}<span>{{venue.track_environment}}</span>{{/if}}
+                {{#if venue.is_shared}}<span>🤝 Shared</span>{{/if}}
+                {{#if venue.has_permanent_toilets}}<span>🚻</span>{{/if}}
+                {{#if venue.has_portaloos}}<span>🚽</span>{{/if}}
+                {{#if venue.has_cafe}}<span>☕</span>{{/if}}
+                {{#if venue.has_bar}}<span>🍺</span>{{/if}}
+                {{#if venue.has_showers}}<span>🚿</span>{{/if}}
+                {{#if venue.has_power_supply}}<span>⚡</span>{{/if}}
+                {{#if venue.has_water_supply}}<span>💧</span>{{/if}}
+                {{#if venue.has_camping}}<span>⛺</span>{{/if}}
               </div>
             </div>
             <div class="admin-org-actions">
+              <button class="btn btn-small btn-default" {{on "click" (fn this.startEditVenue venue)}}>✏️ Edit</button>
               <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteVenue venue)}}>🗑 Delete</button>
             </div>
           </div>
+          {{#if (eq this.editingVenueId venue.id)}}
+            <DesVenueForm
+              @venue={{venue}}
+              @onSave={{this.saveEditVenue}}
+              @onCancel={{this.cancelEditVenue}}
+              @saveLabel="💾 Save Changes"
+            />
+          {{/if}}
         {{/if}}
       {{/each}}
     </div>

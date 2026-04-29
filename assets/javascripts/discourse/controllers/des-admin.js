@@ -128,6 +128,32 @@ export default class DesAdminController extends Controller {
     this.loadAdminVenues();
   }
 
+  @tracked editingVenueId = null;
+
+  @action
+  startEditVenue(venue) {
+    this.editingVenueId = venue.id;
+  }
+
+  @action
+  cancelEditVenue() {
+    this.editingVenueId = null;
+  }
+
+  @action
+  async saveEditVenue(formData) {
+    try {
+      await ajax(`/des/venues/${this.editingVenueId}.json`, {
+        type: "PUT",
+        data: formData
+      });
+      this.editingVenueId = null;
+      this.loadAdminVenues();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
   @action
   async setTabScales() {
     this.activeTab = "scales";
