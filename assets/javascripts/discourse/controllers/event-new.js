@@ -12,6 +12,8 @@ export default class EventNewController extends Controller {
   @tracked bookingType = "internal";
   @tracked pricingType = "tiered";
   @tracked description = "";
+  @tracked bookingOpensDaysBefore = "";
+  @tracked bookingClosesDaysBefore = "";
 
   get clubVenues() {
     const orgId = this.model.event.organisation_id;
@@ -48,6 +50,18 @@ export default class EventNewController extends Controller {
   }
 
   @action
+  @action
+  updateBookingOpens(e) {
+    this.bookingOpensDaysBefore = e.target.value;
+    this.model.event.booking_opens_days_before = e.target.value ? parseInt(e.target.value) : null;
+  }
+
+  @action
+  updateBookingCloses(e) {
+    this.bookingClosesDaysBefore = e.target.value;
+    this.model.event.booking_closes_days_before = e.target.value ? parseInt(e.target.value) : null;
+  }
+
   async updateField(field, event) {
     this.model.event[field] = event.target.value;
     if (field === "booking_type") {

@@ -20,6 +20,8 @@ export default class EventNewRoute extends Route {
           google_maps_url: "",
           refund_cutoff_days: 7,
           booking_type: "internal",
+          booking_opens_days_before: null,
+          booking_closes_days_before: null,
           external_booking_url: "",
           external_booking_details: "",
         },
@@ -40,5 +42,11 @@ export default class EventNewRoute extends Route {
       model.venues = venuesData.venues || [];
       return model;
     });
+  }
+
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    controller.bookingOpensDaysBefore = model.event.booking_opens_days_before ? String(model.event.booking_opens_days_before) : "";
+    controller.bookingClosesDaysBefore = model.event.booking_closes_days_before ? String(model.event.booking_closes_days_before) : "";
   }
 }
