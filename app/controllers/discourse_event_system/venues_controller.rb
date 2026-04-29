@@ -79,7 +79,7 @@ module DiscourseEventSystem
         :name, :address, :google_maps_url, :track_category, :track_surface,
         :track_environment, :website, :description, :parking_info,
         :local_facilities, :access_notes, :created_by_organisation_id,
-        :has_portaloos, :has_permanent_toilets, :has_bar, :has_showers,
+        :has_portaloos, :has_permanent_toilets, :has_bar, :has_cafe, :has_showers,
         :has_power_supply, :has_water_supply, :has_camping, :is_shared
       )
     end
@@ -104,6 +104,7 @@ module DiscourseEventSystem
         has_portaloos: venue.has_portaloos,
         has_permanent_toilets: venue.has_permanent_toilets,
         has_bar: venue.has_bar,
+        has_cafe: venue.has_cafe,
         has_showers: venue.has_showers,
         has_power_supply: venue.has_power_supply,
         has_water_supply: venue.has_water_supply,

@@ -11,7 +11,7 @@ export default class DesVenueForm extends Component {
     name: "", address: "", google_maps_url: "", website: "",
     track_category: "", track_surface: "", track_environment: "",
     description: "", parking_info: "", access_notes: "",
-    has_portaloos: false, has_permanent_toilets: false, has_bar: false,
+    has_portaloos: false, has_permanent_toilets: false, has_bar: false, has_cafe: false,
     has_showers: false, has_power_supply: false, has_water_supply: false,
     has_camping: false, is_shared: false
   };
@@ -130,6 +130,7 @@ export default class DesVenueForm extends Component {
           <label><input type="checkbox" checked={{this.formData.has_portaloos}} {{on "change" (fn this.toggleFacility "has_portaloos")}} /> 🚽 Portaloos</label>
           <label><input type="checkbox" checked={{this.formData.has_permanent_toilets}} {{on "change" (fn this.toggleFacility "has_permanent_toilets")}} /> 🚻 Permanent Toilets</label>
           <label><input type="checkbox" checked={{this.formData.has_bar}} {{on "change" (fn this.toggleFacility "has_bar")}} /> 🍺 Bar</label>
+          <label><input type="checkbox" checked={{this.formData.has_cafe}} {{on "change" (fn this.toggleFacility "has_cafe")}} /> ☕ Café</label>
           <label><input type="checkbox" checked={{this.formData.has_showers}} {{on "change" (fn this.toggleFacility "has_showers")}} /> 🚿 Showers</label>
           <label><input type="checkbox" checked={{this.formData.has_power_supply}} {{on "change" (fn this.toggleFacility "has_power_supply")}} /> ⚡ Power Supply</label>
           <label><input type="checkbox" checked={{this.formData.has_water_supply}} {{on "change" (fn this.toggleFacility "has_water_supply")}} /> 💧 Water Supply</label>

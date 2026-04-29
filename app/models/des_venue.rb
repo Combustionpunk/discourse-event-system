@@ -5,7 +5,7 @@ class DesVenue < ActiveRecord::Base
   TRACK_CATEGORIES = %w[onroad offroad].freeze
   TRACK_SURFACES = %w[carpet astroturf grass tarmac mixed].freeze
   TRACK_ENVIRONMENTS = %w[outdoor indoor_covered].freeze
-  FACILITIES = %w[has_portaloos has_permanent_toilets has_bar has_showers has_power_supply has_water_supply has_camping].freeze
+  FACILITIES = %w[has_portaloos has_permanent_toilets has_bar has_cafe has_showers has_power_supply has_water_supply has_camping].freeze
 
   belongs_to :organisation, class_name: 'DesOrganisation', foreign_key: 'created_by_organisation_id', optional: true
   has_many :events, class_name: 'DesEvent', foreign_key: 'venue_id'
