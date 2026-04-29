@@ -99,3 +99,19 @@
     margin-top: 8px;
   }
 }
+
+.manufacturer-logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px;
+}
+
+.manufacturer-logo-heading {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 8px;
+}

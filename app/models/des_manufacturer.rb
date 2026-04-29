@@ -2,6 +2,7 @@
 
 class DesManufacturer < ActiveRecord::Base
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by', optional: true
+  belongs_to :logo, class_name: 'Upload', foreign_key: 'logo_upload_id', optional: true
   has_many :car_models, class_name: 'DesCarModel', foreign_key: 'manufacturer_id'
 
   validates :name, presence: true, uniqueness: true

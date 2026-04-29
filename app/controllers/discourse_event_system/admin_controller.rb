@@ -85,7 +85,9 @@ module DiscourseEventSystem
 
     def update_manufacturer
       manufacturer = DesManufacturer.find(params[:id])
-      manufacturer.update!(name: params[:name].to_s.strip)
+      attrs = { name: params[:name].to_s.strip }
+      attrs[:logo_upload_id] = params[:logo_upload_id].presence if params.key?(:logo_upload_id)
+      manufacturer.update!(attrs)
       render json: { success: true, name: manufacturer.name }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
@@ -317,7 +319,9 @@ module DiscourseEventSystem
         id: manufacturer.id,
         name: manufacturer.name,
         created_by: manufacturer.creator&.username,
-        status: manufacturer.status
+        status: manufacturer.status,
+        logo_upload_id: manufacturer.logo_upload_id,
+        logo_url: manufacturer.logo&.url
       }
     end
 

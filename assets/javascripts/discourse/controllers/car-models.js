@@ -109,14 +109,57 @@ export default class CarModelsController extends Controller {
     } catch (error) { popupAjaxError(error); }
   }
 
+  @tracked editingManufacturerId = null;
+  @tracked editManufacturerName = "";
+  @tracked editManufacturerLogoUploadId = null;
+  @tracked editManufacturerLogoUrl = null;
+
   @action
   startEditManufacturer(mfr) {
-    const name = window.prompt("Edit manufacturer name:", mfr.name);
-    if (!name || name === mfr.name) return;
-    ajax(`/des/admin/manufacturers/${mfr.id}.json`, {
-      type: "PUT",
-      data: { name }
-    }).then(() => this.router.refresh()).catch(popupAjaxError);
+    this.editingManufacturerId = mfr.id;
+    this.editManufacturerName = mfr.name;
+    this.editManufacturerLogoUploadId = mfr.logo_upload_id || null;
+    this.editManufacturerLogoUrl = mfr.logo_url || null;
+  }
+
+  @action
+  cancelEditManufacturer() {
+    this.editingManufacturerId = null;
+    this.editManufacturerName = "";
+    this.editManufacturerLogoUploadId = null;
+    this.editManufacturerLogoUrl = null;
+  }
+
+  @action
+  updateEditManufacturerName(e) {
+    this.editManufacturerName = e.target.value;
+  }
+
+  @action
+  updateManufacturerLogoUrl(e) {
+    this.editManufacturerLogoUrl = e.target.value;
+  }
+
+  @action
+  removeManufacturerLogo() {
+    this.editManufacturerLogoUploadId = null;
+    this.editManufacturerLogoUrl = null;
+  }
+
+  @action
+  async saveEditManufacturer() {
+    if (!this.editManufacturerName.trim()) return;
+    try {
+      await ajax(`/des/admin/manufacturers/${this.editingManufacturerId}.json`, {
+        type: "PUT",
+        data: {
+          name: this.editManufacturerName.trim(),
+          logo_upload_id: this.editManufacturerLogoUploadId
+        }
+      });
+      this.editingManufacturerId = null;
+      this.router.refresh();
+    } catch (error) { popupAjaxError(error); }
   }
 
   @action

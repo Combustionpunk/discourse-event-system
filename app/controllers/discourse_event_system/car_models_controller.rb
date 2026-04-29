@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class CarModelsController < ApplicationController
     def index
-      manufacturers = DesManufacturer.all.order(:name)
+      manufacturers = DesManufacturer.includes(:logo).all.order(:name)
       models = DesCarModel.includes(:manufacturer).order(:name)
 
       render json: {
@@ -15,6 +15,7 @@ module DiscourseEventSystem
             manufacturer_id: mfr.id,
             manufacturer_name: mfr.name,
             manufacturer_status: mfr.status,
+            manufacturer_logo_url: mfr.logo&.url,
             models: mfr_models.map { |m| serialize_model(m) }
           }
         }.compact
@@ -40,7 +41,8 @@ module DiscourseEventSystem
         id: m.id,
         name: m.name,
         status: m.status,
-        logo_url: nil
+        logo_upload_id: m.logo_upload_id,
+        logo_url: m.logo&.url
       }
     end
 

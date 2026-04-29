@@ -64,7 +64,13 @@
         <div class="manufacturers-grid">
           {{#each this.pendingManufacturers as |mfr|}}
             <div class="manufacturer-card manufacturer-card--pending">
-              <div class="manufacturer-card-logo">🏭</div>
+              <div class="manufacturer-card-logo">
+            {{#if mfr.logo_url}}
+              <img src={{mfr.logo_url}} alt={{mfr.name}} class="manufacturer-logo" />
+            {{else}}
+              🏭
+            {{/if}}
+          </div>
               <div class="manufacturer-card-name">{{mfr.name}}</div>
               <div class="manufacturer-card-status">⏳ Pending</div>
               <div class="manufacturer-card-actions">
@@ -81,7 +87,13 @@
     <div class="manufacturers-grid" style="margin-top:16px;">
       {{#each this.approvedManufacturers as |mfr|}}
         <a href="#manufacturer-{{mfr.id}}" class="manufacturer-card">
-          <div class="manufacturer-card-logo">🏭</div>
+          <div class="manufacturer-card-logo">
+            {{#if mfr.logo_url}}
+              <img src={{mfr.logo_url}} alt={{mfr.name}} class="manufacturer-logo" />
+            {{else}}
+              🏭
+            {{/if}}
+          </div>
           <div class="manufacturer-card-name">{{mfr.name}}</div>
           {{#if this.currentUser.admin}}
             <div class="manufacturer-card-actions">
@@ -89,6 +101,32 @@
             </div>
           {{/if}}
         </a>
+        {{#if (eq this.editingManufacturerId mfr.id)}}
+          <div class="add-model-form" style="margin-top:8px;">
+            <h4>Edit: {{mfr.name}}</h4>
+            <div class="org-form-row">
+              <div class="org-form-field">
+                <label>Name</label>
+                <input type="text" value={{this.editManufacturerName}} {{on "input" this.updateEditManufacturerName}} />
+              </div>
+            </div>
+            <div class="org-form-field" style="margin-top:8px;">
+              <label>Logo</label>
+              {{#if this.editManufacturerLogoUrl}}
+                <div style="margin-bottom:8px;">
+                  <img src={{this.editManufacturerLogoUrl}} alt={{mfr.name}} style="height:60px;width:auto;" />
+                  <button class="btn btn-small btn-danger" style="margin-left:8px;" {{on "click" this.removeManufacturerLogo}}>🗑 Remove</button>
+                </div>
+              {{/if}}
+              <p class="field-help">Upload a logo via the Discourse upload dialog, then paste the URL here:</p>
+              <input type="text" placeholder="Logo URL" value={{this.editManufacturerLogoUrl}} {{on "input" this.updateManufacturerLogoUrl}} />
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-primary" {{on "click" this.saveEditManufacturer}}>💾 Save</button>
+              <button class="btn btn-default" {{on "click" this.cancelEditManufacturer}}>✕ Cancel</button>
+            </div>
+          </div>
+        {{/if}}
       {{/each}}
     </div>
   </div>
@@ -97,7 +135,11 @@
   {{#each this.model.models_by_manufacturer as |group|}}
     <div class="des-admin-section" id="manufacturer-{{group.manufacturer_id}}">
       <div class="section-header">
-        <h2>{{group.manufacturer_name}}
+        <h2>
+          {{#if group.manufacturer_logo_url}}
+            <img src={{group.manufacturer_logo_url}} alt={{group.manufacturer_name}} class="manufacturer-logo-heading" />
+          {{/if}}
+          {{group.manufacturer_name}}
           {{#if (eq group.manufacturer_status "pending")}}
             <span class="pending-tag">⏳ Pending</span>
           {{/if}}
