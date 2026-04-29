@@ -595,5 +595,12 @@
     </div>
   {{/if}}
 
+  {{#if this.showCloneModal}}
+    <DesCloneEventModal
+      @originalTitle={{this.model.event.title}}
+      @onSave={{this.confirmCloneEvent}}
+      @onClose={{this.closeCloneModal}}
+    />
+  {{/if}}
 
 </div>

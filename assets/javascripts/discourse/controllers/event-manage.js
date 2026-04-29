@@ -499,26 +499,26 @@ export default class EventManageController extends Controller {
     }
   }
 
+  @tracked showCloneModal = false;
+
   @action
-  async cloneEvent() {
-    const title = window.prompt(
-      "Enter a title for the cloned event:",
-      this.model.event.title
-    );
-    if (!title) return;
+  cloneEvent() {
+    this.showCloneModal = true;
+  }
 
-    const startDate = window.prompt(
-      "Enter the start date for the cloned event (YYYY-MM-DDTHH:MM):",
-      new Date(this.model.event.start_date).toISOString().slice(0, 16)
-    );
-    if (!startDate) return;
+  @action
+  closeCloneModal() {
+    this.showCloneModal = false;
+  }
 
+  @action
+  async confirmCloneEvent({ title, startDate }) {
     try {
       const response = await ajax(`/des/events/${this.model.event.id}/clone.json`, {
         type: "POST",
         data: { title, start_date: startDate }
       });
-
+      this.showCloneModal = false;
       if (response.event_id) {
         const goToEvent = window.confirm(
           "Event cloned successfully! Would you like to go to the new event?"

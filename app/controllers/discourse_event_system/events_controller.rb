@@ -396,6 +396,7 @@ module DiscourseEventSystem
       @event.des_event_classes.each do |cls|
         new_event.des_event_classes.create!(
           class_type_id: cls.class_type_id,
+          name: cls.name,
           capacity: cls.capacity,
           status: cls.status
         )
