@@ -50,7 +50,6 @@ export default class EventNewController extends Controller {
   }
 
   @action
-  @action
   updateBookingOpens(e) {
     this.bookingOpensDaysBefore = e.target.value;
     this.model.event.booking_opens_days_before = e.target.value ? parseInt(e.target.value) : null;
