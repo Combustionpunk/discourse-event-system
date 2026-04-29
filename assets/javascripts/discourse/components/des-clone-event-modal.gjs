@@ -1,15 +1,13 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import { concat } from "@ember/helper";
+import { concat, fn, get } from "@ember/helper";
 import { on } from "@ember/modifier";
-import { fn } from "@ember/helper";
-import { eq, gt } from "truth-helpers";
+import { gt } from "truth-helpers";
 
 export default class DesCloneEventModal extends Component {
-  @tracked clones = [
-    { title: this.args.originalTitle || "", startDate: "" }
-  ];
+  @tracked cloneTitles = [this.args.originalTitle || ""];
+  @tracked cloneDates = [""];
   @tracked isSaving = false;
 
   get minDate() {
@@ -18,29 +16,28 @@ export default class DesCloneEventModal extends Component {
 
   @action
   addClone() {
-    this.clones = [
-      ...this.clones,
-      { title: this.args.originalTitle || "", startDate: "" }
-    ];
+    this.cloneTitles = [...this.cloneTitles, this.args.originalTitle || ""];
+    this.cloneDates = [...this.cloneDates, ""];
   }
 
   @action
   removeClone(index) {
-    this.clones = this.clones.filter((_, i) => i !== index);
+    this.cloneTitles = this.cloneTitles.filter((_, i) => i !== index);
+    this.cloneDates = this.cloneDates.filter((_, i) => i !== index);
   }
 
   @action
   updateCloneTitle(index, e) {
-    const updated = [...this.clones];
-    updated[index] = { ...updated[index], title: e.target.value };
-    this.clones = updated;
+    const updated = [...this.cloneTitles];
+    updated[index] = e.target.value;
+    this.cloneTitles = updated;
   }
 
   @action
   updateCloneDate(index, e) {
-    const updated = [...this.clones];
-    updated[index] = { ...updated[index], startDate: e.target.value };
-    this.clones = updated;
+    const updated = [...this.cloneDates];
+    updated[index] = e.target.value;
+    this.cloneDates = updated;
   }
 
   @action
@@ -50,14 +47,18 @@ export default class DesCloneEventModal extends Component {
 
   @action
   async save() {
-    const invalid = this.clones.find(c => !c.title.trim() || !c.startDate);
-    if (invalid) {
+    const invalid = this.cloneTitles.find((t, i) => !t.trim() || !this.cloneDates[i]);
+    if (invalid !== undefined) {
       alert("Please fill in all titles and dates before saving.");
       return;
     }
     this.isSaving = true;
     try {
-      await this.args.onSave(this.clones);
+      const clones = this.cloneTitles.map((title, i) => ({
+        title: title.trim(),
+        startDate: this.cloneDates[i]
+      }));
+      await this.args.onSave(clones);
     } finally {
       this.isSaving = false;
     }
@@ -73,13 +74,13 @@ export default class DesCloneEventModal extends Component {
         <div class="des-modal-body">
           <p class="field-help" style="margin-bottom:16px;">Add one or more dates to clone this event to. Each clone will be created as a draft.</p>
 
-          {{#each this.clones as |clone index|}}
+          {{#each this.cloneTitles as |title index|}}
             <div class="clone-row" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;padding:12px;background:var(--primary-very-low);border-radius:6px;">
               <div class="org-form-field" style="flex:2;">
                 <label>Title</label>
                 <input
                   type="text"
-                  value={{clone.title}}
+                  value={{title}}
                   placeholder="Event title..."
                   {{on "input" (fn this.updateCloneTitle index)}}
                   style="width:100%;"
@@ -89,13 +90,13 @@ export default class DesCloneEventModal extends Component {
                 <label>Date & Time</label>
                 <input
                   type="datetime-local"
-                  value={{clone.startDate}}
+                  value={{get this.cloneDates index}}
                   min={{this.minDate}}
                   {{on "change" (fn this.updateCloneDate index)}}
                   style="width:100%;"
                 />
               </div>
-              {{#if (gt this.clones.length 1)}}
+              {{#if (gt this.cloneTitles.length 1)}}
                 <div style="padding-top:22px;">
                   <button class="btn btn-danger btn-small" {{on "click" (fn this.removeClone index)}}>✕</button>
                 </div>
@@ -109,7 +110,7 @@ export default class DesCloneEventModal extends Component {
 
           <div class="des-modal-actions">
             <button class="btn btn-primary" disabled={{this.isSaving}} {{on "click" this.save}}>
-              {{if this.isSaving "Creating..." (if (gt this.clones.length 1) (concat "📋 Clone " this.clones.length " Events") "📋 Clone Event")}}
+              {{if this.isSaving "Creating..." (if (gt this.cloneTitles.length 1) (concat "📋 Clone " this.cloneTitles.length " Events") "📋 Clone Event")}}
             </button>
             <button class="btn btn-default" {{on "click" @onClose}}>Cancel</button>
           </div>
