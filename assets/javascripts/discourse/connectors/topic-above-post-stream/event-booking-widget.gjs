@@ -51,6 +51,14 @@ export default class EventBookingWidget extends Component {
     return t ? `#${t.shortcode} — ${longCode}` : longCode;
   }
 
+  formatDate(dateStr) {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      weekday: "long", day: "numeric", month: "long",
+      year: "numeric", hour: "2-digit", minute: "2-digit"
+    });
+  }
+
   async loadEvent() {
     try {
       const topic = this.args.outletArgs?.model;
@@ -489,7 +497,7 @@ export default class EventBookingWidget extends Component {
         {{else if this.bookingNotOpenYet}}
           <div class="event-closed-banner">⏳ Bookings are not yet open for this event.
             {{#if this.event.booking_opens_at}}
-              <span class="field-help">Bookings open: {{this.event.booking_opens_at}}</span>
+              <span class="field-help">Bookings open: {{this.formatDate this.event.booking_opens_at}}</span>
             {{/if}}
           </div>
         {{else if this.bookingClosed}}
@@ -498,6 +506,22 @@ export default class EventBookingWidget extends Component {
               <span class="field-help">Bookings have been manually closed by the organiser.</span>
             {{/if}}
           </div>
+        {{/if}}
+
+        {{#if this.bookingDisabled}}
+          {{#if this.event.classes.length}}
+            <div class="event-detail-classes">
+              <h3>Classes</h3>
+              <div class="event-classes-grid">
+                {{#each this.event.classes as |cls|}}
+                  <div class="event-class-card">
+                    <div class="event-class-name">{{cls.name}}</div>
+                    <div class="event-class-spaces">{{cls.spaces_remaining}} / {{cls.capacity}} spaces</div>
+                  </div>
+                {{/each}}
+              </div>
+            </div>
+          {{/if}}
         {{/if}}
 
         {{#unless this.bookingDisabled}}
