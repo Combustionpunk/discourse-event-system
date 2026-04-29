@@ -34,6 +34,40 @@ class DesEvent < ActiveRecord::Base
   scope :upcoming, -> { where(status: 'published').where('start_date > ?', Time.now) }
   scope :past, -> { where(status: 'completed').where('start_date < ?', Time.now) }
 
+  def booking_open?
+    return false if booking_manually_closed
+    return true if booking_manually_open
+
+    now = Time.now
+
+    if booking_opens_days_before.present?
+      opens_at = start_date - booking_opens_days_before.days
+      return false if now < opens_at
+    end
+
+    if booking_closes_days_before.present?
+      closes_at = start_date - booking_closes_days_before.days
+      return false if now > closes_at
+    elsif booking_closing_date.present?
+      return false if now > booking_closing_date
+    end
+
+    true
+  end
+
+  def booking_opens_at
+    return nil unless booking_opens_days_before.present?
+    start_date - booking_opens_days_before.days
+  end
+
+  def booking_closes_at
+    if booking_closes_days_before.present?
+      start_date - booking_closes_days_before.days
+    elsif booking_closing_date.present?
+      booking_closing_date
+    end
+  end
+
   def publish!
     create_topic! unless topic_id.present?
     update!(status: 'published')
