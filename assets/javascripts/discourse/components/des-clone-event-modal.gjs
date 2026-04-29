@@ -74,7 +74,7 @@ export default class DesCloneEventModal extends Component {
         <div class="des-modal-body">
           <p class="field-help" style="margin-bottom:16px;">Add one or more dates to clone this event to. Each clone will be created as a draft.</p>
 
-          {{#each this.cloneTitles as |title index|}}
+          {{#each this.cloneTitles key="@index" as |title index|}}
             <div class="clone-row" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;padding:12px;background:var(--primary-very-low);border-radius:6px;">
               <div class="org-form-field" style="flex:2;">
                 <label>Title</label>
