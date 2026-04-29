@@ -37,6 +37,7 @@ export default apiInitializer("1.0", (api) => {
             new RCLink({ route: "events", title: "📅 Events" }),
             new RCLink({ route: "organisations", title: "🏢 Organisations" }),
             new RCLink({ route: "venues", title: "📍 Venues" }),
+            new RCLink({ route: "car-models", title: "🚗 Car Models" }),
           ];
           if (user) {
             links.push(new RCLink({ route: "racing-profile", title: "🏎️ My Racing Profile" }));

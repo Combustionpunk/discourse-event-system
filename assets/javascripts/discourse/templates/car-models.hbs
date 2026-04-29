@@ -1,0 +1,287 @@
+<div class="car-models-container">
+  <div class="events-nav">
+    <LinkTo @route="events" class="btn btn-default">📅 Events</LinkTo>
+    <LinkTo @route="organisations" class="btn btn-default">🏢 Organisations</LinkTo>
+    <LinkTo @route="venues" class="btn btn-default">📍 Venues</LinkTo>
+    <LinkTo @route="car-models" class="btn btn-primary">🚗 Car Models</LinkTo>
+  </div>
+
+  <div class="manage-section-header">
+    <h1>🚗 Car Models</h1>
+  </div>
+
+  {{!-- Manufacturers Section --}}
+  <div class="des-admin-section">
+    <div class="section-header">
+      <h2>Manufacturers</h2>
+      <div style="display:flex;gap:8px;">
+        {{#if this.currentUser}}
+          {{#unless this.currentUser.admin}}
+            <button class="btn btn-default btn-small" {{on "click" this.toggleSuggestManufacturer}}>
+              {{if this.showSuggestManufacturer "✕ Cancel" "➕ Suggest Manufacturer"}}
+            </button>
+          {{/unless}}
+        {{/if}}
+        {{#if this.currentUser.admin}}
+          <button class="btn btn-primary btn-small" {{on "click" this.toggleAddManufacturer}}>
+            {{if this.showAddManufacturer "✕ Cancel" "➕ Add Manufacturer"}}
+          </button>
+        {{/if}}
+      </div>
+    </div>
+
+    {{#if this.showSuggestManufacturer}}
+      <div class="add-model-form">
+        <h4>Suggest a Manufacturer</h4>
+        <p class="field-help">Your suggestion will be reviewed by an admin.</p>
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Manufacturer Name *</label>
+            <input type="text" placeholder="e.g. Associated RC" value={{this.newManufacturerName}} {{on "input" this.updateNewManufacturerName}} />
+          </div>
+        </div>
+        <button class="btn btn-primary" {{on "click" this.suggestManufacturer}}>Submit Suggestion</button>
+      </div>
+    {{/if}}
+
+    {{#if this.showAddManufacturer}}
+      <div class="add-model-form">
+        <h4>Add Manufacturer</h4>
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>Manufacturer Name *</label>
+            <input type="text" placeholder="e.g. Associated RC" value={{this.newManufacturerName}} {{on "input" this.updateNewManufacturerName}} />
+          </div>
+        </div>
+        <button class="btn btn-primary" {{on "click" this.addManufacturer}}>✅ Add Manufacturer</button>
+      </div>
+    {{/if}}
+
+    {{!-- Pending Manufacturers (admin only) --}}
+    {{#if this.currentUser.admin}}
+      {{#if this.pendingManufacturers.length}}
+        <h3 style="margin-top:16px;">⏳ Pending Approval</h3>
+        <div class="manufacturers-grid">
+          {{#each this.pendingManufacturers as |mfr|}}
+            <div class="manufacturer-card manufacturer-card--pending">
+              <div class="manufacturer-card-logo">🏭</div>
+              <div class="manufacturer-card-name">{{mfr.name}}</div>
+              <div class="manufacturer-card-status">⏳ Pending</div>
+              <div class="manufacturer-card-actions">
+                <button class="btn btn-success btn-small" {{on "click" (fn this.approveManufacturer mfr)}}>✅ Approve</button>
+                <button class="btn btn-danger btn-small" {{on "click" (fn this.rejectManufacturer mfr)}}>❌ Reject</button>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
+    {{/if}}
+
+    {{!-- Approved Manufacturers Grid --}}
+    <div class="manufacturers-grid" style="margin-top:16px;">
+      {{#each this.approvedManufacturers as |mfr|}}
+        <a href="#manufacturer-{{mfr.id}}" class="manufacturer-card">
+          <div class="manufacturer-card-logo">🏭</div>
+          <div class="manufacturer-card-name">{{mfr.name}}</div>
+          {{#if this.currentUser.admin}}
+            <div class="manufacturer-card-actions">
+              <button class="btn btn-default btn-small" {{on "click" (fn this.startEditManufacturer mfr)}}>✏️ Edit</button>
+            </div>
+          {{/if}}
+        </a>
+      {{/each}}
+    </div>
+  </div>
+
+  {{!-- Models by Manufacturer --}}
+  {{#each this.model.models_by_manufacturer as |group|}}
+    <div class="des-admin-section" id="manufacturer-{{group.manufacturer_id}}">
+      <div class="section-header">
+        <h2>{{group.manufacturer_name}}
+          {{#if (eq group.manufacturer_status "pending")}}
+            <span class="pending-tag">⏳ Pending</span>
+          {{/if}}
+        </h2>
+        {{#if this.currentUser.admin}}
+          <button class="btn btn-primary btn-small" {{on "click" (fn this.startAddModel group.manufacturer_id group.manufacturer_name)}}>➕ Add Model</button>
+        {{/if}}
+      </div>
+
+      {{#if (eq this.addingModelForManufacturerId group.manufacturer_id)}}
+        <div class="add-model-form">
+          <h4>Add Model for {{group.manufacturer_name}}</h4>
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Name *</label>
+              <input type="text" placeholder="e.g. B7.1" value={{this.newModelForm.name}} {{on "input" (fn this.updateNewModelField "name")}} />
+            </div>
+            <div class="org-form-field">
+              <label>Year</label>
+              <input type="number" placeholder="e.g. 2024" value={{this.newModelForm.year_released}} {{on "input" (fn this.updateNewModelField "year_released")}} />
+            </div>
+            <div class="org-form-field">
+              <label>Driveline</label>
+              <select {{on "change" (fn this.updateNewModelField "driveline")}}>
+                <option value="">Select...</option>
+                <option value="2WD">2WD</option>
+                <option value="4WD">4WD</option>
+                <option value="FWD">FWD</option>
+                <option value="Rear Motor">Rear Motor</option>
+              </select>
+            </div>
+            <div class="org-form-field">
+              <label>Scale</label>
+              <select {{on "change" (fn this.updateNewModelField "scale")}}>
+                <option value="">Select...</option>
+                {{#each this.scales as |s|}}
+                  <option value={{s}}>{{s}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="org-form-field">
+              <label>Chassis Type</label>
+              <select {{on "change" (fn this.updateNewModelField "chassis_type")}}>
+                <option value="">Select...</option>
+                {{#each this.chassisTypes as |c|}}
+                  <option value={{c}}>{{c}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn btn-primary" {{on "click" this.confirmAddModel}}>✅ Add Model</button>
+            <button class="btn btn-default" {{on "click" this.cancelAddModel}}>✕ Cancel</button>
+          </div>
+        </div>
+      {{/if}}
+
+      <div class="models-grid">
+        {{#each group.models as |model|}}
+          <div class="model-card {{if (eq model.status 'pending') 'model-card--pending' ''}}">
+            <div class="model-card-header">
+              <strong>{{model.name}}</strong>
+              {{#if (eq model.status "pending")}}
+                <span class="pending-tag">⏳ Pending</span>
+              {{/if}}
+            </div>
+            <div class="model-card-meta">
+              {{#if model.scale}}<span class="driveline-badge">📏 {{model.scale}}</span>{{/if}}
+              {{#if model.chassis_type}}<span class="driveline-badge">🚗 {{model.chassis_type}}</span>{{/if}}
+              {{#if model.driveline}}<span class="driveline-badge">⚙️ {{model.driveline}}</span>{{/if}}
+              {{#if model.year_released}}<span class="driveline-badge">📅 {{model.year_released}}</span>{{/if}}
+              {{#if model.created_by}}<span class="field-help">Suggested by {{model.created_by}}</span>{{/if}}
+            </div>
+            <div class="model-card-actions">
+              {{#if (eq model.status "approved")}}
+                {{#if this.currentUser}}
+                  <button class="btn btn-primary btn-small" {{on "click" (fn this.addToGarage model)}}>🚗 Add to My Garage</button>
+                {{/if}}
+              {{/if}}
+              {{#if this.currentUser.admin}}
+                {{#if (eq model.status "pending")}}
+                  <button class="btn btn-success btn-small" {{on "click" (fn this.startApproveModel model)}}>✅ Approve</button>
+                  <button class="btn btn-danger btn-small" {{on "click" (fn this.rejectModel model)}}>❌ Reject</button>
+                {{else}}
+                  <button class="btn btn-default btn-small" {{on "click" (fn this.startEditModel model)}}>✏️ Edit</button>
+                  <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteModel model)}}>🗑 Delete</button>
+                {{/if}}
+              {{/if}}
+            </div>
+
+            {{!-- Inline approve form --}}
+            {{#if (eq this.approvingModelId model.id)}}
+              <div class="add-model-form" style="margin-top:8px;">
+                <div class="org-form-row">
+                  <div class="org-form-field">
+                    <label>Year</label>
+                    <input type="number" value={{this.approveModelForm.year_released}} {{on "input" (fn this.updateApproveField "year_released")}} />
+                  </div>
+                  <div class="org-form-field">
+                    <label>Driveline</label>
+                    <select {{on "change" (fn this.updateApproveField "driveline")}}>
+                      <option value="">Select...</option>
+                      <option value="2WD">2WD</option>
+                      <option value="4WD">4WD</option>
+                      <option value="FWD">FWD</option>
+                      <option value="Rear Motor">Rear Motor</option>
+                    </select>
+                  </div>
+                  <div class="org-form-field">
+                    <label>Scale</label>
+                    <select {{on "change" (fn this.updateApproveField "scale")}}>
+                      <option value="">Select...</option>
+                      {{#each this.scales as |s|}}
+                        <option value={{s}}>{{s}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                  <div class="org-form-field">
+                    <label>Chassis Type</label>
+                    <select {{on "change" (fn this.updateApproveField "chassis_type")}}>
+                      <option value="">Select...</option>
+                      {{#each this.chassisTypes as |c|}}
+                        <option value={{c}}>{{c}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <button class="btn btn-primary" {{on "click" this.confirmApproveModel}}>✅ Confirm</button>
+                  <button class="btn btn-default" {{on "click" this.cancelApproveModel}}>✕ Cancel</button>
+                </div>
+              </div>
+            {{/if}}
+
+            {{!-- Inline edit form --}}
+            {{#if (eq this.editingModelId model.id)}}
+              <div class="add-model-form" style="margin-top:8px;">
+                <div class="org-form-row">
+                  <div class="org-form-field">
+                    <label>Name</label>
+                    <input type="text" value={{this.editModelForm.name}} {{on "input" (fn this.updateEditModelField "name")}} />
+                  </div>
+                  <div class="org-form-field">
+                    <label>Year</label>
+                    <input type="number" value={{this.editModelForm.year_released}} {{on "input" (fn this.updateEditModelField "year_released")}} />
+                  </div>
+                  <div class="org-form-field">
+                    <label>Driveline</label>
+                    <select {{on "change" (fn this.updateEditModelField "driveline")}}>
+                      <option value="">Select...</option>
+                      <option value="2WD" selected={{eq this.editModelForm.driveline "2WD"}}>2WD</option>
+                      <option value="4WD" selected={{eq this.editModelForm.driveline "4WD"}}>4WD</option>
+                      <option value="FWD" selected={{eq this.editModelForm.driveline "FWD"}}>FWD</option>
+                      <option value="Rear Motor" selected={{eq this.editModelForm.driveline "Rear Motor"}}>Rear Motor</option>
+                    </select>
+                  </div>
+                  <div class="org-form-field">
+                    <label>Scale</label>
+                    <select {{on "change" (fn this.updateEditModelField "scale")}}>
+                      <option value="">Select...</option>
+                      {{#each this.scales as |s|}}
+                        <option value={{s}} selected={{eq this.editModelForm.scale s}}>{{s}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                  <div class="org-form-field">
+                    <label>Chassis Type</label>
+                    <select {{on "change" (fn this.updateEditModelField "chassis_type")}}>
+                      <option value="">Select...</option>
+                      {{#each this.chassisTypes as |c|}}
+                        <option value={{c}} selected={{eq this.editModelForm.chassis_type c}}>{{c}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <button class="btn btn-primary" {{on "click" this.saveEditModel}}>💾 Save</button>
+                  <button class="btn btn-default" {{on "click" this.cancelEditModel}}>✕ Cancel</button>
+                </div>
+              </div>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  {{/each}}
+</div>

@@ -1,0 +1,101 @@
+.car-models-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.manufacturers-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.manufacturer-card {
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 140px;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--primary);
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: var(--tertiary);
+  }
+
+  &--pending {
+    opacity: 0.7;
+    border-style: dashed;
+  }
+
+  .manufacturer-card-logo {
+    font-size: 2em;
+    margin-bottom: 8px;
+  }
+
+  .manufacturer-card-name {
+    font-weight: bold;
+    font-size: 0.9em;
+  }
+
+  .manufacturer-card-status {
+    font-size: 0.8em;
+    color: var(--primary-medium);
+    margin-top: 4px;
+  }
+
+  .manufacturer-card-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+  }
+}
+
+.models-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.model-card {
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  padding: 16px;
+
+  &--pending {
+    border-style: dashed;
+    opacity: 0.8;
+  }
+
+  .model-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    strong {
+      font-size: 1em;
+    }
+  }
+
+  .model-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .model-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+}
