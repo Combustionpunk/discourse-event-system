@@ -7,12 +7,27 @@
 
   <div class="manage-section-header">
     <h1>📍 Venues</h1>
-    {{#if this.canSuggest}}
-      <button class="btn btn-primary" {{on "click" this.toggleForm}}>
-        {{if this.showForm "Cancel" "➕ Suggest a Venue"}}
+    {{#if this.currentUser.admin}}
+      <button class="btn btn-primary" {{on "click" this.toggleAdminAddVenue}}>
+        {{if this.showAdminAddVenue "✕ Cancel" "+ Add Venue"}}
+      </button>
+    {{else if this.canSuggest}}
+      <button class="btn btn-default" {{on "click" this.toggleForm}}>
+        {{if this.showForm "✕ Cancel" "➕ Suggest a Venue"}}
       </button>
     {{/if}}
   </div>
+
+  {{#if this.showAdminAddVenue}}
+    <div class="venue-form event-form-section">
+      <h2>Add Venue</h2>
+      <DesVenueForm
+        @onSave={{this.adminSaveVenue}}
+        @onCancel={{this.toggleAdminAddVenue}}
+        @saveLabel="✅ Create Venue"
+      />
+    </div>
+  {{/if}}
 
   {{#if this.showForm}}
     <div class="venue-form event-form-section">

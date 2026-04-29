@@ -8,6 +8,7 @@ import { inject as service } from "@ember/service";
 export default class VenuesController extends Controller {
   @service router;
   @tracked showForm = false;
+  @tracked showAdminAddVenue = false;
   @tracked isSaving = false;
   @tracked newVenue = {};
 
@@ -35,6 +36,25 @@ export default class VenuesController extends Controller {
 
   @action updateField(field, e) {
     this.newVenue = { ...this.newVenue, [field]: e.target.value };
+  }
+
+  @action
+  toggleAdminAddVenue() {
+    this.showAdminAddVenue = !this.showAdminAddVenue;
+  }
+
+  @action
+  async adminSaveVenue(formData) {
+    try {
+      await ajax("/des/venues.json", {
+        type: "POST",
+        data: formData
+      });
+      this.showAdminAddVenue = false;
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
   }
 
   @action
