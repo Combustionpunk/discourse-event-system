@@ -34,7 +34,6 @@ export default apiInitializer("1.0", (api) => {
         get links() {
           const user = api.getCurrentUser();
           const links = [
-            new RCLink({ route: "events", title: "📅 Events" }),
             new RCLink({ route: "organisations", title: "🏢 Organisations" }),
             new RCLink({ route: "venues", title: "📍 Venues" }),
             new RCLink({ route: "car-models", title: "🚗 Car Models" }),
@@ -42,6 +41,7 @@ export default apiInitializer("1.0", (api) => {
           if (user) {
             links.push(new RCLink({ route: "racing-profile", title: "🏎️ My Racing Profile" }));
             if (user.admin) {
+              links.push(new RCLink({ route: "events", title: "📅 Events" }));
               links.push(new RCLink({ route: "des-admin", title: "⚙️ DES Admin" }));
             }
           }
