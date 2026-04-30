@@ -7,6 +7,29 @@
   gap: 8px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.rc-filter-group {
+  flex: 1;
+  min-width: 160px;
+  max-width: 220px;
+}
+
+.rc-filter-select {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--primary-low);
+  background: var(--secondary);
+  color: var(--primary);
+  font-size: 0.9em;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: var(--tertiary);
+  }
 }
 
 .rc-events-cards {

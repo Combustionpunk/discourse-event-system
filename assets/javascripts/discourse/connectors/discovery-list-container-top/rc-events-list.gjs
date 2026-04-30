@@ -2,15 +2,21 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
+import { concat } from "@ember/helper";
 import { on } from "@ember/modifier";
-import { fn } from "@ember/helper";
 import { eq } from "truth-helpers";
 
 export default class RcEventsList extends Component {
   @tracked events = [];
-  @tracked filter = "default";
   @tracked loading = true;
   @tracked isRcMeetings = false;
+  @tracked filterOptions = { organisations: [], event_types: [], track_environments: [], track_surfaces: [] };
+
+  @tracked timeFilter = "default";
+  @tracked organisationId = "";
+  @tracked eventTypeId = "";
+  @tracked trackEnvironment = "";
+  @tracked trackSurface = "";
 
   constructor() {
     super(...arguments);
@@ -31,10 +37,18 @@ export default class RcEventsList extends Component {
   async loadEvents() {
     this.loading = true;
     try {
-      const response = await ajax("/des/rc-events-topic-list.json", {
-        data: this.filter !== "default" ? { filter: this.filter } : {}
-      });
+      const params = {};
+      if (this.timeFilter !== "default") params.time_filter = this.timeFilter;
+      if (this.organisationId) params.organisation_id = this.organisationId;
+      if (this.eventTypeId) params.event_type_id = this.eventTypeId;
+      if (this.trackEnvironment) params.track_environment = this.trackEnvironment;
+      if (this.trackSurface) params.track_surface = this.trackSurface;
+
+      const response = await ajax("/des/rc-events-topic-list.json", { data: params });
       this.events = response.topics || [];
+      if (response.filters) {
+        this.filterOptions = response.filters;
+      }
     } catch {
       this.events = [];
     } finally {
@@ -43,8 +57,32 @@ export default class RcEventsList extends Component {
   }
 
   @action
-  async setFilter(f) {
-    this.filter = f;
+  async updateTimeFilter(e) {
+    this.timeFilter = e.target.value;
+    await this.loadEvents();
+  }
+
+  @action
+  async updateOrganisation(e) {
+    this.organisationId = e.target.value;
+    await this.loadEvents();
+  }
+
+  @action
+  async updateEventType(e) {
+    this.eventTypeId = e.target.value;
+    await this.loadEvents();
+  }
+
+  @action
+  async updateEnvironment(e) {
+    this.trackEnvironment = e.target.value;
+    await this.loadEvents();
+  }
+
+  @action
+  async updateSurface(e) {
+    this.trackSurface = e.target.value;
     await this.loadEvents();
   }
 
@@ -52,18 +90,57 @@ export default class RcEventsList extends Component {
     {{#if this.isRcMeetings}}
       <div class="rc-events-list">
         <div class="rc-events-filters">
-          <button class="btn {{if (eq this.filter 'default') 'btn-primary' 'btn-default'}} btn-small" {{on "click" (fn this.setFilter "default")}}>
-            📅 Upcoming & Today
-          </button>
-          <button class="btn {{if (eq this.filter 'today') 'btn-primary' 'btn-default'}} btn-small" {{on "click" (fn this.setFilter "today")}}>
-            📍 Today
-          </button>
-          <button class="btn {{if (eq this.filter 'upcoming') 'btn-primary' 'btn-default'}} btn-small" {{on "click" (fn this.setFilter "upcoming")}}>
-            ⏭ Upcoming
-          </button>
-          <button class="btn {{if (eq this.filter 'past') 'btn-primary' 'btn-default'}} btn-small" {{on "click" (fn this.setFilter "past")}}>
-            ✅ Past
-          </button>
+          <div class="rc-filter-group">
+            <select class="rc-filter-select" {{on "change" this.updateTimeFilter}}>
+              <option value="default" selected={{eq this.timeFilter "default"}}>📅 Upcoming & Today</option>
+              <option value="today" selected={{eq this.timeFilter "today"}}>📍 Today</option>
+              <option value="upcoming" selected={{eq this.timeFilter "upcoming"}}>⏭ Upcoming</option>
+              <option value="past" selected={{eq this.timeFilter "past"}}>✅ Past</option>
+            </select>
+          </div>
+
+          {{#if this.filterOptions.organisations.length}}
+            <div class="rc-filter-group">
+              <select class="rc-filter-select" {{on "change" this.updateOrganisation}}>
+                <option value="">All Organisations</option>
+                {{#each this.filterOptions.organisations as |org|}}
+                  <option value={{org.id}} selected={{eq this.organisationId (concat "" org.id)}}>{{org.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+          {{/if}}
+
+          {{#if this.filterOptions.event_types.length}}
+            <div class="rc-filter-group">
+              <select class="rc-filter-select" {{on "change" this.updateEventType}}>
+                <option value="">All Event Types</option>
+                {{#each this.filterOptions.event_types as |et|}}
+                  <option value={{et.id}} selected={{eq this.eventTypeId (concat "" et.id)}}>{{et.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+          {{/if}}
+
+          {{#if this.filterOptions.track_environments.length}}
+            <div class="rc-filter-group">
+              <select class="rc-filter-select" {{on "change" this.updateEnvironment}}>
+                <option value="">All Environments</option>
+                <option value="outdoor" selected={{eq this.trackEnvironment "outdoor"}}>🌳 Outdoor</option>
+                <option value="indoor_covered" selected={{eq this.trackEnvironment "indoor_covered"}}>🏠 Indoor</option>
+              </select>
+            </div>
+          {{/if}}
+
+          {{#if this.filterOptions.track_surfaces.length}}
+            <div class="rc-filter-group">
+              <select class="rc-filter-select" {{on "change" this.updateSurface}}>
+                <option value="">All Surfaces</option>
+                {{#each this.filterOptions.track_surfaces as |surface|}}
+                  <option value={{surface}} selected={{eq this.trackSurface surface}}>{{surface}}</option>
+                {{/each}}
+              </select>
+            </div>
+          {{/if}}
         </div>
 
         {{#if this.loading}}
@@ -117,7 +194,7 @@ export default class RcEventsList extends Component {
             {{/each}}
           </div>
         {{else}}
-          <div class="rc-events-empty">No events found.</div>
+          <div class="rc-events-empty">No events found for the selected filters.</div>
         {{/if}}
       </div>
     {{/if}}
