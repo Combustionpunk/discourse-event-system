@@ -15,6 +15,7 @@ export default class EventNewController extends Controller {
   @tracked bookingOpensDaysBefore = "";
   @tracked bookingClosesDaysBefore = "";
   @tracked eventTitle = "";
+  @tracked model = null;
 
   get clubVenues() {
     const orgId = this.model.event.organisation_id;
