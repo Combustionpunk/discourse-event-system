@@ -105,6 +105,16 @@
               View Event
             </LinkTo>
           </div>
+          {{#if this.currentUser.admin}}
+            <div class="event-admin-actions" style="margin-top:8px;display:flex;gap:6px;">
+              {{#if (eq event.status "draft")}}
+                <button class="btn btn-primary btn-small" {{on "click" (fn this.publishEvent event)}}>✅ Publish</button>
+              {{/if}}
+              {{#if (or (eq event.status "draft") (eq event.status "cancelled"))}}
+                <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteEvent event)}}>🗑 Delete</button>
+              {{/if}}
+            </div>
+          {{/if}}
         </div>
       {{/each}}
     </div>

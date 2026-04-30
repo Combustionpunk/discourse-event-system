@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show, :public_entrants]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :clone, :update_booking_status, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :clone, :destroy, :update_booking_status, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
 
     def index
       if current_user&.admin?
@@ -368,6 +368,17 @@ module DiscourseEventSystem
       service = DesBookingService.new(current_user, @event)
       result = service.cancel_event_and_refund(params[:reason], current_user)
       render json: { event: serialize_event(@event), refund_summary: result.summary }
+    end
+
+    def destroy
+      ensure_organisation_admin!(@event.organisation)
+      unless ['draft', 'cancelled'].include?(@event.status)
+        return render json: { error: 'Only draft or cancelled events can be deleted' }, status: :unprocessable_entity
+      end
+      @event.destroy!
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
 
     def clone
