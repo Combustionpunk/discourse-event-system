@@ -16,6 +16,7 @@ export default class EventManageController extends Controller {
   @tracked editDescription = "";
   @tracked editRcResultsMeetingId = null;
   @tracked editEventTypeId = null;
+  @tracked model = null;
   @tracked classTypes = null;
   @tracked newClassTypeId = null;
   @tracked newClassCapacity = "";
@@ -422,7 +423,7 @@ export default class EventManageController extends Controller {
   async saveChanges() {
     this.isSaving = true;
     try {
-      await ajax("/des/events/" + this.model.event.id + ".json", {
+      const response = await ajax("/des/events/" + this.model.event.id + ".json", {
         type: "PUT",
         data: {
           event: {
@@ -442,6 +443,9 @@ export default class EventManageController extends Controller {
           }
         },
       });
+      if (response.event) {
+        this.model = { ...this.model, event: response.event };
+      }
       this.editMode = false;
       this.router.refresh();
     } catch (error) {
