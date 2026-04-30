@@ -33,6 +33,17 @@
       />
     </div>
 
+    <div class="org-form-field" style="margin-top: 16px;">
+      <label>Home Postcode</label>
+      <p class="field-help">Used to calculate distance to events</p>
+      <input
+        type="text"
+        placeholder="e.g. S6 1LU"
+        value={{this.postcode}}
+        {{on "input" this.updatePostcode}}
+      />
+    </div>
+
     <div class="org-form-row" style="margin-top: 16px;">
       <div class="org-form-field">
         <label>F Grade (Formula)</label>

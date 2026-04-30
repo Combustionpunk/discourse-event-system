@@ -15,6 +15,7 @@ export default class DesVenueForm extends Component {
     return {
       name: this.args.venue?.name || "",
       address: this.args.venue?.address || "",
+      postcode: this.args.venue?.postcode || "",
       google_maps_url: this.args.venue?.google_maps_url || "",
       website: this.args.venue?.website || "",
       track_category: this.args.venue?.track_category || "",
@@ -73,6 +74,10 @@ export default class DesVenueForm extends Component {
         <div class="org-form-field">
           <label>Address</label>
           <input type="text" value={{this.currentFormData.address}} placeholder="Full address" {{on "input" (fn this.updateField "address")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Postcode</label>
+          <input type="text" value={{this.currentFormData.postcode}} placeholder="e.g. S6 1LU" {{on "input" (fn this.updateField "postcode")}} />
         </div>
       </div>
 

@@ -13,6 +13,7 @@ export default class RacingProfileController extends Controller {
   @tracked brcaNumber = "";
   @tracked fGrade = "";
   @tracked tGrade = "";
+  @tracked postcode = "";
 
   // Family members
   @tracked familyMembers = [];
@@ -50,6 +51,7 @@ export default class RacingProfileController extends Controller {
     this.loadFamilyMembers();
     this.loadGuardian();
     this.loadTransponders();
+    this.postcode = this.model?.profile?.user?.des_postcode || "";
   }
 
   async loadTransponders() {
@@ -74,6 +76,7 @@ export default class RacingProfileController extends Controller {
   @action setBrcaNumber(event) { this.brcaNumber = event.target.value; }
   @action setFGrade(event) { this.fGrade = event.target.value; }
   @action setTGrade(event) { this.tGrade = event.target.value; }
+  @action updatePostcode(event) { this.postcode = event.target.value; }
 
   @action
   async saveProfile() {
@@ -87,6 +90,7 @@ export default class RacingProfileController extends Controller {
           brca_membership_number: this.brcaNumber || this.model.profile.user.brca_membership_number,
           f_grade: this.fGrade || this.model.profile.user.f_grade,
           t_grade: this.tGrade || this.model.profile.user.t_grade,
+          des_postcode: this.postcode,
         },
       });
       this.successMessage = "Profile saved successfully!";

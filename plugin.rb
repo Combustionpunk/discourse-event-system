@@ -12,6 +12,7 @@ register_editable_user_custom_field :brca_membership_number
 register_editable_user_custom_field :des_date_of_birth
 register_editable_user_custom_field :des_f_grade
 register_editable_user_custom_field :des_t_grade
+register_editable_user_custom_field :des_postcode
 
 module ::DiscourseEventSystem
   PLUGIN_NAME = "discourse-event-system"

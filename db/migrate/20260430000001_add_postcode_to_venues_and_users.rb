@@ -1,0 +1,7 @@
+# frozen_string_literal: true
+
+class AddPostcodeToVenuesAndUsers < ActiveRecord::Migration[7.0]
+  def change
+    add_column :des_venues, :postcode, :string
+  end
+end

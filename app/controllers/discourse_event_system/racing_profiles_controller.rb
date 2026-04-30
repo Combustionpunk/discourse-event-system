@@ -12,7 +12,8 @@ module DiscourseEventSystem
           date_of_birth: current_user.custom_fields['des_date_of_birth'] || current_user.date_of_birth&.to_s,
           brca_membership_number: current_user.custom_fields['brca_membership_number'],
           f_grade: current_user.custom_fields['des_f_grade'] || '0',
-          t_grade: current_user.custom_fields['des_t_grade'] || '0'
+          t_grade: current_user.custom_fields['des_t_grade'] || '0',
+          des_postcode: current_user.custom_fields['des_postcode']
         }
       }
     end
@@ -30,6 +31,9 @@ module DiscourseEventSystem
       end
       if params[:t_grade].present?
         current_user.custom_fields['des_t_grade'] = params[:t_grade]
+      end
+      if params.key?(:des_postcode)
+        current_user.custom_fields['des_postcode'] = params[:des_postcode]
       end
       current_user.save_custom_fields
       current_user.save!
