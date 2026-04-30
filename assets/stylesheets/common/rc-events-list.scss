@@ -124,3 +124,26 @@
   padding: 24px 0;
   text-align: center;
 }
+
+.category-rc-meetings {
+  .topic-list {
+    display: none !important;
+  }
+
+  .nav-pills {
+    display: none !important;
+  }
+
+  #create-topic {
+    display: none !important;
+  }
+
+  .topic-list-header {
+    display: none !important;
+  }
+
+  .education-message,
+  .empty-state {
+    display: none !important;
+  }
+}
