@@ -152,6 +152,7 @@ DiscourseEventSystem::Engine.routes.draw do
   put "/des/events/:event_id/results/entries/:entry_id/reject-lap" => "results#reject_lap"
   get "/des/admin/venues" => "venues#admin_index"
   put "/des/admin/venues/:id/approve" => "venues#admin_approve"
+  post "/des/admin/venues/geocode-all" => "venues#geocode_all"
   get "/des/admin" => "admin#index"
   post "/des/admin/organisations/:id/approve" => "admin#approve_organisation"
   post "/des/admin/organisations/:id/reject" => "admin#reject_organisation"

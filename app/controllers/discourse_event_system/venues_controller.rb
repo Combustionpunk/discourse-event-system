@@ -63,6 +63,15 @@ module DiscourseEventSystem
       render json: { venues: venues.map { |v| serialize_venue(v) } }
     end
 
+    def geocode_all
+      raise Discourse::InvalidAccess unless current_user.admin?
+      venues = DesVenue.where.not(postcode: [nil, '']).where(latitude: nil)
+      venues.each do |venue|
+        ::Jobs.enqueue(:discourse_event_system_geocode_venue, venue_id: venue.id)
+      end
+      render json: { queued: venues.count }
+    end
+
     def admin_approve
       raise Discourse::InvalidAccess unless current_user.admin?
       venue = DesVenue.find(params[:id])
@@ -110,7 +119,9 @@ module DiscourseEventSystem
         has_water_supply: venue.has_water_supply,
         has_camping: venue.has_camping,
         is_shared: venue.is_shared,
-        postcode: venue.postcode
+        postcode: venue.postcode,
+        latitude: venue.latitude,
+        longitude: venue.longitude
       }
     end
 

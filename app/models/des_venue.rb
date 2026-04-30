@@ -21,6 +21,14 @@ class DesVenue < ActiveRecord::Base
   scope :shared, -> { where(is_shared: true) }
   scope :exclusive, -> { where(is_shared: false) }
 
+  after_save :geocode_if_needed
+
+  def geocode_if_needed
+    return if latitude.present? && longitude.present?
+    return if postcode.blank?
+    ::Jobs.enqueue(:discourse_event_system_geocode_venue, venue_id: id)
+  end
+
   def approve!
     update!(status: 'approved')
   end
