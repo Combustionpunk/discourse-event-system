@@ -86,6 +86,8 @@ module DiscourseEventSystem
         events = events.where('start_date >= ? AND start_date < ?', Time.now.beginning_of_day, Time.now.end_of_day).order(start_date: :asc)
       when 'upcoming'
         events = events.where('start_date > ?', Time.now.end_of_day).order(start_date: :asc)
+      when 'all'
+        events = events.order(start_date: :asc)
       else
         today    = events.where('start_date >= ? AND start_date < ?', Time.now.beginning_of_day, Time.now.end_of_day).order(start_date: :asc)
         upcoming = events.where('start_date > ?', Time.now.end_of_day).order(start_date: :asc)

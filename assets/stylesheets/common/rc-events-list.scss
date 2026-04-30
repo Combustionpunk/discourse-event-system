@@ -148,6 +148,175 @@
   text-align: center;
 }
 
+// View toggle
+.rc-view-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+// Calendar
+.rc-calendar {
+  width: 100%;
+}
+
+.rc-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.rc-calendar-month {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.rc-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rc-cal-day-header {
+  background: var(--primary-low);
+  padding: 6px;
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--primary-medium);
+}
+
+.rc-cal-cell {
+  background: var(--primary-very-low);
+  min-height: 80px;
+  padding: 4px;
+  position: relative;
+  vertical-align: top;
+
+  &--today {
+    background: rgba(0, 136, 204, 0.08);
+    .rc-cal-date { color: var(--tertiary); font-weight: 700; }
+  }
+
+  &--empty {
+    background: transparent;
+    min-height: 80px;
+  }
+}
+
+.rc-cal-date {
+  font-size: 0.8em;
+  color: var(--primary-medium);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.rc-cal-event {
+  display: block;
+  font-size: 0.72em;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+
+  &--open { background: var(--success); }
+  &--soon { background: var(--highlight); color: #333; }
+  &--closed { background: var(--danger); }
+  &--past { background: var(--primary-medium); }
+}
+
+.rc-cal-multi-badge {
+  display: block;
+  width: 100%;
+  font-size: 0.72em;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: var(--tertiary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover { opacity: 0.85; }
+}
+
+.rc-cal-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  background: var(--secondary);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  padding: 8px;
+  min-width: 200px;
+  max-width: 280px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.rc-cal-popover-close {
+  float: right;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--primary-medium);
+  font-size: 0.8em;
+  padding: 0 4px;
+}
+
+.rc-cal-popover-event {
+  display: block;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  text-decoration: none;
+  color: white;
+  font-size: 0.85em;
+
+  &--open { background: var(--success); }
+  &--soon { background: var(--highlight); color: #333; }
+  &--closed { background: var(--danger); }
+  &--past { background: var(--primary-medium); }
+}
+
+.rc-cal-popover-title {
+  display: block;
+  font-weight: 600;
+}
+
+.rc-cal-popover-org {
+  display: block;
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+@media (max-width: 600px) {
+  .rc-cal-cell {
+    min-height: 60px;
+    padding: 2px;
+  }
+
+  .rc-cal-event,
+  .rc-cal-multi-badge {
+    font-size: 0.65em;
+  }
+
+  .rc-filter-group {
+    min-width: 120px;
+  }
+}
+
 .category-rc-meetings {
   .topic-list {
     display: none !important;
