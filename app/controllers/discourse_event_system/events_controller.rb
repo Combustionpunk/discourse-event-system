@@ -74,6 +74,28 @@ module DiscourseEventSystem
       }
     end
 
+    def rc_topic_list
+      events = DesEvent.includes(:organisation, :venue, :des_event_classes)
+                       .where.not(topic_id: nil)
+                       .where.not(status: ['cancelled', 'draft'])
+
+      case params[:filter]
+      when 'past'
+        events = events.where('start_date < ?', Time.now.beginning_of_day).order(start_date: :desc)
+      when 'today'
+        events = events.where('start_date >= ? AND start_date < ?', Time.now.beginning_of_day, Time.now.end_of_day).order(start_date: :asc)
+      when 'upcoming'
+        events = events.where('start_date > ?', Time.now.end_of_day).order(start_date: :asc)
+      else
+        today = events.where('start_date >= ? AND start_date < ?', Time.now.beginning_of_day, Time.now.end_of_day).order(start_date: :asc).to_a
+        upcoming = events.where('start_date > ?', Time.now.end_of_day).order(start_date: :asc).to_a
+        past = events.where('start_date < ?', Time.now.beginning_of_day).order(start_date: :desc).to_a
+        return render json: { topics: (today + upcoming + past).map { |e| serialize_rc_topic(e) } }
+      end
+
+      render json: { topics: events.map { |e| serialize_rc_topic(e) } }
+    end
+
     def show
       render json: serialize_event(@event)
     end
@@ -771,6 +793,31 @@ module DiscourseEventSystem
 
     def serialize_events(events)
       events.map { |e| serialize_event(e) }
+    end
+
+    def serialize_rc_topic(event)
+      {
+        id: event.id,
+        topic_id: event.topic_id,
+        title: event.title,
+        start_date: event.start_date,
+        formatted_date: event.start_date&.strftime('%a %d %b %Y at %H:%M'),
+        status: event.status,
+        booking_open: event.booking_open?,
+        booking_opens_at: event.booking_opens_at,
+        booking_closes_at: event.booking_closes_at,
+        booking_manually_closed: event.booking_manually_closed,
+        organisation: event.organisation ? {
+          id: event.organisation.id,
+          name: event.organisation.name,
+          logo_url: event.organisation.logo_url
+        } : nil,
+        venue: event.venue ? { name: event.venue.name } : nil,
+        classes: event.des_event_classes.map(&:name),
+        is_today: event.start_date&.to_date == Date.today,
+        is_past: event.start_date ? event.start_date < Time.now : false,
+        topic_url: event.topic_id ? "/t/#{event.topic_id}" : nil
+      }
     end
 
   end

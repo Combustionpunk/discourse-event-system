@@ -24,6 +24,7 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/des/event-types" => "events#event_types"
   get "/des/events/by-topic/:topic_id" => "events#by_topic"
   get "/des/events" => "events#index"
+  get "/des/rc-events-topic-list" => "events#rc_topic_list"
   get "/des/events/:id" => "events#show"
   post "/des/events" => "events#create"
   put "/des/events/:id" => "events#update"
