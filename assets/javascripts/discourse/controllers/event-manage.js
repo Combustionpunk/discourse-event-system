@@ -443,11 +443,8 @@ export default class EventManageController extends Controller {
           }
         },
       });
-      if (response.id) {
-        this.model = { ...this.model, event: response };
-      }
       this.editMode = false;
-      this.router.refresh();
+      await this.router.refresh();
     } catch (error) {
       popupAjaxError(error);
     } finally {
