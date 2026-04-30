@@ -25,6 +25,7 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/des/events/by-topic/:topic_id" => "events#by_topic"
   get "/des/events" => "events#index"
   get "/des/rc-events-topic-list" => "events#rc_topic_list"
+  get "/des/geocode-postcode" => "events#geocode_postcode_endpoint"
   get "/des/events/:id" => "events#show"
   post "/des/events" => "events#create"
   put "/des/events/:id" => "events#update"

@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
+require 'net/http'
+
 module DiscourseEventSystem
   class EventsController < ApplicationController
-    before_action :ensure_logged_in, except: [:index, :show, :public_entrants, :rc_topic_list]
+    before_action :ensure_logged_in, except: [:index, :show, :public_entrants, :rc_topic_list, :geocode_postcode_endpoint]
     before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :clone, :destroy, :update_booking_status, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
 
     def index
@@ -106,6 +108,7 @@ module DiscourseEventSystem
         past_arr     = apply_venue_filters(past, params).to_a
 
         topics = (today_arr + upcoming_arr + past_arr).map { |e| serialize_rc_topic(e) }
+        topics = filter_by_distance(topics, params[:postcode], params[:max_distance_miles]) if params[:postcode].present?
         return render json: { topics: topics, filters: rc_filter_options }
       end
 
@@ -113,10 +116,21 @@ module DiscourseEventSystem
       events = events.where(event_type_id: params[:event_type_id]) if params[:event_type_id].present?
       events = apply_venue_filters(events, params)
 
+      topics = events.map { |e| serialize_rc_topic(e) }
+      topics = filter_by_distance(topics, params[:postcode], params[:max_distance_miles]) if params[:postcode].present?
       render json: {
-        topics: events.map { |e| serialize_rc_topic(e) },
+        topics: topics,
         filters: rc_filter_options
       }
+    end
+
+    def geocode_postcode_endpoint
+      result = geocode_postcode(params[:postcode])
+      if result
+        render json: { success: true, lat: result[:lat], lng: result[:lng] }
+      else
+        render json: { success: false, error: 'Invalid postcode' }, status: :unprocessable_entity
+      end
     end
 
     def show
@@ -818,6 +832,46 @@ module DiscourseEventSystem
       events.map { |e| serialize_event(e) }
     end
 
+    def geocode_postcode(postcode)
+      return nil if postcode.blank?
+      clean = postcode.to_s.strip.gsub(/\s+/, '').upcase
+      response = Net::HTTP.get(URI("https://api.postcodes.io/postcodes/#{clean}"))
+      data = JSON.parse(response)
+      return nil unless data['status'] == 200
+      { lat: data['result']['latitude'], lng: data['result']['longitude'] }
+    rescue
+      nil
+    end
+
+    def distance_in_miles(lat1, lng1, lat2, lng2)
+      rad_per_deg = Math::PI / 180
+      earth_radius_miles = 3958.8
+      dlat = (lat2 - lat1) * rad_per_deg
+      dlng = (lng2 - lng1) * rad_per_deg
+      a = Math.sin(dlat / 2)**2 + Math.cos(lat1 * rad_per_deg) * Math.cos(lat2 * rad_per_deg) * Math.sin(dlng / 2)**2
+      2 * earth_radius_miles * Math.asin(Math.sqrt(a))
+    end
+
+    def filter_by_distance(topics, postcode, max_miles)
+      return topics if postcode.blank? || max_miles.blank?
+      max_miles = max_miles.to_f
+      return topics if max_miles <= 0
+      user_coords = geocode_postcode(postcode)
+      return topics unless user_coords
+
+      venue_cache = {}
+      topics.select do |topic|
+        next true unless topic[:venue_postcode].present?
+        venue_id = topic[:venue_id]
+        unless venue_cache.key?(venue_id)
+          venue_cache[venue_id] = geocode_postcode(topic[:venue_postcode])
+        end
+        venue_coords = venue_cache[venue_id]
+        next true unless venue_coords
+        distance_in_miles(user_coords[:lat], user_coords[:lng], venue_coords[:lat], venue_coords[:lng]) <= max_miles
+      end
+    end
+
     def apply_venue_filters(events, params)
       return events unless params[:track_environment].present? || params[:track_surface].present?
 
@@ -855,7 +909,9 @@ module DiscourseEventSystem
           name: event.organisation.name,
           logo_url: event.organisation.logo_url
         } : nil,
-        venue: event.venue ? { name: event.venue.name } : nil,
+        venue: event.venue ? { name: event.venue.name, postcode: event.venue.postcode } : nil,
+        venue_id: event.venue_id,
+        venue_postcode: event.venue&.postcode,
         classes: event.des_event_classes.map(&:name),
         is_today: event.start_date&.to_date == Date.today,
         is_past: event.start_date ? event.start_date < Time.now : false,
