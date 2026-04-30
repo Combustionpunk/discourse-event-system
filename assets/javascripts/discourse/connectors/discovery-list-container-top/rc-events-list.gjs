@@ -22,6 +22,11 @@ export default class RcEventsList extends Component {
   @tracked eventTypeId = "";
   @tracked trackEnvironment = "";
   @tracked trackSurface = "";
+  @tracked maxDistanceMiles = "";
+  @tracked searchPostcode = "";
+  @tracked postcodeInput = "";
+  @tracked postcodeError = "";
+  @tracked userPostcode = "";
 
   constructor() {
     super(...arguments);
@@ -36,6 +41,14 @@ export default class RcEventsList extends Component {
       return;
     }
     this.isRcMeetings = true;
+    try {
+      const response = await ajax("/des/racing-profile.json");
+      this.userPostcode = response?.user?.des_postcode || "";
+      this.searchPostcode = this.userPostcode;
+      this.postcodeInput = this.userPostcode;
+    } catch {
+      // not logged in or no profile
+    }
     await this.loadEvents();
   }
 
@@ -52,6 +65,10 @@ export default class RcEventsList extends Component {
       if (this.eventTypeId) params.event_type_id = this.eventTypeId;
       if (this.trackEnvironment) params.track_environment = this.trackEnvironment;
       if (this.trackSurface) params.track_surface = this.trackSurface;
+      if (this.maxDistanceMiles && this.searchPostcode) {
+        params.max_distance_miles = this.maxDistanceMiles;
+        params.postcode = this.searchPostcode;
+      }
 
       const response = await ajax("/des/rc-events-topic-list.json", { data: params });
       this.events = response.topics || [];
@@ -68,6 +85,44 @@ export default class RcEventsList extends Component {
   @action async updateEventType(e) { this.eventTypeId = e.target.value; await this.loadEvents(); }
   @action async updateEnvironment(e) { this.trackEnvironment = e.target.value; await this.loadEvents(); }
   @action async updateSurface(e) { this.trackSurface = e.target.value; await this.loadEvents(); }
+
+  @action
+  updatePostcodeInput(e) {
+    this.postcodeInput = e.target.value;
+    this.postcodeError = "";
+  }
+
+  @action
+  async updateDistance(e) {
+    this.maxDistanceMiles = e.target.value;
+    if (e.target.value && this.searchPostcode) {
+      await this.loadEvents();
+    } else if (!e.target.value) {
+      await this.loadEvents();
+    }
+  }
+
+  @action
+  async applyPostcode() {
+    if (!this.postcodeInput.trim()) {
+      this.postcodeError = "Please enter a postcode";
+      return;
+    }
+    try {
+      const response = await ajax("/des/geocode-postcode.json", {
+        data: { postcode: this.postcodeInput.trim() }
+      });
+      if (response.success) {
+        this.searchPostcode = this.postcodeInput.trim();
+        this.postcodeError = "";
+        await this.loadEvents();
+      } else {
+        this.postcodeError = "Invalid postcode";
+      }
+    } catch {
+      this.postcodeError = "Invalid postcode";
+    }
+  }
 
   @action
   async setView(mode) {
@@ -249,6 +304,40 @@ export default class RcEventsList extends Component {
                   <option value={{surface}} selected={{eq this.trackSurface surface}}>{{surface}}</option>
                 {{/each}}
               </select>
+            </div>
+          {{/if}}
+
+          <div class="rc-filter-group">
+            <select class="rc-filter-select" {{on "change" this.updateDistance}}>
+              <option value="">Any distance</option>
+              <option value="5" selected={{eq this.maxDistanceMiles "5"}}>Within 5 miles</option>
+              <option value="10" selected={{eq this.maxDistanceMiles "10"}}>Within 10 miles</option>
+              <option value="15" selected={{eq this.maxDistanceMiles "15"}}>Within 15 miles</option>
+              <option value="25" selected={{eq this.maxDistanceMiles "25"}}>Within 25 miles</option>
+              <option value="50" selected={{eq this.maxDistanceMiles "50"}}>Within 50 miles</option>
+              <option value="75" selected={{eq this.maxDistanceMiles "75"}}>Within 75 miles</option>
+              <option value="100" selected={{eq this.maxDistanceMiles "100"}}>Within 100 miles</option>
+            </select>
+          </div>
+
+          {{#if this.maxDistanceMiles}}
+            <div class="rc-filter-group rc-postcode-group">
+              <div style="display:flex;gap:4px;align-items:center;">
+                <input
+                  type="text"
+                  class="rc-filter-select"
+                  placeholder="Enter postcode..."
+                  value={{this.postcodeInput}}
+                  {{on "input" this.updatePostcodeInput}}
+                  style="flex:1;"
+                />
+                <button class="btn btn-small btn-primary" {{on "click" this.applyPostcode}}>📍</button>
+              </div>
+              {{#if this.postcodeError}}
+                <p class="field-help" style="color:var(--danger);margin:2px 0 0;">{{this.postcodeError}}</p>
+              {{else if this.searchPostcode}}
+                <p class="field-help" style="margin:2px 0 0;">📍 From: {{this.searchPostcode}}</p>
+              {{/if}}
             </div>
           {{/if}}
         </div>
