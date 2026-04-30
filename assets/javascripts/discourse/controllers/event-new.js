@@ -80,6 +80,7 @@ export default class EventNewController extends Controller {
     };
   }
 
+  @action
   async updateField(field, e) {
     const value = e.target.value;
 
