@@ -24,9 +24,14 @@ class DesVenue < ActiveRecord::Base
   after_save :geocode_if_needed
 
   def geocode_if_needed
-    return if latitude.present? && longitude.present?
+    return unless saved_change_to_postcode? || (latitude.blank? && postcode.present?)
     return if postcode.blank?
+    return if latitude.present? && longitude.present? && !saved_change_to_postcode?
+    # Clear coords if postcode changed so they get re-geocoded
+    update_columns(latitude: nil, longitude: nil) if saved_change_to_postcode? && latitude.present?
     ::Jobs.enqueue(:discourse_event_system_geocode_venue, venue_id: id)
+  rescue => e
+    Rails.logger.warn("Failed to enqueue geocode job for venue #{id}: #{e.message}")
   end
 
   def approve!
