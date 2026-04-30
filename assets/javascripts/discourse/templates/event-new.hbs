@@ -26,8 +26,9 @@
           <label>Event Title *</label>
           <input
             type="text"
+            value={{this.eventTitle}}
             placeholder="e.g. Summer RC Championship 2026"
-            {{on "input" (fn this.updateField "title")}}
+            {{on "input" this.updateTitle}}
           />
         </div>
         <div class="org-form-field">

@@ -14,6 +14,7 @@ export default class EventNewController extends Controller {
   @tracked description = "";
   @tracked bookingOpensDaysBefore = "";
   @tracked bookingClosesDaysBefore = "";
+  @tracked eventTitle = "";
 
   get clubVenues() {
     const orgId = this.model.event.organisation_id;
@@ -47,6 +48,11 @@ export default class EventNewController extends Controller {
 
   get orgClassTypes() {
     return (this.model.class_types || []).filter(ct => ct.isOrg);
+  }
+
+  @action
+  updateTitle(e) {
+    this.eventTitle = e.target.value;
   }
 
   @action
@@ -137,16 +143,12 @@ export default class EventNewController extends Controller {
 
   @action
   async saveEvent() {
-    if (!this.model.event.title) {
+    if (!this.eventTitle?.trim()) {
       alert("Please enter an event title");
       return;
     }
     if (!this.model.event.organisation_id) {
       alert("Please select an organisation");
-      return;
-    }
-    if (!this.model.event.title?.trim()) {
-      alert("Please enter an event title");
       return;
     }
     if (!this.model.event.start_date) {
@@ -177,7 +179,7 @@ export default class EventNewController extends Controller {
         data: {
           organisation_id: this.model.event.organisation_id,
           event: {
-            title: this.model.event.title,
+            title: this.eventTitle,
             description: this.description || this.model.event.description,
             organisation_id: this.model.event.organisation_id,
             event_type_id: this.model.event.event_type_id,

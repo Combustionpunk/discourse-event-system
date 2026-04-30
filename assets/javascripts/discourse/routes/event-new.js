@@ -46,6 +46,7 @@ export default class EventNewRoute extends Route {
 
   setupController(controller, model) {
     super.setupController(controller, model);
+    controller.eventTitle = model.event.title || "";
     controller.bookingOpensDaysBefore = model.event.booking_opens_days_before ? String(model.event.booking_opens_days_before) : "";
     controller.bookingClosesDaysBefore = model.event.booking_closes_days_before ? String(model.event.booking_closes_days_before) : "";
   }
