@@ -430,6 +430,7 @@ export default class EventManageController extends Controller {
             booking_opens_days_before: this.bookingOpensDaysBefore ? parseInt(this.bookingOpensDaysBefore) : null,
             booking_closes_days_before: this.bookingClosesDaysBefore ? parseInt(this.bookingClosesDaysBefore) : null,
             venue_id: this.model.event.venue_id,
+            event_type_id: this.model.event.event_type_id,
             rc_results_meeting_id: this.editRcResultsMeetingId,
           }
         },

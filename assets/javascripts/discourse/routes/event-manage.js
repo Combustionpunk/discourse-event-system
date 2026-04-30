@@ -30,8 +30,11 @@ export default class EventManageRoute extends Route {
     event.end_date = toInputFormat(event.end_date);
     event.booking_closing_date = toInputFormat(event.booking_closing_date);
 
-    const venuesData = await ajax("/des/venues.json");
+    const [venuesData, eventTypesData] = await Promise.all([
+      ajax("/des/venues.json"),
+      ajax("/des/event-types.json")
+    ]);
 
-    return { event, entrants, venues: venuesData.venues || [] };
+    return { event, entrants, venues: venuesData.venues || [], event_types: eventTypesData.event_types || [] };
   }
 }
