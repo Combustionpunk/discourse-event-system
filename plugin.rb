@@ -22,6 +22,7 @@ require_relative "lib/discourse_event_system/engine"
 register_asset "stylesheets/discourse-event-system.scss"
 register_asset "stylesheets/common/des-results.scss"
 register_asset "stylesheets/common/des-car-models.scss"
+register_asset "stylesheets/common/rc-events-list.scss"
 
 after_initialize do
   load File.expand_path("../app/models/des_position.rb", __FILE__)

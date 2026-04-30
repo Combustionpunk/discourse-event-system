@@ -1,0 +1,126 @@
+.rc-events-list {
+  padding: 16px 0;
+}
+
+.rc-events-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.rc-events-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rc-event-card {
+  display: block;
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  padding: 16px;
+  text-decoration: none;
+  color: var(--primary);
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: var(--tertiary);
+    background: var(--primary-low);
+    text-decoration: none;
+    color: var(--primary);
+  }
+
+  &--today {
+    border-color: var(--success);
+    border-width: 2px;
+  }
+
+  &--past {
+    opacity: 0.75;
+  }
+}
+
+.rc-event-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rc-event-org {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rc-event-org-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.rc-event-org-name {
+  font-size: 0.85em;
+  color: var(--primary-medium);
+  font-weight: 500;
+}
+
+.rc-event-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.rc-event-badge {
+  font-size: 0.75em;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+
+  &--today { background: var(--success-low); color: var(--success); }
+  &--past { background: var(--primary-low); color: var(--primary-medium); }
+  &--open { background: var(--success-low); color: var(--success); }
+  &--closed { background: var(--danger-low); color: var(--danger); }
+  &--soon { background: var(--highlight-low); color: var(--highlight-high); }
+}
+
+.rc-event-title {
+  margin: 0 0 8px;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.rc-event-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.875em;
+  color: var(--primary-medium);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.rc-event-classes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.rc-event-class-tag {
+  background: var(--primary-low);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.8em;
+}
+
+.rc-events-loading,
+.rc-events-empty {
+  color: var(--primary-medium);
+  padding: 24px 0;
+  text-align: center;
+}
