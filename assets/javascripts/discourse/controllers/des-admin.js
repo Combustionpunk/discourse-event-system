@@ -85,6 +85,8 @@ export default class DesAdminController extends Controller {
 
   @tracked adminVenues = [];
   @tracked showAddVenueForm = false;
+  @tracked isGeocoding = false;
+  @tracked geocodeResult = null;
 
   @action
   setTabVenues() { this.activeTab = "venues"; this.loadAdminVenues(); }
@@ -126,6 +128,20 @@ export default class DesAdminController extends Controller {
     });
     this.showAddVenueForm = false;
     this.loadAdminVenues();
+  }
+
+  @action
+  async geocodeAllVenues() {
+    this.isGeocoding = true;
+    this.geocodeResult = null;
+    try {
+      const response = await ajax("/des/admin/venues/geocode-all.json", { type: "POST" });
+      this.geocodeResult = `✅ Queued ${response.queued} venue${response.queued !== 1 ? 's' : ''} for geocoding`;
+    } catch {
+      this.geocodeResult = "❌ Failed to queue geocoding";
+    } finally {
+      this.isGeocoding = false;
+    }
   }
 
   @tracked editingVenueId = null;
