@@ -49,6 +49,16 @@
     </div>
   {{/if}}
 
+  <div class="venue-view-toggle" style="display:flex;gap:8px;margin-bottom:16px;">
+    <button class="btn btn-small {{if (eq this.viewMode 'list') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setViewMode "list")}}>☰ List</button>
+    <button class="btn btn-small {{if (eq this.viewMode 'map') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setViewMode "map")}}>🗺️ Map</button>
+  </div>
+
+  {{#if (eq this.viewMode "map")}}
+    <div id="venues-map" style="height:550px;width:100%;border-radius:8px;overflow:hidden;margin-bottom:24px;"></div>
+  {{/if}}
+
+  {{#if (eq this.viewMode "list")}}
   {{#if this.model.venues.length}}
     <div class="venues-grid">
       {{#each this.model.venues as |venue|}}
@@ -79,5 +89,6 @@
     <div class="empty-state">
       <p>No venues yet.</p>
     </div>
+  {{/if}}
   {{/if}}
 </div>
