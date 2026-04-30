@@ -391,7 +391,7 @@ export default class EventManageController extends Controller {
       this.editRcResultsMeetingId = this.model.event.rc_results_meeting_id || null;
       this.bookingOpensDaysBefore = this.model.event.booking_opens_days_before ? String(this.model.event.booking_opens_days_before) : "";
       this.bookingClosesDaysBefore = this.model.event.booking_closes_days_before ? String(this.model.event.booking_closes_days_before) : "";
-      this.editEventTypeId = this.model.event.event_type_id || null;
+      this.editEventTypeId = this.model.event.event_type_id || this.model.event.event_type?.id || null;
     }
   }
 
