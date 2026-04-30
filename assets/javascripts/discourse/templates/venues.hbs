@@ -49,10 +49,55 @@
     </div>
   {{/if}}
 
-  <div class="venue-view-toggle" style="display:flex;gap:8px;margin-bottom:16px;">
-    <button class="btn btn-small {{if (eq this.viewMode 'list') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setViewMode "list")}}>☰ List</button>
-    <button class="btn btn-small {{if (eq this.viewMode 'map') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setViewMode "map")}}>🗺️ Map</button>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+    <div class="venue-view-toggle" style="display:flex;gap:8px;">
+      <button class="btn btn-small {{if (eq this.viewMode 'list') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setViewMode "list")}}>☰ List</button>
+      <button class="btn btn-small {{if (eq this.viewMode 'map') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setViewMode "map")}}>🗺️ Map</button>
+    </div>
+    <button class="btn btn-small btn-default" {{on "click" this.toggleIconKey}} title="Icon Key">❓ Icon Key</button>
   </div>
+
+  {{#if this.showIconKey}}
+    <div class="venue-icon-key-overlay" {{on "click" this.toggleIconKey}}>
+      <div class="venue-icon-key-modal" {{on "click" this.stopPropagation}}>
+        <div class="venue-icon-key-header">
+          <h3>Venue Icon Key</h3>
+          <button class="btn btn-small btn-default" {{on "click" this.toggleIconKey}}>✕</button>
+        </div>
+        <div class="venue-icon-key-body">
+          <div class="icon-key-section">
+            <h4>Track Type</h4>
+            <div class="icon-key-row"><span>🏁</span><span>Permanent Track</span></div>
+            <div class="icon-key-row"><span>🏗️</span><span>Pop-up Track</span></div>
+          </div>
+          <div class="icon-key-section">
+            <h4>Environment</h4>
+            <div class="icon-key-row"><span>🌳</span><span>Outdoor</span></div>
+            <div class="icon-key-row"><span>🏠</span><span>Indoor / Covered</span></div>
+          </div>
+          <div class="icon-key-section">
+            <h4>Surface</h4>
+            <div class="icon-key-row"><span>🟫</span><span>Carpet</span></div>
+            <div class="icon-key-row"><span>🌿</span><span>Astroturf</span></div>
+            <div class="icon-key-row"><span>🍃</span><span>Grass</span></div>
+            <div class="icon-key-row"><span>⬛</span><span>Tarmac</span></div>
+            <div class="icon-key-row"><span>🔀</span><span>Mixed Surface</span></div>
+          </div>
+          <div class="icon-key-section">
+            <h4>Facilities</h4>
+            <div class="icon-key-row"><span>🚻</span><span>Permanent Toilets</span></div>
+            <div class="icon-key-row"><span>🚽</span><span>Portaloos</span></div>
+            <div class="icon-key-row"><span>☕</span><span>Café</span></div>
+            <div class="icon-key-row"><span>🍺</span><span>Bar</span></div>
+            <div class="icon-key-row"><span>🚿</span><span>Showers</span></div>
+            <div class="icon-key-row"><span>⚡</span><span>Power Supply</span></div>
+            <div class="icon-key-row"><span>💧</span><span>Water Supply</span></div>
+            <div class="icon-key-row"><span>⛺</span><span>Camping</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/if}}
 
   {{#if (eq this.viewMode "map")}}
     <div id="venues-map" style="height:550px;width:100%;border-radius:8px;overflow:hidden;margin-bottom:24px;"></div>

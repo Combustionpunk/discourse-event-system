@@ -12,6 +12,7 @@ export default class VenuesController extends Controller {
   @tracked isSaving = false;
   @tracked newVenue = {};
   @tracked viewMode = "list";
+  @tracked showIconKey = false;
 
   trackCategories = ["onroad", "offroad"];
   trackSurfaces = ["carpet", "astroturf", "grass", "tarmac", "mixed"];
@@ -73,6 +74,16 @@ export default class VenuesController extends Controller {
     } finally {
       this.isSaving = false;
     }
+  }
+
+  @action
+  toggleIconKey() {
+    this.showIconKey = !this.showIconKey;
+  }
+
+  @action
+  stopPropagation(e) {
+    e.stopPropagation();
   }
 
   @action
