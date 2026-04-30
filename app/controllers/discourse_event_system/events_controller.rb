@@ -79,7 +79,7 @@ module DiscourseEventSystem
                        .where.not(topic_id: nil)
                        .where.not(status: ['cancelled', 'draft'])
 
-      case params[:filter]
+      case params[:time_filter]
       when 'past'
         events = events.where('start_date < ?', Time.now.beginning_of_day).order(start_date: :desc)
       when 'today'
@@ -87,13 +87,34 @@ module DiscourseEventSystem
       when 'upcoming'
         events = events.where('start_date > ?', Time.now.end_of_day).order(start_date: :asc)
       else
-        today = events.where('start_date >= ? AND start_date < ?', Time.now.beginning_of_day, Time.now.end_of_day).order(start_date: :asc).to_a
-        upcoming = events.where('start_date > ?', Time.now.end_of_day).order(start_date: :asc).to_a
-        past = events.where('start_date < ?', Time.now.beginning_of_day).order(start_date: :desc).to_a
-        return render json: { topics: (today + upcoming + past).map { |e| serialize_rc_topic(e) } }
+        today    = events.where('start_date >= ? AND start_date < ?', Time.now.beginning_of_day, Time.now.end_of_day).order(start_date: :asc)
+        upcoming = events.where('start_date > ?', Time.now.end_of_day).order(start_date: :asc)
+        past     = events.where('start_date < ?', Time.now.beginning_of_day).order(start_date: :desc)
+
+        today    = today.where(organisation_id: params[:organisation_id]) if params[:organisation_id].present?
+        upcoming = upcoming.where(organisation_id: params[:organisation_id]) if params[:organisation_id].present?
+        past     = past.where(organisation_id: params[:organisation_id]) if params[:organisation_id].present?
+
+        today    = today.where(event_type_id: params[:event_type_id]) if params[:event_type_id].present?
+        upcoming = upcoming.where(event_type_id: params[:event_type_id]) if params[:event_type_id].present?
+        past     = past.where(event_type_id: params[:event_type_id]) if params[:event_type_id].present?
+
+        today_arr    = apply_venue_filters(today, params).to_a
+        upcoming_arr = apply_venue_filters(upcoming, params).to_a
+        past_arr     = apply_venue_filters(past, params).to_a
+
+        topics = (today_arr + upcoming_arr + past_arr).map { |e| serialize_rc_topic(e) }
+        return render json: { topics: topics, filters: rc_filter_options }
       end
 
-      render json: { topics: events.map { |e| serialize_rc_topic(e) } }
+      events = events.where(organisation_id: params[:organisation_id]) if params[:organisation_id].present?
+      events = events.where(event_type_id: params[:event_type_id]) if params[:event_type_id].present?
+      events = apply_venue_filters(events, params)
+
+      render json: {
+        topics: events.map { |e| serialize_rc_topic(e) },
+        filters: rc_filter_options
+      }
     end
 
     def show
@@ -793,6 +814,25 @@ module DiscourseEventSystem
 
     def serialize_events(events)
       events.map { |e| serialize_event(e) }
+    end
+
+    def apply_venue_filters(events, params)
+      return events unless params[:track_environment].present? || params[:track_surface].present?
+
+      venue_ids = DesVenue.all
+      venue_ids = venue_ids.where(track_environment: params[:track_environment]) if params[:track_environment].present?
+      venue_ids = venue_ids.where(track_surface: params[:track_surface]) if params[:track_surface].present?
+
+      events.where(venue_id: venue_ids.pluck(:id))
+    end
+
+    def rc_filter_options
+      {
+        organisations: DesOrganisation.approved.order(:name).map { |o| { id: o.id, name: o.name } },
+        event_types: DesEventType.order(:name).map { |et| { id: et.id, name: et.name } },
+        track_environments: ['outdoor', 'indoor_covered'],
+        track_surfaces: DesVenue.distinct.pluck(:track_surface).compact.sort
+      }
     end
 
     def serialize_rc_topic(event)
