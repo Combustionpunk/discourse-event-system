@@ -841,6 +841,7 @@ module DiscourseEventSystem
         topic_id: event.topic_id,
         title: event.title,
         start_date: event.start_date,
+        end_date: event.end_date,
         formatted_date: event.start_date&.strftime('%a %d %b %Y at %H:%M'),
         status: event.status,
         booking_open: event.booking_open?,
