@@ -52,17 +52,35 @@ export default class EventNewController extends Controller {
   @action
   updateBookingOpens(e) {
     this.bookingOpensDaysBefore = e.target.value;
-    this.model.event.booking_opens_days_before = e.target.value ? parseInt(e.target.value) : null;
+    this.model = {
+      ...this.model,
+      event: {
+        ...this.model.event,
+        booking_opens_days_before: e.target.value ? parseInt(e.target.value) : null
+      }
+    };
   }
 
   @action
   updateBookingCloses(e) {
     this.bookingClosesDaysBefore = e.target.value;
-    this.model.event.booking_closes_days_before = e.target.value ? parseInt(e.target.value) : null;
+    this.model = {
+      ...this.model,
+      event: {
+        ...this.model.event,
+        booking_closes_days_before: e.target.value ? parseInt(e.target.value) : null
+      }
+    };
   }
 
   async updateField(field, event) {
-    this.model.event[field] = event.target.value;
+    this.model = {
+      ...this.model,
+      event: {
+        ...this.model.event,
+        [field]: event.target.value
+      }
+    };
     if (field === "booking_type") {
       this.bookingType = event.target.value;
     }
@@ -75,11 +93,11 @@ export default class EventNewController extends Controller {
           isOrg: true
         }));
         const globalTypes = data.global_class_types || [];
-        this.model.class_types = [
-          ...globalTypes,
-          ...orgTypes
-        ];
-      } catch (e) {
+        this.model = {
+          ...this.model,
+          class_types: [...globalTypes, ...orgTypes]
+        };
+      } catch {
         // keep existing class types
       }
     }
