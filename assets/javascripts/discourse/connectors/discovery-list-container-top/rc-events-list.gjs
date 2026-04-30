@@ -15,6 +15,7 @@ export default class RcEventsList extends Component {
   @tracked currentYear = new Date().getFullYear();
   @tracked currentMonth = new Date().getMonth();
   @tracked popoverDayKey = null;
+  @tracked popoverPosition = { top: 0, left: 0 };
 
   @tracked timeFilter = "default";
   @tracked organisationId = "";
@@ -98,8 +99,27 @@ export default class RcEventsList extends Component {
   }
 
   @action
-  togglePopover(dayKey) {
-    this.popoverDayKey = this.popoverDayKey === dayKey ? null : dayKey;
+  togglePopover(dayKey, e) {
+    if (this.popoverDayKey === dayKey) {
+      this.popoverDayKey = null;
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const popoverHeight = 300;
+
+    let top = rect.bottom + 4;
+    if (top + popoverHeight > viewportHeight) {
+      top = rect.top - popoverHeight - 4;
+    }
+
+    let left = rect.left;
+    if (left + 300 > window.innerWidth) {
+      left = window.innerWidth - 310;
+    }
+
+    this.popoverPosition = { top, left };
+    this.popoverDayKey = dayKey;
   }
 
   @action
@@ -319,17 +339,6 @@ export default class RcEventsList extends Component {
                         <button class="rc-cal-multi-badge" {{on "click" (fn this.togglePopover day.key)}}>
                           {{day.dayEvents.length}} events
                         </button>
-                        {{#if (eq this.popoverDayKey day.key)}}
-                          <div class="rc-cal-popover">
-                            <button class="rc-cal-popover-close" {{on "click" this.closePopover}}>✕</button>
-                            {{#each day.dayEvents as |event|}}
-                              <a href={{event.topic_url}} class="rc-cal-popover-event {{this.eventBadgeClass event}}">
-                                <span class="rc-cal-popover-title">{{event.title}}</span>
-                                <span class="rc-cal-popover-org">{{event.organisation.name}}</span>
-                              </a>
-                            {{/each}}
-                          </div>
-                        {{/if}}
                       {{/if}}
                     {{/if}}
                   </div>
@@ -338,6 +347,22 @@ export default class RcEventsList extends Component {
                 {{/if}}
               {{/each}}
             </div>
+
+            {{#if this.popoverDayKey}}
+              {{#each this.calendarDays as |day|}}
+                {{#if (eq day.key this.popoverDayKey)}}
+                  <div class="rc-cal-popover" style="top: {{this.popoverPosition.top}}px; left: {{this.popoverPosition.left}}px;">
+                    <button class="rc-cal-popover-close" {{on "click" this.closePopover}}>✕</button>
+                    {{#each day.dayEvents as |event|}}
+                      <a href={{event.topic_url}} class="rc-cal-popover-event {{this.eventBadgeClass event}}">
+                        <span class="rc-cal-popover-title">{{event.title}}</span>
+                        <span class="rc-cal-popover-org">{{event.organisation.name}}</span>
+                      </a>
+                    {{/each}}
+                  </div>
+                {{/if}}
+              {{/each}}
+            {{/if}}
           </div>
         {{/if}}
 

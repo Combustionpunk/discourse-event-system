@@ -252,16 +252,16 @@
 }
 
 .rc-cal-popover {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 100;
+  position: fixed;
+  z-index: 1000;
   background: var(--secondary);
   border: 1px solid var(--primary-low);
   border-radius: 8px;
   padding: 8px;
-  min-width: 200px;
-  max-width: 280px;
+  min-width: 220px;
+  max-width: 300px;
+  max-height: 60vh;
+  overflow-y: auto;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
