@@ -6,14 +6,22 @@ module DiscourseEventSystem
     before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :clone, :update_booking_status, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
 
     def index
-      events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes, :venue)
+      if current_user&.admin?
+        events = DesEvent.includes(:organisation, :event_type, :des_event_classes, :venue)
+      else
+        events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes, :venue)
+      end
 
       # Filter by time
       case params[:filter]
       when 'past'
         events = events.where('start_date < ?', Time.now).order(start_date: :desc)
       else
-        events = events.upcoming.order(start_date: :asc)
+        if current_user&.admin?
+          events = events.where('start_date > ?', Time.now).order(start_date: :asc)
+        else
+          events = events.upcoming.order(start_date: :asc)
+        end
       end
 
       # Filter by organisation

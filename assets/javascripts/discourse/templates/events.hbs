@@ -56,6 +56,9 @@
               <LinkTo @route="event" @model={{event.id}}>
                 {{event.title}}
               </LinkTo>
+              {{#if (eq event.status "draft")}}
+                <span class="draft-badge">📝 Draft</span>
+              {{/if}}
             </h2>
             <span class="event-status event-status--{{event.status}}">
               {{event.status}}
