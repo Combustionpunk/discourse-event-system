@@ -443,8 +443,8 @@ export default class EventManageController extends Controller {
           }
         },
       });
-      if (response.event) {
-        this.model = { ...this.model, event: response.event };
+      if (response.id) {
+        this.model = { ...this.model, event: response };
       }
       this.editMode = false;
       this.router.refresh();
