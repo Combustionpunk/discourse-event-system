@@ -80,20 +80,22 @@ export default class EventNewController extends Controller {
     };
   }
 
-  async updateField(field, event) {
+  async updateField(field, e) {
+    const value = e.target.value;
+
     this.model = {
       ...this.model,
       event: {
         ...this.model.event,
-        [field]: event.target.value
+        [field]: value
       }
     };
     if (field === "booking_type") {
-      this.bookingType = event.target.value;
+      this.bookingType = value;
     }
-    if (field === "organisation_id" && event.target.value) {
+    if (field === "organisation_id" && value) {
       try {
-        const data = await ajax("/des/organisations/" + event.target.value + "/class-types.json");
+        const data = await ajax("/des/organisations/" + value + "/class-types.json");
         const orgTypes = (data.org_class_types || []).map(ct => ({
           id: ct.id,
           name: ct.name + " ★",
