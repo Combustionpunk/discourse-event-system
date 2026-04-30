@@ -386,6 +386,13 @@ export default class RcEventsList extends Component {
                               <span class="rc-icon-badge" title="Indoor">🏠</span>
                             {{/if}}
                           {{/if}}
+                          {{#if event.venue.track_type}}
+                            {{#if (eq event.venue.track_type "permanent")}}
+                              <span class="rc-icon-badge" title="Permanent Track">🏁</span>
+                            {{else}}
+                              <span class="rc-icon-badge" title="Pop-up Track">🏗️</span>
+                            {{/if}}
+                          {{/if}}
                           {{#if event.venue.track_surface}}
                             <span class="rc-icon-badge" title={{event.venue.track_surface}}>
                               {{#if (eq event.venue.track_surface "carpet")}}🟫

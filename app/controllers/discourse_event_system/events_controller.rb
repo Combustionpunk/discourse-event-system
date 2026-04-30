@@ -915,6 +915,7 @@ module DiscourseEventSystem
           track_environment: event.venue.track_environment,
           track_surface: event.venue.track_surface,
           track_category: event.venue.track_category,
+          track_type: event.venue.track_type,
           has_permanent_toilets: event.venue.has_permanent_toilets,
           has_portaloos: event.venue.has_portaloos,
           has_cafe: event.venue.has_cafe,

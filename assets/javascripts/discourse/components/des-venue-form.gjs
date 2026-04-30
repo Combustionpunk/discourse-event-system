@@ -16,6 +16,7 @@ export default class DesVenueForm extends Component {
       name: this.args.venue?.name || "",
       address: this.args.venue?.address || "",
       postcode: this.args.venue?.postcode || "",
+      track_type: this.args.venue?.track_type || "",
       google_maps_url: this.args.venue?.google_maps_url || "",
       website: this.args.venue?.website || "",
       track_category: this.args.venue?.track_category || "",
@@ -78,6 +79,14 @@ export default class DesVenueForm extends Component {
         <div class="org-form-field">
           <label>Postcode</label>
           <input type="text" value={{this.currentFormData.postcode}} placeholder="e.g. S6 1LU" {{on "input" (fn this.updateField "postcode")}} />
+        </div>
+        <div class="org-form-field">
+          <label>Track Type</label>
+          <select {{on "change" (fn this.updateField "track_type")}}>
+            <option value="">Select type...</option>
+            <option value="permanent" selected={{eq this.currentFormData.track_type "permanent"}}>🏁 Permanent Track</option>
+            <option value="popup" selected={{eq this.currentFormData.track_type "popup"}}>🏗️ Pop-up Track</option>
+          </select>
         </div>
       </div>
 

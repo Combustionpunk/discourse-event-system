@@ -40,6 +40,9 @@
   </div>
 
   <div class="venue-badges" style="margin:12px 0;">
+    {{#if this.model.venue.track_type}}
+      <span class="venue-badge">{{#if (eq this.model.venue.track_type "permanent")}}🏁 Permanent Track{{else}}🏗️ Pop-up Track{{/if}}</span>
+    {{/if}}
     {{#if this.model.venue.track_category}}<span class="venue-badge venue-badge--category">{{this.model.venue.track_category}}</span>{{/if}}
     {{#if this.model.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.model.venue.track_surface}}</span>{{/if}}
     {{#if this.model.venue.track_environment}}<span class="venue-badge venue-badge--environment">{{this.model.venue.track_environment}}</span>{{/if}}

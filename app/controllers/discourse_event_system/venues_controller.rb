@@ -89,7 +89,7 @@ module DiscourseEventSystem
         :track_environment, :website, :description, :parking_info,
         :local_facilities, :access_notes, :created_by_organisation_id,
         :has_portaloos, :has_permanent_toilets, :has_bar, :has_cafe, :has_showers,
-        :has_power_supply, :has_water_supply, :has_camping, :is_shared, :postcode
+        :has_power_supply, :has_water_supply, :has_camping, :is_shared, :postcode, :track_type
       )
     end
 
@@ -120,6 +120,7 @@ module DiscourseEventSystem
         has_camping: venue.has_camping,
         is_shared: venue.is_shared,
         postcode: venue.postcode,
+        track_type: venue.track_type,
         latitude: venue.latitude,
         longitude: venue.longitude
       }
