@@ -350,19 +350,77 @@ export default class RcEventsList extends Component {
             <div class="rc-events-cards">
               {{#each this.events as |event|}}
                 <a href={{event.topic_url}} class="rc-event-card {{if event.is_past 'rc-event-card--past' ''}} {{if event.is_today 'rc-event-card--today' ''}}">
-                  <div class="rc-event-card-header">
-                    <div class="rc-event-org">
-                      {{#if event.organisation.logo_url}}
-                        <img src={{event.organisation.logo_url}} alt={{event.organisation.name}} class="rc-event-org-logo" />
-                      {{/if}}
-                      <span class="rc-event-org-name">{{event.organisation.name}}</span>
+
+                  <div class="rc-card-header">
+                    <div class="rc-card-title-block">
+                      <h3 class="rc-event-title">{{event.title}}</h3>
+                      <div class="rc-card-date">📅 {{event.formatted_date}}</div>
                     </div>
-                    <div class="rc-event-badges">
+                    <div class="rc-card-status-badges">
                       {{#if event.is_today}}
                         <span class="rc-event-badge rc-event-badge--today">📍 Today</span>
                       {{else if event.is_past}}
                         <span class="rc-event-badge rc-event-badge--past">✅ Past</span>
                       {{/if}}
+                    </div>
+                  </div>
+
+                  <div class="rc-card-body">
+                    <div class="rc-card-org">
+                      {{#if event.organisation.logo_url}}
+                        <img src={{event.organisation.logo_url}} alt={{event.organisation.name}} class="rc-event-org-logo" />
+                      {{else}}
+                        <div class="rc-org-logo-placeholder">🏭</div>
+                      {{/if}}
+                      <span class="rc-event-org-name">{{event.organisation.name}}</span>
+                    </div>
+
+                    <div class="rc-card-venue">
+                      {{#if event.venue}}
+                        <div class="rc-venue-name">{{event.venue.name}}</div>
+                        <div class="rc-venue-attrs">
+                          {{#if event.venue.track_environment}}
+                            {{#if (eq event.venue.track_environment "outdoor")}}
+                              <span class="rc-icon-badge" title="Outdoor">🌳</span>
+                            {{else}}
+                              <span class="rc-icon-badge" title="Indoor">🏠</span>
+                            {{/if}}
+                          {{/if}}
+                          {{#if event.venue.track_surface}}
+                            <span class="rc-icon-badge" title={{event.venue.track_surface}}>
+                              {{#if (eq event.venue.track_surface "carpet")}}🟫
+                              {{else if (eq event.venue.track_surface "astroturf")}}🌿
+                              {{else if (eq event.venue.track_surface "grass")}}🍃
+                              {{else if (eq event.venue.track_surface "tarmac")}}⬛
+                              {{else if (eq event.venue.track_surface "mixed")}}🔀
+                              {{else}}🏁{{/if}}
+                            </span>
+                          {{/if}}
+                          {{#if event.venue.has_permanent_toilets}}<span class="rc-icon-badge" title="Permanent Toilets">🚻</span>{{/if}}
+                          {{#if event.venue.has_portaloos}}<span class="rc-icon-badge" title="Portaloos">🚽</span>{{/if}}
+                          {{#if event.venue.has_cafe}}<span class="rc-icon-badge" title="Café">☕</span>{{/if}}
+                          {{#if event.venue.has_bar}}<span class="rc-icon-badge" title="Bar">🍺</span>{{/if}}
+                          {{#if event.venue.has_showers}}<span class="rc-icon-badge" title="Showers">🚿</span>{{/if}}
+                          {{#if event.venue.has_power_supply}}<span class="rc-icon-badge" title="Power Supply">⚡</span>{{/if}}
+                          {{#if event.venue.has_water_supply}}<span class="rc-icon-badge" title="Water Supply">💧</span>{{/if}}
+                          {{#if event.venue.has_camping}}<span class="rc-icon-badge" title="Camping">⛺</span>{{/if}}
+                        </div>
+                        {{#if event.distance_miles}}
+                          <div class="rc-venue-distance" title="Distance from your postcode">📏 {{event.distance_miles}} miles</div>
+                        {{/if}}
+                      {{else}}
+                        <div class="rc-venue-name rc-venue-none">📍 Venue TBC</div>
+                      {{/if}}
+                    </div>
+                  </div>
+
+                  <div class="rc-card-footer">
+                    <div class="rc-card-classes">
+                      {{#each event.classes as |cls|}}
+                        <span class="rc-event-class-tag">{{cls}}</span>
+                      {{/each}}
+                    </div>
+                    <div class="rc-card-booking">
                       {{#if event.booking_manually_closed}}
                         <span class="rc-event-badge rc-event-badge--closed">🔴 Booking Closed</span>
                       {{else if event.booking_open}}
@@ -374,22 +432,7 @@ export default class RcEventsList extends Component {
                       {{/if}}
                     </div>
                   </div>
-                  <div class="rc-event-card-body">
-                    <h3 class="rc-event-title">{{event.title}}</h3>
-                    <div class="rc-event-meta">
-                      <span class="rc-event-date">📅 {{event.formatted_date}}</span>
-                      {{#if event.venue}}
-                        <span class="rc-event-venue">📍 {{event.venue.name}}</span>
-                      {{/if}}
-                    </div>
-                    {{#if event.classes.length}}
-                      <div class="rc-event-classes">
-                        {{#each event.classes as |cls|}}
-                          <span class="rc-event-class-tag">{{cls}}</span>
-                        {{/each}}
-                      </div>
-                    {{/if}}
-                  </div>
+
                 </a>
               {{/each}}
             </div>

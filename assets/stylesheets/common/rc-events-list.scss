@@ -42,15 +42,16 @@
   display: block;
   background: var(--primary-very-low);
   border: 1px solid var(--primary-low);
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 0;
   text-decoration: none;
   color: var(--primary);
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  overflow: hidden;
 
   &:hover {
     border-color: var(--tertiary);
-    background: var(--primary-low);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     text-decoration: none;
     color: var(--primary);
   }
@@ -61,42 +62,42 @@
   }
 
   &--past {
-    opacity: 0.75;
+    opacity: 0.72;
   }
 }
 
-.rc-event-card-header {
+.rc-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--primary-low);
   gap: 8px;
 }
 
-.rc-event-org {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.rc-card-title-block {
+  flex: 1;
+  min-width: 0;
 }
 
-.rc-event-org-logo {
-  height: 28px;
-  width: auto;
-  object-fit: contain;
-  border-radius: 4px;
+.rc-event-title {
+  margin: 0 0 4px;
+  font-size: 1.05em;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.rc-event-org-name {
+.rc-card-date {
   font-size: 0.85em;
   color: var(--primary-medium);
-  font-weight: 500;
 }
 
-.rc-event-badges {
+.rc-card-status-badges {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .rc-event-badge {
@@ -112,26 +113,115 @@
   &--soon { background: var(--highlight-low); color: var(--highlight-high); }
 }
 
-.rc-event-title {
-  margin: 0 0 8px;
-  font-size: 1.1em;
-  font-weight: 600;
+.rc-card-body {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--primary-low);
 }
 
-.rc-event-meta {
+.rc-card-org {
   display: flex;
-  gap: 16px;
-  font-size: 0.875em;
-  color: var(--primary-medium);
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-}
-
-.rc-event-classes {
-  display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  min-width: 90px;
+  max-width: 110px;
+  border-right: 1px solid var(--primary-low);
+  text-align: center;
   gap: 6px;
-  margin-top: 8px;
+}
+
+.rc-event-org-logo {
+  height: 48px;
+  width: auto;
+  max-width: 80px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.rc-org-logo-placeholder {
+  font-size: 2em;
+}
+
+.rc-event-org-name {
+  font-size: 0.72em;
+  color: var(--primary-medium);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.rc-card-venue {
+  flex: 1;
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+.rc-venue-name {
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-bottom: 6px;
+
+  &.rc-venue-none {
+    color: var(--primary-medium);
+    font-style: italic;
+    font-weight: normal;
+  }
+}
+
+.rc-venue-attrs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.rc-icon-badge {
+  font-size: 1.1em;
+  cursor: default;
+  position: relative;
+
+  &[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: var(--secondary);
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 200;
+    pointer-events: none;
+    margin-bottom: 4px;
+  }
+}
+
+.rc-venue-distance {
+  font-size: 0.8em;
+  color: var(--primary-medium);
+}
+
+.rc-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rc-card-classes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+.rc-card-booking {
+  flex-shrink: 0;
 }
 
 .rc-event-class-tag {
@@ -314,6 +404,27 @@
 
   .rc-filter-group {
     min-width: 120px;
+  }
+
+  .rc-card-body {
+    flex-direction: column;
+  }
+
+  .rc-card-org {
+    flex-direction: row;
+    max-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--primary-low);
+    justify-content: flex-start;
+    padding: 10px 12px;
+  }
+
+  .rc-event-org-logo {
+    height: 32px;
+  }
+
+  .rc-event-title {
+    white-space: normal;
   }
 }
 
