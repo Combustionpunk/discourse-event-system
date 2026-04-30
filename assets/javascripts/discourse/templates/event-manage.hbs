@@ -94,9 +94,9 @@
         </div>
         <div class="org-form-field">
           <label>Event Type</label>
-          <select {{on "change" (fn this.updateField "event_type_id")}}>
+          <select {{on "change" this.updateEventType}}>
             {{#each this.model.event_types as |et|}}
-              <option value={{et.id}} selected={{eq (concat this.model.event.event_type_id "") (concat et.id "")}}>{{et.name}}</option>
+              <option value={{et.id}} selected={{eq (concat this.editEventTypeId "") (concat et.id "")}}>{{et.name}}</option>
             {{/each}}
           </select>
         </div>

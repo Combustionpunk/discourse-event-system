@@ -15,6 +15,7 @@ export default class EventManageController extends Controller {
   @tracked bookingClosesDaysBefore = "";
   @tracked editDescription = "";
   @tracked editRcResultsMeetingId = null;
+  @tracked editEventTypeId = null;
   @tracked classTypes = null;
   @tracked newClassTypeId = null;
   @tracked newClassCapacity = "";
@@ -389,7 +390,13 @@ export default class EventManageController extends Controller {
       this.editRcResultsMeetingId = this.model.event.rc_results_meeting_id || null;
       this.bookingOpensDaysBefore = this.model.event.booking_opens_days_before ? String(this.model.event.booking_opens_days_before) : "";
       this.bookingClosesDaysBefore = this.model.event.booking_closes_days_before ? String(this.model.event.booking_closes_days_before) : "";
+      this.editEventTypeId = this.model.event.event_type_id || null;
     }
+  }
+
+  @action
+  updateEventType(e) {
+    this.editEventTypeId = e.target.value;
   }
 
   @action
@@ -430,7 +437,7 @@ export default class EventManageController extends Controller {
             booking_opens_days_before: this.bookingOpensDaysBefore ? parseInt(this.bookingOpensDaysBefore) : null,
             booking_closes_days_before: this.bookingClosesDaysBefore ? parseInt(this.bookingClosesDaysBefore) : null,
             venue_id: this.model.event.venue_id,
-            event_type_id: this.model.event.event_type_id,
+            event_type_id: this.editEventTypeId,
             rc_results_meeting_id: this.editRcResultsMeetingId,
           }
         },
