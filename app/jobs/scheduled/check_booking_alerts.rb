@@ -19,14 +19,16 @@ module Jobs
           DiscourseEventSystem::BookingAlertMailer.booking_open(alert.user, event).deliver_now
 
           notification_type = Notification.types[:custom] rescue Notification.types[:posted]
-          Notification.create!(
+          Notification.create(
             notification_type: notification_type,
             user_id: alert.user_id,
             high_priority: true,
+            topic_id: event.topic_id,
+            post_number: 1,
             data: {
-              message: "booking_alert",
+              message: "🏁 Booking is now open for #{event.title}",
               display_username: "system",
-              topic_title: event.title,
+              topic_title: "Booking Open: #{event.title}",
               url: event.topic_id ? "/t/#{event.topic_id}" : "/events"
             }.to_json
           )
