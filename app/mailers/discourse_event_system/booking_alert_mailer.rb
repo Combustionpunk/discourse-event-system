@@ -11,6 +11,7 @@ module DiscourseEventSystem
 
       mail(
         to: user.email,
+        from: SiteSetting.notification_email,
         subject: "🏁 Booking is now open — #{event.title}"
       ) do |format|
         format.html { render plain: booking_open_html }
