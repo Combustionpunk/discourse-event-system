@@ -26,9 +26,9 @@ module Jobs
             topic_id: event.topic_id,
             post_number: 1,
             data: {
-              message: "🏁 Booking is now open for #{event.title}",
-              display_username: "system",
-              topic_title: "Booking Open: #{event.title}",
+              message: "🏁 Booking is now open!",
+              display_username: "Booking Open",
+              topic_title: event.title,
               url: event.topic_id ? "/t/#{event.topic_id}" : "/events"
             }.to_json
           )
