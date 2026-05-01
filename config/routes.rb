@@ -34,6 +34,8 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/events/:id/publish" => "events#publish"
   post "/des/events/:id/cancel" => "events#cancel"
   post "/des/events/:id/clone" => "events#clone"
+  post "/des/events/:id/booking-alert" => "events#subscribe_booking_alert"
+  delete "/des/events/:id/booking-alert" => "events#unsubscribe_booking_alert"
   put "/des/events/:id/booking-status" => "events#update_booking_status"
   get "/des/events/:id/entrants" => "events#entrants"
   get "/des/events/:id/public-entrants" => "events#public_entrants"

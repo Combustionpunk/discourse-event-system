@@ -5,7 +5,7 @@ require 'net/http'
 module DiscourseEventSystem
   class EventsController < ApplicationController
     before_action :ensure_logged_in, except: [:index, :show, :public_entrants, :rc_topic_list, :geocode_postcode_endpoint]
-    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :clone, :destroy, :update_booking_status, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
+    before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :clone, :destroy, :update_booking_status, :subscribe_booking_alert, :unsubscribe_booking_alert, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
 
     def index
       if current_user&.admin?
@@ -131,6 +131,19 @@ module DiscourseEventSystem
       else
         render json: { success: false, error: 'Invalid postcode' }, status: :unprocessable_entity
       end
+    end
+
+    def subscribe_booking_alert
+      return render json: { error: 'Booking is already open' }, status: :unprocessable_entity if @event.booking_open?
+      DesEventBookingAlert.find_or_create_by!(user_id: current_user.id, event_id: @event.id)
+      render json: { subscribed: true }
+    rescue ActiveRecord::RecordInvalid => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def unsubscribe_booking_alert
+      DesEventBookingAlert.where(user_id: current_user.id, event_id: @event.id).destroy_all
+      render json: { subscribed: false }
     end
 
     def show
@@ -724,6 +737,7 @@ module DiscourseEventSystem
         booking_opens_at: event.booking_opens_at,
         booking_closes_at: event.booking_closes_at,
         booking_open: event.booking_open?,
+        user_has_booking_alert: current_user ? DesEventBookingAlert.exists?(user_id: current_user.id, event_id: event.id) : false,
         location: event.location,
         google_maps_url: event.google_maps_url,
         capacity: event.capacity,
@@ -904,6 +918,7 @@ module DiscourseEventSystem
         booking_opens_at: event.booking_opens_at,
         booking_closes_at: event.booking_closes_at,
         booking_manually_closed: event.booking_manually_closed,
+        user_has_booking_alert: current_user ? DesEventBookingAlert.exists?(user_id: current_user.id, event_id: event.id) : false,
         organisation: event.organisation ? {
           id: event.organisation.id,
           name: event.organisation.name,
