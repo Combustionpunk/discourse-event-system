@@ -1,7 +1,7 @@
 # Discourse Event System — Project Backlog
 > Plugin: `discourse-event-system` (RC Bookings for Misfits Discourse)
 > Repo: `https://github.com/Combustionpunk/discourse-event-system`
-> Last updated: 2026-04-30
+> Last updated: 2026-05-01
 
 ---
 
@@ -17,7 +17,7 @@
 
 ---
 
-## Recently Completed (This Session)
+## Recently Completed
 
 ### Event Management
 - [x] Event creation form fixes — tracked properties, @action decorator, async event.target capture
@@ -25,14 +25,48 @@
 - [x] Publish and Delete buttons on events list for admins
 - [x] Event type dropdown in manage event edit form
 - [x] Booking schedule dropdowns (open/close days before) on manage event edit form
-- [x] Booking closing date field removed from manage form (replaced by relative dropdowns)
+- [x] Booking UI removed from /events/:id page — read-only class list and booking status only
+- [x] Events sidebar link restricted to admins only
+- [x] Upcoming Events sidebar link removed for regular users
 
 ### RC Meetings Category View
 - [x] Custom topic list connector replacing standard Discourse topic list
-- [x] Rich event cards with org logo, booking status badge, date, venue, class tags
+- [x] 3-section event cards — header (title/date/badges), body (org | venue+facilities), footer (classes + booking status)
+- [x] Facility icons with CSS hover tooltips
 - [x] Today/Upcoming/Past ordering (today first, then upcoming, then past)
-- [x] Five filter dropdowns: time period, organisation, event type, environment, surface
+- [x] Filter dropdowns: time period, organisation, event type, environment, surface
+- [x] Distance filter with postcodes.io — pre-fills from racing profile postcode, manual entry for others
+- [x] Calendar view with month grid, multi-event popover, colour-coded by booking status
 - [x] Standard topic list, tabs and New Topic button hidden in RC Meetings
+- [x] 🔔 Booking alert button on RC Meetings cards (Booking Soon events only)
+
+### Venues
+- [x] Postcode field on venues
+- [x] Latitude/longitude columns with auto-geocoding via background job (postcodes.io)
+- [x] "Fetch Missing Coordinates" button in DES Admin venues tab
+- [x] Map view on /venues page using Leaflet.js + OpenStreetMap
+- [x] Track type field (🏁 Permanent / 🏗️ Pop-up) on venues
+- [x] Icon key modal on venues page explaining all facility/surface/environment icons
+
+### Booking Alerts
+- [x] des_event_booking_alerts table and model
+- [x] Subscribe/unsubscribe API endpoints
+- [x] Hourly background job — checks for events where booking just opened, notifies subscribed users
+- [x] Email notification with event details and link to topic thread
+- [x] Discourse bell notification on booking open
+- [x] 🔔 Alert Me button on booking widget (shown when booking not yet open)
+
+### User Profile
+- [x] Postcode field on My Racing Profile (des_postcode custom user field)
+- [x] Used for distance filtering in RC Meetings
+
+### Communications
+- [x] Forum post — Introducing the RC Racing System
+- [x] Forum post — How to Use the RC Racing System
+- [x] Full video walkthrough voiceover script
+- [x] Social media highlight reel script (60-90 seconds)
+- [x] Promotional flyer
+- [x] All compiled into downloadable Word document
 
 ---
 
@@ -43,37 +77,38 @@
 - [ ] **Badge double-award guard** — check if user already has badge before granting on re-publish
 - [ ] **Membership creation restriction** — only organisation officials
 
+### Medium Priority — Booking Alerts
+- [ ] **Edit alert email templates via UI** — DES Admin setting to customise booking alert email subject and body
+
 ### Medium Priority — RC Meetings Category
-- [ ] **Further card improvements** — additional info on event cards (e.g. number of spaces remaining, entry fee)
-- [ ] **Calendar view** — toggle between list and calendar view on RC Meetings category
-- [ ] **Distance filtering** — filter events by distance from postcode
-  - Add postcode field to My Racing Profile (auto-used for logged in users)
-  - Manual postcode entry for non-logged in users
-  - Use postcodes.io API for distance calculation
+- [ ] **Spaces remaining on cards** — show total spaces remaining across all classes
+- [ ] **Entry fee on cards** — show "From £X" on event cards
 
 ### Medium Priority — Events Management
 - [ ] **Event "today" status** — closing bookings on the day triggers "event running" state in widget; show "⏳ Awaiting Results"
 - [ ] **Widget — results state** — after results published and all drivers matched, show podium + who attended
-- [ ] **Event page** — admin-facing only; remove booking UI from event page
-- [ ] **"Alert me when booking opens"** — Discourse notification + email; needs `des_event_booking_alerts` table + background job
+- [ ] **"Alert me when booking opens"** — further improvements: resend options, admin view of who has alerts set
 
 ### Medium Priority — Results
+- [ ] **Live timing integration** — pull results directly from timing software (no manual entry)
 - [ ] **Results correction UI** — edit positions, laps, times before publishing
+- [ ] **Improved results analysis** — lap times, qualifying vs final comparisons, head-to-head stats
 - [ ] **Whole-meeting fastest lap** — scrape qualifying rounds too
 - [ ] **Individual lap times** — scrape lap-by-lap data
 
 ### Medium Priority — Discovery
-- [ ] **Category view as primary UX** — members browse events from RC Meetings; event list page for organisers only
+- [ ] **Season standings** — aggregate results across championship rounds, auto-calculated from published results
 
 ### Low Priority
 - [ ] **RC Results live view** — link to live race page during event
-- [ ] **Season standings** — aggregate results across championship rounds
+- [ ] **Promote plugin to other clubs** — separate forum post for club admins outlining admin benefits
 
 ---
 
 ## Known Issues / Bugs
 - [ ] Re-publishing results re-awards badges — needs guard before BadgeGranter.grant
 - [ ] Driver auto-matching is name-only — produces incorrect matches occasionally
+- [ ] Distance filtering excludes events with no venue/postcode — should include them with a "distance unknown" note
 
 ---
 
@@ -82,7 +117,7 @@
 - Member Type Numbers: `1` = junior member, `2` = adult member, `3` = junior non-member, `4` = adult non-member
 - Transponder shortcode stored as integer, displayed with `#` prefix
 - Plugin uses `des_` prefix for all models and custom fields
-- Custom user fields: `brca_membership_number`, `des_date_of_birth`, `des_f_grade`, `des_t_grade`
+- Custom user fields: `brca_membership_number`, `des_date_of_birth`, `des_f_grade`, `des_t_grade`, `des_postcode`
 - PayPal used for payment processing
 - RC Results Venue ID 1075 = Sheffield Off Road & Rally RCC (SOAR)
 - Championship round events = event type name contains "championship"
@@ -91,5 +126,9 @@
 - Badges: "{OrgName} Gold/Silver/Bronze/Fastest Lap"
 - Discourse Docker deploy — no direct file access on live server, always rebuild
 - Track surfaces: carpet, astroturf, grass, tarmac, mixed
+- Track types: permanent (🏁), popup (🏗️)
 - Booking schedule: relative to event date (days before), with manual override flags
 - RC Meetings category name is hardcoded as "RC Meetings" in the plugin
+- Geocoding via postcodes.io (no API key required)
+- Background jobs: geocode venue (regular), check booking alerts (scheduled hourly), membership expiry (scheduled)
+- Booking alerts: deleted after sending so users are only notified once per event
