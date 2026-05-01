@@ -2,11 +2,14 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
+import { popupAjaxError } from "discourse/lib/ajax-error";
+import { service } from "@ember/service";
 import { on } from "@ember/modifier";
 import { fn, concat } from "@ember/helper";
-import { eq } from "truth-helpers";
+import { eq, not } from "truth-helpers";
 
 export default class RcEventsList extends Component {
+  @service currentUser;
   @tracked events = [];
   @tracked loading = true;
   @tracked isRcMeetings = false;
@@ -121,6 +124,23 @@ export default class RcEventsList extends Component {
       }
     } catch {
       this.postcodeError = "Invalid postcode";
+    }
+  }
+
+  @action
+  async toggleBookingAlert(event, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!this.currentUser) return;
+    try {
+      if (event.user_has_booking_alert) {
+        await ajax(`/des/events/${event.id}/booking-alert.json`, { type: "DELETE" });
+      } else {
+        await ajax(`/des/events/${event.id}/booking-alert.json`, { type: "POST" });
+      }
+      await this.loadEvents();
+    } catch (error) {
+      popupAjaxError(error);
     }
   }
 
@@ -434,6 +454,15 @@ export default class RcEventsList extends Component {
                         <span class="rc-event-badge rc-event-badge--open">🟢 Booking Open</span>
                       {{else if event.booking_opens_at}}
                         <span class="rc-event-badge rc-event-badge--soon">⏳ Booking Soon</span>
+                        {{#if this.currentUser}}
+                          <button
+                            class="btn btn-small btn-default rc-alert-btn"
+                            {{on "click" (fn this.toggleBookingAlert event)}}
+                            title={{if event.user_has_booking_alert "Cancel booking alert" "Alert me when booking opens"}}
+                          >
+                            {{if event.user_has_booking_alert "🔕 Cancel Alert" "🔔 Alert Me"}}
+                          </button>
+                        {{/if}}
                       {{else}}
                         <span class="rc-event-badge rc-event-badge--closed">🔴 Booking Closed</span>
                       {{/if}}

@@ -30,6 +30,7 @@ export default class EventBookingWidget extends Component {
   @tracked transponderConfirmations = {};
   @tracked userTransponders = [];
   @tracked transponderSelections = {};
+  @tracked hasBookingAlert = false;
 
   constructor() {
     super(...arguments);
@@ -72,6 +73,7 @@ export default class EventBookingWidget extends Component {
         });
       }
       this.event = response;
+      this.hasBookingAlert = response.user_has_booking_alert || false;
       this.loadEntrants(response.id);
     } catch (e) {
       // No event for this topic
@@ -293,6 +295,22 @@ export default class EventBookingWidget extends Component {
     this.showCalendarDropdown = false;
   }
 
+  @action
+  async toggleBookingAlert() {
+    if (!this.currentUser) return;
+    try {
+      if (this.hasBookingAlert) {
+        await ajax(`/des/events/${this.event.id}/booking-alert.json`, { type: "DELETE" });
+        this.hasBookingAlert = false;
+      } else {
+        await ajax(`/des/events/${this.event.id}/booking-alert.json`, { type: "POST" });
+        this.hasBookingAlert = true;
+      }
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
   @action async joinWaitlist(classId) {
     if (!this.currentUser) { alert("Please log in to join the waitlist"); return; }
     try {
@@ -498,6 +516,13 @@ export default class EventBookingWidget extends Component {
           <div class="event-closed-banner">⏳ Bookings are not yet open for this event.
             {{#if this.event.booking_opens_at}}
               <span class="field-help">Bookings open: {{this.formatDate this.event.booking_opens_at}}</span>
+            {{/if}}
+            {{#if this.currentUser}}
+              <div style="margin-top:8px;">
+                <button class="btn btn-small btn-default rc-alert-btn" {{on "click" this.toggleBookingAlert}}>
+                  {{if this.hasBookingAlert "🔕 Cancel Alert" "🔔 Alert me when booking opens"}}
+                </button>
+              </div>
             {{/if}}
           </div>
         {{else if this.bookingClosed}}

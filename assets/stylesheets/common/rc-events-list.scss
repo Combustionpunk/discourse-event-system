@@ -264,6 +264,12 @@
   font-weight: 600;
 }
 
+.rc-alert-btn {
+  font-size: 0.8em;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
 .rc-calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
