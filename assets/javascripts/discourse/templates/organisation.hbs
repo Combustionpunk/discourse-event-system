@@ -41,6 +41,9 @@
         <button class="manage-tab {{if (eq this.activeTab 'settings') 'active'}}" {{on "click" this.showSettings}}>
           ⚙️ Settings
         </button>
+        <button class="manage-tab {{if (eq this.activeTab 'payouts') 'active'}}" {{on "click" this.showPayouts}}>
+          💰 Payouts
+        </button>
       {{/if}}
     </div>
 
@@ -672,6 +675,63 @@
       <button class="btn btn-primary" {{on "click" this.saveSettings}}>
         💾 Save Settings
       </button>
+    </div>
+  {{/if}}
+
+  {{!-- Payouts Tab --}}
+  {{#if (eq this.activeTab "payouts")}}
+    <div class="org-payouts-tab">
+      {{#if this.payoutsLoading}}
+        <p>Loading payouts...</p>
+      {{else}}
+        <div class="payout-summary-cards">
+          <div class="payout-summary-card">
+            <div class="payout-summary-label">Total Paid Out</div>
+            <div class="payout-summary-value">£{{this.payoutsSummary.total_paid}}</div>
+          </div>
+          <div class="payout-summary-card">
+            <div class="payout-summary-label">Pending</div>
+            <div class="payout-summary-value">£{{this.payoutsSummary.total_pending}}</div>
+          </div>
+        </div>
+
+        {{#if this.orgPayouts.length}}
+          <table class="payout-history-table">
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Date</th>
+                <th>Gross</th>
+                <th>Net</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each this.orgPayouts as |payout|}}
+                <tr class="payout-row payout-status--{{payout.status}}">
+                  <td>{{payout.event_title}}</td>
+                  <td>{{payout.event_date}}</td>
+                  <td>£{{payout.gross_amount}}</td>
+                  <td>£{{payout.net_amount}}</td>
+                  <td><span class="payout-status-badge payout-status--{{payout.status}}">{{payout.status}}</span></td>
+                  <td>
+                    {{#if (eq payout.status "approved")}}
+                      <button class="btn btn-primary btn-small" {{on "click" (fn this.claimPayout payout)}} disabled={{this.claimingPayoutId}}>
+                        {{if (eq this.claimingPayoutId payout.event_id) "Processing..." "💰 Claim"}}
+                      </button>
+                    {{else}}
+                      <a href="/events/{{payout.event_id}}/manage" class="btn btn-default btn-small">View</a>
+                    {{/if}}
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{else}}
+          <p class="field-help">No payouts yet.</p>
+        {{/if}}
+      {{/if}}
     </div>
   {{/if}}
 </div>

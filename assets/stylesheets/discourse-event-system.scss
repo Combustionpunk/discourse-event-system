@@ -945,6 +945,64 @@
   margin-top: 8px;
 }
 
+.payout-summary-cards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.payout-summary-card {
+  background: var(--primary-very-low);
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  padding: 16px 24px;
+  min-width: 160px;
+
+  .payout-summary-label {
+    font-size: 0.8em;
+    color: var(--primary-medium);
+    margin-bottom: 4px;
+  }
+
+  .payout-summary-value {
+    font-size: 1.6em;
+    font-weight: 700;
+    font-family: monospace;
+  }
+}
+
+.payout-history-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--primary-low);
+    font-size: 0.85em;
+    color: var(--primary-medium);
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--primary-low);
+  }
+}
+
+.payout-status-badge {
+  font-size: 0.8em;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+
+  &.payout-status--pending { background: var(--primary-low); color: var(--primary-medium); }
+  &.payout-status--approved { background: var(--success-low); color: var(--success); }
+  &.payout-status--claimed { background: var(--highlight-low); color: var(--highlight-high); }
+  &.payout-status--paid { background: var(--success-low); color: var(--success); }
+  &.payout-status--failed { background: var(--danger-low); color: var(--danger); }
+}
+
 // Venue Icon Key Modal
 .venue-icon-key-overlay {
   position: fixed;

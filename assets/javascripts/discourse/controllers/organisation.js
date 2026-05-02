@@ -194,9 +194,47 @@ export default class OrganisationController extends Controller {
   @tracked showFamilyModal = false;
   @tracked familyMemberSearch = "";
   @tracked familyUserSearchResults = [];
+  @tracked orgPayouts = [];
+  @tracked payoutsSummary = {};
+  @tracked payoutsLoading = false;
+  @tracked claimingPayoutId = null;
+  @tracked payoutsError = null;
 
   @action
   showMemberships() { this.activeTab = "memberships"; }
+
+  @action
+  showPayouts() {
+    this.activeTab = "payouts";
+    this.loadOrgPayouts();
+  }
+
+  async loadOrgPayouts() {
+    this.payoutsLoading = true;
+    try {
+      const response = await ajax(`/des/organisations/${this.model.id}/payouts.json`);
+      this.orgPayouts = response.payouts || [];
+      this.payoutsSummary = response.summary || {};
+    } catch {
+      this.payoutsError = "Failed to load payouts";
+    } finally {
+      this.payoutsLoading = false;
+    }
+  }
+
+  @action
+  async claimPayout(payout) {
+    if (!window.confirm(`Claim payout of £${payout.net_amount} for ${payout.event_title}? This will trigger an immediate PayPal transfer.`)) return;
+    this.claimingPayoutId = payout.event_id;
+    try {
+      await ajax(`/des/events/${payout.event_id}/payout/claim.json`, { type: "POST" });
+      await this.loadOrgPayouts();
+    } catch (error) {
+      popupAjaxError(error);
+    } finally {
+      this.claimingPayoutId = null;
+    }
+  }
 
   @action
   showSettings() {
