@@ -210,6 +210,8 @@ export default class OrganisationController extends Controller {
       google_maps_url: this.model.google_maps_url || "",
       logo_url: this.model.logo_url || "",
       rc_results_venue_id: this.model.rc_results_venue_id || "",
+      paypal_email: this.model.paypal_email || "",
+      surcharge_percentage: this.model.surcharge_percentage || "",
       description: this.model.description || "",
     };
   }

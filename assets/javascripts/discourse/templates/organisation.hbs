@@ -654,6 +654,14 @@
         <input type="url" value={{this.settingsForm.google_maps_url}} {{on "input" (fn this.updateSettingsField "google_maps_url")}} />
       </div>
       <div class="org-form-field">
+        <label>PayPal Email</label>
+        <input type="email" value={{this.settingsForm.paypal_email}} placeholder="payments@yourclub.com" {{on "input" (fn this.updateSettingsField "paypal_email")}} />
+      </div>
+      <div class="org-form-field">
+        <label>Surcharge % <span class="field-help">(platform fee deducted from payouts)</span></label>
+        <input type="number" step="0.1" min="0" max="100" value={{this.settingsForm.surcharge_percentage}} {{on "input" (fn this.updateSettingsField "surcharge_percentage")}} />
+      </div>
+      <div class="org-form-field">
         <label>RC Results Venue ID</label>
         <input type="number" value={{this.settingsForm.rc_results_venue_id}} {{on "input" (fn this.updateSettingsField "rc_results_venue_id")}} placeholder="e.g. 1075" />
       </div>
