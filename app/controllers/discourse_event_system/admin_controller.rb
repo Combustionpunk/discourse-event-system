@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class AdminController < ApplicationController
     before_action :ensure_logged_in
-    before_action :ensure_admin
+    before_action :ensure_admin, except: [:scales, :chassis_types]
 
     def index
       render json: {
