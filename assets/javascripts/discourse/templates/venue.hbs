@@ -86,6 +86,7 @@
       {{#each this.model.upcoming_events as |event|}}
         <div class="venue-event-item">
           <LinkTo @route="event" @model={{event.id}}>{{event.title}}</LinkTo>
+          <span class="venue-event-date">📅 {{event.formatted_date}}</span>
           <span class="field-help">{{event.organisation_name}}</span>
         </div>
       {{/each}}

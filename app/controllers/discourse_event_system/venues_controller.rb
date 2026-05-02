@@ -17,7 +17,7 @@ module DiscourseEventSystem
       render json: {
         venue: serialize_venue(venue).merge(can_edit: current_user.present? && (current_user.admin? || (venue.created_by_organisation_id.present? && is_org_admin?(venue.created_by_organisation_id)))),
         upcoming_events: upcoming_events.map { |e|
-          { id: e.id, title: e.title, start_date: e.start_date, organisation_name: e.organisation&.name }
+          { id: e.id, title: e.title, start_date: e.start_date, formatted_date: e.start_date&.strftime('%a %d %b %Y at %H:%M'), organisation_name: e.organisation&.name }
         }
       }
     end
