@@ -62,6 +62,7 @@ after_initialize do
   load File.expand_path("../app/controllers/discourse_event_system/garage_controller.rb", __FILE__)
   load File.expand_path("../app/controllers/discourse_event_system/admin_controller.rb", __FILE__)
   load File.expand_path("../app/controllers/discourse_event_system/car_models_controller.rb", __FILE__)
+  load File.expand_path("../app/controllers/discourse_event_system/payouts_controller.rb", __FILE__)
   load File.expand_path("../app/mailers/discourse_event_system/event_mailer.rb", __FILE__)
   load File.expand_path("../app/mailers/discourse_event_system/booking_alert_mailer.rb", __FILE__)
   load File.expand_path("../app/jobs/scheduled/membership_expiry_check.rb", __FILE__)
@@ -104,6 +105,7 @@ after_initialize do
   end
 
   # Load badge service
+  load File.expand_path("../app/services/des_payout_service.rb", __FILE__)
   load File.expand_path("../app/services/des_badge_service.rb", __FILE__)
 
   # Create RC racing badges

@@ -38,3 +38,9 @@ plugins:
   des_paypal_fee_updated_at:
     default: ""
     type: string
+  des_paypal_client_id:
+    default: ""
+    type: string
+  des_paypal_client_secret:
+    default: ""
+    type: string
