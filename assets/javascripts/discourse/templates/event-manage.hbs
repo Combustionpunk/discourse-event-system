@@ -54,6 +54,12 @@
     >
       💷 Pricing & Discounts
     </button>
+    <button
+      class="manage-tab {{if (eq this.activeTab 'payout') 'active'}}"
+      {{on "click" (fn this.setTab "payout")}}
+    >
+      💰 Payout
+    </button>
     {{#if this.isChampionshipRound}}
       <button
         class="manage-tab {{if (eq this.activeTab 'results') 'active'}}"
@@ -620,6 +626,56 @@
             {{if this.isImporting "Importing..." "🔄 Re-import Results"}}
           </button>
         </div>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{!-- Payout Tab --}}
+  {{#if (eq this.activeTab "payout")}}
+    <div class="event-payout-tab">
+      {{#if this.payoutLoading}}
+        <p>Loading payout details...</p>
+      {{else}}
+        {{#if this.payoutData.payout}}
+          <div class="payout-status-banner payout-status--{{this.payoutData.payout.status}}">
+            Status: <strong>{{this.payoutData.payout.status}}</strong>
+            {{#if this.payoutData.payout.approved_at}} — Approved {{this.payoutData.payout.approved_at}}{{/if}}
+            {{#if this.payoutData.payout.paid_at}} — Paid {{this.payoutData.payout.paid_at}}{{/if}}
+          </div>
+        {{/if}}
+
+        {{#if this.payoutCalc}}
+          <div class="payout-breakdown">
+            <h3>Payout Breakdown</h3>
+            <table class="payout-table">
+              <tr><td>Gross ({{this.payoutCalc.transaction_count}} bookings)</td><td class="payout-amount">£{{this.payoutCalc.gross_amount}}</td></tr>
+              <tr><td>PayPal fees ({{this.payoutCalc.paypal_fee_percent}}% + £{{this.payoutCalc.paypal_fee_fixed}} × {{this.payoutCalc.transaction_count}})</td><td class="payout-amount payout-deduction">- £{{this.payoutCalc.paypal_fee_amount}}</td></tr>
+              <tr><td>Surcharge ({{this.payoutCalc.surcharge_percent}}%)</td><td class="payout-amount payout-deduction">- £{{this.payoutCalc.surcharge_amount}}</td></tr>
+              <tr class="payout-net"><td><strong>Net to Organisation</strong></td><td class="payout-amount"><strong>£{{this.payoutCalc.net_amount}}</strong></td></tr>
+            </table>
+            {{#if this.payoutCalc.complimentary_count}}
+              <p class="field-help">+ {{this.payoutCalc.complimentary_count}} complimentary entries (excluded from calculation)</p>
+            {{/if}}
+          </div>
+        {{/if}}
+
+        {{#if this.currentUser.admin}}
+          {{#if (eq this.payoutStatus "pending")}}
+            <button class="btn btn-primary" {{on "click" this.approvePayout}} disabled={{this.payoutActionLoading}}>
+              {{if this.payoutActionLoading "Processing..." "✅ Approve Payout"}}
+            </button>
+          {{/if}}
+        {{/if}}
+
+        {{#if (eq this.payoutStatus "approved")}}
+          <div class="payout-approved-banner">
+            ✅ Payout approved — organisation can now claim
+          </div>
+        {{/if}}
+
+        {{#if this.payoutError}}
+          <p class="payout-error">{{this.payoutError}}</p>
+        {{/if}}
       {{/if}}
     </div>
   {{/if}}

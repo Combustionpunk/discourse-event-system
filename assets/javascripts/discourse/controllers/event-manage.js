@@ -18,6 +18,11 @@ export default class EventManageController extends Controller {
   @tracked editEventTypeId = null;
   @tracked model = null;
   @tracked classTypes = null;
+  @tracked payoutData = null;
+  @tracked payoutCalc = null;
+  @tracked payoutLoading = false;
+  @tracked payoutActionLoading = false;
+  @tracked payoutError = null;
   @tracked newClassTypeId = null;
   @tracked newClassCapacity = "";
   @tracked editingClassId = null;
@@ -73,6 +78,42 @@ export default class EventManageController extends Controller {
     this.activeTab = tab;
     if (tab === "results") {
       this.loadResults();
+    }
+    if (tab === "payout") {
+      this.loadPayout();
+    }
+  }
+
+  get payoutStatus() {
+    return this.payoutData?.payout?.status || 'pending';
+  }
+
+  async loadPayout() {
+    this.payoutLoading = true;
+    this.payoutError = null;
+    try {
+      const response = await ajax(`/des/events/${this.model.event.id}/payout.json`);
+      this.payoutData = response;
+      this.payoutCalc = response.calculation;
+    } catch {
+      this.payoutError = "Failed to load payout data";
+    } finally {
+      this.payoutLoading = false;
+    }
+  }
+
+  @action
+  async approvePayout() {
+    if (!window.confirm("Approve payout for this event? This will notify the organisation that they can claim their funds.")) return;
+    this.payoutActionLoading = true;
+    this.payoutError = null;
+    try {
+      const response = await ajax(`/des/events/${this.model.event.id}/payout/approve.json`, { type: "POST" });
+      this.payoutData = { ...this.payoutData, payout: response.payout };
+    } catch (error) {
+      this.payoutError = error.jqXHR?.responseJSON?.error || "Failed to approve payout";
+    } finally {
+      this.payoutActionLoading = false;
     }
   }
 

@@ -893,6 +893,58 @@
   h2 { margin: 0; }
 }
 
+// Payout table
+.payout-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--primary-low);
+  }
+
+  .payout-amount {
+    text-align: right;
+    font-family: monospace;
+  }
+
+  .payout-deduction {
+    color: var(--danger);
+  }
+}
+
+.payout-net td {
+  border-top: 2px solid var(--primary);
+  padding-top: 12px;
+}
+
+.payout-status-banner {
+  padding: 10px 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 0.9em;
+
+  &.payout-status--pending { background: var(--primary-low); }
+  &.payout-status--approved { background: var(--success-low); color: var(--success); }
+  &.payout-status--claimed { background: var(--highlight-low); }
+  &.payout-status--paid { background: var(--success-low); color: var(--success); }
+  &.payout-status--failed { background: var(--danger-low); color: var(--danger); }
+}
+
+.payout-approved-banner {
+  padding: 10px 16px;
+  border-radius: 6px;
+  background: var(--success-low);
+  color: var(--success);
+  margin: 12px 0;
+}
+
+.payout-error {
+  color: var(--danger);
+  margin-top: 8px;
+}
+
 // Venue Icon Key Modal
 .venue-icon-key-overlay {
   position: fixed;
