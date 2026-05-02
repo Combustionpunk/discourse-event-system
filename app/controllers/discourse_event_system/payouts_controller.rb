@@ -225,7 +225,7 @@ module DiscourseEventSystem
     def notify_org_admins(org, event, payout)
       DesOrganisationMember.where(organisation_id: org.id, status: 'active').each do |member|
         Notification.create(
-          notification_type: Notification.types[:custom] rescue Notification.types[:posted],
+          notification_type: (Notification.types[:custom] || Notification.types[:posted]),
           user_id: member.user_id,
           high_priority: true,
           topic_id: event.topic_id,
@@ -243,7 +243,7 @@ module DiscourseEventSystem
     def notify_site_admins_payout_complete(payout)
       User.where(admin: true).each do |admin|
         Notification.create(
-          notification_type: Notification.types[:custom] rescue Notification.types[:posted],
+          notification_type: (Notification.types[:custom] || Notification.types[:posted]),
           user_id: admin.id,
           high_priority: true,
           data: {
@@ -259,7 +259,7 @@ module DiscourseEventSystem
     def notify_site_admins_payout_failed(payout)
       User.where(admin: true).each do |admin|
         Notification.create(
-          notification_type: Notification.types[:custom] rescue Notification.types[:posted],
+          notification_type: (Notification.types[:custom] || Notification.types[:posted]),
           user_id: admin.id,
           high_priority: true,
           data: {
