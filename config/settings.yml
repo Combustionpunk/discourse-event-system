@@ -29,3 +29,12 @@ plugins:
   discourse_event_system_email_club_name:
     default: "Our Club"
     client: false
+  des_paypal_fee_percent:
+    default: 2.9
+    type: float
+  des_paypal_fee_fixed:
+    default: 0.30
+    type: float
+  des_paypal_fee_updated_at:
+    default: ""
+    type: string

@@ -13,6 +13,7 @@ class DesEvent < ActiveRecord::Base
   has_one :des_event_pricing_rule, foreign_key: 'event_id'
   has_many :des_event_discounts, foreign_key: 'event_id'
   has_many :des_event_booking_alerts, foreign_key: :event_id, dependent: :destroy
+  has_one :des_event_payout, foreign_key: :event_id
 
   validates :title, presence: true
   validates :organisation_id, presence: true
