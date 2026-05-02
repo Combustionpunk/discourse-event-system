@@ -2,7 +2,7 @@
 
 class CreateDesEventPayouts < ActiveRecord::Migration[7.0]
   def change
-    create_table :des_event_payouts do |t|
+    create_table :des_event_payouts, if_not_exists: true do |t|
       t.integer :event_id, null: false
       t.integer :organisation_id, null: false
       t.decimal :gross_amount, precision: 10, scale: 2, default: 0
