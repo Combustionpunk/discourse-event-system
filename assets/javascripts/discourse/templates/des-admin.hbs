@@ -41,6 +41,9 @@
     <button class="btn {{if (eq this.activeTab 'chassis_types') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabChassisTypes}}>
       🚗 Chassis Types
     </button>
+    <button class="btn {{if (eq this.activeTab 'payouts') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabPayouts}}>
+      💰 Payouts
+    </button>
   </div>
 
   {{!-- ORGANISATIONS TAB --}}
@@ -697,6 +700,83 @@
         <input type="text" placeholder="New chassis type (e.g. Crawler)" value={{this.newChassisTypeName}} {{on "input" (fn this.updateAdminField "newChassisTypeName")}} />
         <button class="btn btn-primary" {{on "click" this.addChassisType}}>➕ Add Chassis Type</button>
       </div>
+    </div>
+  {{/if}}
+
+  {{!-- PAYOUTS TAB --}}
+  {{#if (eq this.activeTab "payouts")}}
+    <div class="des-admin-section">
+      <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center;flex-wrap:wrap;">
+        <span style="font-weight:600;">Period:</span>
+        <button class="btn btn-small {{if (eq this.payoutPeriod 'all') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setPayoutPeriod "all")}}>All Time</button>
+        <button class="btn btn-small {{if (eq this.payoutPeriod 'year') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setPayoutPeriod "year")}}>This Year</button>
+        <button class="btn btn-small {{if (eq this.payoutPeriod 'month') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setPayoutPeriod "month")}}>This Month</button>
+        <button class="btn btn-small {{if (eq this.payoutPeriod '7days') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setPayoutPeriod "7days")}}>Last 7 Days</button>
+      </div>
+
+      {{#if this.adminPayoutSummary}}
+        <div class="payout-summary-cards" style="margin-bottom:24px;">
+          <div class="payout-summary-card">
+            <div class="payout-summary-label">Total Gross</div>
+            <div class="payout-summary-value">£{{this.adminPayoutSummary.total_gross}}</div>
+          </div>
+          <div class="payout-summary-card" style="border-color:var(--success);">
+            <div class="payout-summary-label">RC Misfits Earned</div>
+            <div class="payout-summary-value" style="color:var(--success);">£{{this.adminPayoutSummary.total_surcharge}}</div>
+          </div>
+          <div class="payout-summary-card">
+            <div class="payout-summary-label">Total Paid Out</div>
+            <div class="payout-summary-value">£{{this.adminPayoutSummary.total_paid}}</div>
+          </div>
+          <div class="payout-summary-card" style="border-color:var(--highlight);">
+            <div class="payout-summary-label">Unclaimed</div>
+            <div class="payout-summary-value" style="color:var(--highlight-high);">£{{this.adminPayoutSummary.total_unclaimed}}</div>
+          </div>
+        </div>
+      {{/if}}
+
+      {{#if this.adminPayoutsLoading}}
+        <p>Loading payouts...</p>
+      {{else if this.adminPayouts.length}}
+        <table class="payout-history-table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Organisation</th>
+              <th>Date</th>
+              <th>Gross</th>
+              <th>Surcharge</th>
+              <th>Net</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each this.adminPayouts as |payout|}}
+              <tr>
+                <td>{{payout.event_title}}</td>
+                <td>{{payout.organisation_name}}</td>
+                <td>{{payout.event_date}}</td>
+                <td>£{{payout.gross_amount}}</td>
+                <td>£{{payout.surcharge_amount}}</td>
+                <td>£{{payout.net_amount}}</td>
+                <td><span class="payout-status-badge payout-status--{{payout.status}}">{{payout.status}}</span></td>
+                <td>
+                  {{#if (eq payout.status "pending")}}
+                    <button class="btn btn-primary btn-small" {{on "click" (fn this.adminApprovePayout payout)}} disabled={{this.approvingPayoutId}}>
+                      {{if (eq this.approvingPayoutId payout.event_id) "..." "✅ Approve"}}
+                    </button>
+                  {{else}}
+                    <span style="color:var(--primary-medium);font-size:0.85em;">{{payout.status}}</span>
+                  {{/if}}
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{else}}
+        <p class="field-help">No payouts found for this period.</p>
+      {{/if}}
     </div>
   {{/if}}
 

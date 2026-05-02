@@ -87,6 +87,11 @@ export default class DesAdminController extends Controller {
   @tracked showAddVenueForm = false;
   @tracked isGeocoding = false;
   @tracked geocodeResult = null;
+  @tracked adminPayouts = [];
+  @tracked adminPayoutSummary = null;
+  @tracked adminPayoutsLoading = false;
+  @tracked payoutPeriod = "all";
+  @tracked approvingPayoutId = null;
 
   @action
   setTabVenues() { this.activeTab = "venues"; this.loadAdminVenues(); }
@@ -141,6 +146,47 @@ export default class DesAdminController extends Controller {
       this.geocodeResult = "❌ Failed to queue geocoding";
     } finally {
       this.isGeocoding = false;
+    }
+  }
+
+  @action
+  setTabPayouts() {
+    this.activeTab = "payouts";
+    this.loadAdminPayouts();
+  }
+
+  @action
+  async setPayoutPeriod(period) {
+    this.payoutPeriod = period;
+    await this.loadAdminPayouts();
+  }
+
+  async loadAdminPayouts() {
+    this.adminPayoutsLoading = true;
+    try {
+      const response = await ajax("/des/admin/payouts.json", {
+        data: this.payoutPeriod !== 'all' ? { period: this.payoutPeriod } : {}
+      });
+      this.adminPayouts = response.payouts || [];
+      this.adminPayoutSummary = response.summary || null;
+    } catch {
+      // silent
+    } finally {
+      this.adminPayoutsLoading = false;
+    }
+  }
+
+  @action
+  async adminApprovePayout(payout) {
+    if (!window.confirm(`Approve payout of £${payout.net_amount} for ${payout.organisation_name} — ${payout.event_title}?\n\nThis will notify the organisation that they can claim their funds.`)) return;
+    this.approvingPayoutId = payout.event_id;
+    try {
+      await ajax(`/des/events/${payout.event_id}/payout/approve.json`, { type: "POST" });
+      await this.loadAdminPayouts();
+    } catch (error) {
+      popupAjaxError(error);
+    } finally {
+      this.approvingPayoutId = null;
     }
   }
 
