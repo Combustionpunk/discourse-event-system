@@ -35,7 +35,10 @@ class DesClassCompatibilityRule < ActiveRecord::Base
       allowed.include?(car.effective_driveline)
     when 'chassis'
       allowed = rule_value.split(',').map(&:strip)
-      allowed.include?(car.car_model&.chassis_type)
+      car_model = car.car_model
+      combined = [car_model&.scale, car_model&.chassis_type].compact.join(' ')
+      chassis_only = car_model&.chassis_type.to_s
+      allowed.include?(combined) || allowed.include?(chassis_only)
     when 'max_year'
       car.year_released.present? && car.year_released <= rule_value.to_i
     when 'min_year'
