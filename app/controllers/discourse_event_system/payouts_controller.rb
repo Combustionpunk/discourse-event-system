@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class PayoutsController < ApplicationController
     before_action :ensure_logged_in
-    before_action :set_event, only: [:show, :approve, :claim]
+    before_action :set_event, only: [:show, :approve, :claim, :retry]
 
     def show
       ensure_organisation_admin!(@event.organisation)
@@ -51,6 +51,32 @@ module DiscourseEventSystem
       return render json: { error: 'Payout not yet approved' }, status: :unprocessable_entity unless payout.status == 'approved'
 
       payout.update!(status: 'claimed', claimed_at: Time.now)
+
+      result = trigger_paypal_payout(payout)
+
+      if result[:success]
+        payout.update!(
+          status: 'paid',
+          paid_at: Time.now,
+          paypal_payout_batch_id: result[:batch_id],
+          paypal_payout_item_id: result[:item_id]
+        )
+        notify_site_admins_payout_complete(payout)
+        render json: { payout: serialize_payout(payout), message: 'Payout sent successfully' }
+      else
+        payout.update!(status: 'failed', failure_reason: result[:error])
+        notify_site_admins_payout_failed(payout)
+        render json: { error: result[:error] }, status: :unprocessable_entity
+      end
+    end
+
+    def retry
+      ensure_organisation_admin!(@event.organisation)
+      payout = @event.des_event_payout
+      return render json: { error: 'No payout found' }, status: :not_found unless payout
+      return render json: { error: 'Can only retry failed payouts' }, status: :unprocessable_entity unless payout.status == 'failed'
+
+      payout.update!(status: 'claimed', claimed_at: Time.now, failure_reason: nil)
 
       result = trigger_paypal_payout(payout)
 

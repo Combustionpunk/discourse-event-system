@@ -40,6 +40,7 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/des/events/:id/payout" => "payouts#show"
   post "/des/events/:id/payout/approve" => "payouts#approve"
   post "/des/events/:id/payout/claim" => "payouts#claim"
+  post "/des/events/:id/payout/retry" => "payouts#retry"
   get "/des/admin/payouts" => "payouts#admin_index"
   get "/des/organisations/:id/payouts" => "payouts#org_index"
   get "/des/events/:id/entrants" => "events#entrants"

@@ -720,6 +720,10 @@
                       <button class="btn btn-primary btn-small" {{on "click" (fn this.claimPayout payout)}} disabled={{this.claimingPayoutId}}>
                         {{if (eq this.claimingPayoutId payout.event_id) "Processing..." "💰 Claim"}}
                       </button>
+                    {{else if (eq payout.status "failed")}}
+                      <button class="btn btn-danger btn-small" {{on "click" (fn this.retryPayout payout)}} disabled={{this.claimingPayoutId}}>
+                        {{if (eq this.claimingPayoutId payout.event_id) "Processing..." "🔄 Retry"}}
+                      </button>
                     {{else}}
                       <a href="/events/{{payout.event_id}}/manage" class="btn btn-default btn-small">View</a>
                     {{/if}}

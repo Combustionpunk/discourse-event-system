@@ -223,6 +223,20 @@ export default class OrganisationController extends Controller {
   }
 
   @action
+  async retryPayout(payout) {
+    if (!window.confirm(`Retry payout of £${payout.net_amount} for ${payout.event_title}?`)) return;
+    this.claimingPayoutId = payout.event_id;
+    try {
+      await ajax(`/des/events/${payout.event_id}/payout/retry.json`, { type: "POST" });
+      await this.loadOrgPayouts();
+    } catch (error) {
+      popupAjaxError(error);
+    } finally {
+      this.claimingPayoutId = null;
+    }
+  }
+
+  @action
   async claimPayout(payout) {
     if (!window.confirm(`Claim payout of £${payout.net_amount} for ${payout.event_title}? This will trigger an immediate PayPal transfer.`)) return;
     this.claimingPayoutId = payout.event_id;
