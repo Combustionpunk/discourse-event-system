@@ -232,7 +232,7 @@ module DiscourseEventSystem
           post_number: 1,
           data: {
             message: "💰 Payout approved for #{event.title}",
-            display_username: "Payout",
+            display_username: "Payment Available",
             topic_title: event.title,
             url: event.topic_id ? "/t/#{event.topic_id}" : "/events"
           }.to_json
@@ -277,7 +277,7 @@ module DiscourseEventSystem
         id: payout.id,
         event_id: payout.event_id,
         event_title: payout.des_event&.title,
-        event_date: payout.des_event&.start_date,
+        event_date: payout.des_event&.start_date&.strftime('%d %b %Y'),
         organisation_id: payout.organisation_id,
         organisation_name: payout.organisation&.name,
         gross_amount: payout.gross_amount,
