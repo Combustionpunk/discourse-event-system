@@ -224,6 +224,7 @@ module Jobs
       }
 
       if existing
+        attrs.delete(:venue_id) if existing.venue_manually_set?
         existing.update!(attrs)
       else
         DesImportedEvent.create!(attrs)
@@ -233,10 +234,10 @@ module Jobs
     def find_or_create_venue(group)
       return nil unless group[:location].present? || group[:lat].present?
 
-      # Try GPS match first (within ~100m = 0.001 degrees)
+      # Try GPS match first (within ~1 mile = 0.015 degrees at UK latitudes)
       if group[:lat].present? && group[:lng].present?
         venue = DesVenue.where(
-          "ABS(latitude - ?) < 0.001 AND ABS(longitude - ?) < 0.001",
+          "ABS(latitude - ?) < 0.015 AND ABS(longitude - ?) < 0.015",
           group[:lat], group[:lng]
         ).first
         return venue if venue
