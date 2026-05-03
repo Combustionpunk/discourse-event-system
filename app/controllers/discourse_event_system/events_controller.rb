@@ -107,7 +107,16 @@ module DiscourseEventSystem
         upcoming_arr = apply_venue_filters(upcoming, params).to_a
         past_arr     = apply_venue_filters(past, params).to_a
 
-        topics = (today_arr + upcoming_arr + past_arr).map { |e| serialize_rc_topic(e) }
+        topics = case params[:time_filter]
+        when 'past'
+          past_arr
+        when 'today'
+          today_arr
+        when 'all'
+          today_arr + upcoming_arr + past_arr
+        else
+          today_arr + upcoming_arr
+        end.map { |e| serialize_rc_topic(e) }
         topics = filter_by_distance(topics, params[:postcode], params[:max_distance_miles]) if params[:postcode].present?
         topics = apply_scale_power_filters(topics, params)
         imported = fetch_imported_events(params)
@@ -903,7 +912,7 @@ module DiscourseEventSystem
 
     def apply_scale_power_filters(topics, params)
       if params[:scale].present?
-        topics = topics.select { |t| t[:scale].blank? || t[:scale] == params[:scale] }
+        topics = topics.select { |t| t[:scale] == params[:scale] }
       end
       if params[:power_type].present?
         topics = topics.select do |t|
