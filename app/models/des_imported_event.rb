@@ -2,6 +2,7 @@
 
 class DesImportedEvent < ActiveRecord::Base
   belongs_to :venue, class_name: 'DesVenue', optional: true
+  belongs_to :organisation, class_name: 'DesOrganisation', optional: true
 
   scope :upcoming, -> { where('starts_at >= ?', Time.now) }
   scope :by_scale, ->(scale) { where(scale: scale) }

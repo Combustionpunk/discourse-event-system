@@ -443,7 +443,7 @@ export default class RcEventsList extends Component {
                     <div class="rc-card-body">
                       <div class="rc-card-org">
                         <div class="rc-org-logo-placeholder">🏁</div>
-                        <span class="rc-event-org-name">BRCA</span>
+                        <span class="rc-event-org-name">{{event.organisation.name}}</span>
                       </div>
 
                       <div class="rc-card-venue">
@@ -643,7 +643,7 @@ export default class RcEventsList extends Component {
                     {{#each day.dayEvents as |event|}}
                       <a href={{if (eq event.type "imported") event.booking_url event.topic_url}} class="rc-cal-popover-event {{this.eventBadgeClass event}}" target={{if (eq event.type "imported") "_blank" ""}} rel={{if (eq event.type "imported") "noopener" ""}}>
                         <span class="rc-cal-popover-title">{{event.title}}</span>
-                        <span class="rc-cal-popover-org">{{if (eq event.type "imported") "BRCA" event.organisation.name}}</span>
+                        <span class="rc-cal-popover-org">{{event.organisation.name}}</span>
                       </a>
                     {{/each}}
                   </div>

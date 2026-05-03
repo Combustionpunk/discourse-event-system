@@ -64,9 +64,12 @@ module Jobs
       grouped = group_events(raw_events)
       Rails.logger.info("[BrcaCalendarSync] Grouped into #{grouped.length} events")
 
+      # Find BRCA organisation
+      brca_org_id = DesOrganisation.find_by(name: 'BRCA')&.id
+
       synced = 0
       grouped.each do |group|
-        upsert_event(group)
+        upsert_event(group, brca_org_id)
         synced += 1
       end
 
@@ -189,7 +192,7 @@ module Jobs
       end
     end
 
-    def upsert_event(group)
+    def upsert_event(group, organisation_id = nil)
       # Find or match venue
       venue = find_or_create_venue(group)
 
@@ -216,7 +219,8 @@ module Jobs
         starts_at: group[:starts_at],
         ends_at: group[:ends_at],
         venue_id: venue&.id,
-        booking_url: "https://www.brca.org/events"
+        booking_url: "https://www.brca.org/events",
+        organisation_id: organisation_id
       }
 
       if existing

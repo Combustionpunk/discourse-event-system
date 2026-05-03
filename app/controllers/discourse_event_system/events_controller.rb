@@ -1003,12 +1003,17 @@ module DiscourseEventSystem
           track_surface: event.venue.track_surface,
           track_environment: event.venue.track_environment
         } : nil,
-        venue_postcode: event.venue&.postcode
+        venue_postcode: event.venue&.postcode,
+        organisation: event.organisation ? {
+          id: event.organisation.id,
+          name: event.organisation.name
+        } : { id: nil, name: 'BRCA' },
+        organisation_id: event.organisation_id
       }
     end
 
     def fetch_imported_events(params)
-      imported = DesImportedEvent.includes(:venue).where('starts_at >= ?', 30.days.ago)
+      imported = DesImportedEvent.includes(:venue, :organisation).where('starts_at >= ?', 30.days.ago)
 
       case params[:time_filter]
       when 'past'
@@ -1032,6 +1037,10 @@ module DiscourseEventSystem
         else
           imported = imported.where(power_type: [params[:power_type], 'mixed'])
         end
+      end
+
+      if params[:organisation_id].present?
+        imported = imported.where(organisation_id: params[:organisation_id])
       end
 
       imported.map { |e| serialize_imported_event(e) }
