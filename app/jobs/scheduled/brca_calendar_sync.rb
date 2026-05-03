@@ -291,7 +291,7 @@ module Jobs
     end
 
     def extract_discipline(title)
-      DISCIPLINE_TAGS.keys.find { |d| title.include?(d) } ||
+      DISCIPLINE_TAGS.keys.find { |d| title.downcase.include?(d.downcase) } ||
         title.split(/\s+(?:Nationals?|Regionals?|Series|20\d\d)/i).first.to_s.strip
     end
 
@@ -312,7 +312,7 @@ module Jobs
 
     def tags_for_discipline(discipline)
       return { scale: nil, power_type: nil, surface: nil } if discipline.blank?
-      DISCIPLINE_TAGS.find { |k, _| discipline.include?(k) }&.last ||
+      DISCIPLINE_TAGS.find { |k, _| discipline.downcase.include?(k.downcase) }&.last ||
         { scale: nil, power_type: nil, surface: nil }
     end
   end
