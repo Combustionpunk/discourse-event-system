@@ -11,7 +11,7 @@ class AddScalePowerToClassTypes < ActiveRecord::Migration[7.0]
     end
 
     # Set all existing class types to 1/10 electric
-    execute("UPDATE des_event_class_types SET scale = '1/10', power_type = 'electric' WHERE scale IS NULL")
+    execute("UPDATE des_event_class_types SET scale = '1/10', power_type = 'electric'")
 
     # Set all existing car models to electric (scale already set per record)
     execute("UPDATE des_car_models SET power_type = 'electric' WHERE power_type IS NULL OR power_type = ''")
