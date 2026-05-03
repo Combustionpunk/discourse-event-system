@@ -1015,17 +1015,17 @@ module DiscourseEventSystem
     end
 
     def fetch_imported_events(params)
-      imported = DesImportedEvent.includes(:venue, :organisation).where('starts_at >= ?', 30.days.ago)
+      imported = DesImportedEvent.includes(:venue, :organisation)
 
       case params[:time_filter]
       when 'past'
-        imported = imported.where('starts_at < ?', Time.now.beginning_of_day).order(starts_at: :desc)
+        imported = imported.where('starts_at >= ? AND starts_at < ?', 30.days.ago, Time.now.beginning_of_day).order(starts_at: :desc)
       when 'today'
         imported = imported.where('starts_at >= ? AND starts_at < ?', Time.now.beginning_of_day, Time.now.end_of_day).order(starts_at: :asc)
       when 'upcoming'
         imported = imported.where('starts_at > ?', Time.now.end_of_day).order(starts_at: :asc)
       when 'all'
-        imported = imported.order(starts_at: :asc)
+        imported = imported.where('starts_at >= ?', 30.days.ago).order(starts_at: :asc)
       else
         imported = imported.where('starts_at >= ?', Time.now.beginning_of_day).order(starts_at: :asc)
       end
@@ -1042,7 +1042,7 @@ module DiscourseEventSystem
       end
 
       if params[:organisation_id].present?
-        imported = imported.where(organisation_id: params[:organisation_id])
+        imported = imported.where(organisation_id: params[:organisation_id].to_i)
       end
 
       imported.map { |e| serialize_imported_event(e) }
