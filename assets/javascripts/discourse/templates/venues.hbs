@@ -112,7 +112,7 @@
             <h3>{{venue.name}}</h3>
             {{#if venue.address}}<p class="venue-address">📍 {{venue.address}}</p>{{/if}}
             <div class="venue-badges">
-              {{#if venue.is_shared}}<span class="venue-badge venue-badge--shared">🤝 Shared</span>{{else}}<span class="venue-badge venue-badge--exclusive">🔒 Club Exclusive</span>{{/if}}
+              {{#if venue.is_shared}}<span class="venue-badge venue-badge--shared">🤝 Shared</span>{{else unless venue.is_stub}}<span class="venue-badge venue-badge--exclusive">🔒 Club Exclusive</span>{{/if}}
               {{#if venue.track_category}}<span class="venue-badge venue-badge--category">{{venue.track_category}}</span>{{/if}}
               {{#if venue.track_surface}}<span class="venue-badge venue-badge--surface">{{venue.track_surface}}</span>{{/if}}
               {{#if venue.track_environment}}<span class="venue-badge venue-badge--environment">{{venue.track_environment}}</span>{{/if}}

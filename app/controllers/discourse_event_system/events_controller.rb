@@ -902,7 +902,9 @@ module DiscourseEventSystem
     end
 
     def apply_scale_power_filters(topics, params)
-      topics = topics.select { |t| t[:scale] == params[:scale] } if params[:scale].present?
+      if params[:scale].present?
+        topics = topics.select { |t| t[:scale].blank? || t[:scale] == params[:scale] }
+      end
       if params[:power_type].present?
         topics = topics.select do |t|
           next true if t[:power_type].blank?

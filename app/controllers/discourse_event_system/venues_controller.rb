@@ -119,6 +119,7 @@ module DiscourseEventSystem
         has_water_supply: venue.has_water_supply,
         has_camping: venue.has_camping,
         is_shared: venue.is_shared,
+        is_stub: venue.is_stub,
         postcode: venue.postcode,
         track_type: venue.track_type,
         latitude: venue.latitude,
