@@ -236,7 +236,7 @@ module Jobs
       # Try GPS match first (within ~100m = 0.001 degrees)
       if group[:lat].present? && group[:lng].present?
         venue = DesVenue.where(
-          "ABS(CAST(latitude AS FLOAT) - ?) < 0.001 AND ABS(CAST(longitude AS FLOAT) - ?) < 0.001",
+          "ABS(latitude - ?) < 0.001 AND ABS(longitude - ?) < 0.001",
           group[:lat], group[:lng]
         ).first
         return venue if venue
