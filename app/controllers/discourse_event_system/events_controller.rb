@@ -1054,6 +1054,21 @@ module DiscourseEventSystem
         imported = imported.where(organisation_id: params[:organisation_id].to_i)
       end
 
+      if params[:postcode].present? && params[:max_distance_miles].present?
+        user_coords = geocode_postcode(params[:postcode])
+        if user_coords
+          max_miles = params[:max_distance_miles].to_f
+          imported = imported.to_a.select do |event|
+            next true if event.venue.nil?
+            next true if event.venue.latitude.blank? || event.venue.longitude.blank?
+            distance_in_miles(
+              user_coords[:lat], user_coords[:lng],
+              event.venue.latitude.to_f, event.venue.longitude.to_f
+            ) <= max_miles
+          end
+        end
+      end
+
       imported.map { |e| serialize_imported_event(e) }
     end
 
