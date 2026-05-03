@@ -193,16 +193,20 @@ module Jobs
     end
 
     def upsert_event(group, organisation_id = nil)
-      # Find or match venue
-      venue = find_or_create_venue(group)
-
-      # Use first UID as stable identifier, store all UIDs
+      # Find existing event first
       primary_uid = group[:uids].first
-      all_uids = group[:uids].to_json
-
       existing = DesImportedEvent.find_by(
         "external_uids::text LIKE ?", "%#{primary_uid}%"
       )
+
+      # Only look up/create venue if event is new or has no venue set
+      venue = if existing&.venue_id.present? && !existing.venue_manually_set?
+        existing.venue
+      else
+        find_or_create_venue(group)
+      end
+
+      all_uids = group[:uids].to_json
 
       attrs = {
         source: 'brca',
