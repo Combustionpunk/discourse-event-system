@@ -79,7 +79,12 @@ module Jobs
 
     def fetch_ical
       uri = URI.parse(ICAL_URL)
-      response = Net::HTTP.get_response(uri)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = (uri.scheme == 'https')
+      http.open_timeout = 30
+      http.read_timeout = 360  # BRCA site is slow — allow 2 minutes
+      request = Net::HTTP::Get.new(uri.request_uri)
+      response = http.request(request)
       return nil unless response.code == '200'
       response.body
     rescue => e
