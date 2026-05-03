@@ -13,11 +13,11 @@ export default class CarModelsController extends Controller {
   @tracked showAddManufacturer = false;
   @tracked newManufacturerName = "";
   @tracked approvingModelId = null;
-  @tracked approveModelForm = { year_released: "", driveline: "", scale: "", chassis_type: "" };
+  @tracked approveModelForm = { year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
   @tracked editingModelId = null;
-  @tracked editModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "" };
+  @tracked editModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
   @tracked addingModelForManufacturerId = null;
-  @tracked newModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "" };
+  @tracked newModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
   @tracked scales = [];
   @tracked chassisTypes = [];
 
@@ -166,7 +166,7 @@ export default class CarModelsController extends Controller {
   @action
   startAddModel(manufacturerId) {
     this.addingModelForManufacturerId = manufacturerId;
-    this.newModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "" };
+    this.newModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
   }
 
   @action
@@ -199,7 +199,8 @@ export default class CarModelsController extends Controller {
       year_released: model.year_released || "",
       driveline: model.driveline || "",
       scale: model.scale || "",
-      chassis_type: model.chassis_type || ""
+      chassis_type: model.chassis_type || "",
+      power_type: model.power_type || ""
     };
   }
 
@@ -242,7 +243,8 @@ export default class CarModelsController extends Controller {
       year_released: model.year_released || "",
       driveline: model.driveline || "",
       scale: model.scale || "",
-      chassis_type: model.chassis_type || ""
+      chassis_type: model.chassis_type || "",
+      power_type: model.power_type || ""
     };
   }
 

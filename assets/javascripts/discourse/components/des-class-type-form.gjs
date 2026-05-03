@@ -9,7 +9,7 @@ import { eq } from "truth-helpers";
 
 export default class DesClassTypeForm extends Component {
   @tracked formData = {
-    name: "", track_environment: "", scale: "",
+    name: "", track_environment: "", scale: "", power_type: "",
     chassis_types: [], drivelines: [],
     min_year: "", max_year: "", manufacturer: "",
     model_id: "", min_age: "", max_age: ""
@@ -38,6 +38,7 @@ export default class DesClassTypeForm extends Component {
         name: ct.name || "",
         track_environment: ct.track_environment || "",
         scale: ct.scale || "",
+        power_type: ct.power_type || "",
         chassis_types: ct.chassis_types || [],
         drivelines: ct.drivelines || [],
         min_year: ct.min_year || "",
@@ -93,7 +94,7 @@ export default class DesClassTypeForm extends Component {
     try {
       await this.args.onSave(this.formData);
       this.formData = {
-        name: "", track_environment: "", scale: "",
+        name: "", track_environment: "", scale: "", power_type: "",
         chassis_types: [], drivelines: [],
         min_year: "", max_year: "", manufacturer: "",
         model_id: "", min_age: "", max_age: ""
@@ -125,6 +126,16 @@ export default class DesClassTypeForm extends Component {
             {{#each this.scales as |s|}}
               <option value={{s}} selected={{eq this.formData.scale s}}>{{s}}</option>
             {{/each}}
+          </select>
+        </div>
+        <div class="org-form-field">
+          <label>Power Type</label>
+          <select {{on "change" (fn this.updateField "power_type")}}>
+            <option value="">Any</option>
+            <option value="electric" selected={{eq this.formData.power_type "electric"}}>Electric</option>
+            <option value="nitro" selected={{eq this.formData.power_type "nitro"}}>Nitro</option>
+            <option value="petrol" selected={{eq this.formData.power_type "petrol"}}>Petrol</option>
+            <option value="both" selected={{eq this.formData.power_type "both"}}>Both</option>
           </select>
         </div>
       </div>

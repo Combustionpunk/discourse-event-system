@@ -10,6 +10,9 @@ class DesEventClassType < ActiveRecord::Base
   scope :for_organisation, ->(org_id) { where(organisation_id: org_id) }
   scope :available_for, ->(org_id) { where(organisation_id: [nil, org_id]) }
 
+  POWER_TYPES = %w[electric nitro petrol both].freeze
+  SCALES = %w[1/10 1/8 1/12 1/5 large_scale].freeze
+
   validates :name, presence: true
   validates :name, uniqueness: { scope: :organisation_id }
   validates :track_environment, inclusion: { in: %w[onroad offroad] }, allow_nil: true

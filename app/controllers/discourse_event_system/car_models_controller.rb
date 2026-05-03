@@ -56,6 +56,7 @@ module DiscourseEventSystem
         driveline: m.driveline,
         scale: m.scale,
         chassis_type: m.chassis_type,
+        power_type: m.power_type,
         status: m.status,
         created_by: m.creator&.username
       }

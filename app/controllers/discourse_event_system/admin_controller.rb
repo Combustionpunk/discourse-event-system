@@ -52,7 +52,8 @@ module DiscourseEventSystem
         year_released: params[:year_released].present? ? params[:year_released].to_i : model.year_released,
         driveline: params[:driveline].present? ? params[:driveline] : model.driveline,
         scale: params[:scale].present? ? params[:scale] : model.scale,
-        chassis_type: params[:chassis_type].present? ? params[:chassis_type] : model.chassis_type
+        chassis_type: params[:chassis_type].present? ? params[:chassis_type] : model.chassis_type,
+        power_type: params.key?(:power_type) ? (params[:power_type].presence || model.power_type) : model.power_type
       )
       render json: serialize_model(model)
     rescue => e
@@ -116,6 +117,7 @@ module DiscourseEventSystem
         driveline: params[:driveline].presence,
         scale: params[:scale].presence,
         chassis_type: params[:chassis_type].presence,
+        power_type: params[:power_type].presence || 'electric',
         status: 'approved',
         created_by: current_user.id
       )
@@ -233,6 +235,7 @@ module DiscourseEventSystem
         name: params[:name].to_s.strip,
         track_environment: params[:track_environment].presence,
         scale: params[:scale].presence,
+        power_type: params[:power_type].presence,
         chassis_types: params[:chassis_types].present? ? Array(params[:chassis_types]).join(',') : nil,
         drivelines: params[:drivelines].present? ? Array(params[:drivelines]).join(',') : nil,
         min_year: params[:min_year].presence,
@@ -253,6 +256,7 @@ module DiscourseEventSystem
         name: params[:name].present? ? params[:name].to_s.strip : ct.name,
         track_environment: params.key?(:track_environment) ? params[:track_environment].presence : ct.track_environment,
         scale: params.key?(:scale) ? params[:scale].presence : ct.scale,
+        power_type: params.key?(:power_type) ? params[:power_type].presence : ct.power_type,
         chassis_types: params.key?(:chassis_types) ? (params[:chassis_types].present? ? Array(params[:chassis_types]).join(',') : nil) : ct.chassis_types,
         drivelines: params.key?(:drivelines) ? (params[:drivelines].present? ? Array(params[:drivelines]).join(',') : nil) : ct.drivelines,
         min_year: params.key?(:min_year) ? params[:min_year].presence : ct.min_year,
@@ -303,6 +307,7 @@ module DiscourseEventSystem
         name: ct.name,
         track_environment: ct.track_environment,
         scale: ct.scale,
+        power_type: ct.power_type,
         chassis_types: ct.chassis_types_list,
         drivelines: ct.drivelines_list,
         min_year: ct.min_year,
@@ -346,6 +351,7 @@ module DiscourseEventSystem
         driveline: model.driveline,
         scale: model.scale,
         chassis_type: model.chassis_type,
+        power_type: model.power_type,
         created_by: model.creator&.username,
         status: model.status
       }

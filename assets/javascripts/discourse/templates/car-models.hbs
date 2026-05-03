@@ -186,6 +186,16 @@
                 {{/each}}
               </select>
             </div>
+            <div class="org-form-field">
+              <label>Power Type</label>
+              <select {{on "change" (fn this.updateNewModelField "power_type")}}>
+                <option value="">Select...</option>
+                <option value="electric">Electric</option>
+                <option value="nitro">Nitro</option>
+                <option value="petrol">Petrol</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
           </div>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button class="btn btn-primary" {{on "click" this.confirmAddModel}}>✅ Add Model</button>
@@ -207,6 +217,7 @@
               {{#if model.scale}}<span class="driveline-badge">📏 {{model.scale}}</span>{{/if}}
               {{#if model.chassis_type}}<span class="driveline-badge">🚗 {{model.chassis_type}}</span>{{/if}}
               {{#if model.driveline}}<span class="driveline-badge">⚙️ {{model.driveline}}</span>{{/if}}
+              {{#if model.power_type}}<span class="driveline-badge">⚡ {{model.power_type}}</span>{{/if}}
               {{#if model.year_released}}<span class="driveline-badge">📅 {{model.year_released}}</span>{{/if}}
               {{#if model.created_by}}<span class="field-help">Suggested by {{model.created_by}}</span>{{/if}}
             </div>
@@ -263,6 +274,16 @@
                       {{/each}}
                     </select>
                   </div>
+                  <div class="org-form-field">
+                    <label>Power Type</label>
+                    <select {{on "change" (fn this.updateApproveField "power_type")}}>
+                      <option value="">Select...</option>
+                      <option value="electric" selected={{eq this.approveModelForm.power_type "electric"}}>Electric</option>
+                      <option value="nitro" selected={{eq this.approveModelForm.power_type "nitro"}}>Nitro</option>
+                      <option value="petrol" selected={{eq this.approveModelForm.power_type "petrol"}}>Petrol</option>
+                      <option value="both" selected={{eq this.approveModelForm.power_type "both"}}>Both</option>
+                    </select>
+                  </div>
                 </div>
                 <div style="display:flex;gap:8px;margin-top:8px;">
                   <button class="btn btn-primary" {{on "click" this.confirmApproveModel}}>✅ Confirm</button>
@@ -309,6 +330,16 @@
                       {{#each this.chassisTypes as |c|}}
                         <option value={{c}} selected={{eq this.editModelForm.chassis_type c}}>{{c}}</option>
                       {{/each}}
+                    </select>
+                  </div>
+                  <div class="org-form-field">
+                    <label>Power Type</label>
+                    <select {{on "change" (fn this.updateEditModelField "power_type")}}>
+                      <option value="">Select...</option>
+                      <option value="electric" selected={{eq this.editModelForm.power_type "electric"}}>Electric</option>
+                      <option value="nitro" selected={{eq this.editModelForm.power_type "nitro"}}>Nitro</option>
+                      <option value="petrol" selected={{eq this.editModelForm.power_type "petrol"}}>Petrol</option>
+                      <option value="both" selected={{eq this.editModelForm.power_type "both"}}>Both</option>
                     </select>
                   </div>
                 </div>
