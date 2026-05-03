@@ -434,6 +434,57 @@
   }
 }
 
+// BRCA imported event styles
+.rc-event-badge--brca {
+  background: #003087;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+.rc-event-badge--series {
+  background: var(--tertiary-low);
+  color: var(--tertiary);
+  text-transform: capitalize;
+}
+
+.rc-event-badge--region {
+  background: var(--highlight-low);
+  color: var(--highlight-high);
+}
+
+.rc-event-tag--scale {
+  background: var(--primary-low);
+  font-weight: 600;
+}
+
+.rc-event-tag--power {
+  &.rc-event-tag--electric { background: #e8f5e9; color: #2e7d32; }
+  &.rc-event-tag--nitro { background: #fff3e0; color: #e65100; }
+  &.rc-event-tag--petrol { background: #f3e5f5; color: #6a1b9a; }
+  &.rc-event-tag--mixed { background: #e3f2fd; color: #1565c0; }
+}
+
+.rc-event-card--imported {
+  border-left: 3px solid #003087;
+
+  .rc-card-footer {
+    border-top: 1px solid var(--primary-low);
+    padding-top: 8px;
+  }
+}
+
+.rc-cal-event--imported {
+  background: #003087;
+}
+
+.rc-cal-popover-event.rc-cal-event--imported {
+  background: #003087;
+}
+
 .category-rc-meetings {
   .topic-list {
     display: none !important;

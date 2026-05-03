@@ -25,6 +25,8 @@ export default class RcEventsList extends Component {
   @tracked eventTypeId = "";
   @tracked trackEnvironment = "";
   @tracked trackSurface = "";
+  @tracked scaleFilter = "";
+  @tracked powerFilter = "";
   @tracked maxDistanceMiles = "";
   @tracked searchPostcode = "";
   @tracked postcodeInput = "";
@@ -68,13 +70,27 @@ export default class RcEventsList extends Component {
       if (this.eventTypeId) params.event_type_id = this.eventTypeId;
       if (this.trackEnvironment) params.track_environment = this.trackEnvironment;
       if (this.trackSurface) params.track_surface = this.trackSurface;
+      if (this.scaleFilter) params.scale = this.scaleFilter;
+      if (this.powerFilter) params.power_type = this.powerFilter;
       if (this.maxDistanceMiles && this.searchPostcode) {
         params.max_distance_miles = this.maxDistanceMiles;
         params.postcode = this.searchPostcode;
       }
 
       const response = await ajax("/des/rc-events-topic-list.json", { data: params });
-      this.events = response.topics || [];
+      const native = response.topics || [];
+      const imported = (response.imported_events || []).map(e => ({
+        ...e,
+        // Normalize date fields for calendar compatibility
+        _startDate: e.start_date,
+      }));
+      // Merge and sort by start date
+      const merged = [...native, ...imported].sort((a, b) => {
+        const dateA = new Date(a.start_date);
+        const dateB = new Date(b.start_date);
+        return dateA - dateB;
+      });
+      this.events = merged;
       if (response.filters) this.filterOptions = response.filters;
     } catch {
       this.events = [];
@@ -88,6 +104,8 @@ export default class RcEventsList extends Component {
   @action async updateEventType(e) { this.eventTypeId = e.target.value; await this.loadEvents(); }
   @action async updateEnvironment(e) { this.trackEnvironment = e.target.value; await this.loadEvents(); }
   @action async updateSurface(e) { this.trackSurface = e.target.value; await this.loadEvents(); }
+  @action async updateScale(e) { this.scaleFilter = e.target.value; await this.loadEvents(); }
+  @action async updatePower(e) { this.powerFilter = e.target.value; await this.loadEvents(); }
 
   @action
   updatePostcodeInput(e) {
@@ -256,11 +274,21 @@ export default class RcEventsList extends Component {
   }
 
   eventBadgeClass(event) {
+    if (event.type === 'imported') return "rc-cal-event--imported";
     if (event.is_past) return "rc-cal-event--past";
     if (event.booking_manually_closed) return "rc-cal-event--closed";
     if (event.booking_open) return "rc-cal-event--open";
     if (event.booking_opens_at) return "rc-cal-event--soon";
     return "rc-cal-event--closed";
+  }
+
+  eventUrl(event) {
+    if (event.type === 'imported') return event.booking_url;
+    return event.topic_url;
+  }
+
+  isImported(event) {
+    return event.type === 'imported';
   }
 
   <template>
@@ -328,6 +356,26 @@ export default class RcEventsList extends Component {
           {{/if}}
 
           <div class="rc-filter-group">
+            <select class="rc-filter-select" {{on "change" this.updateScale}}>
+              <option value="">All scales</option>
+              <option value="1/10" selected={{eq this.scaleFilter "1/10"}}>1/10</option>
+              <option value="1/8" selected={{eq this.scaleFilter "1/8"}}>1/8</option>
+              <option value="1/12" selected={{eq this.scaleFilter "1/12"}}>1/12</option>
+              <option value="large_scale" selected={{eq this.scaleFilter "large_scale"}}>Large Scale</option>
+            </select>
+          </div>
+
+          <div class="rc-filter-group">
+            <select class="rc-filter-select" {{on "change" this.updatePower}}>
+              <option value="">All power</option>
+              <option value="electric" selected={{eq this.powerFilter "electric"}}>⚡ Electric</option>
+              <option value="nitro" selected={{eq this.powerFilter "nitro"}}>🔥 Nitro</option>
+              <option value="petrol" selected={{eq this.powerFilter "petrol"}}>⛽ Petrol</option>
+              <option value="mixed" selected={{eq this.powerFilter "mixed"}}>Mixed</option>
+            </select>
+          </div>
+
+          <div class="rc-filter-group">
             <select class="rc-filter-select" {{on "change" this.updateDistance}}>
               <option value="">Any distance</option>
               <option value="5" selected={{eq this.maxDistanceMiles "5"}}>Within 5 miles</option>
@@ -369,107 +417,178 @@ export default class RcEventsList extends Component {
           {{#if this.events.length}}
             <div class="rc-events-cards">
               {{#each this.events as |event|}}
-                <a href={{event.topic_url}} class="rc-event-card {{if event.is_past 'rc-event-card--past' ''}} {{if event.is_today 'rc-event-card--today' ''}}">
-
-                  <div class="rc-card-header">
-                    <div class="rc-card-title-block">
-                      <h3 class="rc-event-title">{{event.title}}</h3>
-                      <div class="rc-card-date">📅 {{event.formatted_date}}</div>
-                    </div>
-                    <div class="rc-card-status-badges">
-                      {{#if event.is_today}}
-                        <span class="rc-event-badge rc-event-badge--today">📍 Today</span>
-                      {{else if event.is_past}}
-                        <span class="rc-event-badge rc-event-badge--past">✅ Past</span>
-                      {{/if}}
-                    </div>
-                  </div>
-
-                  <div class="rc-card-body">
-                    <div class="rc-card-org">
-                      {{#if event.organisation.logo_url}}
-                        <img src={{event.organisation.logo_url}} alt={{event.organisation.name}} class="rc-event-org-logo" />
-                      {{else}}
-                        <div class="rc-org-logo-placeholder">🏭</div>
-                      {{/if}}
-                      <span class="rc-event-org-name">{{event.organisation.name}}</span>
-                    </div>
-
-                    <div class="rc-card-venue">
-                      {{#if event.venue}}
-                        <div class="rc-venue-name">{{event.venue.name}}</div>
-                        <div class="rc-venue-attrs">
-                          {{#if event.venue.track_environment}}
-                            {{#if (eq event.venue.track_environment "outdoor")}}
-                              <span class="rc-icon-badge" title="Outdoor">🌳</span>
-                            {{else}}
-                              <span class="rc-icon-badge" title="Indoor">🏠</span>
-                            {{/if}}
-                          {{/if}}
-                          {{#if event.venue.track_type}}
-                            {{#if (eq event.venue.track_type "permanent")}}
-                              <span class="rc-icon-badge" title="Permanent Track">🏁</span>
-                            {{else}}
-                              <span class="rc-icon-badge" title="Pop-up Track">🏗️</span>
-                            {{/if}}
-                          {{/if}}
-                          {{#if event.venue.track_surface}}
-                            <span class="rc-icon-badge" title={{event.venue.track_surface}}>
-                              {{#if (eq event.venue.track_surface "carpet")}}🟫
-                              {{else if (eq event.venue.track_surface "astroturf")}}🌿
-                              {{else if (eq event.venue.track_surface "grass")}}🍃
-                              {{else if (eq event.venue.track_surface "tarmac")}}⬛
-                              {{else if (eq event.venue.track_surface "mixed")}}🔀
-                              {{else}}🏁{{/if}}
-                            </span>
-                          {{/if}}
-                          {{#if event.venue.has_permanent_toilets}}<span class="rc-icon-badge" title="Permanent Toilets">🚻</span>{{/if}}
-                          {{#if event.venue.has_portaloos}}<span class="rc-icon-badge" title="Portaloos">🚽</span>{{/if}}
-                          {{#if event.venue.has_cafe}}<span class="rc-icon-badge" title="Café">☕</span>{{/if}}
-                          {{#if event.venue.has_bar}}<span class="rc-icon-badge" title="Bar">🍺</span>{{/if}}
-                          {{#if event.venue.has_showers}}<span class="rc-icon-badge" title="Showers">🚿</span>{{/if}}
-                          {{#if event.venue.has_power_supply}}<span class="rc-icon-badge" title="Power Supply">⚡</span>{{/if}}
-                          {{#if event.venue.has_water_supply}}<span class="rc-icon-badge" title="Water Supply">💧</span>{{/if}}
-                          {{#if event.venue.has_camping}}<span class="rc-icon-badge" title="Camping">⛺</span>{{/if}}
-                        </div>
-                        {{#if event.distance_miles}}
-                          <div class="rc-venue-distance" title="Distance from your postcode">📏 {{event.distance_miles}} miles</div>
+                {{#if (eq event.type "imported")}}
+                  <div class="rc-event-card rc-event-card--imported {{if event.is_past 'rc-event-card--past' ''}} {{if event.is_today 'rc-event-card--today' ''}}">
+                    <div class="rc-card-header">
+                      <div class="rc-card-title-block">
+                        <h3 class="rc-event-title">{{event.title}}</h3>
+                        <div class="rc-card-date">📅 {{event.formatted_date}}</div>
+                      </div>
+                      <div class="rc-card-status-badges">
+                        <span class="rc-event-badge rc-event-badge--brca">BRCA</span>
+                        {{#if event.series_type}}
+                          <span class="rc-event-badge rc-event-badge--series">{{event.series_type}}</span>
                         {{/if}}
-                      {{else}}
-                        <div class="rc-venue-name rc-venue-none">📍 Venue TBC</div>
-                      {{/if}}
-                    </div>
-                  </div>
-
-                  <div class="rc-card-footer">
-                    <div class="rc-card-classes">
-                      {{#each event.classes as |cls|}}
-                        <span class="rc-event-class-tag">{{cls}}</span>
-                      {{/each}}
-                    </div>
-                    <div class="rc-card-booking">
-                      {{#if event.booking_manually_closed}}
-                        <span class="rc-event-badge rc-event-badge--closed">🔴 Booking Closed</span>
-                      {{else if event.booking_open}}
-                        <span class="rc-event-badge rc-event-badge--open">🟢 Booking Open</span>
-                      {{else if event.booking_opens_at}}
-                        <span class="rc-event-badge rc-event-badge--soon">⏳ Booking Soon</span>
-                        {{#if this.currentUser}}
-                          <button
-                            class="btn btn-small btn-default rc-alert-btn"
-                            {{on "click" (fn this.toggleBookingAlert event)}}
-                            title={{if event.user_has_booking_alert "Cancel booking alert" "Alert me when booking opens"}}
-                          >
-                            {{if event.user_has_booking_alert "🔕 Cancel Alert" "🔔 Alert Me"}}
-                          </button>
+                        {{#if event.region}}
+                          <span class="rc-event-badge rc-event-badge--region">{{event.region}}</span>
                         {{/if}}
-                      {{else}}
-                        <span class="rc-event-badge rc-event-badge--closed">🔴 Booking Closed</span>
-                      {{/if}}
+                        {{#if event.is_today}}
+                          <span class="rc-event-badge rc-event-badge--today">📍 Today</span>
+                        {{else if event.is_past}}
+                          <span class="rc-event-badge rc-event-badge--past">✅ Past</span>
+                        {{/if}}
+                      </div>
+                    </div>
+
+                    <div class="rc-card-body">
+                      <div class="rc-card-org">
+                        <div class="rc-org-logo-placeholder">🏁</div>
+                        <span class="rc-event-org-name">BRCA</span>
+                      </div>
+
+                      <div class="rc-card-venue">
+                        {{#if event.venue}}
+                          <div class="rc-venue-name">📍 {{event.venue.name}}</div>
+                        {{else}}
+                          <div class="rc-venue-name rc-venue-none">📍 Venue TBC</div>
+                        {{/if}}
+                        {{#if event.round_number}}
+                          <div class="rc-venue-distance">Round {{event.round_number}}</div>
+                        {{/if}}
+                      </div>
+                    </div>
+
+                    <div class="rc-card-footer">
+                      <div class="rc-card-classes">
+                        {{#if event.scale}}
+                          <span class="rc-event-class-tag rc-event-tag--scale">{{event.scale}}</span>
+                        {{/if}}
+                        {{#if event.power_type}}
+                          <span class="rc-event-class-tag rc-event-tag--power rc-event-tag--{{event.power_type}}">
+                            {{#if (eq event.power_type "electric")}}⚡{{else if (eq event.power_type "nitro")}}🔥{{else if (eq event.power_type "petrol")}}⛽{{else}}🔄{{/if}}
+                            {{event.power_type}}
+                          </span>
+                        {{/if}}
+                        {{#if event.surface}}
+                          <span class="rc-event-class-tag rc-event-tag--surface">
+                            {{#if (eq event.surface "off_road")}}🏔️ Off Road{{else}}🏁 On Road{{/if}}
+                          </span>
+                        {{/if}}
+                        {{#each event.classes_raw as |cls|}}
+                          <span class="rc-event-class-tag">{{cls}}</span>
+                        {{/each}}
+                      </div>
+                      <div class="rc-card-booking">
+                        <a href={{event.booking_url}} target="_blank" rel="noopener" class="btn btn-small btn-default">
+                          Book on BRCA →
+                        </a>
+                      </div>
                     </div>
                   </div>
 
-                </a>
+                {{else}}
+                  <a href={{event.topic_url}} class="rc-event-card {{if event.is_past 'rc-event-card--past' ''}} {{if event.is_today 'rc-event-card--today' ''}}">
+
+                    <div class="rc-card-header">
+                      <div class="rc-card-title-block">
+                        <h3 class="rc-event-title">{{event.title}}</h3>
+                        <div class="rc-card-date">📅 {{event.formatted_date}}</div>
+                      </div>
+                      <div class="rc-card-status-badges">
+                        {{#if event.is_today}}
+                          <span class="rc-event-badge rc-event-badge--today">📍 Today</span>
+                        {{else if event.is_past}}
+                          <span class="rc-event-badge rc-event-badge--past">✅ Past</span>
+                        {{/if}}
+                      </div>
+                    </div>
+
+                    <div class="rc-card-body">
+                      <div class="rc-card-org">
+                        {{#if event.organisation.logo_url}}
+                          <img src={{event.organisation.logo_url}} alt={{event.organisation.name}} class="rc-event-org-logo" />
+                        {{else}}
+                          <div class="rc-org-logo-placeholder">🏭</div>
+                        {{/if}}
+                        <span class="rc-event-org-name">{{event.organisation.name}}</span>
+                      </div>
+
+                      <div class="rc-card-venue">
+                        {{#if event.venue}}
+                          <div class="rc-venue-name">{{event.venue.name}}</div>
+                          <div class="rc-venue-attrs">
+                            {{#if event.venue.track_environment}}
+                              {{#if (eq event.venue.track_environment "outdoor")}}
+                                <span class="rc-icon-badge" title="Outdoor">🌳</span>
+                              {{else}}
+                                <span class="rc-icon-badge" title="Indoor">🏠</span>
+                              {{/if}}
+                            {{/if}}
+                            {{#if event.venue.track_type}}
+                              {{#if (eq event.venue.track_type "permanent")}}
+                                <span class="rc-icon-badge" title="Permanent Track">🏁</span>
+                              {{else}}
+                                <span class="rc-icon-badge" title="Pop-up Track">🏗️</span>
+                              {{/if}}
+                            {{/if}}
+                            {{#if event.venue.track_surface}}
+                              <span class="rc-icon-badge" title={{event.venue.track_surface}}>
+                                {{#if (eq event.venue.track_surface "carpet")}}🟫
+                                {{else if (eq event.venue.track_surface "astroturf")}}🌿
+                                {{else if (eq event.venue.track_surface "grass")}}🍃
+                                {{else if (eq event.venue.track_surface "tarmac")}}⬛
+                                {{else if (eq event.venue.track_surface "mixed")}}🔀
+                                {{else}}🏁{{/if}}
+                              </span>
+                            {{/if}}
+                            {{#if event.venue.has_permanent_toilets}}<span class="rc-icon-badge" title="Permanent Toilets">🚻</span>{{/if}}
+                            {{#if event.venue.has_portaloos}}<span class="rc-icon-badge" title="Portaloos">🚽</span>{{/if}}
+                            {{#if event.venue.has_cafe}}<span class="rc-icon-badge" title="Café">☕</span>{{/if}}
+                            {{#if event.venue.has_bar}}<span class="rc-icon-badge" title="Bar">🍺</span>{{/if}}
+                            {{#if event.venue.has_showers}}<span class="rc-icon-badge" title="Showers">🚿</span>{{/if}}
+                            {{#if event.venue.has_power_supply}}<span class="rc-icon-badge" title="Power Supply">⚡</span>{{/if}}
+                            {{#if event.venue.has_water_supply}}<span class="rc-icon-badge" title="Water Supply">💧</span>{{/if}}
+                            {{#if event.venue.has_camping}}<span class="rc-icon-badge" title="Camping">⛺</span>{{/if}}
+                          </div>
+                          {{#if event.distance_miles}}
+                            <div class="rc-venue-distance" title="Distance from your postcode">📏 {{event.distance_miles}} miles</div>
+                          {{/if}}
+                        {{else}}
+                          <div class="rc-venue-name rc-venue-none">📍 Venue TBC</div>
+                        {{/if}}
+                      </div>
+                    </div>
+
+                    <div class="rc-card-footer">
+                      <div class="rc-card-classes">
+                        {{#each event.classes as |cls|}}
+                          <span class="rc-event-class-tag">{{cls}}</span>
+                        {{/each}}
+                      </div>
+                      <div class="rc-card-booking">
+                        {{#if event.booking_manually_closed}}
+                          <span class="rc-event-badge rc-event-badge--closed">🔴 Booking Closed</span>
+                        {{else if event.booking_open}}
+                          <span class="rc-event-badge rc-event-badge--open">🟢 Booking Open</span>
+                        {{else if event.booking_opens_at}}
+                          <span class="rc-event-badge rc-event-badge--soon">⏳ Booking Soon</span>
+                          {{#if this.currentUser}}
+                            <button
+                              class="btn btn-small btn-default rc-alert-btn"
+                              {{on "click" (fn this.toggleBookingAlert event)}}
+                              title={{if event.user_has_booking_alert "Cancel booking alert" "Alert me when booking opens"}}
+                            >
+                              {{if event.user_has_booking_alert "🔕 Cancel Alert" "🔔 Alert Me"}}
+                            </button>
+                          {{/if}}
+                        {{else}}
+                          <span class="rc-event-badge rc-event-badge--closed">🔴 Booking Closed</span>
+                        {{/if}}
+                      </div>
+                    </div>
+
+                  </a>
+                {{/if}}
               {{/each}}
             </div>
           {{else}}
@@ -500,7 +619,7 @@ export default class RcEventsList extends Component {
 
                     {{#if day.dayEvents.length}}
                       {{#if (eq day.dayEvents.length 1)}}
-                        <a href={{day.dayEvents.[0].topic_url}} class="rc-cal-event {{this.eventBadgeClass day.dayEvents.[0]}}">
+                        <a href={{if (eq day.dayEvents.[0].type "imported") day.dayEvents.[0].booking_url day.dayEvents.[0].topic_url}} class="rc-cal-event {{this.eventBadgeClass day.dayEvents.[0]}}" target={{if (eq day.dayEvents.[0].type "imported") "_blank" ""}} rel={{if (eq day.dayEvents.[0].type "imported") "noopener" ""}}>
                           {{day.dayEvents.[0].title}}
                         </a>
                       {{else}}
@@ -522,9 +641,9 @@ export default class RcEventsList extends Component {
                   <div class="rc-cal-popover" style="top: {{this.popoverPosition.top}}px; left: {{this.popoverPosition.left}}px;">
                     <button class="rc-cal-popover-close" {{on "click" this.closePopover}}>✕</button>
                     {{#each day.dayEvents as |event|}}
-                      <a href={{event.topic_url}} class="rc-cal-popover-event {{this.eventBadgeClass event}}">
+                      <a href={{if (eq event.type "imported") event.booking_url event.topic_url}} class="rc-cal-popover-event {{this.eventBadgeClass event}}" target={{if (eq event.type "imported") "_blank" ""}} rel={{if (eq event.type "imported") "noopener" ""}}>
                         <span class="rc-cal-popover-title">{{event.title}}</span>
-                        <span class="rc-cal-popover-org">{{event.organisation.name}}</span>
+                        <span class="rc-cal-popover-org">{{if (eq event.type "imported") "BRCA" event.organisation.name}}</span>
                       </a>
                     {{/each}}
                   </div>

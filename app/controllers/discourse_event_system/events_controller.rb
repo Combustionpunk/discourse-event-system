@@ -77,7 +77,7 @@ module DiscourseEventSystem
     end
 
     def rc_topic_list
-      events = DesEvent.includes(:organisation, :venue, :des_event_classes)
+      events = DesEvent.includes(:organisation, :venue, des_event_classes: :class_type)
                        .where.not(topic_id: nil)
                        .where.not(status: ['cancelled', 'draft'])
 
@@ -109,7 +109,9 @@ module DiscourseEventSystem
 
         topics = (today_arr + upcoming_arr + past_arr).map { |e| serialize_rc_topic(e) }
         topics = filter_by_distance(topics, params[:postcode], params[:max_distance_miles]) if params[:postcode].present?
-        return render json: { topics: topics, filters: rc_filter_options }
+        topics = apply_scale_power_filters(topics, params)
+        imported = fetch_imported_events(params)
+        return render json: { topics: topics, imported_events: imported, filters: rc_filter_options }
       end
 
       events = events.where(organisation_id: params[:organisation_id]) if params[:organisation_id].present?
@@ -118,8 +120,11 @@ module DiscourseEventSystem
 
       topics = events.map { |e| serialize_rc_topic(e) }
       topics = filter_by_distance(topics, params[:postcode], params[:max_distance_miles]) if params[:postcode].present?
+      topics = apply_scale_power_filters(topics, params)
+      imported = fetch_imported_events(params)
       render json: {
         topics: topics,
+        imported_events: imported,
         filters: rc_filter_options
       }
     end
@@ -896,6 +901,21 @@ module DiscourseEventSystem
       events.where(venue_id: venue_ids.pluck(:id))
     end
 
+    def apply_scale_power_filters(topics, params)
+      topics = topics.select { |t| t[:scale] == params[:scale] } if params[:scale].present?
+      if params[:power_type].present?
+        topics = topics.select do |t|
+          next true if t[:power_type].blank?
+          if params[:power_type] == 'mixed'
+            %w[electric nitro mixed].include?(t[:power_type])
+          else
+            t[:power_type] == params[:power_type] || t[:power_type] == 'mixed'
+          end
+        end
+      end
+      topics
+    end
+
     def rc_filter_options
       {
         organisations: DesOrganisation.approved.order(:name).map { |o| { id: o.id, name: o.name } },
@@ -906,8 +926,10 @@ module DiscourseEventSystem
     end
 
     def serialize_rc_topic(event)
+      first_class_type = event.des_event_classes.first&.class_type
       {
         id: event.id,
+        type: 'native',
         topic_id: event.topic_id,
         title: event.title,
         start_date: event.start_date,
@@ -945,10 +967,74 @@ module DiscourseEventSystem
         venue_postcode: event.venue&.postcode,
         distance_miles: nil,
         classes: event.des_event_classes.map(&:name),
+        scale: first_class_type&.scale,
+        power_type: first_class_type&.power_type,
         is_today: event.start_date&.to_date == Date.today,
         is_past: event.start_date ? event.start_date < Time.now : false,
         topic_url: event.topic_id ? "/t/#{event.topic_id}" : nil
       }
+    end
+
+    def serialize_imported_event(event)
+      {
+        id: event.id,
+        type: 'imported',
+        title: event.title,
+        discipline: event.discipline,
+        series_type: event.series_type,
+        region: event.region,
+        round_number: event.round_number,
+        classes_raw: event.classes_raw_array,
+        scale: event.scale,
+        power_type: event.power_type,
+        surface: event.surface,
+        start_date: event.starts_at&.iso8601,
+        end_date: event.ends_at&.iso8601,
+        formatted_date: event.starts_at&.strftime('%a %d %b %Y at %H:%M'),
+        booking_url: event.booking_url,
+        is_today: event.starts_at&.to_date == Date.today,
+        is_past: event.starts_at ? event.starts_at < Time.now : false,
+        venue: event.venue ? {
+          id: event.venue.id,
+          name: event.venue.name,
+          postcode: event.venue.postcode,
+          latitude: event.venue.latitude,
+          longitude: event.venue.longitude,
+          track_surface: event.venue.track_surface,
+          track_environment: event.venue.track_environment
+        } : nil,
+        venue_postcode: event.venue&.postcode
+      }
+    end
+
+    def fetch_imported_events(params)
+      imported = DesImportedEvent.includes(:venue).where('starts_at >= ?', 30.days.ago)
+
+      case params[:time_filter]
+      when 'past'
+        imported = imported.where('starts_at < ?', Time.now.beginning_of_day).order(starts_at: :desc)
+      when 'today'
+        imported = imported.where('starts_at >= ? AND starts_at < ?', Time.now.beginning_of_day, Time.now.end_of_day).order(starts_at: :asc)
+      when 'upcoming'
+        imported = imported.where('starts_at > ?', Time.now.end_of_day).order(starts_at: :asc)
+      when 'all'
+        imported = imported.order(starts_at: :asc)
+      else
+        imported = imported.where('starts_at >= ?', Time.now.beginning_of_day).order(starts_at: :asc)
+      end
+
+      if params[:scale].present?
+        imported = imported.where(scale: params[:scale])
+      end
+      if params[:power_type].present?
+        if params[:power_type] == 'mixed'
+          imported = imported.where(power_type: %w[electric nitro mixed])
+        else
+          imported = imported.where(power_type: [params[:power_type], 'mixed'])
+        end
+      end
+
+      imported.map { |e| serialize_imported_event(e) }
     end
 
   end
