@@ -52,6 +52,8 @@ after_initialize do
   load File.expand_path("../app/models/des_user_car.rb", __FILE__)
   load File.expand_path("../app/models/des_class_compatibility_rule.rb", __FILE__)
   load File.expand_path("../app/models/des_event_booking_alert.rb", __FILE__)
+  load File.expand_path("../app/models/des_imported_event.rb", __FILE__)
+  load File.expand_path("../app/models/des_venue_suggestion.rb", __FILE__)
   load File.expand_path("../app/services/des_paypal_service.rb", __FILE__)
   load File.expand_path("../app/services/des_booking_service.rb", __FILE__)
   load File.expand_path("../app/controllers/discourse_event_system/events_controller.rb", __FILE__)

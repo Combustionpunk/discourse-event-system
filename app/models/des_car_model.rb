@@ -7,6 +7,7 @@ class DesCarModel < ActiveRecord::Base
 
   DRIVELINES = ['2WD', '4WD', 'FWD', 'Rear Motor'].freeze
   SCALES = ['1/8', '1/10', '1/12', '1/28'].freeze
+  POWER_TYPES = %w[electric nitro petrol both].freeze
 
   CHASSIS_TYPES = [
     'Buggy', 'Truck', 'Stadium', 'Short Course',
