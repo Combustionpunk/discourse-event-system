@@ -26,8 +26,7 @@ export default class VenuesController extends Controller {
     this.showForm = !this.showForm;
     if (this.showForm) {
       this.newVenue = {
-        name: "", address: "", google_maps_url: "", track_category: "",
-        track_surface: "", track_environment: "", website: "", description: "",
+        name: "", address: "", google_maps_url: "", website: "", description: "",
         parking_info: "", local_facilities: "", access_notes: "",
         created_by_organisation_id: this.model.myOrgs[0]?.id || "",
         has_portaloos: false, has_permanent_toilets: false, has_bar: false,
@@ -152,14 +151,17 @@ export default class VenuesController extends Controller {
         venue.has_camping ? '⛺' : '',
       ].filter(Boolean).join(' ');
 
-      const envIcon = venue.track_environment === 'outdoor' ? '🌳' : venue.track_environment ? '🏠' : '';
-      const surface = venue.track_surface ? surfaceMap[venue.track_surface] || venue.track_surface : '';
+      const trackInfo = (venue.tracks || []).map(t => {
+        const env = t.environment === 'outdoor' ? '🌳' : t.environment === 'indoor' ? '🏠' : '';
+        const surf = t.surface ? (surfaceMap[t.surface] || t.surface) : '';
+        return [env, surf, t.name].filter(Boolean).join(' ');
+      }).join(', ');
 
       const popup = `
         <div style="min-width:180px;">
           <strong style="font-size:1.1em;">${venue.name}</strong>
           ${venue.address ? `<p style="margin:4px 0;font-size:0.85em;color:#666;">${venue.address}</p>` : ''}
-          ${envIcon || surface ? `<p style="margin:4px 0;">${envIcon} ${surface}</p>` : ''}
+          ${trackInfo ? `<p style="margin:4px 0;">${trackInfo}</p>` : ''}
           ${facilityIcons ? `<p style="margin:4px 0;">${facilityIcons}</p>` : ''}
           <a href="/venues/${venue.id}" style="display:inline-block;margin-top:8px;padding:4px 10px;background:#0088cc;color:white;border-radius:4px;text-decoration:none;font-size:0.85em;">View Venue</a>
         </div>

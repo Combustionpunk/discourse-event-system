@@ -113,9 +113,10 @@
             {{#if venue.address}}<p class="venue-address">📍 {{venue.address}}</p>{{/if}}
             <div class="venue-badges">
               {{#if venue.is_shared}}<span class="venue-badge venue-badge--shared">🤝 Shared</span>{{else unless venue.is_stub}}<span class="venue-badge venue-badge--exclusive">🔒 Club Exclusive</span>{{/if}}
-              {{#if venue.track_category}}<span class="venue-badge venue-badge--category">{{venue.track_category}}</span>{{/if}}
-              {{#if venue.track_surface}}<span class="venue-badge venue-badge--surface">{{venue.track_surface}}</span>{{/if}}
-              {{#if venue.track_environment}}<span class="venue-badge venue-badge--environment">{{venue.track_environment}}</span>{{/if}}
+              {{#each venue.tracks as |track|}}
+                {{#if track.surface}}<span class="venue-badge venue-badge--surface">{{track.surface}}</span>{{/if}}
+                {{#if track.environment}}<span class="venue-badge venue-badge--environment">{{track.environment}}</span>{{/if}}
+              {{/each}}
             </div>
             <div class="venue-facilities-icons">
               {{#if venue.has_permanent_toilets}}🚻{{/if}}

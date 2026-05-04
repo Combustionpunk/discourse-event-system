@@ -9,9 +9,9 @@ module DiscourseEventSystem
 
     def index
       if current_user&.admin?
-        events = DesEvent.includes(:organisation, :event_type, :des_event_classes, :venue)
+        events = DesEvent.includes(:organisation, :event_type, :des_event_classes, { venue: :tracks })
       else
-        events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes, :venue)
+        events = DesEvent.published.includes(:organisation, :event_type, :des_event_classes, { venue: :tracks })
       end
 
       # Filter by time
@@ -77,7 +77,7 @@ module DiscourseEventSystem
     end
 
     def rc_topic_list
-      events = DesEvent.includes(:organisation, :venue, des_event_classes: :class_type)
+      events = DesEvent.includes(:organisation, { venue: :tracks }, des_event_classes: :class_type)
                        .where.not(topic_id: nil)
                        .where.not(status: ['cancelled', 'draft'])
 
@@ -731,8 +731,6 @@ module DiscourseEventSystem
         venue: event.venue ? {
           id: event.venue.id, name: event.venue.name, address: event.venue.address,
           google_maps_url: event.venue.google_maps_url, website: event.venue.website,
-          track_category: event.venue.track_category, track_surface: event.venue.track_surface,
-          track_environment: event.venue.track_environment,
           has_portaloos: event.venue.has_portaloos, has_permanent_toilets: event.venue.has_permanent_toilets,
           has_bar: event.venue.has_bar, has_showers: event.venue.has_showers,
           has_power_supply: event.venue.has_power_supply, has_water_supply: event.venue.has_water_supply,
@@ -903,11 +901,12 @@ module DiscourseEventSystem
     def apply_venue_filters(events, params)
       return events unless params[:track_environment].present? || params[:track_surface].present?
 
-      venue_ids = DesVenue.all
-      venue_ids = venue_ids.where(track_environment: params[:track_environment]) if params[:track_environment].present?
-      venue_ids = venue_ids.where(track_surface: params[:track_surface]) if params[:track_surface].present?
+      track_query = DesVenueTrack.all
+      track_query = track_query.where(environment: params[:track_environment]) if params[:track_environment].present?
+      track_query = track_query.where(surface: params[:track_surface]) if params[:track_surface].present?
+      venue_ids = track_query.distinct.pluck(:venue_id)
 
-      events.where(venue_id: venue_ids.pluck(:id))
+      events.where(venue_id: venue_ids)
     end
 
     def apply_scale_power_filters(topics, params)
@@ -931,8 +930,8 @@ module DiscourseEventSystem
       {
         organisations: DesOrganisation.approved.order(:name).map { |o| { id: o.id, name: o.name } },
         event_types: DesEventType.order(:name).map { |et| { id: et.id, name: et.name } },
-        track_environments: ['outdoor', 'indoor_covered'],
-        track_surfaces: DesVenue.distinct.pluck(:track_surface).compact.sort
+        track_environments: DesVenueTrack::ENVIRONMENTS,
+        track_surfaces: DesVenueTrack.distinct.pluck(:surface).compact.sort
       }
     end
 
@@ -960,10 +959,7 @@ module DiscourseEventSystem
         venue: event.venue ? {
           name: event.venue.name,
           postcode: event.venue.postcode,
-          track_environment: event.venue.track_environment,
-          track_surface: event.venue.track_surface,
-          track_category: event.venue.track_category,
-          track_type: event.venue.track_type,
+          tracks: event.venue.tracks.map { |t| { name: t.name, surface: t.surface, environment: t.environment } },
           has_permanent_toilets: event.venue.has_permanent_toilets,
           has_portaloos: event.venue.has_portaloos,
           has_cafe: event.venue.has_cafe,
@@ -972,6 +968,7 @@ module DiscourseEventSystem
           has_power_supply: event.venue.has_power_supply,
           has_water_supply: event.venue.has_water_supply,
           has_camping: event.venue.has_camping,
+          has_track_shop: event.venue.has_track_shop,
           is_shared: event.venue.is_shared
         } : nil,
         venue_id: event.venue_id,
@@ -1010,9 +1007,7 @@ module DiscourseEventSystem
           name: event.venue.name,
           postcode: event.venue.postcode,
           latitude: event.venue.latitude,
-          longitude: event.venue.longitude,
-          track_surface: event.venue.track_surface,
-          track_environment: event.venue.track_environment
+          longitude: event.venue.longitude
         } : nil,
         venue_postcode: event.venue&.postcode,
         organisation: event.organisation ? {

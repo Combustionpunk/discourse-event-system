@@ -633,9 +633,10 @@
               <strong>{{venue.name}}</strong>
               <div class="admin-org-meta">
                 {{#if venue.address}}<span>📍 {{venue.address}}</span>{{/if}}
-                {{#if venue.track_category}}<span>{{venue.track_category}}</span>{{/if}}
-                {{#if venue.track_surface}}<span>{{venue.track_surface}}</span>{{/if}}
-                {{#if venue.track_environment}}<span>{{venue.track_environment}}</span>{{/if}}
+                {{#each venue.tracks as |track|}}
+                  {{#if track.surface}}<span>{{track.surface}}</span>{{/if}}
+                  {{#if track.environment}}<span>{{track.environment}}</span>{{/if}}
+                {{/each}}
                 {{#if venue.is_shared}}<span>🤝 Shared</span>{{/if}}
                 {{#if venue.has_permanent_toilets}}<span>🚻</span>{{/if}}
                 {{#if venue.has_portaloos}}<span>🚽</span>{{/if}}

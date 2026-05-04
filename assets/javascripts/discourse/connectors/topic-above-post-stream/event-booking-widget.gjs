@@ -492,9 +492,10 @@ export default class EventBookingWidget extends Component {
               {{#if this.event.venue.address}}<div class="venue-detail-item">📍 {{this.event.venue.address}}</div>{{/if}}
               {{#if this.event.venue.google_maps_url}}<div class="venue-detail-item"><a href={{this.event.venue.google_maps_url}} target="_blank" rel="noopener">🗺️ Map</a></div>{{/if}}
               <div class="venue-badges">
-                {{#if this.event.venue.track_environment}}<span class="venue-badge venue-badge--environment">{{#if (eq this.event.venue.track_environment "outdoor")}}🌳 Outdoor{{else}}🏠 Indoor{{/if}}</span>{{/if}}
-                {{#if this.event.venue.track_category}}<span class="venue-badge venue-badge--category">{{#if (eq this.event.venue.track_category "onroad")}}🛣️ On-Road{{else}}🌿 Off-Road{{/if}}</span>{{/if}}
-                {{#if this.event.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.event.venue.track_surface}}</span>{{/if}}
+                {{#each this.event.venue.tracks as |track|}}
+                  {{#if track.surface}}<span class="venue-badge venue-badge--surface">{{track.surface}}</span>{{/if}}
+                  {{#if track.environment}}<span class="venue-badge venue-badge--environment">{{track.environment}}</span>{{/if}}
+                {{/each}}
               </div>
               <div class="venue-facilities-icons">
                 {{#if this.event.venue.has_permanent_toilets}}🚻{{/if}}

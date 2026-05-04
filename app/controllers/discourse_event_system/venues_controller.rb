@@ -72,7 +72,7 @@ module DiscourseEventSystem
 
     def admin_index
       raise Discourse::InvalidAccess unless current_user.admin?
-      venues = DesVenue.order(:name).includes(:organisation)
+      venues = DesVenue.order(:name).includes(:organisation, :tracks)
       render json: { venues: venues.map { |v| serialize_venue(v) } }
     end
 
@@ -98,11 +98,10 @@ module DiscourseEventSystem
 
     def venue_params
       params.permit(
-        :name, :address, :google_maps_url, :track_category, :track_surface,
-        :track_environment, :website, :description, :parking_info,
+        :name, :address, :google_maps_url, :website, :description, :parking_info,
         :local_facilities, :access_notes, :created_by_organisation_id,
         :has_portaloos, :has_permanent_toilets, :has_bar, :has_cafe, :has_showers,
-        :has_power_supply, :has_water_supply, :has_camping, :has_track_shop, :is_shared, :postcode, :track_type
+        :has_power_supply, :has_water_supply, :has_camping, :has_track_shop, :is_shared, :postcode
       )
     end
 
@@ -112,9 +111,6 @@ module DiscourseEventSystem
         name: venue.name,
         address: venue.address,
         google_maps_url: venue.google_maps_url,
-        track_category: venue.track_category,
-        track_surface: venue.track_surface,
-        track_environment: venue.track_environment,
         website: venue.website,
         description: venue.description,
         parking_info: venue.parking_info,
@@ -135,7 +131,6 @@ module DiscourseEventSystem
         is_shared: venue.is_shared,
         is_stub: venue.is_stub,
         postcode: venue.postcode,
-        track_type: venue.track_type,
         latitude: venue.latitude,
         longitude: venue.longitude,
         tracks: venue.tracks.map { |t|

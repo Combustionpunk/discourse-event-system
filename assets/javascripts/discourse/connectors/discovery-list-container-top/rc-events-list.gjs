@@ -517,30 +517,21 @@ export default class RcEventsList extends Component {
                         {{#if event.venue}}
                           <div class="rc-venue-name">{{event.venue.name}}</div>
                           <div class="rc-venue-attrs">
-                            {{#if event.venue.track_environment}}
-                              {{#if (eq event.venue.track_environment "outdoor")}}
-                                <span class="rc-icon-badge" title="Outdoor">🌳</span>
-                              {{else}}
-                                <span class="rc-icon-badge" title="Indoor">🏠</span>
+                            {{#each event.venue.tracks as |track|}}
+                              {{#if track.environment}}
+                                <span class="rc-icon-badge" title={{track.environment}}>{{#if (eq track.environment "outdoor")}}🌳{{else}}🏠{{/if}}</span>
                               {{/if}}
-                            {{/if}}
-                            {{#if event.venue.track_type}}
-                              {{#if (eq event.venue.track_type "permanent")}}
-                                <span class="rc-icon-badge" title="Permanent Track">🏁</span>
-                              {{else}}
-                                <span class="rc-icon-badge" title="Pop-up Track">🏗️</span>
+                              {{#if track.surface}}
+                                <span class="rc-icon-badge" title={{track.surface}}>
+                                  {{#if (eq track.surface "carpet")}}🟫
+                                  {{else if (eq track.surface "astroturf")}}🌿
+                                  {{else if (eq track.surface "grass")}}🍃
+                                  {{else if (eq track.surface "tarmac")}}⬛
+                                  {{else if (eq track.surface "mixed")}}🔀
+                                  {{else}}🏁{{/if}}
+                                </span>
                               {{/if}}
-                            {{/if}}
-                            {{#if event.venue.track_surface}}
-                              <span class="rc-icon-badge" title={{event.venue.track_surface}}>
-                                {{#if (eq event.venue.track_surface "carpet")}}🟫
-                                {{else if (eq event.venue.track_surface "astroturf")}}🌿
-                                {{else if (eq event.venue.track_surface "grass")}}🍃
-                                {{else if (eq event.venue.track_surface "tarmac")}}⬛
-                                {{else if (eq event.venue.track_surface "mixed")}}🔀
-                                {{else}}🏁{{/if}}
-                              </span>
-                            {{/if}}
+                            {{/each}}
                             {{#if event.venue.has_permanent_toilets}}<span class="rc-icon-badge" title="Permanent Toilets">🚻</span>{{/if}}
                             {{#if event.venue.has_portaloos}}<span class="rc-icon-badge" title="Portaloos">🚽</span>{{/if}}
                             {{#if event.venue.has_cafe}}<span class="rc-icon-badge" title="Café">☕</span>{{/if}}
@@ -549,6 +540,7 @@ export default class RcEventsList extends Component {
                             {{#if event.venue.has_power_supply}}<span class="rc-icon-badge" title="Power Supply">⚡</span>{{/if}}
                             {{#if event.venue.has_water_supply}}<span class="rc-icon-badge" title="Water Supply">💧</span>{{/if}}
                             {{#if event.venue.has_camping}}<span class="rc-icon-badge" title="Camping">⛺</span>{{/if}}
+                            {{#if event.venue.has_track_shop}}<span class="rc-icon-badge" title="Track Shop">🛒</span>{{/if}}
                           </div>
                           {{#if event.distance_miles}}
                             <div class="rc-venue-distance" title="Distance from your postcode">📏 {{event.distance_miles}} miles</div>

@@ -21,12 +21,8 @@ export default class DesVenueForm extends Component {
       name: this.args.venue?.name || "",
       address: this.args.venue?.address || "",
       postcode: this.args.venue?.postcode || "",
-      track_type: this.args.venue?.track_type || "",
       google_maps_url: this.args.venue?.google_maps_url || "",
       website: this.args.venue?.website || "",
-      track_category: this.args.venue?.track_category || "",
-      track_surface: this.args.venue?.track_surface || "",
-      track_environment: this.args.venue?.track_environment || "",
       description: this.args.venue?.description || "",
       parking_info: this.args.venue?.parking_info || "",
       access_notes: this.args.venue?.access_notes || "",
@@ -117,14 +113,6 @@ export default class DesVenueForm extends Component {
           <label>Postcode</label>
           <input type="text" value={{this.currentFormData.postcode}} placeholder="e.g. S6 1LU" {{on "input" (fn this.updateField "postcode")}} />
         </div>
-        <div class="org-form-field">
-          <label>Track Type</label>
-          <select {{on "change" (fn this.updateField "track_type")}}>
-            <option value="">Select type...</option>
-            <option value="permanent" selected={{eq this.currentFormData.track_type "permanent"}}>🏁 Permanent Track</option>
-            <option value="popup" selected={{eq this.currentFormData.track_type "popup"}}>🏗️ Pop-up Track</option>
-          </select>
-        </div>
       </div>
 
       <div class="org-form-row">
@@ -135,34 +123,6 @@ export default class DesVenueForm extends Component {
         <div class="org-form-field">
           <label>Website</label>
           <input type="url" value={{this.currentFormData.website}} {{on "input" (fn this.updateField "website")}} />
-        </div>
-      </div>
-
-      <div class="org-form-row">
-        <div class="org-form-field">
-          <label>Track Category</label>
-          <select {{on "change" (fn this.updateField "track_category")}}>
-            <option value="">Select...</option>
-            <option value="offroad" selected={{eq this.currentFormData.track_category "offroad"}}>🌿 Off-Road</option>
-            <option value="onroad" selected={{eq this.currentFormData.track_category "onroad"}}>🛣️ On-Road</option>
-          </select>
-        </div>
-        <div class="org-form-field">
-          <label>Track Surface</label>
-          <select {{on "change" (fn this.updateField "track_surface")}}>
-            <option value="">Select...</option>
-            {{#each this.trackSurfaces as |ts|}}
-              <option value={{ts}} selected={{eq this.currentFormData.track_surface ts}}>{{ts}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="org-form-field">
-          <label>Track Environment</label>
-          <select {{on "change" (fn this.updateField "track_environment")}}>
-            <option value="">Select...</option>
-            <option value="outdoor" selected={{eq this.currentFormData.track_environment "outdoor"}}>🌳 Outdoor</option>
-            <option value="indoor_covered" selected={{eq this.currentFormData.track_environment "indoor_covered"}}>🏠 Indoor</option>
-          </select>
         </div>
       </div>
 

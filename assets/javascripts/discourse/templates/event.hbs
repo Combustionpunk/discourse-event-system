@@ -26,9 +26,10 @@
       {{#if this.model.venue.address}}<div class="venue-detail-item">📍 {{this.model.venue.address}}</div>{{/if}}
       {{#if this.model.venue.google_maps_url}}<div class="venue-detail-item"><a href={{this.model.venue.google_maps_url}} target="_blank" rel="noopener">🗺️ View on Google Maps</a></div>{{/if}}
       <div class="venue-badges">
-        {{#if this.model.venue.track_environment}}<span class="venue-badge venue-badge--environment">{{#if (eq this.model.venue.track_environment "outdoor")}}🌳 Outdoor{{else}}🏠 Indoor{{/if}}</span>{{/if}}
-        {{#if this.model.venue.track_category}}<span class="venue-badge venue-badge--category">{{#if (eq this.model.venue.track_category "onroad")}}🛣️ On-Road{{else}}🌿 Off-Road{{/if}}</span>{{/if}}
-        {{#if this.model.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.model.venue.track_surface}}</span>{{/if}}
+        {{#each this.model.venue.tracks as |track|}}
+          {{#if track.surface}}<span class="venue-badge venue-badge--surface">{{track.surface}}</span>{{/if}}
+          {{#if track.environment}}<span class="venue-badge venue-badge--environment">{{track.environment}}</span>{{/if}}
+        {{/each}}
       </div>
       <div class="venue-facilities-icons">
         {{#if this.model.venue.has_permanent_toilets}}🚻{{/if}}
