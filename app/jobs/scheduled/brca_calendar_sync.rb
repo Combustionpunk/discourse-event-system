@@ -50,6 +50,7 @@ module Jobs
 
     def execute(args)
       Rails.logger.info('[BrcaCalendarSync] Starting BRCA calendar sync')
+      deduplicate_existing_events
 
       raw_ical = fetch_ical
       return Rails.logger.warn('[BrcaCalendarSync] Failed to fetch iCal feed') unless raw_ical
@@ -192,11 +193,28 @@ module Jobs
       end
     end
 
+    def deduplicate_existing_events
+      # Find groups of events with same title + starts_at
+      dupes = DesImportedEvent
+        .select(:title, :starts_at)
+        .group(:title, :starts_at)
+        .having("COUNT(*) > 1")
+
+      dupes.each do |dupe|
+        events = DesImportedEvent
+          .where(title: dupe.title, starts_at: dupe.starts_at)
+          .order(:id)
+        keeper = events.first
+        events[1..].each(&:destroy)
+        Rails.logger.info("[BrcaCalendarSync] Deduplicated: #{keeper.title} #{keeper.starts_at}")
+      end
+    end
+
     def upsert_event(group, organisation_id = nil)
-      # Find existing event first
-      primary_uid = group[:uids].first
+      # BRCA regenerates UIDs on every iCal export — match by title + date instead
       existing = DesImportedEvent.find_by(
-        "external_uids::text LIKE ?", "%#{primary_uid}%"
+        title: group[:title],
+        starts_at: group[:starts_at]
       )
 
       # Only look up/create venue if event is new or has no venue set
