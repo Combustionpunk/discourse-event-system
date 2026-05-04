@@ -1049,9 +1049,24 @@ module DiscourseEventSystem
         imported = imported.where(organisation_id: params[:organisation_id].to_i)
       end
 
-      # When a native event type is selected, exclude imported events (they use series_type instead)
       if params[:event_type_id].present?
-        imported = imported.none
+        event_type = DesEventType.find_by(id: params[:event_type_id])
+        if event_type
+          # Map event type name to BRCA series_type
+          series_type = case event_type.name.downcase
+          when 'national' then 'national'
+          when 'regional' then 'regional'
+          when 'clubman' then 'clubman'
+          when 'affiliated' then 'affiliated'
+          else nil
+          end
+          if series_type
+            imported = imported.where(series_type: series_type)
+          else
+            # No BRCA equivalent for this event type (Race Meeting, Practice etc)
+            imported = imported.none
+          end
+        end
       end
 
       # Surface/environment filters — query through venue tracks
