@@ -10,7 +10,7 @@ module DiscourseEventSystem
     end
 
     def show
-      venue = DesVenue.find(params[:id])
+      venue = DesVenue.includes(:tracks).find(params[:id])
       native_events = DesEvent.where(venue_id: venue.id, status: 'published')
         .where('start_date > ?', Time.now)
         .order(:start_date).limit(10)
@@ -136,7 +136,10 @@ module DiscourseEventSystem
         postcode: venue.postcode,
         track_type: venue.track_type,
         latitude: venue.latitude,
-        longitude: venue.longitude
+        longitude: venue.longitude,
+        tracks: venue.tracks.map { |t|
+          { id: t.id, name: t.name, surface: t.surface, environment: t.environment, description: t.description }
+        }
       }
     end
 

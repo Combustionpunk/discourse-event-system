@@ -279,6 +279,43 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    # Tracks
+    def create_track
+      venue = DesVenue.find(params[:venue_id])
+      track = venue.tracks.create!(
+        name: params[:name].presence,
+        surface: params[:surface].presence,
+        environment: params[:environment].presence,
+        description: params[:description].presence,
+        sort_order: params[:sort_order].to_i
+      )
+      render json: { track: serialize_track(track) }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def update_track
+      track = DesVenueTrack.find(params[:id])
+      track.update!(
+        name: params[:name].presence || track.name,
+        surface: params[:surface].presence || track.surface,
+        environment: params[:environment].presence || track.environment,
+        description: params[:description].presence,
+        sort_order: params[:sort_order].present? ? params[:sort_order].to_i : track.sort_order
+      )
+      render json: { track: serialize_track(track) }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def destroy_track
+      track = DesVenueTrack.find(params[:id])
+      track.destroy
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     private
 
     def ensure_admin
@@ -355,6 +392,10 @@ module DiscourseEventSystem
         created_by: model.creator&.username,
         status: model.status
       }
+    end
+
+    def serialize_track(track)
+      { id: track.id, venue_id: track.venue_id, name: track.name, surface: track.surface, environment: track.environment, description: track.description, sort_order: track.sort_order }
     end
   end
 end

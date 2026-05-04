@@ -44,9 +44,26 @@
       <span class="venue-badge">{{#if (eq this.model.venue.track_type "permanent")}}🏁 Permanent Track{{else}}🏗️ Pop-up Track{{/if}}</span>
     {{/if}}
     {{#if this.model.venue.track_category}}<span class="venue-badge venue-badge--category">{{this.model.venue.track_category}}</span>{{/if}}
-    {{#if this.model.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.model.venue.track_surface}}</span>{{/if}}
-    {{#if this.model.venue.track_environment}}<span class="venue-badge venue-badge--environment">{{this.model.venue.track_environment}}</span>{{/if}}
   </div>
+
+  {{#if this.model.venue.tracks.length}}
+    <div class="venue-tracks">
+      <h3>🏁 Tracks</h3>
+      {{#each this.model.venue.tracks as |track|}}
+        <div class="venue-track">
+          {{#if track.name}}<span class="venue-track-name">🏁 {{track.name}}</span>{{/if}}
+          {{#if track.surface}}<span class="rc-event-badge rc-surface-badge">{{track.surface}}</span>{{/if}}
+          {{#if track.environment}}<span class="rc-event-badge rc-environment-badge">{{track.environment}}</span>{{/if}}
+          {{#if track.description}}<p class="venue-track-description">{{track.description}}</p>{{/if}}
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="venue-badges" style="margin-bottom:12px;">
+      {{#if this.model.venue.track_surface}}<span class="venue-badge venue-badge--surface">{{this.model.venue.track_surface}}</span>{{/if}}
+      {{#if this.model.venue.track_environment}}<span class="venue-badge venue-badge--environment">{{this.model.venue.track_environment}}</span>{{/if}}
+    </div>
+  {{/if}}
 
   {{#if this.model.venue.description}}
     <div class="event-description-box">{{this.model.venue.description}}</div>

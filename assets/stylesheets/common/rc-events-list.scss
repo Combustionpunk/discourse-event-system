@@ -485,6 +485,47 @@
   background: #003087;
 }
 
+// Venue tracks
+.venue-tracks {
+  margin: 12px 0;
+}
+
+.venue-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--primary-very-low);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.venue-track-name {
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.venue-track-description {
+  width: 100%;
+  font-size: 0.85em;
+  color: var(--primary-medium);
+  margin: 4px 0 0;
+}
+
+.rc-surface-badge {
+  background: var(--primary-low);
+  font-size: 0.8em;
+  text-transform: capitalize;
+}
+
+.rc-environment-badge {
+  background: var(--tertiary-low);
+  color: var(--tertiary);
+  font-size: 0.8em;
+  text-transform: capitalize;
+}
+
 .category-rc-meetings {
   .topic-list {
     display: none !important;

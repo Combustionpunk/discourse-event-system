@@ -12,6 +12,7 @@ class DesVenue < ActiveRecord::Base
   has_many :events, class_name: 'DesEvent', foreign_key: 'venue_id'
   has_many :venue_suggestions, class_name: 'DesVenueSuggestion'
   has_many :imported_events, class_name: 'DesImportedEvent'
+  has_many :tracks, class_name: 'DesVenueTrack', dependent: :destroy
 
   validates :name, presence: true
   validates :status, inclusion: { in: %w[pending approved] }
@@ -38,6 +39,18 @@ class DesVenue < ActiveRecord::Base
     ::Jobs.enqueue(:discourse_event_system_geocode_venue, venue_id: id)
   rescue => e
     Rails.logger.warn("Failed to enqueue geocode job for venue #{id}: #{e.message}")
+  end
+
+  def primary_track
+    tracks.first
+  end
+
+  def all_surfaces
+    tracks.map(&:surface).compact.uniq
+  end
+
+  def all_environments
+    tracks.map(&:environment).compact.uniq
   end
 
   def approve!
