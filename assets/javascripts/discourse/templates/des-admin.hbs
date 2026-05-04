@@ -44,6 +44,12 @@
     <button class="btn {{if (eq this.activeTab 'payouts') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabPayouts}}>
       💰 Payouts
     </button>
+    <button class="btn {{if (eq this.activeTab 'suggestions') 'btn-primary' 'btn-default'}}" {{on "click" this.setTabSuggestions}}>
+      💡 Venue Suggestions
+      {{#if this.pendingSuggestionsCount}}
+        <span class="pending-badge">{{this.pendingSuggestionsCount}}</span>
+      {{/if}}
+    </button>
   </div>
 
   {{!-- ORGANISATIONS TAB --}}
@@ -777,6 +783,49 @@
         </table>
       {{else}}
         <p class="field-help">No payouts found for this period.</p>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{!-- VENUE SUGGESTIONS TAB --}}
+  {{#if (eq this.activeTab "suggestions")}}
+    <div class="des-admin-section">
+      <h2>💡 Pending Venue Suggestions</h2>
+      {{#if this.suggestionsLoading}}
+        <p class="field-help">Loading...</p>
+      {{else if this.pendingSuggestions.length}}
+        {{#each this.pendingSuggestions as |suggestion|}}
+          <div class="admin-org-card" style="margin-bottom:12px;">
+            <div class="admin-org-header">
+              <strong>{{suggestion.venue_name}}</strong>
+              <span class="field-help">by {{suggestion.user}} — {{suggestion.created_at}}</span>
+            </div>
+            <div style="padding:8px 12px;">
+              <h4>Suggested changes:</h4>
+              <pre style="background:var(--primary-very-low);padding:8px;border-radius:4px;font-size:0.85em;white-space:pre-wrap;max-height:200px;overflow:auto;">{{this.formatSuggestion suggestion.suggested_data}}</pre>
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <button class="btn btn-success btn-small" {{on "click" (fn this.approveSuggestion suggestion)}}>✅ Approve & Apply</button>
+                <button class="btn btn-danger btn-small" {{on "click" (fn this.rejectSuggestion suggestion)}}>❌ Reject</button>
+                <a href="/venues/{{suggestion.venue_id}}" class="btn btn-default btn-small" target="_blank">View Venue</a>
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      {{else}}
+        <p class="field-help">No pending suggestions.</p>
+      {{/if}}
+
+      {{#if this.resolvedSuggestions.length}}
+        <h3 style="margin-top:24px;">Recent Resolved</h3>
+        {{#each this.resolvedSuggestions as |suggestion|}}
+          <div class="admin-org-card" style="margin-bottom:8px;opacity:0.7;">
+            <div class="admin-org-header">
+              <strong>{{suggestion.venue_name}}</strong>
+              <span class="field-help">{{suggestion.status}} — by {{suggestion.user}} — {{suggestion.created_at}}</span>
+              {{#if suggestion.admin_notes}}<span class="field-help">Note: {{suggestion.admin_notes}}</span>{{/if}}
+            </div>
+          </div>
+        {{/each}}
       {{/if}}
     </div>
   {{/if}}

@@ -15,10 +15,61 @@ export default class DesAdminController extends Controller {
   @tracked chassisTypesList = [];
   @tracked newScaleName = "";
   @tracked newChassisTypeName = "";
+  @tracked pendingSuggestions = [];
+  @tracked resolvedSuggestions = [];
+  @tracked suggestionsLoading = false;
+
+  get pendingSuggestionsCount() {
+    return this.pendingSuggestions.length;
+  }
 
   @action
   setTab(tab) {
     this.activeTab = tab;
+  }
+
+  @action
+  async setTabSuggestions() {
+    this.activeTab = "suggestions";
+    this.suggestionsLoading = true;
+    try {
+      const response = await ajax("/des/admin/venue-suggestions.json");
+      this.pendingSuggestions = response.pending || [];
+      this.resolvedSuggestions = response.resolved || [];
+    } catch { /* ignore */ } finally {
+      this.suggestionsLoading = false;
+    }
+  }
+
+  formatSuggestion(data) {
+    if (!data) return "No data";
+    return Object.entries(data)
+      .filter(([, v]) => v !== "" && v !== null && v !== undefined)
+      .map(([k, v]) => {
+        if (typeof v === 'object') return `${k}: ${JSON.stringify(v)}`;
+        return `${k}: ${v}`;
+      })
+      .join("\n");
+  }
+
+  @action
+  async approveSuggestion(suggestion) {
+    if (!window.confirm(`Approve suggestion for "${suggestion.venue_name}"? This will update the venue.`)) return;
+    try {
+      await ajax(`/des/admin/venue-suggestions/${suggestion.id}/approve.json`, { type: "PUT" });
+      this.pendingSuggestions = this.pendingSuggestions.filter(s => s.id !== suggestion.id);
+      this.resolvedSuggestions = [{ ...suggestion, status: 'approved' }, ...this.resolvedSuggestions];
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async rejectSuggestion(suggestion) {
+    const notes = window.prompt("Optional rejection note:");
+    try {
+      await ajax(`/des/admin/venue-suggestions/${suggestion.id}/reject.json`, { type: "PUT", data: { admin_notes: notes || "" } });
+      this.pendingSuggestions = this.pendingSuggestions.filter(s => s.id !== suggestion.id);
+      this.resolvedSuggestions = [{ ...suggestion, status: 'rejected', admin_notes: notes }, ...this.resolvedSuggestions];
+    } catch (error) { popupAjaxError(error); }
   }
 
   @tracked newModel = { manufacturer_id: "", name: "", year_released: "", driveline: "", scale: "", chassis_type: "" };

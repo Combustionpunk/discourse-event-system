@@ -316,6 +316,54 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def venue_suggestions
+      suggestions = DesVenueSuggestion.includes(:venue, :user).order(created_at: :desc)
+      render json: {
+        pending: suggestions.where(status: 'pending').map { |s| serialize_suggestion(s) },
+        resolved: suggestions.where(status: %w[approved rejected]).limit(20).map { |s| serialize_suggestion(s) }
+      }
+    end
+
+    def approve_venue_suggestion
+      suggestion = DesVenueSuggestion.find(params[:id])
+      venue = suggestion.venue
+
+      data = suggestion.suggested_data.symbolize_keys
+      tracks_data = data.delete(:tracks)
+
+      allowed_fields = %w[name description parking_info website has_portaloos
+        has_permanent_toilets has_bar has_cafe has_showers has_power_supply
+        has_water_supply has_camping has_track_shop]
+      venue_updates = data.stringify_keys.slice(*allowed_fields)
+      venue.update!(venue_updates) if venue_updates.any?
+
+      if tracks_data.present?
+        tracks_data.each do |track|
+          track = track.symbolize_keys
+          if track[:id].present?
+            existing = DesVenueTrack.find_by(id: track[:id], venue_id: venue.id)
+            existing&.update!(track.slice(:name, :surface, :environment, :description))
+          else
+            venue.tracks.create!(track.slice(:name, :surface, :environment, :description))
+          end
+        end
+      end
+
+      venue.update!(is_stub: false) if venue.is_stub?
+      suggestion.update!(status: 'approved')
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def reject_venue_suggestion
+      suggestion = DesVenueSuggestion.find(params[:id])
+      suggestion.update!(status: 'rejected', admin_notes: params[:admin_notes])
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     private
 
     def ensure_admin
@@ -375,6 +423,19 @@ module DiscourseEventSystem
         rule_type: rule.rule_type,
         rule_value: rule.rule_value,
         organisation_id: rule.organisation_id
+      }
+    end
+
+    def serialize_suggestion(s)
+      {
+        id: s.id,
+        venue_id: s.venue_id,
+        venue_name: s.venue&.name,
+        user: s.user&.username,
+        suggested_data: s.suggested_data,
+        status: s.status,
+        admin_notes: s.admin_notes,
+        created_at: s.created_at&.strftime('%d %b %Y')
       }
     end
 

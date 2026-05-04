@@ -85,6 +85,21 @@ module DiscourseEventSystem
       render json: { queued: venues.count }
     end
 
+    def create_suggestion
+      raise Discourse::NotLoggedIn unless current_user
+      venue = DesVenue.find(params[:venue_id])
+
+      suggestion = DesVenueSuggestion.create!(
+        venue_id: venue.id,
+        user_id: current_user.id,
+        suggested_data: params[:suggested_data].permit!.to_h,
+        status: 'pending'
+      )
+      render json: { success: true, suggestion_id: suggestion.id }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     def admin_approve
       raise Discourse::InvalidAccess unless current_user.admin?
       venue = DesVenue.find(params[:id])
