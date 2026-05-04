@@ -23,6 +23,9 @@
       <button class="manage-tab {{if (eq this.activeTab 'details') 'active'}}" {{on "click" this.showDetails}}>
         📋 Details
       </button>
+      <button class="manage-tab {{if (eq this.activeTab 'venues') 'active'}}" {{on "click" (fn this.showTab "venues")}}>
+        📍 Venues
+      </button>
       {{#if this.model.is_admin}}
       <button class="manage-tab {{if (eq this.activeTab 'memberships') 'active'}}" {{on "click" this.showMemberships}}>
         🎫 Memberships
@@ -735,6 +738,30 @@
         {{else}}
           <p class="field-help">No payouts yet.</p>
         {{/if}}
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{!-- Venues Tab --}}
+  {{#if (eq this.activeTab "venues")}}
+    <div class="des-admin-section">
+      <h2>📍 Venues</h2>
+      {{#if this.model.venues.length}}
+        {{#each this.model.venues as |venue|}}
+          <div class="org-venue-item" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--primary-very-low);border-radius:6px;margin-bottom:6px;flex-wrap:wrap;">
+            <LinkTo @route="venue" @model={{venue.id}}>
+              <strong>{{venue.name}}</strong>
+            </LinkTo>
+            {{#if venue.address}}<span class="field-help">📍 {{venue.address}}</span>{{/if}}
+            {{#if venue.is_stub}}<span class="venue-badge" style="background:var(--highlight-low);color:var(--highlight-high);font-size:0.8em;padding:2px 6px;border-radius:3px;">Stub</span>{{/if}}
+            {{#each venue.tracks as |track|}}
+              {{#if track.surface}}<span class="venue-badge venue-badge--surface">{{track.surface}}</span>{{/if}}
+              {{#if track.environment}}<span class="venue-badge venue-badge--environment">{{track.environment}}</span>{{/if}}
+            {{/each}}
+          </div>
+        {{/each}}
+      {{else}}
+        <p class="field-help">No venues linked to this organisation.</p>
       {{/if}}
     </div>
   {{/if}}

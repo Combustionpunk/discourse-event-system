@@ -824,6 +824,10 @@ module DiscourseEventSystem
     def serialize_organisation_detail(org)
       members = org.des_organisation_members.active.includes(:user, :position)
       events = DesEvent.where(organisation_id: org.id).order(start_date: :desc).limit(10)
+      venues = DesVenue.where(created_by_organisation_id: org.id)
+        .or(DesVenue.where(claimed_organisation_id: org.id, claim_status: 'approved'))
+        .includes(:tracks)
+        .order(:name)
 
       {
         id: org.id,
@@ -865,7 +869,17 @@ module DiscourseEventSystem
         },
         positions: DesPosition.all.map { |p| { id: p.id, name: p.name, is_admin: p.is_admin } },
         membership_types: org.des_organisation_membership_types.active.map { |t| serialize_membership_type(t) },
-        is_member: current_user.present? && DesOrganisationMembership.where(user_id: current_user.id, organisation_id: org.id).active.exists?
+        is_member: current_user.present? && DesOrganisationMembership.where(user_id: current_user.id, organisation_id: org.id).active.exists?,
+        venues: venues.map { |v|
+          {
+            id: v.id,
+            name: v.name,
+            address: v.address,
+            postcode: v.postcode,
+            is_stub: v.is_stub,
+            tracks: v.tracks.map { |t| { name: t.name, surface: t.surface, environment: t.environment } }
+          }
+        }
       }
     end
 
