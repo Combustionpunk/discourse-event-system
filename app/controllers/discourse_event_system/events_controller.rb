@@ -901,7 +901,7 @@ module DiscourseEventSystem
     def apply_venue_filters(events, params)
       return events unless params[:track_environment].present? || params[:track_surface].present?
 
-      track_query = DesVenueTrack.all
+      track_query = DesVenueTrack.unscoped
       track_query = track_query.where(environment: params[:track_environment]) if params[:track_environment].present?
       track_query = track_query.where(surface: params[:track_surface]) if params[:track_surface].present?
       venue_ids = track_query.distinct.pluck(:venue_id)
@@ -931,7 +931,7 @@ module DiscourseEventSystem
         organisations: DesOrganisation.approved.order(:name).map { |o| { id: o.id, name: o.name } },
         event_types: DesEventType.order(:name).map { |et| { id: et.id, name: et.name } },
         track_environments: DesVenueTrack::ENVIRONMENTS,
-        track_surfaces: DesVenueTrack.distinct.pluck(:surface).compact.sort
+        track_surfaces: DesVenueTrack.unscoped.distinct.pluck(:surface).compact.sort
       }
     end
 
