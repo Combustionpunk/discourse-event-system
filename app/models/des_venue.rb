@@ -12,7 +12,7 @@ class DesVenue < ActiveRecord::Base
   has_many :events, class_name: 'DesEvent', foreign_key: 'venue_id'
   has_many :venue_suggestions, class_name: 'DesVenueSuggestion'
   has_many :imported_events, class_name: 'DesImportedEvent'
-  has_many :tracks, class_name: 'DesVenueTrack', dependent: :destroy
+  has_many :tracks, class_name: 'DesVenueTrack', foreign_key: 'venue_id', dependent: :destroy
 
   validates :name, presence: true
   validates :status, inclusion: { in: %w[pending approved] }
