@@ -38,6 +38,7 @@ export default class DesVenueForm extends Component {
       has_power_supply: this.args.venue?.has_power_supply || false,
       has_water_supply: this.args.venue?.has_water_supply || false,
       has_camping: this.args.venue?.has_camping || false,
+      has_track_shop: this.args.venue?.has_track_shop || false,
       is_shared: this.args.venue?.is_shared || false
     };
   }
@@ -253,6 +254,7 @@ export default class DesVenueForm extends Component {
           <label><input type="checkbox" checked={{this.currentFormData.has_power_supply}} {{on "change" (fn this.toggleFacility "has_power_supply")}} /> ⚡ Power Supply</label>
           <label><input type="checkbox" checked={{this.currentFormData.has_water_supply}} {{on "change" (fn this.toggleFacility "has_water_supply")}} /> 💧 Water Supply</label>
           <label><input type="checkbox" checked={{this.currentFormData.has_camping}} {{on "change" (fn this.toggleFacility "has_camping")}} /> ⛺ Camping</label>
+          <label><input type="checkbox" checked={{this.currentFormData.has_track_shop}} {{on "change" (fn this.toggleFacility "has_track_shop")}} /> 🛒 Track Shop</label>
         </div>
       </div>
 
