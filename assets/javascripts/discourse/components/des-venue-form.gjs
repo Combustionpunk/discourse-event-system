@@ -12,6 +12,8 @@ export default class DesVenueForm extends Component {
   @tracked tracks = [];
   @tracked newTrack = { name: "", surface: "", environment: "", description: "" };
   @tracked showAddTrack = false;
+  @tracked editingTrackId = null;
+  @tracked editTrack = { name: "", surface: "", environment: "", description: "" };
 
   trackSurfaces = ["carpet", "astroturf", "grass", "tarmac", "dirt", "mixed"];
   trackEnvironments = ["indoor", "outdoor"];
@@ -98,6 +100,26 @@ export default class DesVenueForm extends Component {
     } catch (error) { popupAjaxError(error); }
   }
 
+  @action startEditTrack(track) {
+    this.editingTrackId = track.id;
+    this.editTrack = { name: track.name || "", surface: track.surface || "", environment: track.environment || "", description: track.description || "" };
+  }
+
+  @action cancelEditTrack() { this.editingTrackId = null; }
+
+  @action updateEditTrackField(field, e) { this.editTrack = { ...this.editTrack, [field]: e.target.value }; }
+
+  @action
+  async saveEditTrack() {
+    try {
+      const result = await ajax(`/des/venues/tracks/${this.editingTrackId}.json`, {
+        type: "PUT", data: this.editTrack
+      });
+      this.tracks = this.tracks.map(t => t.id === this.editingTrackId ? result.track : t);
+      this.editingTrackId = null;
+    } catch (error) { popupAjaxError(error); }
+  }
+
   <template>
     <div class="des-venue-form">
       <div class="org-form-row">
@@ -132,13 +154,52 @@ export default class DesVenueForm extends Component {
           {{#if this.tracks.length}}
             <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
               {{#each this.tracks as |track|}}
-                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--primary-very-low);border-radius:6px;">
-                  <span style="flex:1;">
-                    <strong>{{if track.name track.name "Unnamed Track"}}</strong>
-                    {{#if track.surface}} — {{track.surface}}{{/if}}
-                    {{#if track.environment}} ({{track.environment}}){{/if}}
-                  </span>
-                  <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteTrack track)}}>🗑</button>
+                <div style="padding:6px 8px;background:var(--primary-very-low);border-radius:6px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="flex:1;">
+                      <strong>{{if track.name track.name "Unnamed Track"}}</strong>
+                      {{#if track.surface}} — {{track.surface}}{{/if}}
+                      {{#if track.environment}} ({{track.environment}}){{/if}}
+                    </span>
+                    <button class="btn btn-default btn-small" {{on "click" (fn this.startEditTrack track)}}>✏️</button>
+                    <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteTrack track)}}>🗑</button>
+                  </div>
+                  {{#if (eq this.editingTrackId track.id)}}
+                    <div style="border-top:1px solid var(--primary-low);margin-top:6px;padding-top:8px;">
+                      <div class="org-form-row">
+                        <div class="org-form-field">
+                          <label>Track Name</label>
+                          <input type="text" value={{this.editTrack.name}} {{on "input" (fn this.updateEditTrackField "name")}} />
+                        </div>
+                        <div class="org-form-field">
+                          <label>Surface</label>
+                          <select {{on "change" (fn this.updateEditTrackField "surface")}}>
+                            <option value="">Select...</option>
+                            {{#each this.trackSurfaces as |s|}}
+                              <option value={{s}} selected={{eq this.editTrack.surface s}}>{{s}}</option>
+                            {{/each}}
+                          </select>
+                        </div>
+                        <div class="org-form-field">
+                          <label>Environment</label>
+                          <select {{on "change" (fn this.updateEditTrackField "environment")}}>
+                            <option value="">Select...</option>
+                            {{#each this.trackEnvironments as |e|}}
+                              <option value={{e}} selected={{eq this.editTrack.environment e}}>{{e}}</option>
+                            {{/each}}
+                          </select>
+                        </div>
+                      </div>
+                      <div class="org-form-field">
+                        <label>Description</label>
+                        <input type="text" value={{this.editTrack.description}} {{on "input" (fn this.updateEditTrackField "description")}} />
+                      </div>
+                      <div style="display:flex;gap:8px;margin-top:8px;">
+                        <button class="btn btn-primary btn-small" {{on "click" this.saveEditTrack}}>💾 Save</button>
+                        <button class="btn btn-default btn-small" {{on "click" this.cancelEditTrack}}>✕ Cancel</button>
+                      </div>
+                    </div>
+                  {{/if}}
                 </div>
               {{/each}}
             </div>
