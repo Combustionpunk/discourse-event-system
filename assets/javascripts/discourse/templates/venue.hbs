@@ -85,7 +85,12 @@
       <h3>📅 Upcoming Events</h3>
       {{#each this.model.upcoming_events as |event|}}
         <div class="venue-event-item">
-          <LinkTo @route="event" @model={{event.id}}>{{event.title}}</LinkTo>
+          {{#if (eq event.type "imported")}}
+            <a href={{event.booking_url}} target="_blank" rel="noopener">{{event.title}}</a>
+            <span class="rc-event-badge rc-event-badge--brca">BRCA</span>
+          {{else}}
+            <LinkTo @route="event" @model={{event.id}}>{{event.title}}</LinkTo>
+          {{/if}}
           <span class="venue-event-date">📅 {{event.formatted_date}}</span>
           <span class="field-help">{{event.organisation_name}}</span>
         </div>

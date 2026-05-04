@@ -11,14 +11,27 @@ module DiscourseEventSystem
 
     def show
       venue = DesVenue.find(params[:id])
-      upcoming_events = DesEvent.where(venue_id: venue.id, status: 'published')
+      native_events = DesEvent.where(venue_id: venue.id, status: 'published')
         .where('start_date > ?', Time.now)
         .order(:start_date).limit(10)
+        .map { |e|
+          { id: e.id, title: e.title, start_date: e.start_date, formatted_date: e.start_date&.strftime('%a %d %b %Y at %H:%M'), organisation_name: e.organisation&.name, type: 'native', topic_url: e.topic_id ? "/t/#{e.topic_id}" : nil }
+        }
+
+      imported_events = DesImportedEvent.where(venue_id: venue.id)
+        .where('starts_at > ?', Time.now)
+        .order(:starts_at).limit(10)
+        .map { |e|
+          { id: e.id, title: e.title, start_date: e.starts_at, formatted_date: e.starts_at&.strftime('%a %d %b %Y at %H:%M'), organisation_name: e.organisation&.name, type: 'imported', booking_url: e.booking_url }
+        }
+
+      upcoming_events = (native_events + imported_events)
+        .sort_by { |e| e[:start_date] }
+        .first(10)
+
       render json: {
         venue: serialize_venue(venue).merge(can_edit: current_user.present? && (current_user.admin? || (venue.created_by_organisation_id.present? && is_org_admin?(venue.created_by_organisation_id)))),
-        upcoming_events: upcoming_events.map { |e|
-          { id: e.id, title: e.title, start_date: e.start_date, formatted_date: e.start_date&.strftime('%a %d %b %Y at %H:%M'), organisation_name: e.organisation&.name }
-        }
+        upcoming_events: upcoming_events
       }
     end
 
