@@ -5,7 +5,7 @@ module DiscourseEventSystem
     before_action :ensure_logged_in, except: [:index, :show]
 
     def index
-      venues = DesVenue.approved.order(:name)
+      venues = DesVenue.includes(:tracks).approved.order(:name)
       render json: { venues: venues.map { |v| serialize_venue(v) } }
     end
 
