@@ -15,10 +15,13 @@ export default class VenueController extends Controller {
   @tracked suggestData = {};
   @tracked suggestionSent = false;
   @tracked claimSent = false;
+  @tracked showClaimForm = false;
+  @tracked selectedClaimOrgId = null;
 
   @action toggleEdit() {
     this.editMode = !this.editMode;
     this.suggestMode = false;
+    this.showClaimForm = false;
     if (this.editMode) {
       this.editData = { ...this.model.venue };
     }
@@ -27,6 +30,7 @@ export default class VenueController extends Controller {
   @action toggleSuggest() {
     this.suggestMode = !this.suggestMode;
     this.editMode = false;
+    this.showClaimForm = false;
     this.suggestionSent = false;
     if (this.suggestMode) {
       this.suggestData = { ...this.model.venue };
@@ -51,6 +55,7 @@ export default class VenueController extends Controller {
   }
 
   get canClaim() {
+    console.log('canClaim check:', this.currentUser, this.model?.myOrgs, this.model?.venue?.claim_status);
     if (!this.currentUser) return false;
     const venue = this.model.venue;
     if (venue.claim_status === 'approved' || venue.claim_status === 'pending') return false;
@@ -58,16 +63,30 @@ export default class VenueController extends Controller {
   }
 
   @action
-  async claimVenue() {
-    if (!this.model.myOrgs?.length) return;
-    const org = this.model.myOrgs[0];
+  toggleClaimForm() {
+    this.showClaimForm = !this.showClaimForm;
+    if (this.showClaimForm && this.model.myOrgs?.length === 1) {
+      this.selectedClaimOrgId = this.model.myOrgs[0].id;
+    }
+  }
+
+  @action
+  updateSelectedClaimOrg(e) {
+    this.selectedClaimOrgId = parseInt(e.target.value);
+  }
+
+  @action
+  async submitClaim() {
+    if (!this.selectedClaimOrgId) return;
+    const org = this.model.myOrgs.find(o => o.id === this.selectedClaimOrgId);
     if (!window.confirm(`Claim this venue for ${org.name}?`)) return;
     try {
       await ajax(`/des/venues/${this.model.venue.id}/claim.json`, {
         type: "POST",
-        data: { organisation_id: org.id }
+        data: { organisation_id: this.selectedClaimOrgId }
       });
       this.claimSent = true;
+      this.showClaimForm = false;
     } catch (error) {
       popupAjaxError(error);
     }

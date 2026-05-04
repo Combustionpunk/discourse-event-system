@@ -12,10 +12,32 @@
         <button class="btn btn-default btn-small" {{on "click" this.toggleSuggest}}>{{if this.suggestMode "Cancel" "💡 Suggest Edit"}}</button>
       {{/unless}}
       {{#if this.canClaim}}
-        <button class="btn btn-default btn-small" {{on "click" this.claimVenue}}>🏠 Claim this Venue</button>
+        <button class="btn btn-default btn-small" {{on "click" this.toggleClaimForm}}>
+          🏠 {{if this.showClaimForm "Cancel" "Claim this Venue"}}
+        </button>
       {{/if}}
     {{/if}}
   </div>
+
+  {{#if this.showClaimForm}}
+    <div style="background:var(--primary-very-low);border-radius:6px;padding:12px;margin:8px 0;">
+      <p style="margin:0 0 8px;"><strong>🏠 Claim this venue for your organisation</strong></p>
+      {{#if (gt this.model.myOrgs.length 1)}}
+        <div class="org-form-field">
+          <label>Select Organisation</label>
+          <select {{on "change" this.updateSelectedClaimOrg}}>
+            <option value="">Select...</option>
+            {{#each this.model.myOrgs as |org|}}
+              <option value={{org.id}}>{{org.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+      {{else}}
+        <p style="margin:0 0 8px;color:var(--primary-medium);">Claiming for: <strong>{{this.model.myOrgs.[0].name}}</strong></p>
+      {{/if}}
+      <button class="btn btn-primary btn-small" {{on "click" this.submitClaim}}>✅ Submit Claim</button>
+    </div>
+  {{/if}}
 
   {{#if this.claimSent}}
     <div style="background:var(--success-low);border:1px solid var(--success);border-radius:6px;padding:10px 14px;margin:12px 0;color:var(--success);">
