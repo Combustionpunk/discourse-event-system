@@ -1049,6 +1049,20 @@ module DiscourseEventSystem
         imported = imported.where(organisation_id: params[:organisation_id].to_i)
       end
 
+      # When a native event type is selected, exclude imported events (they use series_type instead)
+      if params[:event_type_id].present?
+        imported = imported.none
+      end
+
+      # Surface/environment filters — query through venue tracks
+      if params[:track_surface].present? || params[:track_environment].present?
+        track_query = DesVenueTrack.unscoped
+        track_query = track_query.where(surface: params[:track_surface]) if params[:track_surface].present?
+        track_query = track_query.where(environment: params[:track_environment]) if params[:track_environment].present?
+        venue_ids = track_query.distinct.pluck(:venue_id)
+        imported = imported.where(venue_id: venue_ids)
+      end
+
       if params[:postcode].present? && params[:max_distance_miles].present?
         user_coords = geocode_postcode(params[:postcode])
         if user_coords
