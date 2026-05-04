@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 class DesVenue < ActiveRecord::Base
   self.table_name = 'des_venues'
+  self.ignored_columns += %w[track_surface track_environment track_category track_type]
 
   FACILITIES = %w[has_portaloos has_permanent_toilets has_bar has_cafe has_showers has_power_supply has_water_supply has_camping has_track_shop].freeze
 
