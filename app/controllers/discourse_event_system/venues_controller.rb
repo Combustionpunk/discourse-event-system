@@ -85,6 +85,26 @@ module DiscourseEventSystem
       render json: { queued: venues.count }
     end
 
+    def claim_venue
+      raise Discourse::NotLoggedIn unless current_user
+      venue = DesVenue.find(params[:id])
+
+      organisation_id = params[:organisation_id].to_i
+      raise Discourse::InvalidAccess unless is_org_admin?(organisation_id)
+
+      if venue.claim_status == 'approved'
+        return render json: { error: 'This venue has already been claimed' }, status: :unprocessable_entity
+      end
+
+      venue.update!(
+        claimed_organisation_id: organisation_id,
+        claim_status: 'pending'
+      )
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     def create_suggestion
       raise Discourse::NotLoggedIn unless current_user
       venue = DesVenue.find(params[:venue_id])
@@ -145,6 +165,9 @@ module DiscourseEventSystem
         has_track_shop: venue.has_track_shop,
         is_shared: venue.is_shared,
         is_stub: venue.is_stub,
+        claim_status: venue.claim_status,
+        claimed_organisation_id: venue.claimed_organisation_id,
+        claimed_organisation_name: venue.claimed_organisation&.name,
         postcode: venue.postcode,
         latitude: venue.latitude,
         longitude: venue.longitude,

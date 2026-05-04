@@ -14,6 +14,7 @@ export default class VenueController extends Controller {
   @tracked suggestMode = false;
   @tracked suggestData = {};
   @tracked suggestionSent = false;
+  @tracked claimSent = false;
 
   @action toggleEdit() {
     this.editMode = !this.editMode;
@@ -46,6 +47,29 @@ export default class VenueController extends Controller {
       popupAjaxError(error);
     } finally {
       this.isSaving = false;
+    }
+  }
+
+  get canClaim() {
+    if (!this.currentUser) return false;
+    const venue = this.model.venue;
+    if (venue.claim_status === 'approved' || venue.claim_status === 'pending') return false;
+    return this.model.myOrgs?.length > 0;
+  }
+
+  @action
+  async claimVenue() {
+    if (!this.model.myOrgs?.length) return;
+    const org = this.model.myOrgs[0];
+    if (!window.confirm(`Claim this venue for ${org.name}?`)) return;
+    try {
+      await ajax(`/des/venues/${this.model.venue.id}/claim.json`, {
+        type: "POST",
+        data: { organisation_id: org.id }
+      });
+      this.claimSent = true;
+    } catch (error) {
+      popupAjaxError(error);
     }
   }
 

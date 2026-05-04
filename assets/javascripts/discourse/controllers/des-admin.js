@@ -172,6 +172,23 @@ export default class DesAdminController extends Controller {
   }
 
   @action
+  async approveVenueClaim(venue) {
+    if (!window.confirm(`Approve claim of "${venue.name}" by ${venue.claimed_organisation_name}?`)) return;
+    try {
+      await ajax(`/des/admin/venues/${venue.id}/approve-claim.json`, { type: "PUT" });
+      this.loadAdminVenues();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  async rejectVenueClaim(venue) {
+    try {
+      await ajax(`/des/admin/venues/${venue.id}/reject-claim.json`, { type: "PUT" });
+      this.loadAdminVenues();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
   toggleAddVenueForm() {
     this.showAddVenueForm = !this.showAddVenueForm;
   }

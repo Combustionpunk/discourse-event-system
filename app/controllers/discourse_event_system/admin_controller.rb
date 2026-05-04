@@ -316,6 +316,22 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def approve_venue_claim
+      venue = DesVenue.find(params[:id])
+      venue.update!(claim_status: 'approved', is_stub: false)
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def reject_venue_claim
+      venue = DesVenue.find(params[:id])
+      venue.update!(claim_status: 'unclaimed', claimed_organisation_id: nil)
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     def venue_suggestions
       suggestions = DesVenueSuggestion.includes(:venue, :user).order(created_at: :desc)
       render json: {

@@ -11,8 +11,29 @@
       {{#unless this.model.venue.can_edit}}
         <button class="btn btn-default btn-small" {{on "click" this.toggleSuggest}}>{{if this.suggestMode "Cancel" "💡 Suggest Edit"}}</button>
       {{/unless}}
+      {{#if this.canClaim}}
+        <button class="btn btn-default btn-small" {{on "click" this.claimVenue}}>🏠 Claim this Venue</button>
+      {{/if}}
     {{/if}}
   </div>
+
+  {{#if this.claimSent}}
+    <div style="background:var(--success-low);border:1px solid var(--success);border-radius:6px;padding:10px 14px;margin:12px 0;color:var(--success);">
+      ✅ Claim submitted! An admin will review it shortly.
+    </div>
+  {{/if}}
+
+  {{#if (eq this.model.venue.claim_status "pending")}}
+    <div style="background:var(--highlight-low);padding:8px 12px;border-radius:6px;margin:8px 0;">
+      ⏳ Claim pending approval
+    </div>
+  {{/if}}
+
+  {{#if (eq this.model.venue.claim_status "approved")}}
+    <div style="margin:8px 0;">
+      🏠 Home venue of <strong>{{this.model.venue.claimed_organisation_name}}</strong>
+    </div>
+  {{/if}}
 
   {{#if this.model.venue.is_stub}}
     <div class="venue-stub-banner" style="background:var(--highlight-low);border:1px solid var(--highlight);border-radius:6px;padding:10px 14px;margin:12px 0;color:var(--highlight-high);">
