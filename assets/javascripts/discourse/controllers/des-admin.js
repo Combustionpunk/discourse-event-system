@@ -18,6 +18,8 @@ export default class DesAdminController extends Controller {
   @tracked pendingSuggestions = [];
   @tracked resolvedSuggestions = [];
   @tracked suggestionsLoading = false;
+  @tracked mergeKeepId = null;
+  @tracked mergeDuplicateId = null;
 
   get pendingSuggestionsCount() {
     return this.pendingSuggestions.length;
@@ -185,6 +187,30 @@ export default class DesAdminController extends Controller {
     try {
       await ajax(`/des/admin/venues/${venue.id}/reject-claim.json`, { type: "PUT" });
       this.loadAdminVenues();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  get cannotMerge() {
+    return !this.mergeKeepId || !this.mergeDuplicateId || this.mergeKeepId === this.mergeDuplicateId;
+  }
+
+  @action updateMergeKeep(e) { this.mergeKeepId = parseInt(e.target.value) || null; }
+  @action updateMergeDuplicate(e) { this.mergeDuplicateId = parseInt(e.target.value) || null; }
+
+  @action
+  async mergeVenues() {
+    const keep = this.adminVenues.find(v => v.id === this.mergeKeepId);
+    const dupe = this.adminVenues.find(v => v.id === this.mergeDuplicateId);
+    if (!keep || !dupe) return;
+    if (!window.confirm(`Merge "${dupe.name}" INTO "${keep.name}"?\n\nThis will permanently delete "${dupe.name}" and re-link all its events to "${keep.name}". This cannot be undone.`)) return;
+    try {
+      await ajax('/des/admin/venues/merge.json', {
+        type: 'POST',
+        data: { keep_id: this.mergeKeepId, merge_id: this.mergeDuplicateId }
+      });
+      this.mergeKeepId = null;
+      this.mergeDuplicateId = null;
+      await this.loadAdminVenues();
     } catch (error) { popupAjaxError(error); }
   }
 

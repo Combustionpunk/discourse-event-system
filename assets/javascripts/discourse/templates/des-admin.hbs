@@ -677,6 +677,34 @@
           {{/if}}
         {{/if}}
       {{/each}}
+
+      <div class="des-admin-section" style="margin-top:24px;">
+        <h3>🔀 Merge Duplicate Venues</h3>
+        <p class="field-help">Select two venues to merge. The second venue will be deleted and all its events re-linked to the first.</p>
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+          <div class="org-form-field">
+            <label>Keep this venue</label>
+            <select {{on "change" this.updateMergeKeep}}>
+              <option value="">Select venue to keep...</option>
+              {{#each this.adminVenues as |venue|}}
+                <option value={{venue.id}}>{{venue.name}} (ID: {{venue.id}})</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="org-form-field">
+            <label>Delete and merge this venue</label>
+            <select {{on "change" this.updateMergeDuplicate}}>
+              <option value="">Select venue to delete...</option>
+              {{#each this.adminVenues as |venue|}}
+                <option value={{venue.id}}>{{venue.name}} (ID: {{venue.id}})</option>
+              {{/each}}
+            </select>
+          </div>
+          <button class="btn btn-danger" {{on "click" this.mergeVenues}} disabled={{this.cannotMerge}}>
+            🔀 Merge Venues
+          </button>
+        </div>
+      </div>
     </div>
   {{/if}}
 

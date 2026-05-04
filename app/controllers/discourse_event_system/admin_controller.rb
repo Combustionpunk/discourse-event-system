@@ -332,6 +332,38 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def merge_venues
+      keep_id = params[:keep_id].to_i
+      merge_id = params[:merge_id].to_i
+
+      return render json: { error: 'Cannot merge a venue with itself' }, status: :unprocessable_entity if keep_id == merge_id
+
+      keeper = DesVenue.find(keep_id)
+      to_merge = DesVenue.find(merge_id)
+
+      DesEvent.where(venue_id: merge_id).update_all(venue_id: keep_id)
+      DesImportedEvent.where(venue_id: merge_id).update_all(venue_id: keep_id)
+
+      if keeper.tracks.empty?
+        to_merge.tracks.update_all(venue_id: keep_id)
+      end
+
+      DesVenueSuggestion.where(venue_id: merge_id).update_all(venue_id: keep_id)
+
+      if to_merge.claim_status == 'approved' && keeper.claim_status != 'approved'
+        keeper.update!(
+          claimed_organisation_id: to_merge.claimed_organisation_id,
+          claim_status: 'approved'
+        )
+      end
+
+      to_merge.destroy
+
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     def venue_suggestions
       suggestions = DesVenueSuggestion.includes(:venue, :user).order(created_at: :desc)
       render json: {

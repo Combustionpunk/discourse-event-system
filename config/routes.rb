@@ -166,6 +166,7 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/des/admin/venue-suggestions" => "admin#venue_suggestions"
   put "/des/admin/venue-suggestions/:id/approve" => "admin#approve_venue_suggestion"
   put "/des/admin/venue-suggestions/:id/reject" => "admin#reject_venue_suggestion"
+  post "/des/admin/venues/merge" => "admin#merge_venues"
   put "/des/admin/venues/:id/approve-claim" => "admin#approve_venue_claim"
   put "/des/admin/venues/:id/reject-claim" => "admin#reject_venue_claim"
   get "/des/admin/venues" => "venues#admin_index"
