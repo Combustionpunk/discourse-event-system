@@ -119,6 +119,7 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/organisations/:id/class-types/:class_type_id/rules" => "organisations#create_class_type_rule"
   delete "/des/organisations/:id/class-types/:class_type_id/rules/:rule_id" => "organisations#destroy_class_type_rule"
   post "/des/organisations/:id/add_member" => "organisations#add_member"
+  delete "/des/organisations/:id/members/:member_id" => "organisations#remove_member"
 
   get "/des/racing-profile" => "racing_profiles#show"
   put "/des/racing-profile" => "racing_profiles#update"
