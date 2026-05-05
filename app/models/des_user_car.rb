@@ -10,11 +10,10 @@ class DesUserCar < ActiveRecord::Base
 
   validates :user_id, presence: true
   validates :manufacturer_id, presence: true
-  validates :transponder_number, presence: true
   validates :transponder_number, format: {
     with: /\A\d{6,7}\z/,
-    message: "must be a 6 or 7 digit number"
-  }
+    message: ->(object, data) { "must be a 6 or 7 digit number" }
+  }, allow_blank: true
 
   scope :active, -> { where(status: 'active') }
 
