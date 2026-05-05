@@ -58,7 +58,10 @@
                   <option value="new" selected={{eq this.editCarTransponderMode "new"}}>✏️ Enter new code...</option>
                 </select>
                 {{#if (eq this.editCarTransponderMode "new")}}
-                  <input type="text" placeholder="e.g. 1234567" value={{this.editCarTransponderNew}} {{on "input" this.updateEditCarTransponderNew}} style="margin-top: 6px;" />
+                  <input type="text" placeholder="e.g. 1234567" value={{this.editCarTransponderNew}} {{on "input" this.updateEditCarTransponderNew}} {{on "blur" this.validateTransponderCode}} style="margin-top: 6px;" />
+                  {{#if this.transponderError}}
+                    <p class="field-help" style="color:var(--danger);margin:2px 0 0;">{{this.transponderError}}</p>
+                  {{/if}}
                 {{/if}}
               </div>
 

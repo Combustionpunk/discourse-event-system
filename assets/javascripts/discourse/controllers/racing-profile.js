@@ -43,6 +43,7 @@ export default class RacingProfileController extends Controller {
   @tracked transponders = [];
   @tracked newTransponderCode = "";
   @tracked newTransponderNotes = "";
+  @tracked transponderError = "";
   @tracked editingTransponderId = null;
   @tracked editTransponderCode = "";
   @tracked editTransponderNotes = "";
@@ -286,13 +287,26 @@ export default class RacingProfileController extends Controller {
   }
 
   // Transponder actions
-  @action updateNewTransponderCode(e) { this.newTransponderCode = e.target.value; }
+  @action updateNewTransponderCode(e) {
+    this.newTransponderCode = e.target.value.replace(/\D/g, '');
+    this.transponderError = "";
+  }
+
+  @action validateTransponderCode() {
+    if (this.newTransponderCode && !/^\d{6,7}$/.test(this.newTransponderCode)) {
+      this.transponderError = "Transponder number must be 6 or 7 digits";
+    }
+  }
   @action updateNewTransponderNotes(e) { this.newTransponderNotes = e.target.value; }
 
   @action
   async addTransponder() {
     if (!this.newTransponderCode.trim()) {
-      alert("Please enter a transponder long code");
+      this.transponderError = "Please enter a transponder long code";
+      return;
+    }
+    if (!/^\d{6,7}$/.test(this.newTransponderCode.trim())) {
+      this.transponderError = "Transponder number must be 6 or 7 digits";
       return;
     }
     try {

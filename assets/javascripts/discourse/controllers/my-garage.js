@@ -34,6 +34,7 @@ export default class MyGarageController extends Controller {
   @tracked editingCar = null;
   @tracked editModels = [];
   @tracked userTransponders = [];
+  @tracked transponderError = "";
   @tracked newCarTransponderMode = "registry";
   @tracked newCarTransponderNew = "";
   @tracked editCarTransponderMode = "registry";
@@ -204,8 +205,20 @@ export default class MyGarageController extends Controller {
 
   @action
   updateEditCarTransponderNew(e) {
-    this.editCarTransponderNew = e.target.value;
-    this.editingCar = { ...this.editingCar, transponder_number: e.target.value };
+    const val = e.target.value.replace(/\D/g, '');
+    this.editCarTransponderNew = val;
+    this.editingCar = { ...this.editingCar, transponder_number: val };
+    this.transponderError = "";
+  }
+
+  @action
+  validateTransponderCode() {
+    const code = this.editCarTransponderNew || this.newCar?.transponder_number;
+    if (code && !/^\d{6,7}$/.test(code)) {
+      this.transponderError = "Transponder number must be 6 or 7 digits";
+    } else {
+      this.transponderError = "";
+    }
   }
 
   async maybeRegisterTransponder(code) {

@@ -122,7 +122,10 @@
       <div class="org-form-row">
         <div class="org-form-field">
           <label>Long Code *</label>
-          <input type="text" placeholder="e.g. 7456985" value={{this.newTransponderCode}} {{on "input" this.updateNewTransponderCode}} />
+          <input type="text" placeholder="e.g. 7456985" value={{this.newTransponderCode}} {{on "input" this.updateNewTransponderCode}} {{on "blur" this.validateTransponderCode}} />
+          {{#if this.transponderError}}
+            <p class="field-help" style="color:var(--danger);margin:2px 0 0;">{{this.transponderError}}</p>
+          {{/if}}
         </div>
         <div class="org-form-field">
           <label>Notes</label>

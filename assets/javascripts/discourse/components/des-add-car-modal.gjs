@@ -18,6 +18,7 @@ export default class DesAddCarModal extends Component {
   @tracked userTransponders = [];
   @tracked transponderMode = "registry";
   @tracked newTransponderCode = "";
+  @tracked transponderError = "";
   @tracked showSuggestModel = false;
   @tracked suggestModelName = "";
   @tracked suggestModelYear = "";
@@ -130,8 +131,17 @@ export default class DesAddCarModal extends Component {
 
   @action
   updateNewTransponderCode(e) {
-    this.newTransponderCode = e.target.value;
-    this.newCar = { ...this.newCar, transponder_number: e.target.value };
+    const val = e.target.value.replace(/\D/g, '');
+    this.newTransponderCode = val;
+    this.newCar = { ...this.newCar, transponder_number: val };
+    this.transponderError = "";
+  }
+
+  @action
+  validateTransponderCode() {
+    if (this.newTransponderCode && !/^\d{6,7}$/.test(this.newTransponderCode)) {
+      this.transponderError = "Transponder number must be 6 or 7 digits";
+    }
   }
 
   @action
@@ -220,7 +230,10 @@ export default class DesAddCarModal extends Component {
                 <option value="new">✏️ Enter new code...</option>
               </select>
               {{#if (eq this.transponderMode "new")}}
-                <input type="text" placeholder="e.g. 7456985" value={{this.newTransponderCode}} {{on "input" this.updateNewTransponderCode}} style="margin-top:6px;" />
+                <input type="text" placeholder="e.g. 7456985" value={{this.newTransponderCode}} {{on "input" this.updateNewTransponderCode}} {{on "blur" this.validateTransponderCode}} style="margin-top:6px;" />
+                {{#if this.transponderError}}
+                  <p class="field-help" style="color:var(--danger);margin:2px 0 0;">{{this.transponderError}}</p>
+                {{/if}}
               {{/if}}
             </div>
           </div>
