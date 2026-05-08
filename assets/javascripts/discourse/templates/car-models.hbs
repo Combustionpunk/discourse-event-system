@@ -10,6 +10,20 @@
     <h1>🚗 Car Models</h1>
   </div>
 
+  {{!-- Quick Navigation --}}
+  <div class="manufacturer-nav-grid">
+    {{#each this.approvedManufacturers as |mfr|}}
+      <a href="#manufacturer-{{mfr.id}}" class="manufacturer-nav-card">
+        {{#if mfr.logo_url}}
+          <img src={{mfr.logo_url}} alt={{mfr.name}} class="manufacturer-nav-logo" />
+        {{else}}
+          <div class="manufacturer-nav-placeholder">🏭</div>
+        {{/if}}
+        <span class="manufacturer-nav-name">{{mfr.name}}</span>
+      </a>
+    {{/each}}
+  </div>
+
   {{!-- Manufacturers Section --}}
   <div class="des-admin-section">
     <div class="section-header">
