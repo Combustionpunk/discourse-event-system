@@ -117,12 +117,14 @@
   {{!-- MANUFACTURERS TAB --}}
   {{#if (eq this.activeTab "manufacturers")}}
     <div class="des-admin-section">
-      <h2>
-        Pending Manufacturers
-        {{#if this.model.pending_manufacturers.length}}
-          <span class="pending-badge">{{this.model.pending_manufacturers.length}}</span>
-        {{/if}}
-      </h2>
+      <div class="section-header">
+        <h2>
+          Pending Manufacturers
+          {{#if this.model.pending_manufacturers.length}}
+            <span class="pending-badge">{{this.model.pending_manufacturers.length}}</span>
+          {{/if}}
+        </h2>
+      </div>
       {{#if this.model.pending_manufacturers.length}}
         {{#each this.model.pending_manufacturers as |manufacturer|}}
           <div class="admin-org-card admin-org-card--pending">
@@ -144,34 +146,66 @@
     </div>
 
     <div class="des-admin-section">
-      <h2>Approved Manufacturers ({{this.model.approved_manufacturers.length}})</h2>
+      <div class="section-header">
+        <h2>Approved Manufacturers ({{this.model.approved_manufacturers.length}})</h2>
+        <button class="btn btn-primary btn-small" {{on "click" this.toggleAddManufacturerForm}}>
+          {{if this.showAddManufacturerForm "✕ Cancel" "➕ Add Manufacturer"}}
+        </button>
+      </div>
+
+      {{#if this.showAddManufacturerForm}}
+        <div class="add-model-form">
+          <h4>Add Manufacturer</h4>
+          <div class="org-form-row">
+            <div class="org-form-field">
+              <label>Manufacturer Name *</label>
+              <input type="text" placeholder="e.g. Associated RC" value={{this.newManufacturerName}} {{on "input" this.updateNewManufacturerName}} />
+            </div>
+          </div>
+          <button class="btn btn-primary" {{on "click" this.addManufacturer}}>✅ Add Manufacturer</button>
+        </div>
+      {{/if}}
+
       {{#if this.model.approved_manufacturers.length}}
-        <div class="approved-manufacturers-list">
+        <div class="manufacturers-grid" style="margin-top:16px;">
           {{#each this.model.approved_manufacturers as |manufacturer|}}
-            <div class="admin-org-card">
-              {{#if (eq this.editingManufacturerId manufacturer.id)}}
-                <div class="admin-org-info" style="flex:1;">
-                  <input
-                    type="text"
-                    value={{this.editingManufacturerName}}
-                    {{on "input" this.updateEditingManufacturerName}}
-                    class="manufacturer-edit-input"
+            <div class="manufacturer-card">
+              <div class="manufacturer-card-logo">
+                {{#if manufacturer.logo_url}}
+                  <img src={{manufacturer.logo_url}} alt={{manufacturer.name}} class="manufacturer-logo" />
+                {{else}}
+                  🏭
+                {{/if}}
+              </div>
+              <div class="manufacturer-card-name">{{manufacturer.name}}</div>
+              <div class="manufacturer-card-actions">
+                <button class="btn btn-default btn-small" {{on "click" (fn this.startEditManufacturer manufacturer)}}>✏️ Edit</button>
+                <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteManufacturer manufacturer)}}>🗑 Delete</button>
+              </div>
+            </div>
+            {{#if (eq this.editingManufacturerId manufacturer.id)}}
+              <div class="add-model-form" style="margin-top:8px;">
+                <h4>Edit: {{manufacturer.name}}</h4>
+                <div class="org-form-row">
+                  <div class="org-form-field">
+                    <label>Name</label>
+                    <input type="text" value={{this.editingManufacturerName}} {{on "input" this.updateEditingManufacturerName}} />
+                  </div>
+                </div>
+                <div class="org-form-field" style="margin-top:8px;">
+                  <label>Logo</label>
+                  <DesLogoUploader
+                    @logoUrl={{this.editingManufacturerLogoUrl}}
+                    @onUpload={{this.manufacturerLogoUploaded}}
+                    @onRemove={{this.removeManufacturerLogo}}
                   />
                 </div>
-                <div class="admin-org-actions">
-                  <button class="btn btn-small btn-primary" {{on "click" this.saveManufacturer}}>Save</button>
-                  <button class="btn btn-small btn-default" {{on "click" this.cancelEditManufacturer}}>Cancel</button>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                  <button class="btn btn-primary" {{on "click" this.saveManufacturer}}>💾 Save</button>
+                  <button class="btn btn-default" {{on "click" this.cancelEditManufacturer}}>✕ Cancel</button>
                 </div>
-              {{else}}
-                <div class="admin-org-info">
-                  <strong>{{manufacturer.name}}</strong>
-                </div>
-                <div class="admin-org-actions">
-                  <button class="btn btn-small btn-default" {{on "click" (fn this.startEditManufacturer manufacturer)}}>✏️ Edit</button>
-                  <button class="btn btn-small btn-danger" {{on "click" (fn this.deleteManufacturer manufacturer)}}>🗑 Delete</button>
-                </div>
-              {{/if}}
-            </div>
+              </div>
+            {{/if}}
           {{/each}}
         </div>
       {{else}}

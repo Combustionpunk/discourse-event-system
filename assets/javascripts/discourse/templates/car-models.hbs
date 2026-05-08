@@ -24,126 +24,36 @@
     {{/each}}
   </div>
 
-  {{!-- Manufacturers Section --}}
-  <div class="des-admin-section">
-    <div class="section-header">
-      <h2>Manufacturers</h2>
-      <div style="display:flex;gap:8px;">
-        {{#if this.currentUser}}
-          {{#unless this.currentUser.admin}}
+  {{#if this.currentUser}}
+    {{#unless this.currentUser.admin}}
+      <div class="des-admin-section">
+        <div class="section-header">
+          <div style="display:flex;gap:8px;">
             <button class="btn btn-default btn-small" {{on "click" this.toggleSuggestManufacturer}}>
               {{if this.showSuggestManufacturer "✕ Cancel" "➕ Suggest Manufacturer"}}
             </button>
             <button class="btn btn-default btn-small" {{on "click" (fn this.openSuggestModelModal null)}}>
               ➕ Suggest Model
             </button>
-          {{/unless}}
-        {{/if}}
-        {{#if this.currentUser.admin}}
-          <button class="btn btn-primary btn-small" {{on "click" this.toggleAddManufacturer}}>
-            {{if this.showAddManufacturer "✕ Cancel" "➕ Add Manufacturer"}}
-          </button>
-        {{/if}}
-      </div>
-    </div>
-
-    {{#if this.showSuggestManufacturer}}
-      <div class="add-model-form">
-        <h4>Suggest a Manufacturer</h4>
-        <p class="field-help">Your suggestion will be reviewed by an admin.</p>
-        <div class="org-form-row">
-          <div class="org-form-field">
-            <label>Manufacturer Name *</label>
-            <input type="text" placeholder="e.g. Associated RC" value={{this.newManufacturerName}} {{on "input" this.updateNewManufacturerName}} />
           </div>
         </div>
-        <button class="btn btn-primary" {{on "click" this.suggestManufacturer}}>Submit Suggestion</button>
-      </div>
-    {{/if}}
 
-    {{#if this.showAddManufacturer}}
-      <div class="add-model-form">
-        <h4>Add Manufacturer</h4>
-        <div class="org-form-row">
-          <div class="org-form-field">
-            <label>Manufacturer Name *</label>
-            <input type="text" placeholder="e.g. Associated RC" value={{this.newManufacturerName}} {{on "input" this.updateNewManufacturerName}} />
-          </div>
-        </div>
-        <button class="btn btn-primary" {{on "click" this.addManufacturer}}>✅ Add Manufacturer</button>
-      </div>
-    {{/if}}
-
-    {{!-- Pending Manufacturers (admin only) --}}
-    {{#if this.currentUser.admin}}
-      {{#if this.pendingManufacturers.length}}
-        <h3 style="margin-top:16px;">⏳ Pending Approval</h3>
-        <div class="manufacturers-grid">
-          {{#each this.pendingManufacturers as |mfr|}}
-            <div class="manufacturer-card manufacturer-card--pending">
-              <div class="manufacturer-card-logo">
-            {{#if mfr.logo_url}}
-              <img src={{mfr.logo_url}} alt={{mfr.name}} class="manufacturer-logo" />
-            {{else}}
-              🏭
-            {{/if}}
-          </div>
-              <div class="manufacturer-card-name">{{mfr.name}}</div>
-              <div class="manufacturer-card-status">⏳ Pending</div>
-              <div class="manufacturer-card-actions">
-                <button class="btn btn-success btn-small" {{on "click" (fn this.approveManufacturer mfr)}}>✅ Approve</button>
-                <button class="btn btn-danger btn-small" {{on "click" (fn this.rejectManufacturer mfr)}}>❌ Reject</button>
-              </div>
-            </div>
-          {{/each}}
-        </div>
-      {{/if}}
-    {{/if}}
-
-    {{!-- Approved Manufacturers Grid --}}
-    <div class="manufacturers-grid" style="margin-top:16px;">
-      {{#each this.approvedManufacturers as |mfr|}}
-        <a href="#manufacturer-{{mfr.id}}" class="manufacturer-card">
-          <div class="manufacturer-card-logo">
-            {{#if mfr.logo_url}}
-              <img src={{mfr.logo_url}} alt={{mfr.name}} class="manufacturer-logo" />
-            {{else}}
-              🏭
-            {{/if}}
-          </div>
-          <div class="manufacturer-card-name">{{mfr.name}}</div>
-          {{#if this.currentUser.admin}}
-            <div class="manufacturer-card-actions">
-              <button class="btn btn-default btn-small" {{on "click" (fn this.startEditManufacturer mfr)}}>✏️ Edit</button>
-            </div>
-          {{/if}}
-        </a>
-        {{#if (eq this.editingManufacturerId mfr.id)}}
-          <div class="add-model-form" style="margin-top:8px;">
-            <h4>Edit: {{mfr.name}}</h4>
+        {{#if this.showSuggestManufacturer}}
+          <div class="add-model-form">
+            <h4>Suggest a Manufacturer</h4>
+            <p class="field-help">Your suggestion will be reviewed by an admin.</p>
             <div class="org-form-row">
               <div class="org-form-field">
-                <label>Name</label>
-                <input type="text" value={{this.editManufacturerName}} {{on "input" this.updateEditManufacturerName}} />
+                <label>Manufacturer Name *</label>
+                <input type="text" placeholder="e.g. Associated RC" value={{this.newManufacturerName}} {{on "input" this.updateNewManufacturerName}} />
               </div>
             </div>
-            <div class="org-form-field" style="margin-top:8px;">
-              <label>Logo</label>
-              <DesLogoUploader
-                @logoUrl={{this.editManufacturerLogoUrl}}
-                @onUpload={{this.manufacturerLogoUploaded}}
-                @onRemove={{this.removeManufacturerLogo}}
-              />
-            </div>
-            <div style="display:flex;gap:8px;margin-top:12px;">
-              <button class="btn btn-primary" {{on "click" this.saveEditManufacturer}}>💾 Save</button>
-              <button class="btn btn-default" {{on "click" this.cancelEditManufacturer}}>✕ Cancel</button>
-            </div>
+            <button class="btn btn-primary" {{on "click" this.suggestManufacturer}}>Submit Suggestion</button>
           </div>
         {{/if}}
-      {{/each}}
-    </div>
-  </div>
+      </div>
+    {{/unless}}
+  {{/if}}
 
   {{!-- Models by Manufacturer --}}
   {{#each this.model.models_by_manufacturer as |group|}}

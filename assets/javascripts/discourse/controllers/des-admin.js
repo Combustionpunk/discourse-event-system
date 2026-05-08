@@ -430,17 +430,25 @@ export default class DesAdminController extends Controller {
 
   @tracked editingManufacturerId = null;
   @tracked editingManufacturerName = "";
+  @tracked editingManufacturerLogoUploadId = null;
+  @tracked editingManufacturerLogoUrl = null;
+  @tracked showAddManufacturerForm = false;
+  @tracked newManufacturerName = "";
 
   @action
   startEditManufacturer(manufacturer) {
     this.editingManufacturerId = manufacturer.id;
     this.editingManufacturerName = manufacturer.name;
+    this.editingManufacturerLogoUploadId = manufacturer.logo_upload_id || null;
+    this.editingManufacturerLogoUrl = manufacturer.logo_url || null;
   }
 
   @action
   cancelEditManufacturer() {
     this.editingManufacturerId = null;
     this.editingManufacturerName = "";
+    this.editingManufacturerLogoUploadId = null;
+    this.editingManufacturerLogoUrl = null;
   }
 
   @action
@@ -449,19 +457,61 @@ export default class DesAdminController extends Controller {
   }
 
   @action
+  manufacturerLogoUploaded(upload) {
+    this.editingManufacturerLogoUploadId = upload.id;
+    this.editingManufacturerLogoUrl = upload.url;
+  }
+
+  @action
+  removeManufacturerLogo() {
+    this.editingManufacturerLogoUploadId = null;
+    this.editingManufacturerLogoUrl = null;
+  }
+
+  @action
   async saveManufacturer() {
     if (!this.editingManufacturerName.trim()) return;
     try {
       await ajax("/des/admin/manufacturers/" + this.editingManufacturerId + ".json", {
         type: "PUT",
-        data: { name: this.editingManufacturerName },
+        data: {
+          name: this.editingManufacturerName,
+          logo_upload_id: this.editingManufacturerLogoUploadId
+        },
       });
       this.editingManufacturerId = null;
       this.editingManufacturerName = "";
+      this.editingManufacturerLogoUploadId = null;
+      this.editingManufacturerLogoUrl = null;
       this.router.refresh();
     } catch (error) {
       popupAjaxError(error);
     }
+  }
+
+  @action
+  toggleAddManufacturerForm() {
+    this.showAddManufacturerForm = !this.showAddManufacturerForm;
+    this.newManufacturerName = "";
+  }
+
+  @action
+  updateNewManufacturerName(e) {
+    this.newManufacturerName = e.target.value;
+  }
+
+  @action
+  async addManufacturer() {
+    if (!this.newManufacturerName.trim()) return;
+    try {
+      await ajax("/des/admin/manufacturers.json", {
+        type: "POST",
+        data: { name: this.newManufacturerName.trim() }
+      });
+      this.showAddManufacturerForm = false;
+      this.newManufacturerName = "";
+      this.router.refresh();
+    } catch (error) { popupAjaxError(error); }
   }
 
   @action
