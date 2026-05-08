@@ -26,11 +26,12 @@ class DesManufacturer < ActiveRecord::Base
 
   def retain_logo_upload
     return unless logo_upload_id.present?
-    Upload.find_by(id: logo_upload_id)&.retain!
+    upload = Upload.find_by(id: logo_upload_id)
+    upload&.update_columns(retain_hours: nil) if upload
   end
 
   def unretain_old_logo_upload
     return unless logo_upload_id_changed? && logo_upload_id_was.present?
-    Upload.find_by(id: logo_upload_id_was)&.unretain!
+    # Old upload can be cleaned up naturally — no action needed
   end
 end
