@@ -201,7 +201,7 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 8px 4px;
+  padding: 6px 4px;
   border-radius: 6px;
   text-decoration: none;
   color: var(--primary);
@@ -215,14 +215,15 @@
 }
 
 .manufacturer-nav-logo {
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
+  padding: 2px;
 }
 
 .manufacturer-nav-placeholder {
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
