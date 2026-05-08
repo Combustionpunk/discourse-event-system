@@ -20,6 +20,9 @@
             <button class="btn btn-default btn-small" {{on "click" this.toggleSuggestManufacturer}}>
               {{if this.showSuggestManufacturer "✕ Cancel" "➕ Suggest Manufacturer"}}
             </button>
+            <button class="btn btn-default btn-small" {{on "click" (fn this.openSuggestModelModal null)}}>
+              ➕ Suggest Model
+            </button>
           {{/unless}}
         {{/if}}
         {{#if this.currentUser.admin}}
@@ -141,6 +144,13 @@
             <span class="pending-tag">⏳ Pending</span>
           {{/if}}
         </h2>
+        {{#if this.currentUser}}
+          {{#unless this.currentUser.admin}}
+            <button class="btn btn-default btn-small" {{on "click" (fn this.openSuggestModelModal group)}}>
+              ➕ Suggest Model
+            </button>
+          {{/unless}}
+        {{/if}}
         {{#if this.currentUser.admin}}
           <button class="btn btn-primary btn-small" {{on "click" (fn this.startAddModel group.manufacturer_id group.manufacturer_name)}}>➕ Add Model</button>
         {{/if}}
@@ -361,6 +371,17 @@
       @modelId={{this.addCarModelId}}
       @onSave={{this.onCarAdded}}
       @onClose={{this.closeAddCarModal}}
+    />
+  {{/if}}
+
+  {{#if this.showSuggestModelModal}}
+    <DesSuggestModelModal
+      @manufacturers={{this.approvedManufacturers}}
+      @preselectedManufacturer={{this.suggestModelPreselectedManufacturer}}
+      @scales={{this.scales}}
+      @chassisTypes={{this.chassisTypes}}
+      @onSave={{this.onModelSuggested}}
+      @onClose={{this.closeSuggestModelModal}}
     />
   {{/if}}
 </div>

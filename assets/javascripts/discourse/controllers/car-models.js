@@ -279,9 +279,31 @@ export default class CarModelsController extends Controller {
     } catch (error) { popupAjaxError(error); }
   }
 
+  @tracked showSuggestModelModal = false;
+  @tracked suggestModelPreselectedManufacturer = null;
+
   @tracked showAddCarModal = false;
   @tracked addCarManufacturerId = null;
   @tracked addCarModelId = null;
+
+  @action
+  openSuggestModelModal(manufacturer = null) {
+    this.suggestModelPreselectedManufacturer = manufacturer;
+    this.showSuggestModelModal = true;
+  }
+
+  @action
+  closeSuggestModelModal() {
+    this.showSuggestModelModal = false;
+    this.suggestModelPreselectedManufacturer = null;
+  }
+
+  @action
+  onModelSuggested() {
+    this.showSuggestModelModal = false;
+    this.suggestModelPreselectedManufacturer = null;
+    this.router.refresh();
+  }
 
   @action
   addToGarage(model) {
