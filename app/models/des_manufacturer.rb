@@ -8,6 +8,9 @@ class DesManufacturer < ActiveRecord::Base
   validates :name, presence: true, uniqueness: true
   validates :status, inclusion: { in: %w[pending approved rejected] }
 
+  after_save :retain_logo_upload
+  before_update :unretain_old_logo_upload
+
   scope :approved, -> { where(status: 'approved') }
   scope :pending, -> { where(status: 'pending') }
 
@@ -17,5 +20,17 @@ class DesManufacturer < ActiveRecord::Base
 
   def reject!
     update!(status: 'rejected')
+  end
+
+  private
+
+  def retain_logo_upload
+    return unless logo_upload_id.present?
+    Upload.find_by(id: logo_upload_id)&.retain!
+  end
+
+  def unretain_old_logo_upload
+    return unless logo_upload_id_changed? && logo_upload_id_was.present?
+    Upload.find_by(id: logo_upload_id_was)&.unretain!
   end
 end

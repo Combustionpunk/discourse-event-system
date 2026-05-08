@@ -100,8 +100,10 @@ module DiscourseEventSystem
       if linked_models > 0
         return render json: { error: "Cannot delete: #{linked_models} approved car model(s) are linked to this manufacturer. Delete or reassign them first." }, status: :unprocessable_entity
       end
+      old_upload = Upload.find_by(id: manufacturer.logo_upload_id) if manufacturer.logo_upload_id.present?
       DesCarModel.where(manufacturer_id: manufacturer.id).destroy_all
       manufacturer.destroy!
+      old_upload&.unretain!
       render json: { success: true }
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
