@@ -4,7 +4,7 @@ require 'net/http'
 
 module DiscourseEventSystem
   class EventsController < ApplicationController
-    before_action :ensure_logged_in, except: [:index, :show, :public_entrants, :rc_topic_list, :geocode_postcode_endpoint]
+    before_action :ensure_logged_in, except: [:index, :show, :public_entrants, :rc_topic_list, :geocode_postcode_endpoint, :by_topic]
     before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :clone, :destroy, :update_booking_status, :subscribe_booking_alert, :unsubscribe_booking_alert, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
 
     def index
