@@ -31,6 +31,7 @@ export default class EventBookingWidget extends Component {
   @tracked userTransponders = [];
   @tracked transponderSelections = {};
   @tracked hasBookingAlert = false;
+  @tracked results = { status: 'none' };
 
   constructor() {
     super(...arguments);
@@ -75,8 +76,18 @@ export default class EventBookingWidget extends Component {
       this.event = response;
       this.hasBookingAlert = response.user_has_booking_alert || false;
       this.loadEntrants(response.id);
+      this.loadResults(response.id);
     } catch (e) {
       // No event for this topic
+    }
+  }
+
+  async loadResults(eventId) {
+    try {
+      const response = await ajax("/des/events/" + eventId + "/results.json");
+      this.results = response;
+    } catch {
+      this.results = { status: 'none' };
     }
   }
 
@@ -196,6 +207,36 @@ export default class EventBookingWidget extends Component {
   }
   get bookingDisabled() {
     return this.event?.status === "cancelled" || this.bookingClosed || this.bookingNotOpenYet;
+  }
+
+  get isEventToday() {
+    if (!this.event?.start_date) return false;
+    const start = new Date(this.event.start_date);
+    const now = new Date();
+    return start.toDateString() === now.toDateString();
+  }
+
+  get isEventPast() {
+    if (!this.event?.start_date) return false;
+    const start = new Date(this.event.start_date);
+    const now = new Date();
+    return start < now && start.toDateString() !== now.toDateString();
+  }
+
+  get hasResults() {
+    return this.results?.status === 'published';
+  }
+
+  get isAwaitingResults() {
+    return (this.isEventPast || this.isEventToday) && !this.hasResults;
+  }
+
+  get isEventRunning() {
+    return this.isEventToday && this.bookingClosed;
+  }
+
+  get showWhosComingSection() {
+    return this.currentUser || this.isEventRunning;
   }
 
   get totalEntrantCount() {
@@ -534,6 +575,152 @@ export default class EventBookingWidget extends Component {
           </div>
         {{/if}}
 
+        {{!-- Event Running --}}
+        {{#if this.isEventRunning}}
+          <div class="event-status-banner event-status-banner--running">
+            🏁 <strong>Event Running</strong> — Results will be published after the event.
+          </div>
+        {{/if}}
+
+        {{!-- Awaiting Results --}}
+        {{#if this.isAwaitingResults}}
+          <div class="event-status-banner event-status-banner--awaiting">
+            ⏳ <strong>Awaiting Results</strong> — This event has concluded. Results will be published shortly.
+          </div>
+        {{/if}}
+
+        {{!-- Published Results --}}
+        {{#if this.hasResults}}
+          <div class="event-results-section">
+            <h2 class="results-heading">🏆 Results</h2>
+
+            {{!-- Podium Cards --}}
+            <div class="podium-cards">
+              {{#each this.results.class_summaries as |summary|}}
+                <div class="podium-card">
+                  <h3 class="podium-class-name">{{summary.class_name}}</h3>
+                  <div class="podium-positions">
+
+                    {{!-- 1st Place --}}
+                    <div class="podium-position podium-first">
+                      <div class="podium-trophy">🥇</div>
+                      {{#if summary.first.user}}
+                        <a href="/u/{{summary.first.user.username}}" data-user-card={{summary.first.user.username}}>
+                          <img
+                            src={{summary.first.user.avatar_url}}
+                            class="podium-avatar"
+                            alt={{summary.first.user.username}}
+                            width="60" height="60"
+                          />
+                        </a>
+                        <span class="podium-name">{{summary.first.user.username}}</span>
+                      {{else}}
+                        <div class="podium-avatar podium-avatar--unknown">?</div>
+                        <span class="podium-name">{{summary.first.driver_name}}</span>
+                      {{/if}}
+                    </div>
+
+                    {{!-- 2nd Place --}}
+                    <div class="podium-position podium-second">
+                      <div class="podium-trophy">🥈</div>
+                      {{#if summary.second.user}}
+                        <a href="/u/{{summary.second.user.username}}" data-user-card={{summary.second.user.username}}>
+                          <img
+                            src={{summary.second.user.avatar_url}}
+                            class="podium-avatar"
+                            alt={{summary.second.user.username}}
+                            width="60" height="60"
+                          />
+                        </a>
+                        <span class="podium-name">{{summary.second.user.username}}</span>
+                      {{else}}
+                        <div class="podium-avatar podium-avatar--unknown">?</div>
+                        <span class="podium-name">{{summary.second.driver_name}}</span>
+                      {{/if}}
+                    </div>
+
+                    {{!-- 3rd Place --}}
+                    <div class="podium-position podium-third">
+                      <div class="podium-trophy">🥉</div>
+                      {{#if summary.third.user}}
+                        <a href="/u/{{summary.third.user.username}}" data-user-card={{summary.third.user.username}}>
+                          <img
+                            src={{summary.third.user.avatar_url}}
+                            class="podium-avatar"
+                            alt={{summary.third.user.username}}
+                            width="60" height="60"
+                          />
+                        </a>
+                        <span class="podium-name">{{summary.third.user.username}}</span>
+                      {{else}}
+                        <div class="podium-avatar podium-avatar--unknown">?</div>
+                        <span class="podium-name">{{summary.third.driver_name}}</span>
+                      {{/if}}
+                    </div>
+
+                  </div>
+
+                  {{!-- Fastest Lap --}}
+                  {{#if summary.fastest_lap.driver_name}}
+                    <div class="podium-fastest-lap">
+                      <span>⚡ Fastest Lap: </span>
+                      {{#if summary.fastest_lap.user}}
+                        <a href="/u/{{summary.fastest_lap.user.username}}" data-user-card={{summary.fastest_lap.user.username}}>
+                          {{summary.fastest_lap.user.username}}
+                        </a>
+                      {{else}}
+                        <span>{{summary.fastest_lap.driver_name}}</span>
+                      {{/if}}
+                      <span class="fastest-lap-time"> — {{summary.fastest_lap.extra}}s</span>
+                    </div>
+                  {{/if}}
+
+                </div>
+              {{/each}}
+            </div>
+
+            {{!-- Full Results Tables --}}
+            <div class="full-results">
+              <h3>Full Finals Results</h3>
+              {{#each this.results.races as |race|}}
+                <div class="results-race-section">
+                  <h4>{{race.race_name}}</h4>
+                  <table class="results-table">
+                    <thead>
+                      <tr>
+                        <th>Pos</th>
+                        <th>Car</th>
+                        <th>Driver</th>
+                        <th>Laps / Time</th>
+                        <th>Best Lap</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{#each race.entries as |entry|}}
+                        <tr>
+                          <td>{{entry.position}}</td>
+                          <td>{{entry.car_number}}</td>
+                          <td>
+                            {{#if entry.user}}
+                              <a href="/u/{{entry.user.username}}" data-user-card={{entry.user.username}}>
+                                {{entry.user.username}}
+                              </a>
+                            {{else}}
+                              {{entry.driver_name}}
+                            {{/if}}
+                          </td>
+                          <td>{{entry.laps}} / {{entry.race_time}}</td>
+                          <td>{{entry.best_lap}}</td>
+                        </tr>
+                      {{/each}}
+                    </tbody>
+                  </table>
+                </div>
+              {{/each}}
+            </div>
+          </div>
+        {{/if}}
+
         {{#if this.bookingDisabled}}
           {{#if this.event.classes.length}}
             <div class="event-detail-classes">
@@ -696,8 +883,8 @@ export default class EventBookingWidget extends Component {
         </div>
         {{/unless}}
 
-        {{!-- Who's Coming (logged-in only) --}}
-        {{#if this.currentUser}}
+        {{!-- Who's Coming (logged-in users, or when event is running) --}}
+        {{#if this.showWhosComingSection}}
         {{#if this.totalEntrantCount}}
           <div class="event-whos-coming">
             <button class="whos-coming-toggle" type="button" {{on "click" this.toggleWhosComingSection}}>
