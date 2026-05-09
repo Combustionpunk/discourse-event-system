@@ -558,25 +558,27 @@ export default class EventBookingWidget extends Component {
               <div class="event-class-card {{if (eq cls.status 'sold_out') 'sold-out'}}">
                 <div class="event-class-name">{{cls.name}}</div>
                 <div class="event-class-spaces">{{cls.spaces_remaining}} / {{cls.capacity}} spaces</div>
-                {{#if (eq cls.status "sold_out")}}
-                  {{#if cls.user_waitlist_position}}
-                    <div class="waitlist-status">📋 Position #{{cls.user_waitlist_position}}</div>
+                {{#if this.currentUser}}
+                  {{#if (eq cls.status "sold_out")}}
+                    {{#if cls.user_waitlist_position}}
+                      <div class="waitlist-status">📋 Position #{{cls.user_waitlist_position}}</div>
+                    {{else}}
+                      <button class="btn btn-small btn-default" {{on "click" (fn this.joinWaitlist cls.id)}}>📋 Join Waitlist</button>
+                    {{/if}}
+                    {{#if cls.waitlist_count}}<span class="waitlist-count">{{cls.waitlist_count}} waiting</span>{{/if}}
                   {{else}}
-                    <button class="btn btn-small btn-default" {{on "click" (fn this.joinWaitlist cls.id)}}>📋 Join Waitlist</button>
+                    <input type="checkbox" id="topic-class-{{cls.id}}" {{on "change" (fn this.toggleClass cls.id)}} />
+                    <label for="topic-class-{{cls.id}}">Select</label>
                   {{/if}}
-                  {{#if cls.waitlist_count}}<span class="waitlist-count">{{cls.waitlist_count}} waiting</span>{{/if}}
                 {{else}}
-                  <input type="checkbox" id="topic-class-{{cls.id}}" {{on "change" (fn this.toggleClass cls.id)}} />
-                  <label for="topic-class-{{cls.id}}">Select</label>
+                  {{#if (eq cls.status "sold_out")}}
+                    <span class="field-help">Sold out</span>
+                  {{/if}}
                 {{/if}}
               </div>
             {{/each}}
           </div>
         </div>
-
-        {{#if this.event.max_classes_per_booking}}
-          <p class="field-help">⚠️ Maximum {{this.event.max_classes_per_booking}} class(es) per booking.</p>
-        {{/if}}
 
         {{#if this.event.pricing}}
           <div class="event-detail-pricing">
@@ -596,45 +598,51 @@ export default class EventBookingWidget extends Component {
           </div>
         {{/if}}
 
-        {{!-- Family Booking --}}
-        {{#if this.event.family_members.length}}
-          <div class="event-family-booking">
-            <button class="btn btn-default family-toggle" {{on "click" this.toggleFamilySection}}>
-              {{if this.familyExpanded "▼" "▶"}} Book Family Members
-            </button>
-            {{#if this.familyExpanded}}
-              <div class="family-members-list">
-                {{#each this.event.family_members as |member|}}
-                  <div class="family-member-card">
-                    <h4>{{member.username}}</h4>
-                    <div class="event-classes-grid">
-                      {{#each this.event.classes as |cls|}}
-                        <div class="event-class-card {{if (eq cls.status 'sold_out') 'sold-out'}}">
-                          <div class="event-class-name">{{cls.name}}</div>
-                          <div class="event-class-spaces">{{cls.spaces_remaining}} / {{cls.capacity}} spaces</div>
-                          {{#if (eq cls.status "sold_out")}}
-                            <span class="field-help">Sold out</span>
-                          {{else}}
-                            <input type="checkbox" id="topic-family-{{member.user_id}}-class-{{cls.id}}" {{on "change" (fn this.toggleFamilyClass member.user_id cls.id)}} />
-                            <label for="topic-family-{{member.user_id}}-class-{{cls.id}}">Select</label>
-                          {{/if}}
-                        </div>
-                      {{/each}}
+        {{#if this.currentUser}}
+          {{#if this.event.max_classes_per_booking}}
+            <p class="field-help">⚠️ Maximum {{this.event.max_classes_per_booking}} class(es) per booking.</p>
+          {{/if}}
+
+          {{!-- Family Booking --}}
+          {{#if this.event.family_members.length}}
+            <div class="event-family-booking">
+              <button class="btn btn-default family-toggle" {{on "click" this.toggleFamilySection}}>
+                {{if this.familyExpanded "▼" "▶"}} Book Family Members
+              </button>
+              {{#if this.familyExpanded}}
+                <div class="family-members-list">
+                  {{#each this.event.family_members as |member|}}
+                    <div class="family-member-card">
+                      <h4>{{member.username}}</h4>
+                      <div class="event-classes-grid">
+                        {{#each this.event.classes as |cls|}}
+                          <div class="event-class-card {{if (eq cls.status 'sold_out') 'sold-out'}}">
+                            <div class="event-class-name">{{cls.name}}</div>
+                            <div class="event-class-spaces">{{cls.spaces_remaining}} / {{cls.capacity}} spaces</div>
+                            {{#if (eq cls.status "sold_out")}}
+                              <span class="field-help">Sold out</span>
+                            {{else}}
+                              <input type="checkbox" id="topic-family-{{member.user_id}}-class-{{cls.id}}" {{on "change" (fn this.toggleFamilyClass member.user_id cls.id)}} />
+                              <label for="topic-family-{{member.user_id}}-class-{{cls.id}}">Select</label>
+                            {{/if}}
+                          </div>
+                        {{/each}}
+                      </div>
                     </div>
-                  </div>
-                {{/each}}
+                  {{/each}}
+                </div>
+              {{/if}}
+            </div>
+          {{/if}}
+
+          {{!-- Family summary --}}
+          {{#if this.event.pricing}}
+            {{#if this.hasFamilySelections}}
+              <div class="event-booking-summary family-summary">
+                <strong>Combined Total (you + family): {{this.totalClassCount}} classes</strong>
+                <strong>Total: £{{this.calculatedTotal}}</strong>
               </div>
             {{/if}}
-          </div>
-        {{/if}}
-
-        {{!-- Family summary --}}
-        {{#if this.event.pricing}}
-          {{#if this.hasFamilySelections}}
-            <div class="event-booking-summary family-summary">
-              <strong>Combined Total (you + family): {{this.totalClassCount}} classes</strong>
-              <strong>Total: £{{this.calculatedTotal}}</strong>
-            </div>
           {{/if}}
         {{/if}}
 
@@ -646,7 +654,6 @@ export default class EventBookingWidget extends Component {
           {{else}}
             <a href="/login" class="btn btn-primary">Log in to Book</a>
           {{/if}}
-
 
           <div class="event-booking-dates">
             {{#if this.event.booking_closing_date}}
@@ -689,7 +696,8 @@ export default class EventBookingWidget extends Component {
         </div>
         {{/unless}}
 
-        {{!-- Who's Coming --}}
+        {{!-- Who's Coming (logged-in only) --}}
+        {{#if this.currentUser}}
         {{#if this.totalEntrantCount}}
           <div class="event-whos-coming">
             <button class="whos-coming-toggle" type="button" {{on "click" this.toggleWhosComingSection}}>
@@ -742,8 +750,10 @@ export default class EventBookingWidget extends Component {
             {{/if}}
           </div>
         {{/if}}
+        {{/if}}
 
-        {{!-- Car Selection Modal --}}
+        {{!-- Car Selection Modal (logged-in only) --}}
+        {{#if this.currentUser}}
         {{#if this.showCarSelection}}
           <div class="car-selection-overlay">
             <div class="car-selection-modal">
@@ -844,6 +854,7 @@ export default class EventBookingWidget extends Component {
               </div>
             </div>
           </div>
+        {{/if}}
         {{/if}}
 
       </div>
