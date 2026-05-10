@@ -60,14 +60,12 @@
     >
       💰 Payout
     </button>
-    {{#if this.isChampionshipRound}}
-      <button
-        class="manage-tab {{if (eq this.activeTab 'results') 'active'}}"
-        {{on "click" (fn this.setTab "results")}}
-      >
-        🏆 Results
-      </button>
-    {{/if}}
+    <button
+      class="manage-tab {{if (eq this.activeTab 'results') 'active'}}"
+      {{on "click" (fn this.setTab "results")}}
+    >
+      🏆 Results
+    </button>
   </div>
 
   {{!-- Details Tab --}}
