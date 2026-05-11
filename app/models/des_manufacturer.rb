@@ -27,7 +27,13 @@ class DesManufacturer < ActiveRecord::Base
   def retain_logo_upload
     return unless logo_upload_id.present?
     upload = Upload.find_by(id: logo_upload_id)
-    upload&.update_columns(retain_hours: nil) if upload
+    return unless upload
+    # Set access_control_post_id to prevent Discourse orphan cleanup
+    # Use post ID 1 (system post) as the anchor
+    upload.update_columns(
+      retain_hours: nil,
+      access_control_post_id: 1
+    )
   end
 
   def unretain_old_logo_upload
