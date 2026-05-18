@@ -209,6 +209,14 @@ export default class EventBookingWidget extends Component {
     return this.event?.status === "cancelled" || this.bookingClosed || this.bookingNotOpenYet;
   }
 
+  get isExternalBooking() {
+    return this.event?.booking_type === 'external';
+  }
+
+  get externalBookingUrl() {
+    return this.event?.external_booking_url;
+  }
+
   get isEventToday() {
     if (!this.event?.start_date) return false;
     const start = new Date(this.event.start_date);
@@ -745,23 +753,25 @@ export default class EventBookingWidget extends Component {
               <div class="event-class-card {{if (eq cls.status 'sold_out') 'sold-out'}}">
                 <div class="event-class-name">{{cls.name}}</div>
                 <div class="event-class-spaces">{{cls.spaces_remaining}} / {{cls.capacity}} spaces</div>
-                {{#if this.currentUser}}
-                  {{#if (eq cls.status "sold_out")}}
-                    {{#if cls.user_waitlist_position}}
-                      <div class="waitlist-status">📋 Position #{{cls.user_waitlist_position}}</div>
+                {{#unless this.isExternalBooking}}
+                  {{#if this.currentUser}}
+                    {{#if (eq cls.status "sold_out")}}
+                      {{#if cls.user_waitlist_position}}
+                        <div class="waitlist-status">📋 Position #{{cls.user_waitlist_position}}</div>
+                      {{else}}
+                        <button class="btn btn-small btn-default" {{on "click" (fn this.joinWaitlist cls.id)}}>📋 Join Waitlist</button>
+                      {{/if}}
+                      {{#if cls.waitlist_count}}<span class="waitlist-count">{{cls.waitlist_count}} waiting</span>{{/if}}
                     {{else}}
-                      <button class="btn btn-small btn-default" {{on "click" (fn this.joinWaitlist cls.id)}}>📋 Join Waitlist</button>
+                      <input type="checkbox" id="topic-class-{{cls.id}}" {{on "change" (fn this.toggleClass cls.id)}} />
+                      <label for="topic-class-{{cls.id}}">Select</label>
                     {{/if}}
-                    {{#if cls.waitlist_count}}<span class="waitlist-count">{{cls.waitlist_count}} waiting</span>{{/if}}
                   {{else}}
-                    <input type="checkbox" id="topic-class-{{cls.id}}" {{on "change" (fn this.toggleClass cls.id)}} />
-                    <label for="topic-class-{{cls.id}}">Select</label>
+                    {{#if (eq cls.status "sold_out")}}
+                      <span class="field-help">Sold out</span>
+                    {{/if}}
                   {{/if}}
-                {{else}}
-                  {{#if (eq cls.status "sold_out")}}
-                    <span class="field-help">Sold out</span>
-                  {{/if}}
-                {{/if}}
+                {{/unless}}
               </div>
             {{/each}}
           </div>
@@ -785,61 +795,74 @@ export default class EventBookingWidget extends Component {
           </div>
         {{/if}}
 
-        {{#if this.currentUser}}
-          {{#if this.event.max_classes_per_booking}}
-            <p class="field-help">⚠️ Maximum {{this.event.max_classes_per_booking}} class(es) per booking.</p>
-          {{/if}}
+        {{#unless this.isExternalBooking}}
+          {{#if this.currentUser}}
+            {{#if this.event.max_classes_per_booking}}
+              <p class="field-help">⚠️ Maximum {{this.event.max_classes_per_booking}} class(es) per booking.</p>
+            {{/if}}
 
-          {{!-- Family Booking --}}
-          {{#if this.event.family_members.length}}
-            <div class="event-family-booking">
-              <button class="btn btn-default family-toggle" {{on "click" this.toggleFamilySection}}>
-                {{if this.familyExpanded "▼" "▶"}} Book Family Members
-              </button>
-              {{#if this.familyExpanded}}
-                <div class="family-members-list">
-                  {{#each this.event.family_members as |member|}}
-                    <div class="family-member-card">
-                      <h4>{{member.username}}</h4>
-                      <div class="event-classes-grid">
-                        {{#each this.event.classes as |cls|}}
-                          <div class="event-class-card {{if (eq cls.status 'sold_out') 'sold-out'}}">
-                            <div class="event-class-name">{{cls.name}}</div>
-                            <div class="event-class-spaces">{{cls.spaces_remaining}} / {{cls.capacity}} spaces</div>
-                            {{#if (eq cls.status "sold_out")}}
-                              <span class="field-help">Sold out</span>
-                            {{else}}
-                              <input type="checkbox" id="topic-family-{{member.user_id}}-class-{{cls.id}}" {{on "change" (fn this.toggleFamilyClass member.user_id cls.id)}} />
-                              <label for="topic-family-{{member.user_id}}-class-{{cls.id}}">Select</label>
-                            {{/if}}
-                          </div>
-                        {{/each}}
+            {{!-- Family Booking --}}
+            {{#if this.event.family_members.length}}
+              <div class="event-family-booking">
+                <button class="btn btn-default family-toggle" {{on "click" this.toggleFamilySection}}>
+                  {{if this.familyExpanded "▼" "▶"}} Book Family Members
+                </button>
+                {{#if this.familyExpanded}}
+                  <div class="family-members-list">
+                    {{#each this.event.family_members as |member|}}
+                      <div class="family-member-card">
+                        <h4>{{member.username}}</h4>
+                        <div class="event-classes-grid">
+                          {{#each this.event.classes as |cls|}}
+                            <div class="event-class-card {{if (eq cls.status 'sold_out') 'sold-out'}}">
+                              <div class="event-class-name">{{cls.name}}</div>
+                              <div class="event-class-spaces">{{cls.spaces_remaining}} / {{cls.capacity}} spaces</div>
+                              {{#if (eq cls.status "sold_out")}}
+                                <span class="field-help">Sold out</span>
+                              {{else}}
+                                <input type="checkbox" id="topic-family-{{member.user_id}}-class-{{cls.id}}" {{on "change" (fn this.toggleFamilyClass member.user_id cls.id)}} />
+                                <label for="topic-family-{{member.user_id}}-class-{{cls.id}}">Select</label>
+                              {{/if}}
+                            </div>
+                          {{/each}}
+                        </div>
                       </div>
-                    </div>
-                  {{/each}}
-                </div>
-              {{/if}}
-            </div>
-          {{/if}}
-
-          {{!-- Family summary --}}
-          {{#if this.event.pricing}}
-            {{#if this.hasFamilySelections}}
-              <div class="event-booking-summary family-summary">
-                <strong>Combined Total (you + family): {{this.totalClassCount}} classes</strong>
-                <strong>Total: £{{this.calculatedTotal}}</strong>
+                    {{/each}}
+                  </div>
+                {{/if}}
               </div>
             {{/if}}
+
+            {{!-- Family summary --}}
+            {{#if this.event.pricing}}
+              {{#if this.hasFamilySelections}}
+                <div class="event-booking-summary family-summary">
+                  <strong>Combined Total (you + family): {{this.totalClassCount}} classes</strong>
+                  <strong>Total: £{{this.calculatedTotal}}</strong>
+                </div>
+              {{/if}}
+            {{/if}}
           {{/if}}
-        {{/if}}
+        {{/unless}}
 
         <div class="event-detail-actions">
-          {{#if this.currentUser}}
-            <button class="btn btn-primary" disabled={{this.noClassesSelected}} {{on "click" this.bookEvent}}>
-              {{if this.isBooking "Processing..." "Book Now"}}
-            </button>
+          {{#if this.isExternalBooking}}
+            <div class="external-booking-section">
+              {{#if this.event.external_booking_details}}
+                <p class="field-help">{{this.event.external_booking_details}}</p>
+              {{/if}}
+              <a href={{this.externalBookingUrl}} target="_blank" rel="noopener" class="btn btn-primary external-booking-btn">
+                🔗 Book on External Site →
+              </a>
+            </div>
           {{else}}
-            <a href="/login" class="btn btn-primary">Log in to Book</a>
+            {{#if this.currentUser}}
+              <button class="btn btn-primary" disabled={{this.noClassesSelected}} {{on "click" this.bookEvent}}>
+                {{if this.isBooking "Processing..." "Book Now"}}
+              </button>
+            {{else}}
+              <a href="/login" class="btn btn-primary">Log in to Book</a>
+            {{/if}}
           {{/if}}
 
           <div class="event-booking-dates">
