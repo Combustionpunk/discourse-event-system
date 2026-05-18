@@ -199,6 +199,7 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/admin/class-types" => "admin#create_class_type"
   put "/des/admin/class-types/:id" => "admin#update_class_type"
   delete "/des/admin/class-types/:id" => "admin#destroy_class_type"
+  delete "/des/admin/events/:id" => "admin#delete_event"
 end
 
 Discourse::Application.routes.draw do

@@ -893,6 +893,15 @@ export default class DesAdminController extends Controller {
   }
 
   @action
+  async deleteEvent(event) {
+    if (!window.confirm(`Permanently delete "${event.title}"? This cannot be undone. All bookings will be cancelled.`)) return;
+    try {
+      await ajax(`/des/admin/events/${event.id}.json`, { type: "DELETE" });
+      this.router.refresh();
+    } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
   async deleteOrgClassType(ct, organisationId) {
     if (!window.confirm(`Delete class type "${ct.name}"?`)) return;
     try {

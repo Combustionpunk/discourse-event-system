@@ -50,6 +50,9 @@
         <span class="pending-badge">{{this.pendingSuggestionsCount}}</span>
       {{/if}}
     </button>
+    <button class="btn {{if (eq this.activeTab 'events') 'btn-primary' 'btn-default'}}" {{on "click" (fn this.setTab "events")}}>
+      📅 Events
+    </button>
   </div>
 
   {{!-- ORGANISATIONS TAB --}}
@@ -853,6 +856,33 @@
         </table>
       {{else}}
         <p class="field-help">No payouts found for this period.</p>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{!-- EVENTS TAB --}}
+  {{#if (eq this.activeTab "events")}}
+    <div class="des-admin-section">
+      <h2>Events ({{this.model.events.length}})</h2>
+      {{#if this.model.events.length}}
+        {{#each this.model.events as |event|}}
+          <div class="admin-org-card">
+            <div class="admin-org-info">
+              <strong>{{event.title}}</strong>
+              <div class="admin-org-meta">
+                <span>🏢 {{event.organisation_name}}</span>
+                <span>📅 {{event.start_date}}</span>
+                <span class="booking-status booking-status--{{event.status}}">{{event.status}}</span>
+              </div>
+            </div>
+            <div class="admin-org-actions">
+              <a href="/events/{{event.id}}/manage" class="btn btn-default btn-small">⚙️ Manage</a>
+              <button class="btn btn-danger btn-small" {{on "click" (fn this.deleteEvent event)}}>🗑 Delete</button>
+            </div>
+          </div>
+        {{/each}}
+      {{else}}
+        <p class="no-pending">No events found.</p>
       {{/if}}
     </div>
   {{/if}}

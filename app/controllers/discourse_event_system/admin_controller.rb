@@ -20,7 +20,8 @@ module DiscourseEventSystem
           org = cts.first.organisation
           { organisation_id: org_id, organisation_name: org&.name || "Unknown", class_types: cts.map { |ct| serialize_class_type(ct) } }
         }.sort_by { |g| g[:organisation_name] },
-        global_rules: DesClassCompatibilityRule.global.includes(:class_type).map { |r| serialize_rule(r) }
+        global_rules: DesClassCompatibilityRule.global.includes(:class_type).map { |r| serialize_rule(r) },
+        events: DesEvent.includes(:organisation).order(start_date: :desc).limit(100).map { |e| serialize_event_admin(e) }
       }
     end
 
@@ -412,6 +413,20 @@ module DiscourseEventSystem
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def delete_event
+      raise Discourse::InvalidAccess unless current_user&.admin?
+      event = DesEvent.find(params[:id])
+
+      # Cancel any active bookings first
+      DesEventBooking.where(event_id: event.id).update_all(status: 'cancelled')
+
+      # Delete the event
+      event.destroy!
+      render json: { success: true }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     private
 
     def ensure_admin
@@ -505,6 +520,16 @@ module DiscourseEventSystem
 
     def serialize_track(track)
       { id: track.id, venue_id: track.venue_id, name: track.name, surface: track.surface, environment: track.environment, description: track.description, sort_order: track.sort_order }
+    end
+
+    def serialize_event_admin(event)
+      {
+        id: event.id,
+        title: event.title,
+        status: event.status,
+        start_date: event.start_date,
+        organisation_name: event.organisation&.name
+      }
     end
   end
 end
