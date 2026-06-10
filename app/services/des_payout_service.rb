@@ -66,13 +66,13 @@ class DesPayoutService
 
   def paid_bookings
     @event.des_event_bookings
-          .where.not(status: ['cancelled', 'refunded'])
+          .where(status: 'confirmed')
           .where('amount_paid > 0')
   end
 
   def complimentary_bookings
     @event.des_event_bookings
-          .where.not(status: ['cancelled', 'refunded'])
+          .where(status: 'confirmed')
           .where('amount_paid IS NULL OR amount_paid = 0')
   end
 
