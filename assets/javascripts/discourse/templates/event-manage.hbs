@@ -663,6 +663,20 @@
               {{if this.payoutActionLoading "Processing..." "✅ Approve Payout"}}
             </button>
           {{/if}}
+
+          {{#if (or (eq this.payoutStatus "pending") (eq this.payoutStatus "failed"))}}
+            <div class="manual-payout-section" style="margin-top:16px;padding:12px;background:var(--primary-very-low);border-radius:8px;">
+              <h4>Manual Payment</h4>
+              <p class="field-help">Use this to record a manual bank transfer or cash payment.</p>
+              <div class="org-form-field">
+                <label>Notes (optional)</label>
+                <input type="text" placeholder="e.g. Bank transfer ref: 12345" value={{this.manualPayoutNotes}} {{on "input" this.updateManualPayoutNotes}} />
+              </div>
+              <button class="btn btn-success" {{on "click" this.markPayoutManuallyPaid}}>
+                ✅ Mark as Manually Paid
+              </button>
+            </div>
+          {{/if}}
         {{/if}}
 
         {{#if (eq this.payoutStatus "approved")}}

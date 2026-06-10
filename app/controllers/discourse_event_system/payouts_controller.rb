@@ -3,7 +3,7 @@
 module DiscourseEventSystem
   class PayoutsController < ApplicationController
     before_action :ensure_logged_in
-    before_action :set_event, only: [:show, :approve, :claim, :retry]
+    before_action :set_event, only: [:show, :approve, :claim, :retry, :mark_payout_manually_paid]
 
     def show
       ensure_organisation_admin!(@event.organisation)
@@ -94,6 +94,22 @@ module DiscourseEventSystem
         notify_site_admins_payout_failed(payout)
         render json: { error: result[:error] }, status: :unprocessable_entity
       end
+    end
+
+    def mark_payout_manually_paid
+      ensure_admin!
+      payout = DesEventPayout.find_by(event_id: @event.id)
+      return render json: { error: 'No payout found' }, status: :not_found unless payout
+
+      payout.update!(
+        status: 'paid',
+        paid_at: Time.now,
+        initiated_by: current_user.id,
+        notes: params[:notes].presence
+      )
+      render json: { success: true, payout: serialize_payout(payout) }
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
 
     def admin_index

@@ -23,6 +23,7 @@ export default class EventManageController extends Controller {
   @tracked payoutLoading = false;
   @tracked payoutActionLoading = false;
   @tracked payoutError = null;
+  @tracked manualPayoutNotes = "";
   @tracked newClassTypeId = null;
   @tracked newClassCapacity = "";
   @tracked editingClassId = null;
@@ -114,6 +115,25 @@ export default class EventManageController extends Controller {
       this.payoutError = error.jqXHR?.responseJSON?.error || "Failed to approve payout";
     } finally {
       this.payoutActionLoading = false;
+    }
+  }
+
+  @action
+  updateManualPayoutNotes(e) {
+    this.manualPayoutNotes = e.target.value;
+  }
+
+  @action
+  async markPayoutManuallyPaid() {
+    if (!window.confirm("Mark this payout as manually paid? This cannot be undone.")) return;
+    try {
+      await ajax(`/des/events/${this.model.event.id}/payout/mark-paid.json`, {
+        type: "POST",
+        data: { notes: this.manualPayoutNotes }
+      });
+      this.loadPayout();
+    } catch (error) {
+      popupAjaxError(error);
     }
   }
 
