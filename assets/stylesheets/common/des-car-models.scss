@@ -482,15 +482,57 @@
     object-fit: contain;
   }
 
+  // Effects sit on the img, not the container: opacity or filter on the
+  // container would isolate it, and the blend would have nothing to mix with.
   &__art-placeholder {
     font-size: var(--font-up-4);
-    opacity: 0.25;
-    filter: grayscale(1);
+
+    &:not(:has(img)) {
+      opacity: 0.25;
+      filter: grayscale(1);
+    }
 
     img {
       max-width: 60%;
       max-height: 40%;
       object-fit: contain;
+      opacity: 0.35;
+      filter: grayscale(1);
+    }
+
+    // Logos on a solid box (data-backdrop, set by the logoBackdrop modifier)
+    // are blended so the box drops out: screen removes black on dark schemes,
+    // multiply removes white on light ones, and a box of the opposite colour
+    // is inverted first. Plugin CSS is compiled once for the default scheme,
+    // so style queries on --scheme-type switch it at runtime.
+    img[data-backdrop] {
+      mix-blend-mode: dark-light-choose(multiply, screen);
+    }
+
+    img[data-backdrop="#{dark-light-choose("dark", "light")}"] {
+      filter: grayscale(1) invert(1);
+    }
+
+    @container style(--scheme-type: light) {
+      img[data-backdrop] {
+        mix-blend-mode: multiply;
+        filter: grayscale(1);
+      }
+
+      img[data-backdrop="dark"] {
+        filter: grayscale(1) invert(1);
+      }
+    }
+
+    @container style(--scheme-type: dark) {
+      img[data-backdrop] {
+        mix-blend-mode: screen;
+        filter: grayscale(1);
+      }
+
+      img[data-backdrop="light"] {
+        filter: grayscale(1) invert(1);
+      }
     }
   }
 

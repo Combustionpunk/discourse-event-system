@@ -9,6 +9,7 @@ import dAvatar from "discourse/ui-kit/helpers/d-avatar";
 import { i18n } from "discourse-i18n";
 import DesAddCarModal from "../components/des-add-car-modal";
 import DesCarModelEditForm from "../components/des-car-model-edit-form";
+import { logoBackdrop } from "../lib/des-logo-backdrop";
 
 const applyLightbox = modifier((element) => {
   lightbox(element);
@@ -43,7 +44,11 @@ export default <template>
             class="des-model-card__art-placeholder des-car-model-detail__placeholder"
           >
             {{#if @controller.carModel.manufacturer_logo_url}}
-              <img alt="" src={{@controller.carModel.manufacturer_logo_url}} />
+              <img
+                alt=""
+                src={{@controller.carModel.manufacturer_logo_url}}
+                {{logoBackdrop}}
+              />
             {{else}}
               🏭
             {{/if}}

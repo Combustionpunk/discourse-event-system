@@ -8,6 +8,7 @@ import lightbox from "discourse/lib/lightbox";
 import DButton from "discourse/ui-kit/d-button";
 import DDropdownMenu from "discourse/ui-kit/d-dropdown-menu";
 import { i18n } from "discourse-i18n";
+import { logoBackdrop } from "../lib/des-logo-backdrop";
 import DesLogoUploader from "./des-logo-uploader";
 
 // Specs matching these defaults are omitted from the spec line.
@@ -88,7 +89,12 @@ export default class DesCarModelCard extends Component {
         {{else}}
           <div aria-hidden="true" class="des-model-card__art-placeholder">
             {{#if @placeholderLogoUrl}}
-              <img alt="" loading="lazy" src={{@placeholderLogoUrl}} />
+              <img
+                alt=""
+                loading="lazy"
+                src={{@placeholderLogoUrl}}
+                {{logoBackdrop}}
+              />
             {{else}}
               🏭
             {{/if}}
