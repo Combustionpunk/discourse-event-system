@@ -36,6 +36,24 @@ const DesCarModelFilters = <template>
       {{/if}}
     {{/each}}
 
+    <div class="des-model-filters__group des-model-filters__group--sort">
+      <span class="des-model-filters__label">
+        {{i18n "discourse_event_system.car_models.sort.label"}}
+      </span>
+      <div class="des-model-filters__chips" role="group">
+        {{#each @sortOptions as |option|}}
+          <DButton
+            aria-pressed={{if option.active "true" "false"}}
+            class="btn-small des-model-filters__chip des-model-filters__sort
+              {{if option.active 'des-model-filters__chip--active'}}"
+            data-sort={{option.value}}
+            @action={{fn @onSort option.value}}
+            @translatedLabel={{option.label}}
+          />
+        {{/each}}
+      </div>
+    </div>
+
     {{#if @hasActiveFilters}}
       <DButton
         class="btn-flat btn-small des-model-filters__clear"

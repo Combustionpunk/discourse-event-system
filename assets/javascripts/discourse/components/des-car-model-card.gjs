@@ -103,6 +103,12 @@ export default class DesCarModelCard extends Component {
         {{/if}}
       </div>
 
+      {{#if @showManufacturer}}
+        <div class="des-model-card__manufacturer">
+          {{@model.manufacturer_name}}
+        </div>
+      {{/if}}
+
       <div class="des-model-card__name">
         <span class="des-model-card__title">{{@model.name}}</span>
         {{#if this.isPending}}
@@ -114,6 +120,15 @@ export default class DesCarModelCard extends Component {
 
       {{#if this.specLine}}
         <div class="des-model-card__specs">{{this.specLine}}</div>
+      {{/if}}
+
+      {{#if @model.racer_count}}
+        <div class="des-model-card__racers">
+          {{i18n
+            "discourse_event_system.car_models.racer_count"
+            count=@model.racer_count
+          }}
+        </div>
       {{/if}}
 
       {{#if @showSuggestedBy}}

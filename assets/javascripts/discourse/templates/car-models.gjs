@@ -1,7 +1,7 @@
 import { concat, fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
-import { eq } from "discourse/truth-helpers";
+import { eq, or } from "discourse/truth-helpers";
 import DButton from "discourse/ui-kit/d-button";
 import DEmptyState from "discourse/ui-kit/d-empty-state";
 import { i18n } from "discourse-i18n";
@@ -92,6 +92,84 @@ const FormActions = <template>
   </div>
 </template>;
 
+const ModelCard = <template>
+  <DesCarModelCard
+    @boxArtPending={{has
+      @controller.pendingBoxArtModelIds
+      @model.id
+    }}
+    @canAddToGarage={{@controller.currentUser}}
+    @canManage={{@controller.isAdmin}}
+    @canSuggestBoxArt={{@controller.currentUser}}
+    @garageUsername={{@controller.currentUser.username}}
+    @inGarage={{has @controller.garageModelIds @model.id}}
+    @model={{@model}}
+    @onAddToGarage={{@controller.addToGarage}}
+    @onDelete={{@controller.deleteModel}}
+    @onEdit={{@controller.startEditModel}}
+    @onSuggestBoxArt={{@controller.suggestBoxArt}}
+    @placeholderLogoUrl={{@placeholderLogoUrl}}
+    @showManufacturer={{@showManufacturer}}
+  @showSuggestedBy={{@controller.isAdmin}}
+  >
+    {{#if (eq @controller.editingModelId @model.id)}}
+      <div class="add-model-form des-model-card__edit-form">
+        <div class="org-form-row">
+          <div class="org-form-field">
+            <label>{{i18n
+                "discourse_event_system.car_models.fields.name"
+              }}</label>
+            <input
+              type="text"
+              value={{@controller.editModelForm.name}}
+              {{on
+                "input"
+                (fn @controller.updateEditModelField "name")
+              }}
+            />
+          </div>
+          <ModelSpecFields
+            @chassisTypes={{@controller.chassisTypes}}
+            @form={{@controller.editModelForm}}
+            @onChange={{@controller.updateEditModelField}}
+            @scales={{@controller.scales}}
+          />
+          <div class="org-form-field des-model-card__box-art-field">
+            <label>{{i18n
+                "discourse_event_system.car_models.box_art.label"
+              }}</label>
+            <DesLogoUploader
+              @changeLabel={{i18n
+                "discourse_event_system.car_models.box_art.change"
+              }}
+              @helpText={{i18n
+                "discourse_event_system.car_models.box_art.help"
+              }}
+              @logoUrl={{@controller.editModelForm.box_art_url}}
+              @onRemove={{@controller.removeEditBoxArt}}
+              @onUpload={{@controller.editBoxArtUploaded}}
+              @previewAlt={{i18n
+                "discourse_event_system.car_models.box_art.label"
+              }}
+              @removeLabel={{i18n
+                "discourse_event_system.car_models.box_art.remove"
+              }}
+              @uploadLabel={{i18n
+                "discourse_event_system.car_models.box_art.upload"
+              }}
+            />
+          </div>
+        </div>
+        <FormActions
+          @confirmLabel="discourse_event_system.car_models.save"
+          @onCancel={{@controller.cancelEditModel}}
+          @onConfirm={{@controller.saveEditModel}}
+        />
+      </div>
+    {{/if}}
+  </DesCarModelCard>
+</template>;
+
 export default <template>
   <div class="car-models-container">
     <div class="events-nav">
@@ -115,8 +193,10 @@ export default <template>
       @onClear={{@controller.clearFilters}}
       @onClearSearch={{@controller.clearSearch}}
       @onSearchInput={{@controller.onSearchInput}}
+      @onSort={{@controller.setSort}}
       @onToggle={{@controller.toggleFilter}}
       @searchValue={{@controller.searchValue}}
+      @sortOptions={{@controller.sortOptions}}
     />
 
     <DesPendingModelsPanel
@@ -145,7 +225,7 @@ export default <template>
       </div>
     </DesPendingModelsPanel>
 
-    {{#unless @controller.hasActiveFilters}}
+    {{#unless (or @controller.hasActiveFilters @controller.isFlatView)}}
       <div class="des-manufacturer-grid">
         {{#each @controller.manufacturerTiles as |tile|}}
           <DButton
@@ -226,6 +306,34 @@ export default <template>
       {{/unless}}
     {{/if}}
 
+    {{#if @controller.isFlatView}}
+      {{#if @controller.flatModels.length}}
+        <section class="des-manufacturer-section des-manufacturer-section--flat">
+          <div class="des-manufacturer-section__header">
+            <h2 class="des-manufacturer-section__title">
+              {{i18n "discourse_event_system.car_models.most_popular_heading"}}
+            </h2>
+          </div>
+          <div class="des-model-grid">
+            {{#each @controller.flatModels as |entry|}}
+              <ModelCard
+                @controller={{@controller}}
+                @model={{entry.model}}
+                @placeholderLogoUrl={{entry.logoUrl}}
+                @showManufacturer={{true}}
+              />
+            {{/each}}
+          </div>
+        </section>
+      {{else}}
+        <DEmptyState
+          @ctaAction={{@controller.clearFilters}}
+          @ctaLabel={{i18n "discourse_event_system.car_models.filters.clear"}}
+          @identifier="des-car-models"
+          @title={{i18n "discourse_event_system.car_models.no_matches"}}
+        />
+      {{/if}}
+    {{else}}
     {{#each @controller.manufacturerSections as |mfrSection|}}
       <section
         class="des-manufacturer-section"
@@ -305,80 +413,11 @@ export default <template>
 
         <div class="des-model-grid">
           {{#each mfrSection.models as |model|}}
-            <DesCarModelCard
-              @boxArtPending={{has
-                @controller.pendingBoxArtModelIds
-                model.id
-              }}
-              @canAddToGarage={{@controller.currentUser}}
-              @canManage={{@controller.isAdmin}}
-              @canSuggestBoxArt={{@controller.currentUser}}
-              @garageUsername={{@controller.currentUser.username}}
-              @inGarage={{has @controller.garageModelIds model.id}}
+            <ModelCard
+              @controller={{@controller}}
               @model={{model}}
-              @onAddToGarage={{@controller.addToGarage}}
-              @onDelete={{@controller.deleteModel}}
-              @onEdit={{@controller.startEditModel}}
-              @onSuggestBoxArt={{@controller.suggestBoxArt}}
               @placeholderLogoUrl={{mfrSection.manufacturer.logo_url}}
-              @showSuggestedBy={{@controller.isAdmin}}
-            >
-              {{#if (eq @controller.editingModelId model.id)}}
-                <div class="add-model-form des-model-card__edit-form">
-                  <div class="org-form-row">
-                    <div class="org-form-field">
-                      <label>{{i18n
-                          "discourse_event_system.car_models.fields.name"
-                        }}</label>
-                      <input
-                        type="text"
-                        value={{@controller.editModelForm.name}}
-                        {{on
-                          "input"
-                          (fn @controller.updateEditModelField "name")
-                        }}
-                      />
-                    </div>
-                    <ModelSpecFields
-                      @chassisTypes={{@controller.chassisTypes}}
-                      @form={{@controller.editModelForm}}
-                      @onChange={{@controller.updateEditModelField}}
-                      @scales={{@controller.scales}}
-                    />
-                    <div class="org-form-field des-model-card__box-art-field">
-                      <label>{{i18n
-                          "discourse_event_system.car_models.box_art.label"
-                        }}</label>
-                      <DesLogoUploader
-                        @changeLabel={{i18n
-                          "discourse_event_system.car_models.box_art.change"
-                        }}
-                        @helpText={{i18n
-                          "discourse_event_system.car_models.box_art.help"
-                        }}
-                        @logoUrl={{@controller.editModelForm.box_art_url}}
-                        @onRemove={{@controller.removeEditBoxArt}}
-                        @onUpload={{@controller.editBoxArtUploaded}}
-                        @previewAlt={{i18n
-                          "discourse_event_system.car_models.box_art.label"
-                        }}
-                        @removeLabel={{i18n
-                          "discourse_event_system.car_models.box_art.remove"
-                        }}
-                        @uploadLabel={{i18n
-                          "discourse_event_system.car_models.box_art.upload"
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <FormActions
-                    @confirmLabel="discourse_event_system.car_models.save"
-                    @onCancel={{@controller.cancelEditModel}}
-                    @onConfirm={{@controller.saveEditModel}}
-                  />
-                </div>
-              {{/if}}
-            </DesCarModelCard>
+            />
           {{/each}}
         </div>
       </section>
@@ -392,6 +431,8 @@ export default <template>
         />
       {{/if}}
     {{/each}}
+
+    {{/if}}
 
     {{#if @controller.showAddCarModal}}
       <DesAddCarModal

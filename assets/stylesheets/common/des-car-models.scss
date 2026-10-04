@@ -508,6 +508,18 @@
     font-weight: normal;
   }
 
+  &__manufacturer {
+    color: var(--primary-medium);
+    font-size: var(--font-down-2);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  &__racers {
+    color: var(--primary-high);
+    font-size: var(--font-down-1);
+  }
+
   &__specs,
   &__suggested-by {
     color: var(--primary-medium);

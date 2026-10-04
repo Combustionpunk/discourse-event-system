@@ -5,6 +5,8 @@ module DiscourseEventSystem
     def index
       manufacturers = DesManufacturer.includes(:logo).all.order(:name)
       models = DesCarModel.includes(:manufacturer, :creator, box_art: :optimized_images).order(:name)
+      @racer_counts =
+        DesUserCar.active.where.not(car_model_id: nil).group(:car_model_id).distinct.count(:user_id)
 
       render json: {
         image_suggestions: image_suggestions_payload,
@@ -112,6 +114,7 @@ module DiscourseEventSystem
         power_type: m.power_type,
         status: m.status,
         created_by: m.creator&.username,
+        racer_count: @racer_counts&.fetch(m.id, 0) || 0,
         box_art_upload_id: m.box_art&.id,
         box_art_url: m.box_art_thumbnail_url,
         box_art_full_url: m.box_art&.url,

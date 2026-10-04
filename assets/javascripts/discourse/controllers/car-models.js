@@ -16,6 +16,17 @@ function compareNames(a, b) {
   return (a || "").localeCompare(b || "", undefined, { sensitivity: "base" });
 }
 
+const SORT_MODES = ["name", "popular", "newest"];
+
+const MODEL_COMPARATORS = {
+  name: (a, b) => compareNames(a.name, b.name),
+  popular: (a, b) =>
+    (b.racer_count || 0) - (a.racer_count || 0) || compareNames(a.name, b.name),
+  newest: (a, b) =>
+    (b.year_released ?? -Infinity) - (a.year_released ?? -Infinity) ||
+    compareNames(a.name, b.name),
+};
+
 function parseList(value) {
   return value ? value.split(",").filter(Boolean) : [];
 }
@@ -31,6 +42,7 @@ export default class CarModelsController extends Controller {
   @tracked drive = "";
   @tracked era = "";
   @tracked show = "";
+  @tracked sort = "name";
   @tracked locallyPendingBoxArtIds = [];
   @tracked locallyAddedGarageIds = [];
   @tracked searchInput = null;
@@ -67,7 +79,7 @@ export default class CarModelsController extends Controller {
 
   @tracked addCarModelId = null;
 
-  queryParams = ["q", "type", "drive", "era", "show"];
+  queryParams = ["q", "type", "drive", "era", "show", "sort"];
 
   constructor() {
     super(...arguments);
@@ -234,6 +246,31 @@ export default class CarModelsController extends Controller {
       });
   }
 
+  get sortMode() {
+    return SORT_MODES.includes(this.sort) ? this.sort : "name";
+  }
+
+  get isFlatView() {
+    return this.sortMode === "popular";
+  }
+
+  get sortOptions() {
+    return SORT_MODES.map((value) => ({
+      value,
+      label: i18n(`discourse_event_system.car_models.sort.${value}`),
+      active: value === this.sortMode,
+    }));
+  }
+
+  get flatModels() {
+    const logos = new Map(
+      (this.model.manufacturers || []).map((m) => [m.id, m.logo_url])
+    );
+    return [...this.filteredModels]
+      .sort(MODEL_COMPARATORS.popular)
+      .map((model) => ({ model, logoUrl: logos.get(model.manufacturer_id) }));
+  }
+
   get manufacturerSections() {
     const filtered = this.filteredModels;
     return [...(this.model.manufacturers || [])]
@@ -242,7 +279,7 @@ export default class CarModelsController extends Controller {
       .map((manufacturer) => {
         const models = filtered
           .filter((m) => m.manufacturer_id === manufacturer.id)
-          .sort((a, b) => compareNames(a.name, b.name));
+          .sort(MODEL_COMPARATORS[this.sortMode]);
         return {
           manufacturer,
           models,
@@ -666,6 +703,11 @@ export default class CarModelsController extends Controller {
         ? values.filter((v) => v !== value)
         : [...values, value]
     ).join(",");
+  }
+
+  @action
+  setSort(value) {
+    this.sort = value;
   }
 
   @action

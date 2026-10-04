@@ -20,6 +20,15 @@ en:
           missing_box_art: "Missing box art"
           clear: "Clear filters"
         no_matches: "No models match"
+        racer_count:
+          one: "🏁 %{count} racer"
+          other: "🏁 %{count} racers"
+        most_popular_heading: "Most popular"
+        sort:
+          label: "Sort"
+          name: "A–Z"
+          popular: "Most popular"
+          newest: "Newest"
         model_count:
           one: "%{count} model"
           other: "%{count} models"
