@@ -1,29 +1,229 @@
-import Controller from "@ember/controller";
 import { tracked } from "@glimmer/tracking";
+import Controller from "@ember/controller";
 import { action } from "@ember/object";
+import { schedule } from "@ember/runloop";
 import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import discourseDebounce from "discourse/lib/debounce";
+import { i18n } from "discourse-i18n";
+
+const CURRENT_ERA_START_YEAR = 2015;
+const SEARCH_DEBOUNCE_MS = 250;
+const LIST_FILTER_KEYS = ["type", "drive", "era"];
+
+function compareNames(a, b) {
+  return (a || "").localeCompare(b || "", undefined, { sensitivity: "base" });
+}
+
+function parseList(value) {
+  return value ? value.split(",").filter(Boolean) : [];
+}
 
 export default class CarModelsController extends Controller {
   @service currentUser;
+  @service dialog;
   @service router;
 
+  @tracked q = "";
+  @tracked type = "";
+  @tracked drive = "";
+  @tracked era = "";
+  @tracked searchInput = null;
   @tracked showSuggestManufacturer = false;
+
   @tracked showAddManufacturer = false;
   @tracked newManufacturerName = "";
   @tracked approvingModelId = null;
-  @tracked approveModelForm = { year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
+  @tracked
+  approveModelForm = { year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
   @tracked editingModelId = null;
-  @tracked editModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
+  @tracked
+  editModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
   @tracked addingModelForManufacturerId = null;
-  @tracked newModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
+  @tracked
+  newModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
   @tracked scales = [];
   @tracked chassisTypes = [];
+  @tracked editingManufacturerId = null;
+
+  @tracked editManufacturerName = "";
+
+  @tracked editManufacturerLogoUploadId = null;
+
+  @tracked editManufacturerLogoUrl = null;
+
+  @tracked showSuggestModelModal = false;
+
+  @tracked suggestModelPreselectedManufacturer = null;
+
+  @tracked showAddCarModal = false;
+
+  @tracked addCarManufacturerId = null;
+
+  @tracked addCarModelId = null;
+
+  queryParams = ["q", "type", "drive", "era"];
 
   constructor() {
     super(...arguments);
     this.loadScalesAndChassisTypes();
+  }
+
+  get approvedManufacturers() {
+    return (this.model.manufacturers || []).filter(m => m.status === "approved");
+  }
+
+  get searchValue() {
+    return this.searchInput ?? this.q;
+  }
+
+  get isAdmin() {
+    return !!this.currentUser?.admin;
+  }
+
+  get allModels() {
+    return (this.model.models_by_manufacturer || []).flatMap(
+      (group) => group.models
+    );
+  }
+
+  get approvedModels() {
+    return this.allModels.filter((m) => m.status === "approved");
+  }
+
+  // Admins review pending models in the panel; suggesters see their own inline.
+  get sectionModels() {
+    const username = this.currentUser?.username;
+    return this.allModels.filter(
+      (m) =>
+        m.status === "approved" ||
+        (!this.isAdmin &&
+          username &&
+          m.status === "pending" &&
+          m.created_by === username)
+    );
+  }
+
+  get pendingModels() {
+    if (!this.isAdmin) {
+      return [];
+    }
+    return this.allModels
+      .filter((m) => m.status === "pending")
+      .sort(
+        (a, b) =>
+          compareNames(a.manufacturer_name, b.manufacturer_name) ||
+          compareNames(a.name, b.name)
+      );
+  }
+
+  get activeFilters() {
+    return {
+      search: this.q.trim().toLowerCase(),
+      type: parseList(this.type),
+      drive: parseList(this.drive),
+      era: parseList(this.era),
+    };
+  }
+
+  get hasActiveFilters() {
+    const { search, type, drive, era } = this.activeFilters;
+    return !!search || type.length > 0 || drive.length > 0 || era.length > 0;
+  }
+
+  get filteredModels() {
+    const filters = this.activeFilters;
+    return this.sectionModels.filter((m) => this.#matches(m, filters));
+  }
+
+  get filterGroups() {
+    const { type, drive, era } = this.activeFilters;
+    const distinct = (field) =>
+      [...new Set(this.approvedModels.map((m) => m[field]).filter(Boolean))]
+        .sort(compareNames)
+        .map((value) => ({ value, label: value }));
+    const withState = (options, active) =>
+      options.map((o) => ({ ...o, active: active.includes(o.value) }));
+
+    return [
+      {
+        key: "type",
+        label: i18n("discourse_event_system.car_models.filters.type"),
+        options: withState(distinct("chassis_type"), type),
+      },
+      {
+        key: "drive",
+        label: i18n("discourse_event_system.car_models.filters.drive"),
+        options: withState(distinct("driveline"), drive),
+      },
+      {
+        key: "era",
+        label: i18n("discourse_event_system.car_models.filters.era"),
+        options: withState(
+          [
+            {
+              value: "current",
+              label: i18n("discourse_event_system.car_models.filters.era_current"),
+            },
+            {
+              value: "vintage",
+              label: i18n("discourse_event_system.car_models.filters.era_vintage"),
+            },
+          ],
+          era
+        ),
+      },
+    ];
+  }
+
+  get manufacturerTiles() {
+    const filtered = this.filteredModels;
+    return [...this.approvedManufacturers]
+      .sort((a, b) => compareNames(a.name, b.name))
+      .map((manufacturer) => {
+        const totalCount = this.approvedModels.filter(
+          (m) => m.manufacturer_id === manufacturer.id
+        ).length;
+        const matchCount = filtered.filter(
+          (m) => m.manufacturer_id === manufacturer.id && m.status === "approved"
+        ).length;
+        return {
+          manufacturer,
+          totalCount,
+          matchCount,
+          isEmpty: matchCount === 0,
+          isDisabled:
+            matchCount === 0 && (totalCount > 0 || !this.currentUser),
+          title: this.#tileTitle(manufacturer, totalCount, matchCount),
+        };
+      });
+  }
+
+  get manufacturerSections() {
+    const filtered = this.filteredModels;
+    return [...(this.model.manufacturers || [])]
+      .filter((mfr) => mfr.status !== "rejected")
+      .sort((a, b) => compareNames(a.name, b.name))
+      .map((manufacturer) => {
+        const models = filtered
+          .filter((m) => m.manufacturer_id === manufacturer.id)
+          .sort((a, b) => compareNames(a.name, b.name));
+        return {
+          manufacturer,
+          models,
+          count: models.filter((m) => m.status === "approved").length,
+        };
+      })
+      .filter(
+        (section) =>
+          section.models.length > 0 ||
+          section.manufacturer.id === this.addingModelForManufacturerId
+      );
+  }
+
+  get pendingManufacturers() {
+    return (this.model.manufacturers || []).filter(m => m.status === "pending");
   }
 
   async loadScalesAndChassisTypes() {
@@ -37,14 +237,6 @@ export default class CarModelsController extends Controller {
     } catch {
       // fall back to empty
     }
-  }
-
-  get approvedManufacturers() {
-    return (this.model.manufacturers || []).filter(m => m.status === "approved");
-  }
-
-  get pendingManufacturers() {
-    return (this.model.manufacturers || []).filter(m => m.status === "pending");
   }
 
   @action
@@ -66,7 +258,7 @@ export default class CarModelsController extends Controller {
 
   @action
   async suggestManufacturer() {
-    if (!this.newManufacturerName.trim()) return;
+    if (!this.newManufacturerName.trim()) {return;}
     try {
       await ajax("/des/car-models/suggest-manufacturer.json", {
         type: "POST",
@@ -80,7 +272,7 @@ export default class CarModelsController extends Controller {
 
   @action
   async addManufacturer() {
-    if (!this.newManufacturerName.trim()) return;
+    if (!this.newManufacturerName.trim()) {return;}
     try {
       await ajax("/des/admin/manufacturers.json", {
         type: "POST",
@@ -102,17 +294,12 @@ export default class CarModelsController extends Controller {
 
   @action
   async rejectManufacturer(mfr) {
-    if (!window.confirm(`Reject manufacturer "${mfr.name}"?`)) return;
+    if (!window.confirm(`Reject manufacturer "${mfr.name}"?`)) {return;}
     try {
       await ajax(`/des/admin/manufacturers/${mfr.id}.json`, { type: "DELETE" });
       this.router.refresh();
     } catch (error) { popupAjaxError(error); }
   }
-
-  @tracked editingManufacturerId = null;
-  @tracked editManufacturerName = "";
-  @tracked editManufacturerLogoUploadId = null;
-  @tracked editManufacturerLogoUrl = null;
 
   @action
   startEditManufacturer(mfr) {
@@ -149,7 +336,7 @@ export default class CarModelsController extends Controller {
 
   @action
   async saveEditManufacturer() {
-    if (!this.editManufacturerName.trim()) return;
+    if (!this.editManufacturerName.trim()) {return;}
     try {
       await ajax(`/des/admin/manufacturers/${this.editingManufacturerId}.json`, {
         type: "PUT",
@@ -181,7 +368,7 @@ export default class CarModelsController extends Controller {
 
   @action
   async confirmAddModel() {
-    if (!this.newModelForm.name.trim()) return;
+    if (!this.newModelForm.name.trim()) {return;}
     try {
       await ajax("/des/admin/models.json", {
         type: "POST",
@@ -228,7 +415,14 @@ export default class CarModelsController extends Controller {
 
   @action
   async rejectModel(model) {
-    if (!window.confirm(`Reject model "${model.name}"?`)) return;
+    const confirmed = await this.dialog.yesNoConfirm({
+      message: i18n("discourse_event_system.car_models.confirm_reject", {
+        name: model.name,
+      }),
+    });
+    if (!confirmed) {
+      return;
+    }
     try {
       await ajax(`/des/admin/models/${model.id}.json`, { type: "DELETE" });
       this.router.refresh();
@@ -272,19 +466,19 @@ export default class CarModelsController extends Controller {
 
   @action
   async deleteModel(model) {
-    if (!window.confirm(`Delete model "${model.name}"?`)) return;
+    const confirmed = await this.dialog.deleteConfirm({
+      message: i18n("discourse_event_system.car_models.confirm_delete", {
+        name: model.name,
+      }),
+    });
+    if (!confirmed) {
+      return;
+    }
     try {
       await ajax(`/des/admin/models/${model.id}.json`, { type: "DELETE" });
       this.router.refresh();
     } catch (error) { popupAjaxError(error); }
   }
-
-  @tracked showSuggestModelModal = false;
-  @tracked suggestModelPreselectedManufacturer = null;
-
-  @tracked showAddCarModal = false;
-  @tracked addCarManufacturerId = null;
-  @tracked addCarModelId = null;
 
   @action
   openSuggestModelModal(manufacturer = null) {
@@ -324,5 +518,117 @@ export default class CarModelsController extends Controller {
     this.showAddCarModal = false;
     this.addCarManufacturerId = null;
     this.addCarModelId = null;
+  }
+
+  @action
+  onSearchInput(event) {
+    this.searchInput = event.target.value;
+    discourseDebounce(this, this.#applySearch, SEARCH_DEBOUNCE_MS);
+  }
+
+  @action
+  clearSearch() {
+    this.searchInput = null;
+    this.q = "";
+  }
+
+  @action
+  toggleFilter(key, value) {
+    if (!LIST_FILTER_KEYS.includes(key)) {
+      return;
+    }
+    const values = parseList(this[key]);
+    this[key] = (
+      values.includes(value)
+        ? values.filter((v) => v !== value)
+        : [...values, value]
+    ).join(",");
+  }
+
+  @action
+  clearFilters() {
+    this.clearSearch();
+    LIST_FILTER_KEYS.forEach((key) => (this[key] = ""));
+  }
+
+  @action
+  selectManufacturerTile(tile) {
+    const { manufacturer } = tile;
+
+    if (tile.matchCount > 0) {
+      this.#scrollToManufacturer(manufacturer.id);
+    } else if (tile.totalCount === 0 && this.isAdmin) {
+      this.startAddModel(manufacturer.id);
+      schedule("afterRender", () =>
+        this.#scrollToManufacturer(manufacturer.id)
+      );
+    } else if (tile.totalCount === 0 && this.currentUser) {
+      this.openSuggestModelModal(manufacturer);
+    }
+  }
+
+  // Hand the input back to the query param so back/forward navigation stays in sync.
+  #applySearch() {
+    if (this.searchInput !== null) {
+      this.q = this.searchInput;
+      this.searchInput = null;
+    }
+  }
+
+  #matches(model, { search, type, drive, era }) {
+    if (search) {
+      const haystack =
+        `${model.name} ${model.manufacturer_name || ""}`.toLowerCase();
+      if (!haystack.includes(search)) {
+        return false;
+      }
+    }
+
+    if (type.length && !type.includes(model.chassis_type)) {
+      return false;
+    }
+
+    if (drive.length && !drive.includes(model.driveline)) {
+      return false;
+    }
+
+    if (era.length) {
+      const year = parseInt(model.year_released, 10);
+      if (!year) {
+        return false;
+      }
+      const modelEra = year >= CURRENT_ERA_START_YEAR ? "current" : "vintage";
+      if (!era.includes(modelEra)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  #tileTitle(manufacturer, totalCount, matchCount) {
+    if (matchCount > 0) {
+      return manufacturer.name;
+    }
+    if (totalCount > 0) {
+      return i18n("discourse_event_system.car_models.tile_no_matches");
+    }
+    if (this.isAdmin) {
+      return i18n("discourse_event_system.car_models.tile_add", {
+        manufacturer: manufacturer.name,
+      });
+    }
+    if (this.currentUser) {
+      return i18n("discourse_event_system.car_models.tile_suggest", {
+        manufacturer: manufacturer.name,
+      });
+    }
+    return i18n("discourse_event_system.car_models.tile_no_models");
+  }
+
+  #scrollToManufacturer(id) {
+    document
+      .getElementById(`manufacturer-${id}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }

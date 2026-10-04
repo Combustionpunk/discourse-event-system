@@ -1,300 +1,354 @@
-import { fn } from "@ember/helper";
+import { concat, fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
+import DButton from "discourse/ui-kit/d-button";
+import DEmptyState from "discourse/ui-kit/d-empty-state";
+import { i18n } from "discourse-i18n";
 import DesAddCarModal from "../components/des-add-car-modal";
+import DesCarModelCard from "../components/des-car-model-card";
+import DesCarModelFilters from "../components/des-car-model-filters";
+import DesPendingModelsPanel from "../components/des-pending-models-panel";
 import DesSuggestModelModal from "../components/des-suggest-model-modal";
+
+const DRIVELINES = ["2WD", "4WD", "FWD", "Rear Motor"];
+const POWER_TYPES = ["electric", "nitro", "petrol", "both"];
+
+const PowerTypeOptions = <template>
+  <option value="">{{i18n "discourse_event_system.car_models.select"}}</option>
+  {{#each POWER_TYPES as |powerType|}}
+    <option selected={{eq @selected powerType}} value={{powerType}}>
+      {{i18n
+        (concat "discourse_event_system.car_models.power_types." powerType)
+      }}
+    </option>
+  {{/each}}
+</template>;
+
+const ListOptions = <template>
+  <option value="">{{i18n "discourse_event_system.car_models.select"}}</option>
+  {{#each @values as |value|}}
+    <option selected={{eq @selected value}} value={{value}}>{{value}}</option>
+  {{/each}}
+</template>;
+
+const ModelSpecFields = <template>
+  <div class="org-form-field">
+    <label>{{i18n "discourse_event_system.car_models.fields.year"}}</label>
+    <input
+      placeholder={{i18n
+        "discourse_event_system.car_models.fields.year_placeholder"
+      }}
+      type="number"
+      value={{@form.year_released}}
+      {{on "input" (fn @onChange "year_released")}}
+    />
+  </div>
+  <div class="org-form-field">
+    <label>{{i18n "discourse_event_system.car_models.fields.driveline"}}</label>
+    <select {{on "change" (fn @onChange "driveline")}}>
+      <ListOptions @selected={{@form.driveline}} @values={{DRIVELINES}} />
+    </select>
+  </div>
+  <div class="org-form-field">
+    <label>{{i18n "discourse_event_system.car_models.fields.scale"}}</label>
+    <select {{on "change" (fn @onChange "scale")}}>
+      <ListOptions @selected={{@form.scale}} @values={{@scales}} />
+    </select>
+  </div>
+  <div class="org-form-field">
+    <label>{{i18n
+        "discourse_event_system.car_models.fields.chassis_type"
+      }}</label>
+    <select {{on "change" (fn @onChange "chassis_type")}}>
+      <ListOptions @selected={{@form.chassis_type}} @values={{@chassisTypes}} />
+    </select>
+  </div>
+  <div class="org-form-field">
+    <label>{{i18n
+        "discourse_event_system.car_models.fields.power_type"
+      }}</label>
+    <select {{on "change" (fn @onChange "power_type")}}>
+      <PowerTypeOptions @selected={{@form.power_type}} />
+    </select>
+  </div>
+</template>;
+
+const FormActions = <template>
+  <div class="des-model-form__actions">
+    <DButton
+      class="btn-primary"
+      @action={{@onConfirm}}
+      @icon="check"
+      @label={{@confirmLabel}}
+    />
+    <DButton
+      @action={{@onCancel}}
+      @label="discourse_event_system.car_models.cancel"
+    />
+  </div>
+</template>;
 
 export default <template>
   <div class="car-models-container">
     <div class="events-nav">
-      <LinkTo class="btn btn-default" @route="events">📅 Events</LinkTo>
-      <LinkTo class="btn btn-default" @route="organisations">🏢 Organisations</LinkTo>
-      <LinkTo class="btn btn-default" @route="venues">📍 Venues</LinkTo>
-      <LinkTo class="btn btn-primary" @route="car-models">🚗 Car Models</LinkTo>
+      <LinkTo class="btn btn-default" @route="events">📅
+        {{i18n "discourse_event_system.car_models.nav.events"}}</LinkTo>
+      <LinkTo class="btn btn-default" @route="organisations">🏢
+        {{i18n "discourse_event_system.car_models.nav.organisations"}}</LinkTo>
+      <LinkTo class="btn btn-default" @route="venues">📍
+        {{i18n "discourse_event_system.car_models.nav.venues"}}</LinkTo>
+      <LinkTo class="btn btn-primary" @route="car-models">🚗
+        {{i18n "discourse_event_system.car_models.nav.car_models"}}</LinkTo>
     </div>
 
     <div class="manage-section-header">
-      <h1>🚗 Car Models</h1>
+      <h1>🚗 {{i18n "discourse_event_system.car_models.title"}}</h1>
     </div>
 
-    {{!-- Quick Navigation --}}
-    <div class="manufacturer-nav-grid">
-      {{#each @controller.approvedManufacturers as |mfr|}}
-        <a class="manufacturer-nav-card" href="#manufacturer-{{mfr.id}}">
-          {{#if mfr.logo_url}}
-            <img alt={{mfr.name}} class="manufacturer-nav-logo" src={{mfr.logo_url}} />
-          {{else}}
-            <div class="manufacturer-nav-placeholder">🏭</div>
-          {{/if}}
-          <span class="manufacturer-nav-name">{{mfr.name}}</span>
-        </a>
+    <DesCarModelFilters
+      @groups={{@controller.filterGroups}}
+      @hasActiveFilters={{@controller.hasActiveFilters}}
+      @onClear={{@controller.clearFilters}}
+      @onClearSearch={{@controller.clearSearch}}
+      @onSearchInput={{@controller.onSearchInput}}
+      @onToggle={{@controller.toggleFilter}}
+      @searchValue={{@controller.searchValue}}
+    />
+
+    <DesPendingModelsPanel
+      @approvingModelId={{@controller.approvingModelId}}
+      @models={{@controller.pendingModels}}
+      @onApprove={{@controller.startApproveModel}}
+      @onReject={{@controller.rejectModel}}
+    >
+      <div class="add-model-form">
+        <div class="org-form-row">
+          <ModelSpecFields
+            @chassisTypes={{@controller.chassisTypes}}
+            @form={{@controller.approveModelForm}}
+            @onChange={{@controller.updateApproveField}}
+            @scales={{@controller.scales}}
+          />
+        </div>
+        <FormActions
+          @confirmLabel="discourse_event_system.car_models.confirm"
+          @onCancel={{@controller.cancelApproveModel}}
+          @onConfirm={{@controller.confirmApproveModel}}
+        />
+      </div>
+    </DesPendingModelsPanel>
+
+    <div class="des-manufacturer-grid">
+      {{#each @controller.manufacturerTiles as |tile|}}
+        <DButton
+          class="btn-transparent des-manufacturer-tile
+            {{if tile.isEmpty 'des-manufacturer-tile--empty'}}"
+          data-manufacturer-id={{tile.manufacturer.id}}
+          @action={{fn @controller.selectManufacturerTile tile}}
+          @disabled={{tile.isDisabled}}
+          @translatedTitle={{tile.title}}
+        >
+          <span class="des-manufacturer-tile__logo">
+            {{#if tile.manufacturer.logo_url}}
+              <img alt="" src={{tile.manufacturer.logo_url}} />
+            {{else}}
+              <span class="des-manufacturer-tile__placeholder">🏭</span>
+            {{/if}}
+          </span>
+          <span class="des-manufacturer-tile__name">
+            {{tile.manufacturer.name}}
+          </span>
+          <span class="des-manufacturer-tile__count">{{tile.matchCount}}</span>
+        </DButton>
       {{/each}}
     </div>
 
     {{#if @controller.currentUser}}
-      {{#unless @controller.currentUser.admin}}
-        <div class="des-admin-section">
-          <div class="section-header">
-            <div style="display:flex;gap:8px;">
-              <button class="btn btn-default btn-small" {{on "click" @controller.toggleSuggestManufacturer}}>
-                {{if @controller.showSuggestManufacturer "✕ Cancel" "➕ Suggest Manufacturer"}}
-              </button>
-              <button class="btn btn-default btn-small" {{on "click" (fn @controller.openSuggestModelModal null)}}>
-                ➕ Suggest Model
-              </button>
-            </div>
-          </div>
-
-          {{#if @controller.showSuggestManufacturer}}
-            <div class="add-model-form">
-              <h4>Suggest a Manufacturer</h4>
-              <p class="field-help">Your suggestion will be reviewed by an admin.</p>
-              <div class="org-form-row">
-                <div class="org-form-field">
-                  <label>Manufacturer Name *</label>
-                  <input placeholder="e.g. Associated RC" type="text" value={{@controller.newManufacturerName}} {{on "input" @controller.updateNewManufacturerName}} />
-                </div>
-              </div>
-              <button class="btn btn-primary" {{on "click" @controller.suggestManufacturer}}>Submit Suggestion</button>
-            </div>
-          {{/if}}
+      {{#unless @controller.isAdmin}}
+        <div class="des-suggest-bar">
+          <DButton
+            class="btn-small"
+            @action={{@controller.toggleSuggestManufacturer}}
+            @icon={{if @controller.showSuggestManufacturer "xmark" "plus"}}
+            @label={{if
+              @controller.showSuggestManufacturer
+              "discourse_event_system.car_models.cancel"
+              "discourse_event_system.car_models.suggest_manufacturer"
+            }}
+          />
+          <DButton
+            class="btn-small"
+            @action={{fn @controller.openSuggestModelModal null}}
+            @icon="plus"
+            @label="discourse_event_system.car_models.suggest_model"
+          />
         </div>
+
+        {{#if @controller.showSuggestManufacturer}}
+          <div class="add-model-form">
+            <h4>{{i18n
+                "discourse_event_system.car_models.suggest_manufacturer_heading"
+              }}</h4>
+            <p class="field-help">{{i18n
+                "discourse_event_system.car_models.suggest_manufacturer_help"
+              }}</p>
+            <div class="org-form-row">
+              <div class="org-form-field">
+                <label>{{i18n
+                    "discourse_event_system.car_models.manufacturer_name"
+                  }}</label>
+                <input
+                  placeholder={{i18n
+                    "discourse_event_system.car_models.manufacturer_name_placeholder"
+                  }}
+                  type="text"
+                  value={{@controller.newManufacturerName}}
+                  {{on "input" @controller.updateNewManufacturerName}}
+                />
+              </div>
+            </div>
+            <DButton
+              class="btn-primary"
+              @action={{@controller.suggestManufacturer}}
+              @label="discourse_event_system.car_models.submit_suggestion"
+            />
+          </div>
+        {{/if}}
       {{/unless}}
     {{/if}}
 
-    {{!-- Models by Manufacturer --}}
-    {{#each @controller.model.models_by_manufacturer as |group|}}
-      <div class="des-admin-section" id="manufacturer-{{group.manufacturer_id}}">
-        <div class="section-header">
-          <h2>
-            {{#if group.manufacturer_logo_url}}
-              <img alt={{group.manufacturer_name}} class="manufacturer-logo-heading" src={{group.manufacturer_logo_url}} />
+    {{#each @controller.manufacturerSections as |mfrSection|}}
+      <section
+        class="des-manufacturer-section"
+        id="manufacturer-{{mfrSection.manufacturer.id}}"
+      >
+        <div class="des-manufacturer-section__header">
+          <h2 class="des-manufacturer-section__title">
+            {{#if mfrSection.manufacturer.logo_url}}
+              <img
+                alt=""
+                class="des-manufacturer-section__logo"
+                src={{mfrSection.manufacturer.logo_url}}
+              />
             {{/if}}
-            {{group.manufacturer_name}}
-            {{#if (eq group.manufacturer_status "pending")}}
-              <span class="pending-tag">⏳ Pending</span>
+            {{i18n
+              "discourse_event_system.car_models.section_heading"
+              manufacturer=mfrSection.manufacturer.name
+              count=mfrSection.count
+            }}
+            {{#if (eq mfrSection.manufacturer.status "pending")}}
+              <span class="des-model-card__pending-tag">
+                {{i18n "discourse_event_system.car_models.pending_manufacturer"}}
+              </span>
             {{/if}}
           </h2>
-          {{#if @controller.currentUser}}
-            {{#unless @controller.currentUser.admin}}
-              <button class="btn btn-default btn-small" {{on "click" (fn @controller.openSuggestModelModal group)}}>
-                ➕ Suggest Model
-              </button>
-            {{/unless}}
-          {{/if}}
-          {{#if @controller.currentUser.admin}}
-            <button class="btn btn-primary btn-small" {{on "click" (fn @controller.startAddModel group.manufacturer_id group.manufacturer_name)}}>➕ Add Model</button>
+          {{#if @controller.isAdmin}}
+            <DButton
+              class="btn-small"
+              @action={{fn @controller.startAddModel mfrSection.manufacturer.id}}
+              @icon="plus"
+              @label="discourse_event_system.car_models.add_model"
+            />
+          {{else if @controller.currentUser}}
+            <DButton
+              class="btn-small"
+              @action={{fn @controller.openSuggestModelModal mfrSection.manufacturer}}
+              @icon="plus"
+              @label="discourse_event_system.car_models.suggest_model"
+            />
           {{/if}}
         </div>
 
-        {{#if (eq @controller.addingModelForManufacturerId group.manufacturer_id)}}
+        {{#if (eq @controller.addingModelForManufacturerId mfrSection.manufacturer.id)}}
           <div class="add-model-form">
-            <h4>Add Model for {{group.manufacturer_name}}</h4>
+            <h4>{{i18n
+                "discourse_event_system.car_models.add_model_heading"
+                manufacturer=mfrSection.manufacturer.name
+              }}</h4>
             <div class="org-form-row">
               <div class="org-form-field">
-                <label>Name *</label>
-                <input placeholder="e.g. B7.1" type="text" value={{@controller.newModelForm.name}} {{on "input" (fn @controller.updateNewModelField "name")}} />
+                <label>{{i18n
+                    "discourse_event_system.car_models.fields.name_required"
+                  }}</label>
+                <input
+                  placeholder={{i18n
+                    "discourse_event_system.car_models.fields.name_placeholder"
+                  }}
+                  type="text"
+                  value={{@controller.newModelForm.name}}
+                  {{on "input" (fn @controller.updateNewModelField "name")}}
+                />
               </div>
-              <div class="org-form-field">
-                <label>Year</label>
-                <input placeholder="e.g. 2024" type="number" value={{@controller.newModelForm.year_released}} {{on "input" (fn @controller.updateNewModelField "year_released")}} />
-              </div>
-              <div class="org-form-field">
-                <label>Driveline</label>
-                <select {{on "change" (fn @controller.updateNewModelField "driveline")}}>
-                  <option value="">Select...</option>
-                  <option value="2WD">2WD</option>
-                  <option value="4WD">4WD</option>
-                  <option value="FWD">FWD</option>
-                  <option value="Rear Motor">Rear Motor</option>
-                </select>
-              </div>
-              <div class="org-form-field">
-                <label>Scale</label>
-                <select {{on "change" (fn @controller.updateNewModelField "scale")}}>
-                  <option value="">Select...</option>
-                  {{#each @controller.scales as |s|}}
-                    <option value={{s}}>{{s}}</option>
-                  {{/each}}
-                </select>
-              </div>
-              <div class="org-form-field">
-                <label>Chassis Type</label>
-                <select {{on "change" (fn @controller.updateNewModelField "chassis_type")}}>
-                  <option value="">Select...</option>
-                  {{#each @controller.chassisTypes as |c|}}
-                    <option value={{c}}>{{c}}</option>
-                  {{/each}}
-                </select>
-              </div>
-              <div class="org-form-field">
-                <label>Power Type</label>
-                <select {{on "change" (fn @controller.updateNewModelField "power_type")}}>
-                  <option value="">Select...</option>
-                  <option value="electric">Electric</option>
-                  <option value="nitro">Nitro</option>
-                  <option value="petrol">Petrol</option>
-                  <option value="both">Both</option>
-                </select>
-              </div>
+              <ModelSpecFields
+                @chassisTypes={{@controller.chassisTypes}}
+                @form={{@controller.newModelForm}}
+                @onChange={{@controller.updateNewModelField}}
+                @scales={{@controller.scales}}
+              />
             </div>
-            <div style="display:flex;gap:8px;margin-top:8px;">
-              <button class="btn btn-primary" {{on "click" @controller.confirmAddModel}}>✅ Add Model</button>
-              <button class="btn btn-default" {{on "click" @controller.cancelAddModel}}>✕ Cancel</button>
-            </div>
+            <FormActions
+              @confirmLabel="discourse_event_system.car_models.add_model"
+              @onCancel={{@controller.cancelAddModel}}
+              @onConfirm={{@controller.confirmAddModel}}
+            />
           </div>
         {{/if}}
 
-        <div class="models-grid">
-          {{#each group.models as |model|}}
-            <div class="model-card {{if (eq model.status 'pending') 'model-card--pending' ''}}">
-              <div class="model-card-header">
-                <strong>{{model.name}}</strong>
-                {{#if (eq model.status "pending")}}
-                  <span class="pending-tag">⏳ Pending</span>
-                {{/if}}
-              </div>
-              <div class="model-card-meta">
-                {{#if model.scale}}<span class="driveline-badge">📏 {{model.scale}}</span>{{/if}}
-                {{#if model.chassis_type}}<span class="driveline-badge">🚗 {{model.chassis_type}}</span>{{/if}}
-                {{#if model.driveline}}<span class="driveline-badge">⚙️ {{model.driveline}}</span>{{/if}}
-                {{#if model.power_type}}<span class="driveline-badge">⚡ {{model.power_type}}</span>{{/if}}
-                {{#if model.year_released}}<span class="driveline-badge">📅 {{model.year_released}}</span>{{/if}}
-                {{#if model.created_by}}<span class="field-help">Suggested by {{model.created_by}}</span>{{/if}}
-              </div>
-              <div class="model-card-actions">
-                {{#unless (eq model.status "pending")}}
-                  {{#if @controller.currentUser}}
-                    <button class="btn btn-primary btn-small" {{on "click" (fn @controller.addToGarage model)}}>🚗 Add to My Garage</button>
-                  {{/if}}
-                {{/unless}}
-                {{#if @controller.currentUser.admin}}
-                  {{#if (eq model.status "pending")}}
-                    <button class="btn btn-success btn-small" {{on "click" (fn @controller.startApproveModel model)}}>✅ Approve</button>
-                    <button class="btn btn-danger btn-small" {{on "click" (fn @controller.rejectModel model)}}>❌ Reject</button>
-                  {{else}}
-                    <button class="btn btn-default btn-small" {{on "click" (fn @controller.startEditModel model)}}>✏️ Edit</button>
-                    <button class="btn btn-danger btn-small" {{on "click" (fn @controller.deleteModel model)}}>🗑 Delete</button>
-                  {{/if}}
-                {{/if}}
-              </div>
-
-              {{!-- Inline approve form --}}
-              {{#if (eq @controller.approvingModelId model.id)}}
-                <div class="add-model-form" style="margin-top:8px;">
-                  <div class="org-form-row">
-                    <div class="org-form-field">
-                      <label>Year</label>
-                      <input type="number" value={{@controller.approveModelForm.year_released}} {{on "input" (fn @controller.updateApproveField "year_released")}} />
-                    </div>
-                    <div class="org-form-field">
-                      <label>Driveline</label>
-                      <select {{on "change" (fn @controller.updateApproveField "driveline")}}>
-                        <option value="">Select...</option>
-                        <option value="2WD">2WD</option>
-                        <option value="4WD">4WD</option>
-                        <option value="FWD">FWD</option>
-                        <option value="Rear Motor">Rear Motor</option>
-                      </select>
-                    </div>
-                    <div class="org-form-field">
-                      <label>Scale</label>
-                      <select {{on "change" (fn @controller.updateApproveField "scale")}}>
-                        <option value="">Select...</option>
-                        {{#each @controller.scales as |s|}}
-                          <option value={{s}}>{{s}}</option>
-                        {{/each}}
-                      </select>
-                    </div>
-                    <div class="org-form-field">
-                      <label>Chassis Type</label>
-                      <select {{on "change" (fn @controller.updateApproveField "chassis_type")}}>
-                        <option value="">Select...</option>
-                        {{#each @controller.chassisTypes as |c|}}
-                          <option value={{c}}>{{c}}</option>
-                        {{/each}}
-                      </select>
-                    </div>
-                    <div class="org-form-field">
-                      <label>Power Type</label>
-                      <select {{on "change" (fn @controller.updateApproveField "power_type")}}>
-                        <option value="">Select...</option>
-                        <option selected={{eq @controller.approveModelForm.power_type "electric"}} value="electric">Electric</option>
-                        <option selected={{eq @controller.approveModelForm.power_type "nitro"}} value="nitro">Nitro</option>
-                        <option selected={{eq @controller.approveModelForm.power_type "petrol"}} value="petrol">Petrol</option>
-                        <option selected={{eq @controller.approveModelForm.power_type "both"}} value="both">Both</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div style="display:flex;gap:8px;margin-top:8px;">
-                    <button class="btn btn-primary" {{on "click" @controller.confirmApproveModel}}>✅ Confirm</button>
-                    <button class="btn btn-default" {{on "click" @controller.cancelApproveModel}}>✕ Cancel</button>
-                  </div>
-                </div>
-              {{/if}}
-
-              {{!-- Inline edit form --}}
+        <div class="des-model-grid">
+          {{#each mfrSection.models as |model|}}
+            <DesCarModelCard
+              @canAddToGarage={{@controller.currentUser}}
+              @canManage={{@controller.isAdmin}}
+              @model={{model}}
+              @onAddToGarage={{@controller.addToGarage}}
+              @onDelete={{@controller.deleteModel}}
+              @onEdit={{@controller.startEditModel}}
+              @showSuggestedBy={{@controller.isAdmin}}
+            >
               {{#if (eq @controller.editingModelId model.id)}}
-                <div class="add-model-form" style="margin-top:8px;">
+                <div class="add-model-form des-model-card__edit-form">
                   <div class="org-form-row">
                     <div class="org-form-field">
-                      <label>Name</label>
-                      <input type="text" value={{@controller.editModelForm.name}} {{on "input" (fn @controller.updateEditModelField "name")}} />
+                      <label>{{i18n
+                          "discourse_event_system.car_models.fields.name"
+                        }}</label>
+                      <input
+                        type="text"
+                        value={{@controller.editModelForm.name}}
+                        {{on
+                          "input"
+                          (fn @controller.updateEditModelField "name")
+                        }}
+                      />
                     </div>
-                    <div class="org-form-field">
-                      <label>Year</label>
-                      <input type="number" value={{@controller.editModelForm.year_released}} {{on "input" (fn @controller.updateEditModelField "year_released")}} />
-                    </div>
-                    <div class="org-form-field">
-                      <label>Driveline</label>
-                      <select {{on "change" (fn @controller.updateEditModelField "driveline")}}>
-                        <option value="">Select...</option>
-                        <option selected={{eq @controller.editModelForm.driveline "2WD"}} value="2WD">2WD</option>
-                        <option selected={{eq @controller.editModelForm.driveline "4WD"}} value="4WD">4WD</option>
-                        <option selected={{eq @controller.editModelForm.driveline "FWD"}} value="FWD">FWD</option>
-                        <option selected={{eq @controller.editModelForm.driveline "Rear Motor"}} value="Rear Motor">Rear Motor</option>
-                      </select>
-                    </div>
-                    <div class="org-form-field">
-                      <label>Scale</label>
-                      <select {{on "change" (fn @controller.updateEditModelField "scale")}}>
-                        <option value="">Select...</option>
-                        {{#each @controller.scales as |s|}}
-                          <option selected={{eq @controller.editModelForm.scale s}} value={{s}}>{{s}}</option>
-                        {{/each}}
-                      </select>
-                    </div>
-                    <div class="org-form-field">
-                      <label>Chassis Type</label>
-                      <select {{on "change" (fn @controller.updateEditModelField "chassis_type")}}>
-                        <option value="">Select...</option>
-                        {{#each @controller.chassisTypes as |c|}}
-                          <option selected={{eq @controller.editModelForm.chassis_type c}} value={{c}}>{{c}}</option>
-                        {{/each}}
-                      </select>
-                    </div>
-                    <div class="org-form-field">
-                      <label>Power Type</label>
-                      <select {{on "change" (fn @controller.updateEditModelField "power_type")}}>
-                        <option value="">Select...</option>
-                        <option selected={{eq @controller.editModelForm.power_type "electric"}} value="electric">Electric</option>
-                        <option selected={{eq @controller.editModelForm.power_type "nitro"}} value="nitro">Nitro</option>
-                        <option selected={{eq @controller.editModelForm.power_type "petrol"}} value="petrol">Petrol</option>
-                        <option selected={{eq @controller.editModelForm.power_type "both"}} value="both">Both</option>
-                      </select>
-                    </div>
+                    <ModelSpecFields
+                      @chassisTypes={{@controller.chassisTypes}}
+                      @form={{@controller.editModelForm}}
+                      @onChange={{@controller.updateEditModelField}}
+                      @scales={{@controller.scales}}
+                    />
                   </div>
-                  <div style="display:flex;gap:8px;margin-top:8px;">
-                    <button class="btn btn-primary" {{on "click" @controller.saveEditModel}}>💾 Save</button>
-                    <button class="btn btn-default" {{on "click" @controller.cancelEditModel}}>✕ Cancel</button>
-                  </div>
+                  <FormActions
+                    @confirmLabel="discourse_event_system.car_models.save"
+                    @onCancel={{@controller.cancelEditModel}}
+                    @onConfirm={{@controller.saveEditModel}}
+                  />
                 </div>
               {{/if}}
-            </div>
+            </DesCarModelCard>
           {{/each}}
         </div>
-      </div>
+      </section>
+    {{else}}
+      {{#if @controller.hasActiveFilters}}
+        <DEmptyState
+          @ctaAction={{@controller.clearFilters}}
+          @ctaLabel={{i18n "discourse_event_system.car_models.filters.clear"}}
+          @identifier="des-car-models"
+          @title={{i18n "discourse_event_system.car_models.no_matches"}}
+        />
+      {{/if}}
     {{/each}}
 
     {{#if @controller.showAddCarModal}}
