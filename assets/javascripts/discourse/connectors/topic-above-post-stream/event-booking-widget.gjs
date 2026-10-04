@@ -5,7 +5,7 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
-import { eq, not } from "truth-helpers";
+import { eq, not } from "discourse/truth-helpers";
 import transponderDisplay from "../../helpers/transponder-display";
 import { service } from "@ember/service";
 import { LinkTo } from "@ember/routing";

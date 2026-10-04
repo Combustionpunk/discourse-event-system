@@ -6,7 +6,7 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 import { service } from "@ember/service";
 import { on } from "@ember/modifier";
 import { fn, concat } from "@ember/helper";
-import { eq, not } from "truth-helpers";
+import { eq, not } from "discourse/truth-helpers";
 
 export default class RcEventsList extends Component {
   @service currentUser;

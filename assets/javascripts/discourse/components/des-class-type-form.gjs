@@ -5,7 +5,7 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { on } from "@ember/modifier";
 import { concat, fn } from "@ember/helper";
-import { eq } from "truth-helpers";
+import { eq } from "discourse/truth-helpers";
 
 export default class DesClassTypeForm extends Component {
   @tracked formData = {

@@ -3,7 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { concat, fn, get } from "@ember/helper";
 import { on } from "@ember/modifier";
-import { gt } from "truth-helpers";
+import { gt } from "discourse/truth-helpers";
 
 export default class DesCloneEventModal extends Component {
   @tracked cloneTitles = [this.args.originalTitle || ""];
