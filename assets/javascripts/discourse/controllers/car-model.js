@@ -5,14 +5,18 @@ import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { i18n } from "discourse-i18n";
-import { powerTypeLabel } from "../components/des-car-model-card";
+import { carModelSlug, powerTypeLabel } from "../components/des-car-model-card";
+import DesMergeCarModelModal from "../components/des-merge-car-model-modal";
 
 export default class CarModelController extends Controller {
   @service currentUser;
   @service dialog;
+  @service modal;
   @service router;
+  @service toasts;
 
   @tracked addedToGarage = false;
+  @tracked boxArtSubmitted = false;
   @tracked chassisTypes = [];
   @tracked isEditing = false;
   @tracked scales = [];
@@ -20,6 +24,10 @@ export default class CarModelController extends Controller {
 
   get carModel() {
     return this.model.model;
+  }
+
+  get boxArtPending() {
+    return this.model.my_pending_box_art || this.boxArtSubmitted;
   }
 
   get inGarage() {
@@ -90,6 +98,52 @@ export default class CarModelController extends Controller {
   deleteAndClose(close) {
     close();
     this.deleteModel();
+  }
+
+  @action
+  async suggestBoxArt(upload) {
+    try {
+      const result = await ajax(
+        `/des/car-models/${this.carModel.id}/box-art.json`,
+        { type: "POST", data: { upload_id: upload.id } }
+      );
+      if (result.applied) {
+        this.toasts.success({
+          duration: "short",
+          data: {
+            message: i18n("discourse_event_system.car_models.box_art.applied"),
+          },
+        });
+        this.router.refresh();
+      } else {
+        this.boxArtSubmitted = true;
+        this.toasts.success({
+          data: {
+            message: i18n("discourse_event_system.car_models.box_art.submitted"),
+          },
+        });
+      }
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async mergeAndClose(close) {
+    close();
+    try {
+      const data = await ajax("/des/car-models.json");
+      this.modal.show(DesMergeCarModelModal, {
+        model: {
+          source: this.carModel,
+          models: data.models_by_manufacturer.flatMap((group) => group.models),
+          onMerged: (target) =>
+            this.router.transitionTo("car-model", carModelSlug(target)),
+        },
+      });
+    } catch (error) {
+      popupAjaxError(error);
+    }
   }
 
   @action

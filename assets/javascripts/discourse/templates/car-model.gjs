@@ -8,8 +8,8 @@ import DDropdownMenu from "discourse/ui-kit/d-dropdown-menu";
 import dAvatar from "discourse/ui-kit/helpers/d-avatar";
 import { i18n } from "discourse-i18n";
 import DesAddCarModal from "../components/des-add-car-modal";
+import DesBoxArtPlaceholder from "../components/des-box-art-placeholder";
 import DesCarModelEditForm from "../components/des-car-model-edit-form";
-import { logoBackdrop } from "../lib/des-logo-backdrop";
 
 const applyLightbox = modifier((element) => {
   lightbox(element);
@@ -39,20 +39,12 @@ export default <template>
             </a>
           </div>
         {{else}}
-          <div
-            aria-hidden="true"
-            class="des-model-card__art-placeholder des-car-model-detail__placeholder"
-          >
-            {{#if @controller.carModel.manufacturer_logo_url}}
-              <img
-                alt=""
-                src={{@controller.carModel.manufacturer_logo_url}}
-                {{logoBackdrop}}
-              />
-            {{else}}
-              🏭
-            {{/if}}
-          </div>
+          <DesBoxArtPlaceholder
+            @large={{true}}
+            @logoUrl={{@controller.carModel.manufacturer_logo_url}}
+            @onSuggest={{if @controller.currentUser @controller.suggestBoxArt}}
+            @pending={{@controller.boxArtPending}}
+          />
         {{/if}}
       </div>
 
@@ -87,6 +79,14 @@ export default <template>
                       @action={{fn @controller.startEditAndClose args.close}}
                       @icon="pencil"
                       @label="discourse_event_system.car_models.edit"
+                    />
+                  </dropdown.item>
+                  <dropdown.item>
+                    <DButton
+                      class="btn-transparent des-car-model-detail__merge"
+                      @action={{fn @controller.mergeAndClose args.close}}
+                      @icon="code-merge"
+                      @label="discourse_event_system.car_models.merge_into"
                     />
                   </dropdown.item>
                   <dropdown.item>

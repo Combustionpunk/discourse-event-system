@@ -41,6 +41,9 @@ module DiscourseEventSystem
             in_garage: in_garage,
           ),
         racers: current_user ? serialize_racers(model) : nil,
+        my_pending_box_art:
+          current_user.present? && !current_user.admin? &&
+            model.image_suggestions.pending.exists?(user_id: current_user.id),
         eligible_classes: eligible_classes(model),
       }
     end

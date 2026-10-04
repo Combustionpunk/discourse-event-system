@@ -453,8 +453,7 @@
   }
 
   &__art-gallery,
-  &__art-link,
-  &__art-placeholder {
+  &__art-link {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -466,74 +465,11 @@
     cursor: zoom-in;
   }
 
-  &__art-action {
-    position: absolute;
-    right: 0;
-    bottom: 0.4em;
-    left: 0;
-    color: var(--primary-medium);
-    font-size: var(--font-down-1);
-    text-align: center;
-  }
 
   &__art-link img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-  }
-
-  // Effects sit on the img, not the container: opacity or filter on the
-  // container would isolate it, and the blend would have nothing to mix with.
-  &__art-placeholder {
-    font-size: var(--font-up-4);
-
-    &:not(:has(img)) {
-      opacity: 0.25;
-      filter: grayscale(1);
-    }
-
-    img {
-      max-width: 60%;
-      max-height: 40%;
-      object-fit: contain;
-      opacity: 0.35;
-      filter: grayscale(1);
-    }
-
-    // Logos on a solid box (data-backdrop, set by the logoBackdrop modifier)
-    // are blended so the box drops out: screen removes black on dark schemes,
-    // multiply removes white on light ones, and a box of the opposite colour
-    // is inverted first. Plugin CSS is compiled once for the default scheme,
-    // so style queries on --scheme-type switch it at runtime.
-    img[data-backdrop] {
-      mix-blend-mode: dark-light-choose(multiply, screen);
-    }
-
-    img[data-backdrop="#{dark-light-choose("dark", "light")}"] {
-      filter: grayscale(1) invert(1);
-    }
-
-    @container style(--scheme-type: light) {
-      img[data-backdrop] {
-        mix-blend-mode: multiply;
-        filter: grayscale(1);
-      }
-
-      img[data-backdrop="dark"] {
-        filter: grayscale(1) invert(1);
-      }
-    }
-
-    @container style(--scheme-type: dark) {
-      img[data-backdrop] {
-        mix-blend-mode: screen;
-        filter: grayscale(1);
-      }
-
-      img[data-backdrop="light"] {
-        filter: grayscale(1) invert(1);
-      }
-    }
   }
 
   &__name {
@@ -559,7 +495,6 @@
   }
 
   &__art-link,
-  &__art-action,
   &__actions,
   &__edit-form,
   &__in-garage {
@@ -705,8 +640,7 @@
     align-items: start;
   }
 
-  &__art,
-  &__placeholder {
+  &__art {
     aspect-ratio: 4 / 3;
     overflow: hidden;
     background: var(--primary-very-low);
@@ -728,12 +662,6 @@
     }
   }
 
-  &__placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-  }
 
   &__manufacturer {
     display: flex;
@@ -908,3 +836,97 @@
   }
 }
 
+// Faded manufacturer logo shown in place of missing box art, with an optional
+// action centred below it. Effects sit on the img, not a wrapper: opacity or
+// filter on a wrapper would isolate it, and the blend would have nothing to mix with.
+.des-box-art-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  width: 100%;
+  height: 100%;
+  padding: 0.75em;
+  box-sizing: border-box;
+
+  &__logo {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    font-size: var(--font-up-4);
+  }
+
+  &__action {
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+    padding: 0.2em 0.6em;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+    text-align: center;
+  }
+
+  &--large {
+    .des-box-art-placeholder__logo {
+      font-size: 4em;
+    }
+
+    .des-box-art-placeholder__logo img {
+      max-height: 9rem;
+    }
+
+    .des-box-art-placeholder__action {
+      font-size: var(--font-0);
+    }
+  }
+
+
+  .des-box-art-placeholder__logo:not(:has(img)) {
+    opacity: 0.25;
+    filter: grayscale(1);
+  }
+
+  .des-box-art-placeholder__logo img {
+    max-width: 60%;
+    max-height: 4.5em;
+    object-fit: contain;
+    opacity: 0.35;
+    filter: grayscale(1);
+  }
+
+  // Logos on a solid box (data-backdrop, set by the logoBackdrop modifier)
+  // are blended so the box drops out: screen removes black on dark schemes,
+  // multiply removes white on light ones, and a box of the opposite colour
+  // is inverted first. Plugin CSS is compiled once for the default scheme,
+  // so style queries on --scheme-type switch it at runtime.
+  .des-box-art-placeholder__logo img[data-backdrop] {
+    mix-blend-mode: dark-light-choose(multiply, screen);
+  }
+
+  .des-box-art-placeholder__logo img[data-backdrop="#{dark-light-choose("dark", "light")}"] {
+    filter: grayscale(1) invert(1);
+  }
+
+  @container style(--scheme-type: light) {
+    .des-box-art-placeholder__logo img[data-backdrop] {
+      mix-blend-mode: multiply;
+      filter: grayscale(1);
+    }
+
+    .des-box-art-placeholder__logo img[data-backdrop="dark"] {
+      filter: grayscale(1) invert(1);
+    }
+  }
+
+  @container style(--scheme-type: dark) {
+    .des-box-art-placeholder__logo img[data-backdrop] {
+      mix-blend-mode: screen;
+      filter: grayscale(1);
+    }
+
+    .des-box-art-placeholder__logo img[data-backdrop="light"] {
+      filter: grayscale(1) invert(1);
+    }
+  }
+}

@@ -8,8 +8,7 @@ import lightbox from "discourse/lib/lightbox";
 import DButton from "discourse/ui-kit/d-button";
 import DDropdownMenu from "discourse/ui-kit/d-dropdown-menu";
 import { i18n } from "discourse-i18n";
-import { logoBackdrop } from "../lib/des-logo-backdrop";
-import DesLogoUploader from "./des-logo-uploader";
+import DesBoxArtPlaceholder from "./des-box-art-placeholder";
 
 // Specs matching these defaults are omitted from the spec line.
 export const DEFAULT_SCALE = "1/10";
@@ -87,36 +86,11 @@ export default class DesCarModelCard extends Component {
             </a>
           </div>
         {{else}}
-          <div aria-hidden="true" class="des-model-card__art-placeholder">
-            {{#if @placeholderLogoUrl}}
-              <img
-                alt=""
-                loading="lazy"
-                src={{@placeholderLogoUrl}}
-                {{logoBackdrop}}
-              />
-            {{else}}
-              🏭
-            {{/if}}
-          </div>
-          {{#if @boxArtPending}}
-            <span class="des-model-card__art-action">
-              {{i18n "discourse_event_system.car_models.box_art.pending_review"}}
-            </span>
-          {{else if @canSuggestBoxArt}}
-            <span class="des-model-card__art-action">
-              <DesLogoUploader
-                @compact={{true}}
-                @onUpload={{fn @onSuggestBoxArt @model}}
-                @uploadingLabel={{i18n
-                  "discourse_event_system.car_models.box_art.uploading"
-                }}
-                @uploadLabel={{i18n
-                  "discourse_event_system.car_models.box_art.add"
-                }}
-              />
-            </span>
-          {{/if}}
+          <DesBoxArtPlaceholder
+            @logoUrl={{@placeholderLogoUrl}}
+            @onSuggest={{if @canSuggestBoxArt (fn @onSuggestBoxArt @model)}}
+            @pending={{@boxArtPending}}
+          />
         {{/if}}
       </div>
 
