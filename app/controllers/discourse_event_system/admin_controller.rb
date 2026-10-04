@@ -148,6 +148,16 @@ module DiscourseEventSystem
       render json: { success: true }
     end
 
+    def approve_image_suggestion
+      DesCarModelImageSuggestion.pending.find(params[:id]).approve!
+      render json: success_json
+    end
+
+    def reject_image_suggestion
+      DesCarModelImageSuggestion.pending.find(params[:id]).reject!
+      render json: success_json
+    end
+
     def destroy_model
       model = DesCarModel.find(params[:id])
       DesUserCar.where(car_model_id: model.id).update_all(car_model_id: nil)

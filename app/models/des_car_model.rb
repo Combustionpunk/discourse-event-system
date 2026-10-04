@@ -14,6 +14,10 @@ class DesCarModel < ActiveRecord::Base
              foreign_key: "box_art_upload_id",
              optional: true
   has_many :upload_references, as: :target, dependent: :destroy
+  has_many :image_suggestions,
+           class_name: "DesCarModelImageSuggestion",
+           foreign_key: "car_model_id",
+           dependent: :destroy
 
   DRIVELINES = ["2WD", "4WD", "FWD", "Rear Motor"].freeze
   SCALES = %w[1/8 1/10 1/12 1/28].freeze

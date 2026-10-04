@@ -7,6 +7,7 @@ import lightbox from "discourse/lib/lightbox";
 import DButton from "discourse/ui-kit/d-button";
 import DDropdownMenu from "discourse/ui-kit/d-dropdown-menu";
 import { i18n } from "discourse-i18n";
+import DesLogoUploader from "./des-logo-uploader";
 
 // Specs matching these defaults are omitted from the spec line.
 export const DEFAULT_SCALE = "1/10";
@@ -80,6 +81,24 @@ export default class DesCarModelCard extends Component {
               🏭
             {{/if}}
           </div>
+          {{#if @boxArtPending}}
+            <span class="des-model-card__art-action">
+              {{i18n "discourse_event_system.car_models.box_art.pending_review"}}
+            </span>
+          {{else if @canSuggestBoxArt}}
+            <span class="des-model-card__art-action">
+              <DesLogoUploader
+                @compact={{true}}
+                @onUpload={{fn @onSuggestBoxArt @model}}
+                @uploadingLabel={{i18n
+                  "discourse_event_system.car_models.box_art.uploading"
+                }}
+                @uploadLabel={{i18n
+                  "discourse_event_system.car_models.box_art.add"
+                }}
+              />
+            </span>
+          {{/if}}
         {{/if}}
       </div>
 

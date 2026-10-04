@@ -260,6 +260,16 @@
     font-size: var(--font-down-1);
   }
 
+  &__kind {
+    margin-left: 0.25em;
+    padding: 0 0.4em;
+    border-radius: var(--d-border-radius);
+    background: var(--tertiary-low);
+    color: var(--primary-high);
+    font-size: var(--font-down-2);
+    font-weight: normal;
+  }
+
   &__suggested-by--separated::before {
     content: " · ";
   }
@@ -432,6 +442,7 @@
   }
 
   &__art {
+    position: relative;
     aspect-ratio: 4 / 3;
     margin: -0.6em -0.75em 0.25em;
     overflow: hidden;
@@ -452,6 +463,16 @@
 
   &__art-link {
     cursor: zoom-in;
+  }
+
+  &__art-action {
+    position: absolute;
+    right: 0;
+    bottom: 0.4em;
+    left: 0;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+    text-align: center;
   }
 
   &__art-link img {
@@ -568,5 +589,14 @@
     &__title {
       font-size: var(--font-up-1);
     }
+  }
+}
+
+.des-logo-uploader--compact {
+  color: var(--tertiary);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
   }
 }

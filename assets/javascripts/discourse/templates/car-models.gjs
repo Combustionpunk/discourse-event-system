@@ -12,6 +12,8 @@ import DesLogoUploader from "../components/des-logo-uploader";
 import DesPendingModelsPanel from "../components/des-pending-models-panel";
 import DesSuggestModelModal from "../components/des-suggest-model-modal";
 
+const has = (set, value) => set.has(value);
+
 const DRIVELINES = ["2WD", "4WD", "FWD", "Rear Motor"];
 const POWER_TYPES = ["electric", "nitro", "petrol", "both"];
 
@@ -119,9 +121,12 @@ export default <template>
 
     <DesPendingModelsPanel
       @approvingModelId={{@controller.approvingModelId}}
+      @imageSuggestions={{@controller.imageSuggestions}}
       @models={{@controller.pendingModels}}
       @onApprove={{@controller.startApproveModel}}
+      @onApproveImage={{@controller.approveImageSuggestion}}
       @onReject={{@controller.rejectModel}}
+      @onRejectImage={{@controller.rejectImageSuggestion}}
     >
       <div class="add-model-form">
         <div class="org-form-row">
@@ -301,12 +306,18 @@ export default <template>
         <div class="des-model-grid">
           {{#each mfrSection.models as |model|}}
             <DesCarModelCard
+              @boxArtPending={{has
+                @controller.pendingBoxArtModelIds
+                model.id
+              }}
               @canAddToGarage={{@controller.currentUser}}
               @canManage={{@controller.isAdmin}}
+              @canSuggestBoxArt={{@controller.currentUser}}
               @model={{model}}
               @onAddToGarage={{@controller.addToGarage}}
               @onDelete={{@controller.deleteModel}}
               @onEdit={{@controller.startEditModel}}
+              @onSuggestBoxArt={{@controller.suggestBoxArt}}
               @placeholderLogoUrl={{mfrSection.manufacturer.logo_url}}
               @showSuggestedBy={{@controller.isAdmin}}
             >

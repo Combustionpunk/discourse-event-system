@@ -7,6 +7,8 @@ module DiscourseEventSystem
       models = DesCarModel.includes(:manufacturer, :creator, box_art: :optimized_images).order(:name)
 
       render json: {
+        image_suggestions: image_suggestions_payload,
+        my_pending_box_art_model_ids: my_pending_box_art_model_ids,
         manufacturers: manufacturers.map { |m| serialize_manufacturer(m) },
         models_by_manufacturer: manufacturers.map { |mfr|
           mfr_models = models.select { |m| m.manufacturer_id == mfr.id }
@@ -22,6 +24,28 @@ module DiscourseEventSystem
       }
     end
 
+    def suggest_box_art
+      ensure_logged_in
+      model = DesCarModel.find(params[:id])
+      upload_id = DesCarModel.box_art_upload_id_for(params[:upload_id], current_user)
+      raise Discourse::InvalidParameters.new(:upload_id) if upload_id.blank?
+
+      if current_user.admin?
+        model.update!(box_art_upload_id: upload_id)
+        return render json: { applied: true }
+      end
+
+      if model.image_suggestions.pending.exists?(user_id: current_user.id)
+        return render_json_error(I18n.t("discourse_event_system.box_art.already_pending"), status: 409)
+      end
+
+      RateLimiter.new(current_user, "des-suggest-box-art", 10, 1.hour).performed!
+      suggestion = model.image_suggestions.create!(upload_id: upload_id, user: current_user)
+      render json: { applied: false, suggestion_id: suggestion.id }, status: :created
+    rescue ActiveRecord::RecordInvalid => e
+      render_json_error(e.record.errors.full_messages.join(", "))
+    end
+
     def suggest_manufacturer
       ensure_logged_in
       manufacturer = DesManufacturer.create!(
@@ -35,6 +59,29 @@ module DiscourseEventSystem
     end
 
     private
+
+    def image_suggestions_payload
+      return [] unless current_user&.admin?
+      DesCarModelImageSuggestion
+        .pending
+        .includes(:user, :upload, car_model: :manufacturer)
+        .order(:created_at)
+        .map do |suggestion|
+          {
+            id: suggestion.id,
+            car_model_id: suggestion.car_model_id,
+            car_model_name: suggestion.car_model.name,
+            manufacturer_name: suggestion.car_model.manufacturer&.name,
+            suggested_by: suggestion.user&.username,
+            image_url: suggestion.upload&.url,
+          }
+        end
+    end
+
+    def my_pending_box_art_model_ids
+      return [] if current_user.blank? || current_user.admin?
+      DesCarModelImageSuggestion.pending.where(user_id: current_user.id).pluck(:car_model_id)
+    end
 
     def serialize_manufacturer(m)
       {

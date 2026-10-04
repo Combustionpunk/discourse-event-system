@@ -10,7 +10,7 @@ import { i18n } from "discourse-i18n";
 
 const CURRENT_ERA_START_YEAR = 2015;
 const SEARCH_DEBOUNCE_MS = 250;
-const LIST_FILTER_KEYS = ["type", "drive", "era"];
+const LIST_FILTER_KEYS = ["type", "drive", "era", "show"];
 
 function compareNames(a, b) {
   return (a || "").localeCompare(b || "", undefined, { sensitivity: "base" });
@@ -24,11 +24,14 @@ export default class CarModelsController extends Controller {
   @service currentUser;
   @service dialog;
   @service router;
+  @service toasts;
 
   @tracked q = "";
   @tracked type = "";
   @tracked drive = "";
   @tracked era = "";
+  @tracked show = "";
+  @tracked locallyPendingBoxArtIds = [];
   @tracked searchInput = null;
   @tracked showSuggestManufacturer = false;
 
@@ -63,7 +66,7 @@ export default class CarModelsController extends Controller {
 
   @tracked addCarModelId = null;
 
-  queryParams = ["q", "type", "drive", "era"];
+  queryParams = ["q", "type", "drive", "era", "show"];
 
   constructor() {
     super(...arguments);
@@ -119,18 +122,35 @@ export default class CarModelsController extends Controller {
       );
   }
 
+  get pendingBoxArtModelIds() {
+    return new Set([
+      ...(this.model.my_pending_box_art_model_ids || []),
+      ...this.locallyPendingBoxArtIds,
+    ]);
+  }
+
+  get imageSuggestions() {
+    const filters = this.activeFilters;
+    const modelsById = new Map(this.allModels.map((m) => [m.id, m]));
+    return (this.model.image_suggestions || []).filter((suggestion) => {
+      const carModel = modelsById.get(suggestion.car_model_id);
+      return carModel && this.#matches(carModel, filters);
+    });
+  }
+
   get activeFilters() {
     return {
       search: this.q.trim().toLowerCase(),
       type: parseList(this.type),
       drive: parseList(this.drive),
       era: parseList(this.era),
+      show: parseList(this.show),
     };
   }
 
   get hasActiveFilters() {
-    const { search, type, drive, era } = this.activeFilters;
-    return !!search || type.length > 0 || drive.length > 0 || era.length > 0;
+    const { search, ...lists } = this.activeFilters;
+    return !!search || Object.values(lists).some((list) => list.length > 0);
   }
 
   get filteredModels() {
@@ -139,7 +159,7 @@ export default class CarModelsController extends Controller {
   }
 
   get filterGroups() {
-    const { type, drive, era } = this.activeFilters;
+    const { type, drive, era, show } = this.activeFilters;
     const distinct = (field) =>
       [...new Set(this.approvedModels.map((m) => m[field]).filter(Boolean))]
         .sort(compareNames)
@@ -174,6 +194,11 @@ export default class CarModelsController extends Controller {
           ],
           era
         ),
+      },
+      {
+        key: "show",
+        label: i18n("discourse_event_system.car_models.filters.show"),
+        options: withState(this.#showOptions(), show),
       },
     ];
   }
@@ -415,6 +440,61 @@ export default class CarModelsController extends Controller {
   }
 
   @action
+  async suggestBoxArt(model, upload) {
+    try {
+      const result = await ajax(`/des/car-models/${model.id}/box-art.json`, {
+        type: "POST",
+        data: { upload_id: upload.id },
+      });
+      if (result.applied) {
+        this.toasts.success({
+          duration: "short",
+          data: {
+            message: i18n("discourse_event_system.car_models.box_art.applied"),
+          },
+        });
+        this.router.refresh();
+      } else {
+        this.locallyPendingBoxArtIds = [
+          ...this.locallyPendingBoxArtIds,
+          model.id,
+        ];
+        this.toasts.success({
+          data: {
+            message: i18n("discourse_event_system.car_models.box_art.submitted"),
+          },
+        });
+      }
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async approveImageSuggestion(suggestion) {
+    try {
+      await ajax(`/des/admin/image-suggestions/${suggestion.id}/approve.json`, {
+        type: "POST",
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
+  async rejectImageSuggestion(suggestion) {
+    try {
+      await ajax(`/des/admin/image-suggestions/${suggestion.id}/reject.json`, {
+        type: "POST",
+      });
+      this.router.refresh();
+    } catch (error) {
+      popupAjaxError(error);
+    }
+  }
+
+  @action
   async rejectModel(model) {
     const confirmed = await this.dialog.yesNoConfirm({
       message: i18n("discourse_event_system.car_models.confirm_reject", {
@@ -606,7 +686,7 @@ export default class CarModelsController extends Controller {
     }
   }
 
-  #matches(model, { search, type, drive, era }) {
+  #matches(model, { search, type, drive, era, show }) {
     if (search) {
       const haystack =
         `${model.name} ${model.manufacturer_name || ""}`.toLowerCase();
@@ -634,7 +714,22 @@ export default class CarModelsController extends Controller {
       }
     }
 
+    if (show.includes("missing_box_art") && model.box_art_url) {
+      return false;
+    }
+
     return true;
+  }
+
+  #showOptions() {
+    const options = [];
+    if (this.isAdmin) {
+      options.push({
+        value: "missing_box_art",
+        label: i18n("discourse_event_system.car_models.filters.missing_box_art"),
+      });
+    }
+    return options;
   }
 
   #tileTitle(manufacturer, totalCount, matchCount) {

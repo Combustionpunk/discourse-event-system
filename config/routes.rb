@@ -149,6 +149,7 @@ DiscourseEventSystem::Engine.routes.draw do
 
   get "/des/car-models" => "car_models#index"
   post "/des/car-models/suggest-manufacturer" => "car_models#suggest_manufacturer"
+  post "/des/car-models/:id/box-art" => "car_models#suggest_box_art"
 
   get "/des/venues" => "venues#index"
   get "/des/venues/:id" => "venues#show"
@@ -189,6 +190,8 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/admin/models/:id/approve" => "admin#approve_model"
   post "/des/admin/models/:id/reject" => "admin#reject_model"
   put "/des/admin/models/:id" => "admin#update_model"
+  post "/des/admin/image-suggestions/:id/approve" => "admin#approve_image_suggestion"
+  post "/des/admin/image-suggestions/:id/reject" => "admin#reject_image_suggestion"
   post "/des/admin/rules" => "admin#create_rule"
   delete "/des/admin/rules/:id" => "admin#destroy_rule"
   get "/des/admin/scales" => "admin#scales"

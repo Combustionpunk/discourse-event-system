@@ -48,6 +48,13 @@ const PendingModelMeta = <template>
 export default class DesPendingModelsPanel extends Component {
   @tracked isOpen = readOpenState();
 
+  get totalCount() {
+    return (
+      (this.args.models?.length || 0) +
+      (this.args.imageSuggestions?.length || 0)
+    );
+  }
+
   @action
   onToggle(event) {
     this.isOpen = event.target.open;
@@ -55,7 +62,7 @@ export default class DesPendingModelsPanel extends Component {
   }
 
   <template>
-    {{#if @models.length}}
+    {{#if this.totalCount}}
       <details
         class="des-pending-panel"
         open={{this.isOpen}}
@@ -64,7 +71,7 @@ export default class DesPendingModelsPanel extends Component {
         <summary class="des-pending-panel__summary">
           {{i18n
             "discourse_event_system.car_models.pending_panel.title"
-            count=@models.length
+            count=this.totalCount
           }}
         </summary>
 
@@ -114,6 +121,57 @@ export default class DesPendingModelsPanel extends Component {
                   {{yield}}
                 </div>
               {{/if}}
+            </li>
+          {{/each}}
+
+          {{#each @imageSuggestions as |suggestion|}}
+            <li
+              class="des-pending-panel__item des-pending-panel__item--box-art"
+              data-image-suggestion-id={{suggestion.id}}
+            >
+              <a
+                class="des-pending-panel__art"
+                href={{suggestion.image_url}}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <img alt="" loading="lazy" src={{suggestion.image_url}} />
+              </a>
+
+              <div class="des-pending-panel__details">
+                <div class="des-pending-panel__name">
+                  <span class="des-pending-panel__manufacturer">
+                    {{suggestion.manufacturer_name}}
+                  </span>
+                  {{suggestion.car_model_name}}
+                  <span class="des-pending-panel__kind">
+                    {{i18n
+                      "discourse_event_system.car_models.pending_panel.box_art_heading"
+                    }}
+                  </span>
+                </div>
+                <div class="des-pending-panel__meta">
+                  {{i18n
+                    "discourse_event_system.car_models.pending_panel.suggested_by"
+                    username=suggestion.suggested_by
+                  }}
+                </div>
+              </div>
+
+              <div class="des-pending-panel__actions">
+                <DButton
+                  class="btn-primary btn-small des-pending-panel__approve"
+                  @action={{fn @onApproveImage suggestion}}
+                  @icon="check"
+                  @label="discourse_event_system.car_models.pending_panel.approve"
+                />
+                <DButton
+                  class="btn-danger btn-small des-pending-panel__reject"
+                  @action={{fn @onRejectImage suggestion}}
+                  @icon="xmark"
+                  @label="discourse_event_system.car_models.pending_panel.reject"
+                />
+              </div>
             </li>
           {{/each}}
         </ul>

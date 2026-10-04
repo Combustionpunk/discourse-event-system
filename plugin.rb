@@ -49,6 +49,7 @@ after_initialize do
   load File.expand_path("../app/models/des_event_cancellation_refund.rb", __FILE__)
   load File.expand_path("../app/models/des_manufacturer.rb", __FILE__)
   load File.expand_path("../app/models/des_car_model.rb", __FILE__)
+  load File.expand_path("../app/models/des_car_model_image_suggestion.rb", __FILE__)
   load File.expand_path("../app/models/des_user_car.rb", __FILE__)
   load File.expand_path("../app/models/des_class_compatibility_rule.rb", __FILE__)
   load File.expand_path("../app/models/des_event_booking_alert.rb", __FILE__)

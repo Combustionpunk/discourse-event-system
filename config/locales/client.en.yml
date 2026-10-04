@@ -15,6 +15,8 @@ en:
           era: "Era"
           era_current: "Current"
           era_vintage: "Vintage"
+          show: "Show"
+          missing_box_art: "Missing box art"
           clear: "Clear filters"
         no_matches: "No models match"
         model_count:
@@ -30,6 +32,7 @@ en:
         pending_panel:
           title: "⏳ Pending approval (%{count})"
           suggested_by: "Suggested by %{username}"
+          box_art_heading: "Box art"
           approve: "Approve"
           reject: "Reject"
         suggested_by: "Suggested by %{username}"
@@ -69,6 +72,11 @@ en:
           remove: "Remove"
           help: "A photo of the box or the car. JPG or PNG work best."
           view: "View box art for %{name}"
+          add: "📷 Add box art"
+          uploading: "Uploading..."
+          pending_review: "📷 Box art pending review"
+          submitted: "Thanks! Your box art will appear once an admin approves it."
+          applied: "Box art added"
         power_types:
           electric: "Electric"
           nitro: "Nitro"

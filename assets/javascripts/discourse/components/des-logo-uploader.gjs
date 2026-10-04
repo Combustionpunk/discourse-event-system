@@ -40,29 +40,46 @@ export default class DesLogoUploader extends Component {
   }
 
   <template>
-    <div class="des-logo-uploader">
-      {{#if @logoUrl}}
-        <div class="logo-preview" style="margin-bottom:8px;">
-          <img src={{@logoUrl}} alt={{if @previewAlt @previewAlt "Logo"}} style="height:60px;width:auto;object-fit:contain;" />
-          <button class="btn btn-small btn-danger" style="margin-left:8px;" type="button" {{on "click" @onRemove}}>🗑 {{if @removeLabel @removeLabel "Remove"}}</button>
-        </div>
-      {{/if}}
-
-      <label class="btn btn-default btn-small" style="cursor:pointer;display:inline-block;">
+    {{#if @compact}}
+      <label class="des-logo-uploader des-logo-uploader--compact">
         {{#if this.isUploading}}
-          ⏳ Uploading...
+          ⏳ {{@uploadingLabel}}
         {{else}}
-          📁 {{if @logoUrl (if @changeLabel @changeLabel "Change Logo") (if @uploadLabel @uploadLabel "Upload Logo")}}
+          {{@uploadLabel}}
         {{/if}}
         <input
           type="file"
           accept="image/*"
-          style="display:none;"
+          hidden
           {{on "change" this.handleFileChange}}
           disabled={{this.isUploading}}
         />
       </label>
-      <p class="field-help" style="margin-top:4px;">{{if @helpText @helpText "PNG, JPG or SVG recommended. Will display at 60px height."}}</p>
-    </div>
+    {{else}}
+      <div class="des-logo-uploader">
+        {{#if @logoUrl}}
+          <div class="logo-preview" style="margin-bottom:8px;">
+            <img src={{@logoUrl}} alt={{if @previewAlt @previewAlt "Logo"}} style="height:60px;width:auto;object-fit:contain;" />
+            <button class="btn btn-small btn-danger" style="margin-left:8px;" type="button" {{on "click" @onRemove}}>🗑 {{if @removeLabel @removeLabel "Remove"}}</button>
+          </div>
+        {{/if}}
+
+        <label class="btn btn-default btn-small" style="cursor:pointer;display:inline-block;">
+          {{#if this.isUploading}}
+            ⏳ Uploading...
+          {{else}}
+            📁 {{if @logoUrl (if @changeLabel @changeLabel "Change Logo") (if @uploadLabel @uploadLabel "Upload Logo")}}
+          {{/if}}
+          <input
+            type="file"
+            accept="image/*"
+            style="display:none;"
+            {{on "change" this.handleFileChange}}
+            disabled={{this.isUploading}}
+          />
+        </label>
+        <p class="field-help" style="margin-top:4px;">{{if @helpText @helpText "PNG, JPG or SVG recommended. Will display at 60px height."}}</p>
+      </div>
+    {{/if}}
   </template>
 }

@@ -1,0 +1,4 @@
+en:
+  discourse_event_system:
+    box_art:
+      already_pending: "You already have box art waiting for review on this model."
