@@ -790,3 +790,79 @@
     grid-template-columns: 1fr;
   }
 }
+
+.des-car-models-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+}
+
+.des-merge-modal {
+  &__scope {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    margin: 0.5em 0;
+  }
+
+  &__candidates {
+    max-height: 14em;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--primary-low);
+    border-radius: var(--d-border-radius);
+  }
+
+  .btn.des-merge-modal__candidate {
+    width: 100%;
+    justify-content: flex-start;
+
+    &--selected {
+      background: var(--tertiary-low);
+    }
+  }
+
+  &__empty {
+    padding: 0.5em;
+    color: var(--primary-medium);
+  }
+
+  &__preview {
+    margin-top: 1em;
+
+    h3 {
+      font-size: var(--font-0);
+    }
+  }
+
+  &__warning {
+    color: var(--danger);
+  }
+}
+
+.des-name-tidy-modal {
+  &__intro {
+    color: var(--primary-medium);
+  }
+
+  &__table {
+    width: 100%;
+
+    th,
+    td {
+      padding: 0.35em 0.5em;
+      text-align: left;
+      vertical-align: top;
+    }
+  }
+
+  &__clash {
+    color: var(--danger);
+    font-size: var(--font-down-1);
+  }
+}
+

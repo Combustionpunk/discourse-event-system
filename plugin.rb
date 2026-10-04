@@ -58,6 +58,8 @@ after_initialize do
   load File.expand_path("../app/models/des_venue_track.rb", __FILE__)
   load File.expand_path("../app/services/des_paypal_service.rb", __FILE__)
   load File.expand_path("../app/services/des_booking_service.rb", __FILE__)
+  load File.expand_path("../app/services/des_car_model_merge_service.rb", __FILE__)
+  load File.expand_path("../app/services/des_car_model_name_tidier.rb", __FILE__)
   load File.expand_path("../app/controllers/discourse_event_system/events_controller.rb", __FILE__)
   load File.expand_path("../app/controllers/discourse_event_system/bookings_controller.rb", __FILE__)
   load File.expand_path("../app/controllers/discourse_event_system/organisations_controller.rb", __FILE__)

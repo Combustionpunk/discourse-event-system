@@ -1,4 +1,6 @@
 en:
+  site_settings:
+    des_car_model_name_prefixes: "Car model name prefixes the 'Tidy names' tool upper-cases when followed by a number (e.g. XB4, RC10B6.2)."
   discourse_event_system:
     box_art:
       already_pending: "You already have box art waiting for review on this model."

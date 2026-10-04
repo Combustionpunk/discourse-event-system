@@ -53,6 +53,7 @@ en:
         delete: "Delete"
         confirm_delete: "Delete model \"%{name}\"?"
         confirm_reject: "Reject model \"%{name}\"?"
+        confirm_reject_manufacturer: "Reject manufacturer \"%{name}\"?"
         suggest_manufacturer: "Suggest manufacturer"
         suggest_model: "Suggest model"
         cancel: "Cancel"
@@ -88,6 +89,52 @@ en:
           pending_review: "📷 Box art pending review"
           submitted: "Thanks! Your box art will appear once an admin approves it."
           applied: "Box art added"
+        merge_into: "Merge into…"
+        tidy_names: "Tidy names"
+        merge:
+          title: "Merge %{name} into…"
+          intro: "Pick the model to keep. Everything pointing at this model moves to it, then this model is deleted."
+          search_placeholder: "Search models"
+          all_manufacturers: "Show all manufacturers"
+          no_candidates: "No matching models"
+          preview_heading: "%{source} → %{target}"
+          counts:
+            garage_entries:
+              one: "%{count} garage entry moves"
+              other: "%{count} garage entries move"
+            duplicate_garage_entries:
+              one: "%{count} duplicate garage entry is retired (the owner already has the target)"
+              other: "%{count} duplicate garage entries are retired (the owners already have the target)"
+            bookings:
+              one: "%{count} booking uses one of these cars"
+              other: "%{count} bookings use these cars"
+            class_types:
+              one: "%{count} class type restricted to this model is updated"
+              other: "%{count} class types restricted to this model are updated"
+            compatibility_rules:
+              one: "%{count} compatibility rule is updated"
+              other: "%{count} compatibility rules are updated"
+            image_suggestions:
+              one: "%{count} box art suggestion moves"
+              other: "%{count} box art suggestions move"
+          box_art:
+            target: "The target keeps its own box art."
+            source: "The target has no box art, so it takes this model's."
+            none: "Neither model has box art."
+          warning: "This cannot be undone."
+          confirm: "Merge"
+        tidy:
+          title: "Tidy model names"
+          intro: "Proposed capitalisation changes. Known prefixes (%{prefixes}) are upper-cased when followed by a number; all-caps words are kept; other words get a capital first letter. Nothing changes until you tick rows and apply."
+          select_all: "Select all"
+          manufacturer: "Manufacturer"
+          current: "Current"
+          proposed: "Proposed"
+          clash: "Same name as existing \"%{name}\": consider merging instead"
+          nothing: "All model names already look tidy."
+          apply:
+            one: "Apply %{count} change"
+            other: "Apply %{count} changes"
         power_types:
           electric: "Electric"
           nitro: "Nitro"

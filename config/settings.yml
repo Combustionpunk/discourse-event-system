@@ -44,3 +44,7 @@ plugins:
   des_paypal_client_secret:
     default: ""
     type: string
+  des_car_model_name_prefixes:
+    default: "RC10|SC|SCT|XB2|XB4|XT2|LD|ST|B|T"
+    type: list
+    list_type: compact

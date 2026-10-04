@@ -33,6 +33,7 @@ const ModelCard = <template>
     @onAddToGarage={{@controller.addToGarage}}
     @onDelete={{@controller.deleteModel}}
     @onEdit={{@controller.startEditModel}}
+    @onMerge={{@controller.openMerge}}
     @onSuggestBoxArt={{@controller.suggestBoxArt}}
     @placeholderLogoUrl={{@placeholderLogoUrl}}
     @showManufacturer={{@showManufacturer}}
@@ -109,8 +110,16 @@ export default <template>
         {{i18n "discourse_event_system.car_models.nav.car_models"}}</LinkTo>
     </div>
 
-    <div class="manage-section-header">
+    <div class="manage-section-header des-car-models-header">
       <h1>🚗 {{i18n "discourse_event_system.car_models.title"}}</h1>
+      {{#if @controller.isAdmin}}
+        <DButton
+          class="btn-default des-car-models-header__tidy"
+          @action={{@controller.openNameTidy}}
+          @icon="wand-magic-sparkles"
+          @label="discourse_event_system.car_models.tidy_names"
+        />
+      {{/if}}
     </div>
 
     <DesCarModelFilters

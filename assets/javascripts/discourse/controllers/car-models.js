@@ -7,6 +7,8 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import discourseDebounce from "discourse/lib/debounce";
 import { i18n } from "discourse-i18n";
+import DesMergeCarModelModal from "../components/des-merge-car-model-modal";
+import DesNameTidyModal from "../components/des-name-tidy-modal";
 
 const CURRENT_ERA_START_YEAR = 2015;
 const SEARCH_DEBOUNCE_MS = 250;
@@ -34,6 +36,7 @@ function parseList(value) {
 export default class CarModelsController extends Controller {
   @service currentUser;
   @service dialog;
+  @service modal;
   @service router;
   @service toasts;
 
@@ -365,7 +368,14 @@ export default class CarModelsController extends Controller {
 
   @action
   async rejectManufacturer(mfr) {
-    if (!window.confirm(`Reject manufacturer "${mfr.name}"?`)) {return;}
+    const confirmed = await this.dialog.yesNoConfirm({
+      message: i18n("discourse_event_system.car_models.confirm_reject_manufacturer", {
+        name: mfr.name,
+      }),
+    });
+    if (!confirmed) {
+      return;
+    }
     try {
       await ajax(`/des/admin/manufacturers/${mfr.id}.json`, { type: "DELETE" });
       this.router.refresh();
@@ -482,6 +492,24 @@ export default class CarModelsController extends Controller {
       this.approvingModelId = null;
       this.router.refresh();
     } catch (error) { popupAjaxError(error); }
+  }
+
+  @action
+  openMerge(source) {
+    this.modal.show(DesMergeCarModelModal, {
+      model: {
+        source,
+        models: this.allModels,
+        onMerged: () => this.router.refresh(),
+      },
+    });
+  }
+
+  @action
+  openNameTidy() {
+    this.modal.show(DesNameTidyModal, {
+      model: { onApplied: () => this.router.refresh() },
+    });
   }
 
   @action

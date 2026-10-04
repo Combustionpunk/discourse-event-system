@@ -198,6 +198,14 @@ export default class DesCarModelCard extends Component {
                 </dropdown.item>
                 <dropdown.item>
                   <DButton
+                    class="btn-transparent des-model-card__merge"
+                    @action={{fn this.runMenuAction @onMerge args.close}}
+                    @icon="code-merge"
+                    @label="discourse_event_system.car_models.merge_into"
+                  />
+                </dropdown.item>
+                <dropdown.item>
+                  <DButton
                     class="btn-transparent btn-danger des-model-card__delete"
                     @action={{fn this.runMenuAction @onDelete args.close}}
                     @icon="trash-can"

@@ -148,6 +148,23 @@ module DiscourseEventSystem
       render json: { success: true }
     end
 
+    def merge_model_preview
+      render json: car_model_merger.preview
+    end
+
+    def merge_model
+      render json: car_model_merger.merge!(current_user)
+    end
+
+    def name_tidy_preview
+      render json: { prefixes: DesCarModelNameTidier.prefixes, changes: DesCarModelNameTidier.new.preview }
+    end
+
+    def apply_name_tidy
+      changes = DesCarModelNameTidier.new.apply!(Array(params[:ids]), current_user)
+      render json: { applied: changes.size }
+    end
+
     def approve_image_suggestion
       DesCarModelImageSuggestion.pending.find(params[:id]).approve!
       render json: success_json
@@ -513,6 +530,13 @@ module DiscourseEventSystem
         admin_notes: s.admin_notes,
         created_at: s.created_at&.strftime('%d %b %Y')
       }
+    end
+
+    def car_model_merger
+      DesCarModelMergeService.new(
+        DesCarModel.includes(:manufacturer).find(params[:id]),
+        DesCarModel.includes(:manufacturer).find(params.require(:target_id)),
+      )
     end
 
     def serialize_model(model)
