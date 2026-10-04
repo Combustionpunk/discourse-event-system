@@ -2,7 +2,7 @@ import Controller from "@ember/controller";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 
 export default class FamilySetupController extends Controller {
   @service router;

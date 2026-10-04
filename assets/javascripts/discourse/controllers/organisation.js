@@ -4,7 +4,7 @@ import { ajax } from "discourse/lib/ajax";
 import { later } from "@ember/runloop";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { tracked } from "@glimmer/tracking";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 
 export default class OrganisationController extends Controller {
   @service router;

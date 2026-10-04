@@ -2,7 +2,7 @@ import Controller from "@ember/controller";
 import { action } from "@ember/object";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 
 export default class MyBookingsController extends Controller {
