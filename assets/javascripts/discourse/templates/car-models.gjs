@@ -313,6 +313,8 @@ export default <template>
               @canAddToGarage={{@controller.currentUser}}
               @canManage={{@controller.isAdmin}}
               @canSuggestBoxArt={{@controller.currentUser}}
+              @garageUsername={{@controller.currentUser.username}}
+              @inGarage={{has @controller.garageModelIds model.id}}
               @model={{model}}
               @onAddToGarage={{@controller.addToGarage}}
               @onDelete={{@controller.deleteModel}}

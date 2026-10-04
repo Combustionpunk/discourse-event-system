@@ -9,6 +9,7 @@ module DiscourseEventSystem
       render json: {
         image_suggestions: image_suggestions_payload,
         my_pending_box_art_model_ids: my_pending_box_art_model_ids,
+        my_garage_model_ids: my_garage_model_ids,
         manufacturers: manufacturers.map { |m| serialize_manufacturer(m) },
         models_by_manufacturer: manufacturers.map { |mfr|
           mfr_models = models.select { |m| m.manufacturer_id == mfr.id }
@@ -76,6 +77,11 @@ module DiscourseEventSystem
             image_url: suggestion.upload&.url,
           }
         end
+    end
+
+    def my_garage_model_ids
+      return [] if current_user.blank?
+      DesUserCar.active.where(user_id: current_user.id).where.not(car_model_id: nil).distinct.pluck(:car_model_id)
     end
 
     def my_pending_box_art_model_ids

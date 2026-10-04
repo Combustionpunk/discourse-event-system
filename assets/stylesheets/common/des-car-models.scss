@@ -527,6 +527,15 @@
     padding-top: 0.25em;
   }
 
+  &__in-garage {
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+
+    &:hover {
+      color: var(--tertiary);
+    }
+  }
+
   &__menu-trigger {
     margin-left: auto;
   }

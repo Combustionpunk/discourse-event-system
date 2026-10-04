@@ -195,12 +195,12 @@ export default class DesAddCarModal extends Component {
         }
       }
 
-      await ajax("/des/garage.json", {
+      const car = await ajax("/des/garage.json", {
         type: "POST",
         data: { car: this.newCar }
       });
 
-      this.args.onSave?.();
+      this.args.onSave?.(car);
     } catch (error) {
       popupAjaxError(error);
     } finally {

@@ -32,6 +32,7 @@ export default class CarModelsController extends Controller {
   @tracked era = "";
   @tracked show = "";
   @tracked locallyPendingBoxArtIds = [];
+  @tracked locallyAddedGarageIds = [];
   @tracked searchInput = null;
   @tracked showSuggestManufacturer = false;
 
@@ -126,6 +127,13 @@ export default class CarModelsController extends Controller {
     return new Set([
       ...(this.model.my_pending_box_art_model_ids || []),
       ...this.locallyPendingBoxArtIds,
+    ]);
+  }
+
+  get garageModelIds() {
+    return new Set([
+      ...(this.model.my_garage_model_ids || []),
+      ...this.locallyAddedGarageIds,
     ]);
   }
 
@@ -625,7 +633,11 @@ export default class CarModelsController extends Controller {
   }
 
   @action
-  onCarAdded() {
+  onCarAdded(car) {
+    const modelId = car?.model?.id ?? this.addCarModelId;
+    if (modelId) {
+      this.locallyAddedGarageIds = [...this.locallyAddedGarageIds, modelId];
+    }
     this.showAddCarModal = false;
     this.addCarManufacturerId = null;
     this.addCarModelId = null;
@@ -718,11 +730,21 @@ export default class CarModelsController extends Controller {
       return false;
     }
 
+    if (show.includes("mine") && !this.garageModelIds.has(model.id)) {
+      return false;
+    }
+
     return true;
   }
 
   #showOptions() {
     const options = [];
+    if (this.currentUser) {
+      options.push({
+        value: "mine",
+        label: i18n("discourse_event_system.car_models.filters.my_cars"),
+      });
+    }
     if (this.isAdmin) {
       options.push({
         value: "missing_box_art",

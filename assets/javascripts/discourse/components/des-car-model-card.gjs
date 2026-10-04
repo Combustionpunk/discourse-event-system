@@ -1,6 +1,7 @@
 import Component from "@glimmer/component";
 import { fn } from "@ember/helper";
 import { action } from "@ember/object";
+import { LinkTo } from "@ember/routing";
 import { modifier } from "ember-modifier";
 import DMenu from "discourse/float-kit/components/d-menu";
 import lightbox from "discourse/lib/lightbox";
@@ -129,12 +130,22 @@ export default class DesCarModelCard extends Component {
       <div class="des-model-card__actions">
         {{#if @canAddToGarage}}
           {{#unless this.isPending}}
-            <DButton
-              class="btn-primary btn-small des-model-card__garage"
-              @action={{fn @onAddToGarage @model}}
-              @icon="plus"
-              @label="discourse_event_system.car_models.add_to_garage"
-            />
+            {{#if @inGarage}}
+              <LinkTo
+                class="des-model-card__in-garage"
+                @model={{@garageUsername}}
+                @route="user.garage"
+              >
+                {{i18n "discourse_event_system.car_models.in_garage"}}
+              </LinkTo>
+            {{else}}
+              <DButton
+                class="btn-primary btn-small des-model-card__garage"
+                @action={{fn @onAddToGarage @model}}
+                @icon="plus"
+                @label="discourse_event_system.car_models.add_to_garage"
+              />
+            {{/if}}
           {{/unless}}
         {{/if}}
 
