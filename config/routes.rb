@@ -17,6 +17,7 @@ DiscourseEventSystem::Engine.routes.draw do
   get "/racing-profile" => "frontend#index"
   get "/my-garage" => "frontend#index"
   get "/car-models" => "frontend#index"
+  get "/car-models/:id" => "car_models#page"
   get "/events/new" => "frontend#index"
 
   # API routes
@@ -148,6 +149,7 @@ DiscourseEventSystem::Engine.routes.draw do
   post "/des/garage/suggest-model" => "garage#suggest_model"
 
   get "/des/car-models" => "car_models#index"
+  get "/des/car-models/:id" => "car_models#show"
   post "/des/car-models/suggest-manufacturer" => "car_models#suggest_manufacturer"
   post "/des/car-models/:id/box-art" => "car_models#suggest_box_art"
 

@@ -14,6 +14,22 @@ import DesLogoUploader from "./des-logo-uploader";
 export const DEFAULT_SCALE = "1/10";
 export const DEFAULT_POWER_TYPE = "electric";
 
+const KNOWN_POWER_TYPES = ["electric", "nitro", "petrol", "both"];
+
+export function powerTypeLabel(powerType) {
+  return KNOWN_POWER_TYPES.includes(powerType)
+    ? i18n(`discourse_event_system.car_models.power_types.${powerType}`)
+    : powerType;
+}
+
+export function carModelSlug(model) {
+  const words = `${model.manufacturer_name || ""} ${model.name || ""}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return words ? `${model.id}-${words}` : String(model.id);
+}
+
 export function modelSpecLine(model) {
   const parts = [model.chassis_type, model.driveline, model.year_released];
 
@@ -22,12 +38,7 @@ export function modelSpecLine(model) {
   }
 
   if (model.power_type && model.power_type !== DEFAULT_POWER_TYPE) {
-    parts.push(
-      i18n(
-        `discourse_event_system.car_models.power_types.${model.power_type}`,
-        { defaultValue: model.power_type }
-      )
-    );
+    parts.push(powerTypeLabel(model.power_type));
   }
 
   return parts.filter(Boolean).join(" · ");
@@ -110,7 +121,11 @@ export default class DesCarModelCard extends Component {
       {{/if}}
 
       <div class="des-model-card__name">
-        <span class="des-model-card__title">{{@model.name}}</span>
+        <LinkTo
+          class="des-model-card__title"
+          @model={{carModelSlug @model}}
+          @route="car-model"
+        >{{@model.name}}</LinkTo>
         {{#if this.isPending}}
           <span class="des-model-card__pending-tag">
             {{i18n "discourse_event_system.car_models.pending"}}

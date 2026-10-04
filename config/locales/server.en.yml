@@ -2,3 +2,6 @@ en:
   discourse_event_system:
     box_art:
       already_pending: "You already have box art waiting for review on this model."
+    car_model_page:
+      title: "%{model} | %{site_title}"
+      description: "%{model}: %{specs}. See who races it and which classes it's eligible for."

@@ -2,6 +2,8 @@
 
 module DiscourseEventSystem
   class CarModelsController < ApplicationController
+    skip_before_action :check_xhr, only: :page
+
     def index
       manufacturers = DesManufacturer.includes(:logo).all.order(:name)
       models = DesCarModel.includes(:manufacturer, :creator, box_art: :optimized_images).order(:name)
@@ -25,6 +27,29 @@ module DiscourseEventSystem
           }
         }.compact
       }
+    end
+
+    def show
+      model = find_visible_model!
+      @racer_counts = { model.id => racers_scope(model).distinct.count(:user_id) }
+      in_garage = current_user.present? && racers_scope(model).exists?(user_id: current_user.id)
+
+      render json: {
+        model:
+          serialize_model(model).merge(
+            manufacturer_logo_url: model.manufacturer&.logo&.url,
+            in_garage: in_garage,
+          ),
+        racers: current_user ? serialize_racers(model) : nil,
+        eligible_classes: eligible_classes(model),
+      }
+    end
+
+    # Server-rendered shell for /car-models/:id so shared links get OpenGraph tags.
+    def page
+      @car_model = DesCarModel.includes(:manufacturer, box_art: :optimized_images).find_by(id: params[:id].to_i)
+      @car_model = nil unless @car_model&.status == "approved"
+      render "discourse_event_system/car_models/page"
     end
 
     def suggest_box_art
@@ -62,6 +87,37 @@ module DiscourseEventSystem
     end
 
     private
+
+    def find_visible_model!
+      model = DesCarModel.includes(:creator, manufacturer: :logo, box_art: :optimized_images).find_by(id: params[:id].to_i)
+      visible =
+        model &&
+          (model.status == "approved" || current_user&.admin? ||
+            (model.status == "pending" && model.created_by == current_user&.id))
+      raise Discourse::NotFound unless visible
+      model
+    end
+
+    def racers_scope(model)
+      DesUserCar.active.where(car_model_id: model.id)
+    end
+
+    def serialize_racers(model)
+      User
+        .where(id: racers_scope(model).select(:user_id))
+        .order(:username_lower)
+        .map { |user| { id: user.id, username: user.username, name: user.name, avatar_template: user.avatar_template } }
+    end
+
+    # Reuses the booking eligibility check by asking it about an unsaved garage car of this model.
+    def eligible_classes(model)
+      car = DesUserCar.new(car_model: model, manufacturer: model.manufacturer)
+      DesEventClassType
+        .includes(:organisation)
+        .order(:name)
+        .select { |class_type| car.eligible_for_class?(class_type, class_type.organisation_id) }
+        .map { |class_type| { id: class_type.id, name: class_type.name, organisation_name: class_type.organisation&.name } }
+    end
 
     def image_suggestions_payload
       return [] unless current_user&.admin?

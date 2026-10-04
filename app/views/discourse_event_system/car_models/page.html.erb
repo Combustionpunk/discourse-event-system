@@ -1,0 +1,17 @@
+<% if @car_model %>
+  <%
+    model_title = [@car_model.manufacturer&.name, @car_model.name].compact.join(" ")
+    specs = [@car_model.chassis_type, @car_model.driveline, @car_model.scale, @car_model.year_released].compact_blank
+    image_url = @car_model.box_art_thumbnail_url || @car_model.manufacturer&.logo&.url
+  %>
+  <% content_for :title do %><%= model_title %><% end %>
+  <% content_for :head do %>
+    <%= raw crawlable_meta_data(
+          title: I18n.t("discourse_event_system.car_model_page.title", model: model_title, site_title: SiteSetting.title),
+          description: I18n.t("discourse_event_system.car_model_page.description", model: model_title, specs: specs.join(" · ")),
+          image: image_url.present? ? ::UrlHelper.absolute(image_url) : nil,
+        ) %>
+  <% end %>
+  <h1><%= model_title %></h1>
+  <p><%= specs.join(" · ") %></p>
+<% end %>

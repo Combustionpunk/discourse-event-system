@@ -93,3 +93,9 @@ en:
           nitro: "Nitro"
           petrol: "Petrol"
           both: "Both"
+      car_model_detail:
+        back: "← Car models"
+        racers: "Racing this car"
+        no_racers: "Nobody has this car in their garage yet."
+        eligible_classes: "Eligible classes"
+        no_classes: "No class types currently accept this model."
