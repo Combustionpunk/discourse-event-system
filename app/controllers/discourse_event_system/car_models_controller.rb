@@ -41,7 +41,7 @@ module DiscourseEventSystem
         id: m.id,
         name: m.name,
         status: m.status,
-        logo_upload_id: m.logo_upload_id,
+        logo_upload_id: m.logo&.id,
         logo_url: m.logo&.url
       }
     end

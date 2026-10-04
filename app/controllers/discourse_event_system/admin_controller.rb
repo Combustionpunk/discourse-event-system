@@ -88,7 +88,7 @@ module DiscourseEventSystem
     def update_manufacturer
       manufacturer = DesManufacturer.find(params[:id])
       attrs = { name: params[:name].to_s.strip }
-      attrs[:logo_upload_id] = params[:logo_upload_id].presence if params.key?(:logo_upload_id)
+      attrs[:logo_upload_id] = Upload.where(id: params[:logo_upload_id].presence).pick(:id) if params.key?(:logo_upload_id)
       manufacturer.update!(attrs)
       render json: { success: true, name: manufacturer.name }
     rescue => e
@@ -473,7 +473,7 @@ module DiscourseEventSystem
         name: manufacturer.name,
         created_by: manufacturer.creator&.username,
         status: manufacturer.status,
-        logo_upload_id: manufacturer.logo_upload_id,
+        logo_upload_id: manufacturer.logo&.id,
         logo_url: manufacturer.logo&.url
       }
     end
