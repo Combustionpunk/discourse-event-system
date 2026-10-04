@@ -6,6 +6,8 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 import { on } from "@ember/modifier";
 import { fn, concat } from "@ember/helper";
 import { eq } from "discourse/truth-helpers";
+import { i18n } from "discourse-i18n";
+import DesLogoUploader from "./des-logo-uploader";
 
 export default class DesSuggestModelModal extends Component {
   @tracked manufacturerId = "";
@@ -15,6 +17,8 @@ export default class DesSuggestModelModal extends Component {
   @tracked scale = "";
   @tracked chassisType = "";
   @tracked powerType = "";
+  @tracked boxArtUploadId = null;
+  @tracked boxArtUrl = null;
   @tracked isSaving = false;
   @tracked successMessage = "";
 
@@ -53,6 +57,7 @@ export default class DesSuggestModelModal extends Component {
           driveline: this.driveline || undefined,
           scale: this.scale || undefined,
           chassis_type: this.chassisType || undefined,
+          box_art_upload_id: this.boxArtUploadId || undefined,
         },
       });
       this.successMessage = "Model suggestion submitted for review!";
@@ -62,6 +67,18 @@ export default class DesSuggestModelModal extends Component {
     } finally {
       this.isSaving = false;
     }
+  }
+
+  @action
+  boxArtUploaded(upload) {
+    this.boxArtUploadId = upload.id;
+    this.boxArtUrl = upload.url;
+  }
+
+  @action
+  removeBoxArt() {
+    this.boxArtUploadId = null;
+    this.boxArtUrl = null;
   }
 
   <template>
@@ -139,6 +156,22 @@ export default class DesSuggestModelModal extends Component {
                     <option value={{p}}>{{p}}</option>
                   {{/each}}
                 </select>
+              </div>
+            </div>
+
+            <div class="org-form-row">
+              <div class="org-form-field">
+                <label>{{i18n "discourse_event_system.car_models.box_art.label"}}</label>
+                <DesLogoUploader
+                  @changeLabel={{i18n "discourse_event_system.car_models.box_art.change"}}
+                  @helpText={{i18n "discourse_event_system.car_models.box_art.help"}}
+                  @logoUrl={{this.boxArtUrl}}
+                  @onRemove={{this.removeBoxArt}}
+                  @onUpload={{this.boxArtUploaded}}
+                  @previewAlt={{i18n "discourse_event_system.car_models.box_art.label"}}
+                  @removeLabel={{i18n "discourse_event_system.car_models.box_art.remove"}}
+                  @uploadLabel={{i18n "discourse_event_system.car_models.box_art.upload"}}
+                />
               </div>
             </div>
 

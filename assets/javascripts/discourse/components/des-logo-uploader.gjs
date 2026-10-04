@@ -43,8 +43,8 @@ export default class DesLogoUploader extends Component {
     <div class="des-logo-uploader">
       {{#if @logoUrl}}
         <div class="logo-preview" style="margin-bottom:8px;">
-          <img src={{@logoUrl}} alt="Logo" style="height:60px;width:auto;object-fit:contain;" />
-          <button class="btn btn-small btn-danger" style="margin-left:8px;" {{on "click" @onRemove}}>🗑 Remove</button>
+          <img src={{@logoUrl}} alt={{if @previewAlt @previewAlt "Logo"}} style="height:60px;width:auto;object-fit:contain;" />
+          <button class="btn btn-small btn-danger" style="margin-left:8px;" type="button" {{on "click" @onRemove}}>🗑 {{if @removeLabel @removeLabel "Remove"}}</button>
         </div>
       {{/if}}
 
@@ -52,7 +52,7 @@ export default class DesLogoUploader extends Component {
         {{#if this.isUploading}}
           ⏳ Uploading...
         {{else}}
-          📁 {{if @logoUrl "Change Logo" "Upload Logo"}}
+          📁 {{if @logoUrl (if @changeLabel @changeLabel "Change Logo") (if @uploadLabel @uploadLabel "Upload Logo")}}
         {{/if}}
         <input
           type="file"
@@ -62,7 +62,7 @@ export default class DesLogoUploader extends Component {
           disabled={{this.isUploading}}
         />
       </label>
-      <p class="field-help" style="margin-top:4px;">PNG, JPG or SVG recommended. Will display at 60px height.</p>
+      <p class="field-help" style="margin-top:4px;">{{if @helpText @helpText "PNG, JPG or SVG recommended. Will display at 60px height."}}</p>
     </div>
   </template>
 }

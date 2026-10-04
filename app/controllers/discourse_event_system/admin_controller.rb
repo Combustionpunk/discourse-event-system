@@ -47,6 +47,7 @@ module DiscourseEventSystem
 
     def update_model
       model = DesCarModel.find(params[:id])
+      model.box_art_upload_id = DesCarModel.box_art_upload_id_for(params[:box_art_upload_id], current_user) if params.key?(:box_art_upload_id)
       model.update!(
         manufacturer_id: params[:manufacturer_id].present? ? params[:manufacturer_id].to_i : model.manufacturer_id,
         name: params[:name].present? ? params[:name].strip : model.name,
@@ -119,6 +120,7 @@ module DiscourseEventSystem
         scale: params[:scale].presence,
         chassis_type: params[:chassis_type].presence,
         power_type: params[:power_type].presence || 'electric',
+        box_art_upload_id: DesCarModel.box_art_upload_id_for(params[:box_art_upload_id], current_user),
         status: 'approved',
         created_by: current_user.id
       )
@@ -129,6 +131,7 @@ module DiscourseEventSystem
 
     def approve_model
       model = DesCarModel.find(params[:id])
+      model.box_art_upload_id = DesCarModel.box_art_upload_id_for(params[:box_art_upload_id], current_user) if params.key?(:box_art_upload_id)
       model.update!(
         status: 'approved',
         year_released: params[:year_released].present? ? params[:year_released].to_i : nil,

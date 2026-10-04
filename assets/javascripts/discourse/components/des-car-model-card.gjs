@@ -1,7 +1,9 @@
 import Component from "@glimmer/component";
 import { fn } from "@ember/helper";
 import { action } from "@ember/object";
+import { modifier } from "ember-modifier";
 import DMenu from "discourse/float-kit/components/d-menu";
+import lightbox from "discourse/lib/lightbox";
 import DButton from "discourse/ui-kit/d-button";
 import DDropdownMenu from "discourse/ui-kit/d-dropdown-menu";
 import { i18n } from "discourse-i18n";
@@ -30,6 +32,10 @@ export function modelSpecLine(model) {
 }
 
 export default class DesCarModelCard extends Component {
+  applyLightbox = modifier((element) => {
+    lightbox(element);
+  });
+
   get specLine() {
     return modelSpecLine(this.args.model);
   }
@@ -49,6 +55,34 @@ export default class DesCarModelCard extends Component {
       class="des-model-card {{if this.isPending 'des-model-card--pending'}}"
       data-model-id={{@model.id}}
     >
+      <div class="des-model-card__art">
+        {{#if @model.box_art_url}}
+          <div class="des-model-card__art-gallery" {{this.applyLightbox}}>
+            <a
+              aria-label={{i18n
+                "discourse_event_system.car_models.box_art.view"
+                name=@model.name
+              }}
+              class="lightbox des-model-card__art-link"
+              data-target-height={{@model.box_art_height}}
+              data-target-width={{@model.box_art_width}}
+              href={{@model.box_art_full_url}}
+              title={{@model.name}}
+            >
+              <img alt="" loading="lazy" src={{@model.box_art_url}} />
+            </a>
+          </div>
+        {{else}}
+          <div aria-hidden="true" class="des-model-card__art-placeholder">
+            {{#if @placeholderLogoUrl}}
+              <img alt="" loading="lazy" src={{@placeholderLogoUrl}} />
+            {{else}}
+              🏭
+            {{/if}}
+          </div>
+        {{/if}}
+      </div>
+
       <div class="des-model-card__name">
         <span class="des-model-card__title">{{@model.name}}</span>
         {{#if this.isPending}}

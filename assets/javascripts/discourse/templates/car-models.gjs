@@ -8,6 +8,7 @@ import { i18n } from "discourse-i18n";
 import DesAddCarModal from "../components/des-add-car-modal";
 import DesCarModelCard from "../components/des-car-model-card";
 import DesCarModelFilters from "../components/des-car-model-filters";
+import DesLogoUploader from "../components/des-logo-uploader";
 import DesPendingModelsPanel from "../components/des-pending-models-panel";
 import DesSuggestModelModal from "../components/des-suggest-model-modal";
 
@@ -139,30 +140,32 @@ export default <template>
       </div>
     </DesPendingModelsPanel>
 
-    <div class="des-manufacturer-grid">
-      {{#each @controller.manufacturerTiles as |tile|}}
-        <DButton
-          class="btn-transparent des-manufacturer-tile
-            {{if tile.isEmpty 'des-manufacturer-tile--empty'}}"
-          data-manufacturer-id={{tile.manufacturer.id}}
-          @action={{fn @controller.selectManufacturerTile tile}}
-          @disabled={{tile.isDisabled}}
-          @translatedTitle={{tile.title}}
-        >
-          <span class="des-manufacturer-tile__logo">
-            {{#if tile.manufacturer.logo_url}}
-              <img alt="" src={{tile.manufacturer.logo_url}} />
-            {{else}}
-              <span class="des-manufacturer-tile__placeholder">🏭</span>
-            {{/if}}
-          </span>
-          <span class="des-manufacturer-tile__name">
-            {{tile.manufacturer.name}}
-          </span>
-          <span class="des-manufacturer-tile__count">{{tile.matchCount}}</span>
-        </DButton>
-      {{/each}}
-    </div>
+    {{#unless @controller.hasActiveFilters}}
+      <div class="des-manufacturer-grid">
+        {{#each @controller.manufacturerTiles as |tile|}}
+          <DButton
+            class="btn-transparent des-manufacturer-tile
+              {{if tile.isEmpty 'des-manufacturer-tile--empty'}}"
+            data-manufacturer-id={{tile.manufacturer.id}}
+            @action={{fn @controller.selectManufacturerTile tile}}
+            @disabled={{tile.isDisabled}}
+            @translatedTitle={{tile.title}}
+          >
+            <span class="des-manufacturer-tile__logo">
+              {{#if tile.manufacturer.logo_url}}
+                <img alt="" src={{tile.manufacturer.logo_url}} />
+              {{else}}
+                <span class="des-manufacturer-tile__placeholder">🏭</span>
+              {{/if}}
+            </span>
+            <span class="des-manufacturer-tile__name">
+              {{tile.manufacturer.name}}
+            </span>
+            <span class="des-manufacturer-tile__count">{{tile.matchCount}}</span>
+          </DButton>
+        {{/each}}
+      </div>
+    {{/unless}}
 
     {{#if @controller.currentUser}}
       {{#unless @controller.isAdmin}}
@@ -304,6 +307,7 @@ export default <template>
               @onAddToGarage={{@controller.addToGarage}}
               @onDelete={{@controller.deleteModel}}
               @onEdit={{@controller.startEditModel}}
+              @placeholderLogoUrl={{mfrSection.manufacturer.logo_url}}
               @showSuggestedBy={{@controller.isAdmin}}
             >
               {{#if (eq @controller.editingModelId model.id)}}
@@ -328,6 +332,31 @@ export default <template>
                       @onChange={{@controller.updateEditModelField}}
                       @scales={{@controller.scales}}
                     />
+                    <div class="org-form-field des-model-card__box-art-field">
+                      <label>{{i18n
+                          "discourse_event_system.car_models.box_art.label"
+                        }}</label>
+                      <DesLogoUploader
+                        @changeLabel={{i18n
+                          "discourse_event_system.car_models.box_art.change"
+                        }}
+                        @helpText={{i18n
+                          "discourse_event_system.car_models.box_art.help"
+                        }}
+                        @logoUrl={{@controller.editModelForm.box_art_url}}
+                        @onRemove={{@controller.removeEditBoxArt}}
+                        @onUpload={{@controller.editBoxArtUploaded}}
+                        @previewAlt={{i18n
+                          "discourse_event_system.car_models.box_art.label"
+                        }}
+                        @removeLabel={{i18n
+                          "discourse_event_system.car_models.box_art.remove"
+                        }}
+                        @uploadLabel={{i18n
+                          "discourse_event_system.car_models.box_art.upload"
+                        }}
+                      />
+                    </div>
                   </div>
                   <FormActions
                     @confirmLabel="discourse_event_system.car_models.save"

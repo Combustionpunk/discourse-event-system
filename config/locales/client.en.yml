@@ -8,7 +8,7 @@ en:
           organisations: "Organisations"
           venues: "Venues"
           car_models: "Car models"
-        search_placeholder: "Search models or manufacturers"
+        search_placeholder: "Search models"
         filters:
           type: "Type"
           drive: "Drive"
@@ -62,6 +62,13 @@ en:
           scale: "Scale"
           chassis_type: "Chassis type"
           power_type: "Power type"
+        box_art:
+          label: "Box art (optional)"
+          upload: "Upload box art"
+          change: "Change box art"
+          remove: "Remove"
+          help: "A photo of the box or the car. JPG or PNG work best."
+          view: "View box art for %{name}"
         power_types:
           electric: "Electric"
           nitro: "Nitro"

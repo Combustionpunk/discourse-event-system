@@ -109,8 +109,9 @@ export default class CarModelsController extends Controller {
     if (!this.isAdmin) {
       return [];
     }
+    const filters = this.activeFilters;
     return this.allModels
-      .filter((m) => m.status === "pending")
+      .filter((m) => m.status === "pending" && this.#matches(m, filters))
       .sort(
         (a, b) =>
           compareNames(a.manufacturer_name, b.manufacturer_name) ||
@@ -438,7 +439,27 @@ export default class CarModelsController extends Controller {
       driveline: model.driveline || "",
       scale: model.scale || "",
       chassis_type: model.chassis_type || "",
-      power_type: model.power_type || ""
+      power_type: model.power_type || "",
+      box_art_upload_id: model.box_art_upload_id || null,
+      box_art_url: model.box_art_url || null,
+    };
+  }
+
+  @action
+  editBoxArtUploaded(upload) {
+    this.editModelForm = {
+      ...this.editModelForm,
+      box_art_upload_id: upload.id,
+      box_art_url: upload.url,
+    };
+  }
+
+  @action
+  removeEditBoxArt() {
+    this.editModelForm = {
+      ...this.editModelForm,
+      box_art_upload_id: null,
+      box_art_url: null,
     };
   }
 
@@ -455,9 +476,19 @@ export default class CarModelsController extends Controller {
   @action
   async saveEditModel() {
     try {
+      const form = this.editModelForm;
       await ajax(`/des/admin/models/${this.editingModelId}.json`, {
         type: "PUT",
-        data: this.editModelForm
+        data: {
+          name: form.name,
+          year_released: form.year_released,
+          driveline: form.driveline,
+          scale: form.scale,
+          chassis_type: form.chassis_type,
+          power_type: form.power_type,
+          // Blank clears the box art server-side.
+          box_art_upload_id: form.box_art_upload_id || "",
+        },
       });
       this.editingModelId = null;
       this.router.refresh();

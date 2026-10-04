@@ -106,6 +106,7 @@ module DiscourseEventSystem
         driveline: params[:driveline].present? ? params[:driveline] : nil,
         scale: params[:scale].present? ? params[:scale] : nil,
         chassis_type: params[:chassis_type].present? ? params[:chassis_type] : nil,
+        box_art_upload_id: DesCarModel.box_art_upload_id_for(params[:box_art_upload_id], current_user),
         status: 'pending',
         created_by: current_user.id
       )
