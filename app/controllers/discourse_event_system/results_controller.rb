@@ -2,10 +2,13 @@ module DiscourseEventSystem
   class ResultsController < ::ApplicationController
     requires_plugin PLUGIN_NAME
 
-    before_action :ensure_logged_in
+    before_action :ensure_logged_in, except: :show
     before_action :set_event
 
+    # Published results are public; everything else stays with the event's managers.
     def show
+      raise Discourse::NotFound if @event.draft? && !@event.manageable_by?(current_user)
+
       result = DesEventResult.includes(
         races: :entries,
         class_summaries: [:first_user, :second_user, :third_user, :fastest_lap_user]

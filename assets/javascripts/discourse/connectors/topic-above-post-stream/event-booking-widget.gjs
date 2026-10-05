@@ -5,10 +5,14 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
-import { eq, not } from "discourse/truth-helpers";
+import { eq, not, or } from "discourse/truth-helpers";
 import transponderDisplay from "../../helpers/transponder-display";
 import { service } from "@ember/service";
 import { LinkTo } from "@ember/routing";
+import { getOwner } from "@ember/owner";
+import DButton from "discourse/ui-kit/d-button";
+import { i18n } from "discourse-i18n";
+import DesEventResults from "../../components/des-event-results";
 
 export default class EventBookingWidget extends Component {
   @service currentUser;
@@ -76,7 +80,9 @@ export default class EventBookingWidget extends Component {
       this.event = response;
       this.hasBookingAlert = response.user_has_booking_alert || false;
       this.loadEntrants(response.id);
-      this.loadResults(response.id);
+      if (response.lifecycle_state === "results") {
+        this.loadResults(response.id);
+      }
     } catch (e) {
       // No event for this topic
     }
@@ -92,6 +98,9 @@ export default class EventBookingWidget extends Component {
   }
 
   async loadEntrants(eventId) {
+    if (!this.showWhosComingSection) {
+      return;
+    }
     try {
       const data = await ajax("/des/events/" + eventId + "/public-entrants.json");
       const statusOrder = { confirmed: 0, pending: 1, waitlist: 2, cancelled: 3 };
@@ -217,34 +226,46 @@ export default class EventBookingWidget extends Component {
     return this.event?.external_booking_url;
   }
 
-  get isEventToday() {
-    if (!this.event?.start_date) return false;
-    const start = new Date(this.event.start_date);
-    const now = new Date();
-    return start.toDateString() === now.toDateString();
+  // Computed server-side by DesEvent#lifecycle_state.
+  get lifecycleState() {
+    return this.event?.lifecycle_state;
   }
 
-  get isEventPast() {
-    if (!this.event?.start_date) return false;
-    const start = new Date(this.event.start_date);
-    const now = new Date();
-    return start < now && start.toDateString() !== now.toDateString();
+  get isUpcoming() {
+    return this.lifecycleState === "upcoming";
+  }
+
+  get isRaceDay() {
+    return this.lifecycleState === "race_day";
+  }
+
+  get isCancelled() {
+    return this.lifecycleState === "cancelled";
   }
 
   get hasResults() {
-    return this.results?.status === 'published';
+    return this.lifecycleState === "results" && this.results?.status === "published";
   }
 
-  get isAwaitingResults() {
-    return (this.isEventPast || this.isEventToday) && !this.hasResults;
+  get showBookingArea() {
+    return this.isUpcoming && !this.bookingDisabled;
   }
 
-  get isEventRunning() {
-    return this.isEventToday && this.bookingClosed;
+  // Before and on race day the class list stays visible even when booking is closed.
+  get showReadOnlyClasses() {
+    return (this.isUpcoming || this.isRaceDay || this.isCancelled) && !this.showBookingArea;
+  }
+
+  get showReadOnlyPricing() {
+    return this.isUpcoming && this.bookingDisabled && !!this.event?.pricing;
   }
 
   get showWhosComingSection() {
-    return this.currentUser || this.isEventRunning;
+    return !!this.currentUser || this.isRaceDay;
+  }
+
+  get topicUrl() {
+    return window.location.origin + (this.event?.topic_url || window.location.pathname);
   }
 
   get totalEntrantCount() {
@@ -281,7 +302,7 @@ export default class EventBookingWidget extends Component {
     const start = new Date(e.start_date);
     const end = e.end_date ? new Date(e.end_date) : new Date(start.getTime() + 4*3600000);
     const fmt = (d) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-    const p = new URLSearchParams({ action: "TEMPLATE", text: e.title, dates: fmt(start)+"/"+fmt(end), location: e.location||"", details: (e.description||"")+"\n\n"+window.location.origin+"/events/"+e.id });
+    const p = new URLSearchParams({ action: "TEMPLATE", text: e.title, dates: fmt(start)+"/"+fmt(end), location: e.location||"", details: (e.description||"")+"\n\n"+this.topicUrl });
     return "https://calendar.google.com/calendar/render?" + p.toString();
   }
 
@@ -290,7 +311,7 @@ export default class EventBookingWidget extends Component {
     if (!e?.start_date) return "#";
     const start = new Date(e.start_date).toISOString();
     const end = e.end_date ? new Date(e.end_date).toISOString() : new Date(new Date(e.start_date).getTime()+4*3600000).toISOString();
-    const p = new URLSearchParams({ rru: "addevent", subject: e.title, startdt: start, enddt: end, location: e.location||"", body: (e.description||"")+"\n\n"+window.location.origin+"/events/"+e.id, path: "/calendar/action/compose" });
+    const p = new URLSearchParams({ rru: "addevent", subject: e.title, startdt: start, enddt: end, location: e.location||"", body: (e.description||"")+"\n\n"+this.topicUrl, path: "/calendar/action/compose" });
     return "https://outlook.live.com/calendar/0/deeplink/compose?" + p.toString();
   }
 
@@ -324,6 +345,10 @@ export default class EventBookingWidget extends Component {
     this.familySelections = c;
   }
 
+  @action showLogin() {
+    getOwner(this).lookup("route:application").send("showLogin");
+  }
+
   @action toggleWhosComingSection() { this.isWhosComingExpanded = !this.isWhosComingExpanded; }
   @action setEntrantsFilter(filter) { this.entrantsFilter = filter; }
   @action toggleCalendarDropdown() { this.showCalendarDropdown = !this.showCalendarDropdown; }
@@ -334,7 +359,7 @@ export default class EventBookingWidget extends Component {
     const fmt = (d) => new Date(d).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
     const s = fmt(e.start_date);
     const n = e.end_date ? fmt(e.end_date) : fmt(new Date(new Date(e.start_date).getTime()+4*3600000));
-    const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//RC Event System//EN","BEGIN:VEVENT","SUMMARY:"+(e.title||""),"DTSTART:"+s,"DTEND:"+n,"LOCATION:"+(e.location||""),"DESCRIPTION:"+(e.description||"").replace(/\n/g,"\\n"),"URL:"+window.location.origin+"/events/"+e.id,"END:VEVENT","END:VCALENDAR"].join("\r\n");
+    const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//RC Event System//EN","BEGIN:VEVENT","SUMMARY:"+(e.title||""),"DTSTART:"+s,"DTEND:"+n,"LOCATION:"+(e.location||""),"DESCRIPTION:"+(e.description||"").replace(/\n/g,"\\n"),"URL:"+this.topicUrl,"END:VEVENT","END:VCALENDAR"].join("\r\n");
     const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -520,7 +545,7 @@ export default class EventBookingWidget extends Component {
 
         <div class="event-detail-meta">
           <div class="event-detail-meta-item">
-            {{#if this.event.organisation.logo_url}}<img src={{this.event.organisation.logo_url}} class="org-logo org-logo--inline" alt="" />{{/if}} <strong>Organisation:</strong> {{this.event.organisation.name}}
+            {{#if this.event.organisation.logo_url}}<img src={{this.event.organisation.logo_url}} class="org-logo org-logo--inline" alt="" />{{/if}} <strong>Organisation:</strong> <LinkTo @model={{this.event.organisation.id}} @route="organisation">{{this.event.organisation.name}}</LinkTo>
           </div>
           <div class="event-detail-meta-item">
             <strong>Date:</strong> {{this.event.formatted_date}}
@@ -560,176 +585,52 @@ export default class EventBookingWidget extends Component {
         </div>
 
 
-        {{#if (eq this.event.status "cancelled")}}
+        {{#if this.isCancelled}}
           <div class="event-cancelled-banner">⚠️ This event has been cancelled.</div>
-        {{else if this.bookingNotOpenYet}}
-          <div class="event-closed-banner">⏳ Bookings are not yet open for this event.
-            {{#if this.event.booking_opens_at}}
-              <span class="field-help">Bookings open: {{this.formatDate this.event.booking_opens_at}}</span>
-            {{/if}}
-            {{#if this.currentUser}}
-              <div style="margin-top:8px;">
-                <button class="btn btn-small btn-default rc-alert-btn" {{on "click" this.toggleBookingAlert}}>
-                  {{if this.hasBookingAlert "🔕 Cancel Alert" "🔔 Alert me when booking opens"}}
-                </button>
-              </div>
-            {{/if}}
-          </div>
-        {{else if this.bookingClosed}}
-          <div class="event-closed-banner">⏰ Booking has closed for this event.
-            {{#if this.event.booking_manually_closed}}
-              <span class="field-help">Bookings have been manually closed by the organiser.</span>
-            {{/if}}
-          </div>
-        {{/if}}
-
-        {{!-- Event Running --}}
-        {{#if this.isEventRunning}}
+        {{else if this.isUpcoming}}
+          {{#if this.bookingNotOpenYet}}
+            <div class="event-closed-banner">⏳ Bookings are not yet open for this event.
+              {{#if this.event.booking_opens_at}}
+                <span class="field-help">Bookings open: {{this.formatDate this.event.booking_opens_at}}</span>
+              {{/if}}
+              {{#if this.currentUser}}
+                <div style="margin-top:8px;">
+                  <button class="btn btn-small btn-default rc-alert-btn" {{on "click" this.toggleBookingAlert}}>
+                    {{if this.hasBookingAlert "🔕 Cancel Alert" "🔔 Alert me when booking opens"}}
+                  </button>
+                </div>
+              {{/if}}
+            </div>
+          {{else if this.bookingClosed}}
+            <div class="event-closed-banner">⏰ Booking has closed for this event.
+              {{#if this.event.booking_manually_closed}}
+                <span class="field-help">Bookings have been manually closed by the organiser.</span>
+              {{/if}}
+            </div>
+          {{/if}}
+        {{else if this.isRaceDay}}
           <div class="event-status-banner event-status-banner--running">
-            🏁 <strong>Event Running</strong> — Results will be published after the event.
+            {{i18n "discourse_event_system.event_widget.race_day"}}
           </div>
-        {{/if}}
-
-        {{!-- Awaiting Results --}}
-        {{#if this.isAwaitingResults}}
+        {{else if (eq this.lifecycleState "processing")}}
           <div class="event-status-banner event-status-banner--awaiting">
-            ⏳ <strong>Awaiting Results</strong> — This event has concluded. Results will be published shortly.
+            {{i18n "discourse_event_system.event_widget.processing"}}
+          </div>
+        {{else if (eq this.lifecycleState "awaiting_results")}}
+          <div class="event-status-banner event-status-banner--awaiting">
+            {{i18n "discourse_event_system.event_widget.awaiting_results"}}
+          </div>
+        {{else if (eq this.lifecycleState "no_results_expected")}}
+          <div class="event-status-banner event-status-banner--finished">
+            {{i18n "discourse_event_system.event_widget.no_results_expected"}}
           </div>
         {{/if}}
 
-        {{!-- Published Results --}}
         {{#if this.hasResults}}
-          <div class="event-results-section">
-            <h2 class="results-heading">🏆 Results</h2>
-
-            {{!-- Podium Cards --}}
-            <div class="podium-cards">
-              {{#each this.results.class_summaries as |summary|}}
-                <div class="podium-card">
-                  <h3 class="podium-class-name">{{summary.class_name}}</h3>
-                  <div class="podium-positions">
-
-                    {{!-- 1st Place --}}
-                    <div class="podium-position podium-first">
-                      <div class="podium-trophy">🥇</div>
-                      {{#if summary.first.user}}
-                        <a href="/u/{{summary.first.user.username}}" data-user-card={{summary.first.user.username}}>
-                          <img
-                            src={{summary.first.user.avatar_url}}
-                            class="podium-avatar"
-                            alt={{summary.first.user.username}}
-                            width="60" height="60"
-                          />
-                        </a>
-                        <span class="podium-name">{{summary.first.user.username}}</span>
-                      {{else}}
-                        <div class="podium-avatar podium-avatar--unknown">?</div>
-                        <span class="podium-name">{{summary.first.driver_name}}</span>
-                      {{/if}}
-                    </div>
-
-                    {{!-- 2nd Place --}}
-                    <div class="podium-position podium-second">
-                      <div class="podium-trophy">🥈</div>
-                      {{#if summary.second.user}}
-                        <a href="/u/{{summary.second.user.username}}" data-user-card={{summary.second.user.username}}>
-                          <img
-                            src={{summary.second.user.avatar_url}}
-                            class="podium-avatar"
-                            alt={{summary.second.user.username}}
-                            width="60" height="60"
-                          />
-                        </a>
-                        <span class="podium-name">{{summary.second.user.username}}</span>
-                      {{else}}
-                        <div class="podium-avatar podium-avatar--unknown">?</div>
-                        <span class="podium-name">{{summary.second.driver_name}}</span>
-                      {{/if}}
-                    </div>
-
-                    {{!-- 3rd Place --}}
-                    <div class="podium-position podium-third">
-                      <div class="podium-trophy">🥉</div>
-                      {{#if summary.third.user}}
-                        <a href="/u/{{summary.third.user.username}}" data-user-card={{summary.third.user.username}}>
-                          <img
-                            src={{summary.third.user.avatar_url}}
-                            class="podium-avatar"
-                            alt={{summary.third.user.username}}
-                            width="60" height="60"
-                          />
-                        </a>
-                        <span class="podium-name">{{summary.third.user.username}}</span>
-                      {{else}}
-                        <div class="podium-avatar podium-avatar--unknown">?</div>
-                        <span class="podium-name">{{summary.third.driver_name}}</span>
-                      {{/if}}
-                    </div>
-
-                  </div>
-
-                  {{!-- Fastest Lap --}}
-                  {{#if summary.fastest_lap.driver_name}}
-                    <div class="podium-fastest-lap">
-                      <span>⚡ Fastest Lap: </span>
-                      {{#if summary.fastest_lap.user}}
-                        <a href="/u/{{summary.fastest_lap.user.username}}" data-user-card={{summary.fastest_lap.user.username}}>
-                          {{summary.fastest_lap.user.username}}
-                        </a>
-                      {{else}}
-                        <span>{{summary.fastest_lap.driver_name}}</span>
-                      {{/if}}
-                      <span class="fastest-lap-time"> — {{summary.fastest_lap.extra}}s</span>
-                    </div>
-                  {{/if}}
-
-                </div>
-              {{/each}}
-            </div>
-
-            {{!-- Full Results Tables --}}
-            <div class="full-results">
-              <h3>Full Finals Results</h3>
-              {{#each this.results.races as |race|}}
-                <div class="results-race-section">
-                  <h4>{{race.race_name}}</h4>
-                  <table class="results-table">
-                    <thead>
-                      <tr>
-                        <th>Pos</th>
-                        <th>Car</th>
-                        <th>Driver</th>
-                        <th>Laps / Time</th>
-                        <th>Best Lap</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {{#each race.entries as |entry|}}
-                        <tr>
-                          <td>{{entry.position}}</td>
-                          <td>{{entry.car_number}}</td>
-                          <td>
-                            {{#if entry.user}}
-                              <a href="/u/{{entry.user.username}}" data-user-card={{entry.user.username}}>
-                                {{entry.user.username}}
-                              </a>
-                            {{else}}
-                              {{entry.driver_name}}
-                            {{/if}}
-                          </td>
-                          <td>{{entry.laps}} / {{entry.race_time}}</td>
-                          <td>{{entry.best_lap}}</td>
-                        </tr>
-                      {{/each}}
-                    </tbody>
-                  </table>
-                </div>
-              {{/each}}
-            </div>
-          </div>
+          <DesEventResults @results={{this.results}} />
         {{/if}}
 
-        {{#if this.bookingDisabled}}
+        {{#if this.showReadOnlyClasses}}
           {{#if this.event.classes.length}}
             <div class="event-detail-classes">
               <h3>Classes</h3>
@@ -745,7 +646,19 @@ export default class EventBookingWidget extends Component {
           {{/if}}
         {{/if}}
 
-        {{#unless this.bookingDisabled}}
+        {{#if this.showReadOnlyPricing}}
+          <div class="event-detail-pricing">
+            <h3>Pricing</h3>
+            {{#if (eq this.event.pricing.rule_type "tiered")}}
+              <p>First class: £{{this.event.pricing.first_class_price}}</p>
+              <p>Additional classes: £{{this.event.pricing.subsequent_class_price}} each</p>
+            {{else}}
+              <p>£{{this.event.pricing.flat_price}} per class</p>
+            {{/if}}
+          </div>
+        {{/if}}
+
+        {{#if this.showBookingArea}}
         <div class="event-detail-classes">
           <h3>Classes</h3>
           <div class="event-classes-grid">
@@ -861,7 +774,11 @@ export default class EventBookingWidget extends Component {
                 {{if this.isBooking "Processing..." "Book Now"}}
               </button>
             {{else}}
-              <a href="/login" class="btn btn-primary">Log in to Book</a>
+              <DButton
+                class="btn-primary"
+                @action={{this.showLogin}}
+                @label="discourse_event_system.event_widget.log_in_to_book"
+              />
             {{/if}}
           {{/if}}
 
@@ -887,24 +804,28 @@ export default class EventBookingWidget extends Component {
               <p class="refund-info refund-ended">💰 No refunds available</p>
             {{/if}}
           </div>
-          <div class="calendar-dropdown-wrapper">
-            <button class="btn btn-default" type="button" {{on "click" this.toggleCalendarDropdown}}>📅 Add to Calendar</button>
-            {{#if this.showCalendarDropdown}}
-              <div class="calendar-dropdown">
-                <a href="#" class="calendar-dropdown-item" {{on "click" this.downloadICS}}>📅 Download ICS (Apple/Outlook)</a>
-                <a href={{this.googleCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">📅 Google Calendar</a>
-                <a href={{this.outlookCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">📅 Outlook.com</a>
+        </div>
+        {{/if}}
+
+        {{#if (or this.isUpcoming this.isRaceDay this.event.is_admin)}}
+          <div class="event-detail-actions event-detail-actions--secondary">
+            {{#if (or this.isUpcoming this.isRaceDay)}}
+              <div class="calendar-dropdown-wrapper">
+                <button class="btn btn-default" type="button" {{on "click" this.toggleCalendarDropdown}}>📅 Add to Calendar</button>
+                {{#if this.showCalendarDropdown}}
+                  <div class="calendar-dropdown">
+                    <a href="#" class="calendar-dropdown-item" {{on "click" this.downloadICS}}>📅 Download ICS (Apple/Outlook)</a>
+                    <a href={{this.googleCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">📅 Google Calendar</a>
+                    <a href={{this.outlookCalendarUrl}} class="calendar-dropdown-item" target="_blank" rel="noopener">📅 Outlook.com</a>
+                  </div>
+                {{/if}}
               </div>
             {{/if}}
+            {{#if this.event.is_admin}}
+              <LinkTo class="btn btn-default" @model={{this.event.id}} @route="event-manage">{{i18n "discourse_event_system.event_widget.event_admin"}}</LinkTo>
+            {{/if}}
           </div>
-
-          {{#if this.event.is_admin}}
-            <a href="/events/{{this.event.id}}/manage" class="btn btn-default">⚙️ Manage Event</a>
-          {{/if}}
-
-          <a href="/events/{{this.event.id}}" class="btn btn-default">📋 Full Event Page</a>
-        </div>
-        {{/unless}}
+        {{/if}}
 
         {{!-- Who's Coming (logged-in users, or when event is running) --}}
         {{#if this.showWhosComingSection}}

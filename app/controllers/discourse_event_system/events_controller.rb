@@ -83,7 +83,9 @@ module DiscourseEventSystem
     def rc_topic_list
       events = DesEvent.includes(:organisation, { venue: :tracks }, des_event_classes: :class_type)
                        .where.not(topic_id: nil)
-                       .where.not(status: ['cancelled', 'draft'])
+                       .where.not(status: 'draft')
+                       # Cancelled events stay listed (with a badge) until their date passes.
+                       .where("des_events.status <> 'cancelled' OR des_events.start_date >= ?", Time.zone.now.beginning_of_day)
 
       case params[:time_filter]
       when 'past'
@@ -800,6 +802,8 @@ module DiscourseEventSystem
         } : nil,
         max_classes_per_booking: event.max_classes_per_booking,
         rc_results_meeting_id: event.rc_results_meeting_id,
+        lifecycle_state: event.lifecycle_state,
+        expects_results: event.expects_results?,
         is_admin: current_user.present? && is_event_admin?(event),
         user_is_member: current_user.present? && DesOrganisationMembership.where(user_id: current_user.id, organisation_id: event.organisation_id).active.exists?,
         user_is_junior: current_user.present? && begin

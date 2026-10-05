@@ -2,6 +2,7 @@ import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
 import DButton from "discourse/ui-kit/d-button";
+import DesEventResults from "../components/des-event-results";
 
 export default <template>
   <div class="event-detail-container">
@@ -130,148 +131,18 @@ export default <template>
     {{!-- Discussion link --}}
 
     {{#if @controller.isChampionshipRound}}
-      <div class="event-results-section">
-        <h2 class="results-heading">🏆 Championship Round Results</h2>
-
-        {{#if (eq @controller.results.status "none")}}
-          <div class="results-awaiting">
-            <p>⏳ Awaiting event results</p>
-          </div>
-
-        {{else if (eq @controller.results.status "pending_match")}}
-          <div class="results-awaiting">
-            <p>⏳ Results being processed</p>
-          </div>
-
-        {{else if (eq @controller.results.status "published")}}
-
-          {{!-- Podium Cards --}}
-          <div class="podium-cards">
-            {{#each @controller.results.class_summaries as |summary|}}
-              <div class="podium-card">
-                <h3 class="podium-class-name">{{summary.class_name}}</h3>
-                <div class="podium-positions">
-
-                  {{!-- 1st Place --}}
-                  <div class="podium-position podium-first">
-                    <div class="podium-trophy">🥇</div>
-                    {{#if summary.first.user}}
-                      <a data-user-card={{summary.first.user.username}} href="/u/{{summary.first.user.username}}">
-                        <img
-                          alt={{summary.first.user.username}}
-                          class="podium-avatar"
-                          height="60"
-                          src={{summary.first.user.avatar_url}} width="60"
-                        />
-                      </a>
-                      <span class="podium-name">{{summary.first.user.username}}</span>
-                    {{else}}
-                      <div class="podium-avatar podium-avatar--unknown">?</div>
-                      <span class="podium-name">{{summary.first.driver_name}}</span>
-                    {{/if}}
-                  </div>
-
-                  {{!-- 2nd Place --}}
-                  <div class="podium-position podium-second">
-                    <div class="podium-trophy">🥈</div>
-                    {{#if summary.second.user}}
-                      <a data-user-card={{summary.second.user.username}} href="/u/{{summary.second.user.username}}">
-                        <img
-                          alt={{summary.second.user.username}}
-                          class="podium-avatar"
-                          height="60"
-                          src={{summary.second.user.avatar_url}} width="60"
-                        />
-                      </a>
-                      <span class="podium-name">{{summary.second.user.username}}</span>
-                    {{else}}
-                      <div class="podium-avatar podium-avatar--unknown">?</div>
-                      <span class="podium-name">{{summary.second.driver_name}}</span>
-                    {{/if}}
-                  </div>
-
-                  {{!-- 3rd Place --}}
-                  <div class="podium-position podium-third">
-                    <div class="podium-trophy">🥉</div>
-                    {{#if summary.third.user}}
-                      <a data-user-card={{summary.third.user.username}} href="/u/{{summary.third.user.username}}">
-                        <img
-                          alt={{summary.third.user.username}}
-                          class="podium-avatar"
-                          height="60"
-                          src={{summary.third.user.avatar_url}} width="60"
-                        />
-                      </a>
-                      <span class="podium-name">{{summary.third.user.username}}</span>
-                    {{else}}
-                      <div class="podium-avatar podium-avatar--unknown">?</div>
-                      <span class="podium-name">{{summary.third.driver_name}}</span>
-                    {{/if}}
-                  </div>
-
-                </div>
-
-                {{!-- Fastest Lap --}}
-                {{#if summary.fastest_lap.driver_name}}
-                  <div class="podium-fastest-lap">
-                    <span>⚡ Fastest Lap: </span>
-                    {{#if summary.fastest_lap.user}}
-                      <a data-user-card={{summary.fastest_lap.user.username}} href="/u/{{summary.fastest_lap.user.username}}">
-                        {{summary.fastest_lap.user.username}}
-                      </a>
-                    {{else}}
-                      <span>{{summary.fastest_lap.driver_name}}</span>
-                    {{/if}}
-                    <span class="fastest-lap-time"> — {{summary.fastest_lap.extra}}s</span>
-                  </div>
-                {{/if}}
-
-              </div>
-            {{/each}}
-          </div>
-
-          {{!-- Full Results Tables --}}
-          <div class="full-results">
-            <h3>Full Finals Results</h3>
-            {{#each @controller.results.races as |race|}}
-              <div class="results-race-section">
-                <h4>{{race.race_name}}</h4>
-                <table class="results-table">
-                  <thead>
-                    <tr>
-                      <th>Pos</th>
-                      <th>Car</th>
-                      <th>Driver</th>
-                      <th>Laps / Time</th>
-                      <th>Best Lap</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {{#each race.entries as |entry|}}
-                      <tr>
-                        <td>{{entry.position}}</td>
-                        <td>{{entry.car_number}}</td>
-                        <td>
-                          {{#if entry.user}}
-                            <a data-user-card={{entry.user.username}} href="/u/{{entry.user.username}}">
-                              {{entry.user.username}}
-                            </a>
-                          {{else}}
-                            {{entry.driver_name}}
-                          {{/if}}
-                        </td>
-                        <td>{{entry.laps}} / {{entry.race_time}}</td>
-                        <td>{{entry.best_lap}}</td>
-                      </tr>
-                    {{/each}}
-                  </tbody>
-                </table>
-              </div>
-            {{/each}}
-          </div>
-
-        {{/if}}
-      </div>
+      {{#if (eq @controller.results.status "published")}}
+        <DesEventResults @results={{@controller.results}} />
+      {{else}}
+        <div class="event-results-section">
+          <h2 class="results-heading">🏆 Championship Round Results</h2>
+          {{#if (eq @controller.results.status "pending_match")}}
+            <div class="results-awaiting"><p>⏳ Results being processed</p></div>
+          {{else}}
+            <div class="results-awaiting"><p>⏳ Awaiting event results</p></div>
+          {{/if}}
+        </div>
+      {{/if}}
     {{/if}}
 
     {{!-- 7. Who's Coming (collapsible) --}}

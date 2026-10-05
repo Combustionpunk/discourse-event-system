@@ -7,6 +7,7 @@ import { service } from "@ember/service";
 import { on } from "@ember/modifier";
 import { fn, concat } from "@ember/helper";
 import { eq, not } from "discourse/truth-helpers";
+import { i18n } from "discourse-i18n";
 
 export default class RcEventsList extends Component {
   @service currentUser;
@@ -275,6 +276,9 @@ export default class RcEventsList extends Component {
 
   eventBadgeClass(event) {
     if (event.type === 'imported') return "rc-cal-event--imported";
+    if (event.status === "cancelled") {
+      return "rc-cal-event--cancelled";
+    }
     if (event.is_past) return "rc-cal-event--past";
     if (event.booking_manually_closed) return "rc-cal-event--closed";
     if (event.booking_open) return "rc-cal-event--open";
@@ -487,7 +491,7 @@ export default class RcEventsList extends Component {
                   </div>
 
                 {{else}}
-                  <a href={{event.topic_url}} class="rc-event-card {{if event.is_past 'rc-event-card--past' ''}} {{if event.is_today 'rc-event-card--today' ''}}">
+                  <a href={{event.topic_url}} class="rc-event-card {{if event.is_past 'rc-event-card--past' ''}} {{if event.is_today 'rc-event-card--today' ''}} {{if (eq event.status 'cancelled') 'rc-event-card--cancelled' ''}}">
 
                     <div class="rc-card-header">
                       <div class="rc-card-title-block">
@@ -495,7 +499,9 @@ export default class RcEventsList extends Component {
                         <div class="rc-card-date">📅 {{event.formatted_date}}</div>
                       </div>
                       <div class="rc-card-status-badges">
-                        {{#if event.is_today}}
+                        {{#if (eq event.status "cancelled")}}
+                          <span class="rc-event-badge rc-event-badge--cancelled">{{i18n "discourse_event_system.event_widget.cancelled_badge"}}</span>
+                        {{else if event.is_today}}
                           <span class="rc-event-badge rc-event-badge--today">📍 Today</span>
                         {{else if event.is_past}}
                           <span class="rc-event-badge rc-event-badge--past">✅ Past</span>
@@ -558,7 +564,9 @@ export default class RcEventsList extends Component {
                         {{/each}}
                       </div>
                       <div class="rc-card-booking">
-                        {{#if event.booking_manually_closed}}
+                        {{#if (eq event.status "cancelled")}}
+                          {{! The status badge already says it is cancelled. }}
+                        {{else if event.booking_manually_closed}}
                           <span class="rc-event-badge rc-event-badge--closed">🔴 Booking Closed</span>
                         {{else if event.booking_open}}
                           <span class="rc-event-badge rc-event-badge--open">🟢 Booking Open</span>

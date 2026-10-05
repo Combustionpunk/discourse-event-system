@@ -64,6 +64,14 @@
   &--past {
     opacity: 0.72;
   }
+
+  &--cancelled {
+    opacity: 0.72;
+
+    .rc-event-title {
+      text-decoration: line-through;
+    }
+  }
 }
 
 .rc-card-header {
@@ -111,6 +119,11 @@
   &--open { background: var(--success-low); color: var(--success); }
   &--closed { background: var(--danger-low); color: var(--danger); }
   &--soon { background: var(--highlight-low); color: var(--highlight-high); }
+
+  &--cancelled {
+    background: var(--danger);
+    color: var(--secondary);
+  }
 }
 
 .rc-card-body {
@@ -330,6 +343,11 @@
   &--soon { background: var(--highlight); color: #333; }
   &--closed { background: var(--danger); }
   &--past { background: var(--primary-medium); }
+
+  &--cancelled {
+    background: var(--primary-medium);
+    text-decoration: line-through;
+  }
 }
 
 .rc-cal-multi-badge {
@@ -384,6 +402,11 @@
   &--soon { background: var(--highlight); color: #333; }
   &--closed { background: var(--danger); }
   &--past { background: var(--primary-medium); }
+
+  &--cancelled {
+    background: var(--primary-medium);
+    text-decoration: line-through;
+  }
 }
 
 .rc-cal-popover-title {

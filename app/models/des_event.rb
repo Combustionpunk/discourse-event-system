@@ -14,6 +14,7 @@ class DesEvent < ActiveRecord::Base
   has_many :des_event_discounts, foreign_key: 'event_id'
   has_many :des_event_booking_alerts, foreign_key: :event_id, dependent: :destroy
   has_one :des_event_payout, foreign_key: :event_id
+  has_one :des_event_result, class_name: "DesEventResult", foreign_key: :event_id
 
   validates :title, presence: true
   validates :organisation_id, presence: true
@@ -116,6 +117,25 @@ class DesEvent < ActiveRecord::Base
   def race_day?(now = Time.zone.now)
     return false if start_date.blank?
     now.between?(start_date.beginning_of_day, (end_date || start_date).end_of_day)
+  end
+
+  # External events are run and scored elsewhere, so their results never arrive here.
+  def expects_results?
+    return false if booking_type == "external"
+    rc_results_meeting_id.present? || !!event_type&.produces_results?
+  end
+
+  # Where the event is in its life, from a member's point of view. Drives the topic widget.
+  def lifecycle_state(now = Time.zone.now)
+    return "draft" if draft?
+    return "cancelled" if status == "cancelled"
+
+    result_status = des_event_result&.status
+    return "results" if result_status == "published"
+    return "race_day" if race_day?(now)
+    return "upcoming" if start_date.blank? || now < start_date.beginning_of_day
+    return "processing" if result_status.present?
+    expects_results? ? "awaiting_results" : "no_results_expected"
   end
 
   def create_topic!

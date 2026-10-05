@@ -141,6 +141,25 @@ en:
           both: "Both"
       event_detail:
         discussion_and_booking: "🏁 Discussion & booking"
+      event_widget:
+        race_day: "🏁 Race day. Results will appear here after racing."
+        processing: "⏳ Results are being processed and will appear here once published."
+        awaiting_results: "⏳ Awaiting results. This event has finished and results will be published soon."
+        no_results_expected: "🏁 This event has finished. No results will be published here."
+        log_in_to_book: "Log in to book"
+        event_admin: "⚙️ Event admin"
+        cancelled_badge: "Cancelled"
+      event_results:
+        heading: "🏆 Results"
+        fastest_lap: "⚡ Fastest lap:"
+        lap_time: "%{time}s"
+        full_finals: "Full finals results"
+        columns:
+          position: "Pos"
+          car: "Car"
+          driver: "Driver"
+          laps_time: "Laps / time"
+          best_lap: "Best lap"
       car_model_detail:
         back: "← Car models"
         racers: "Racing this car"
