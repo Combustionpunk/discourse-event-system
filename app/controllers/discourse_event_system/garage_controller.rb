@@ -2,6 +2,8 @@
 
 module DiscourseEventSystem
   class GarageController < ApplicationController
+    requires_plugin PLUGIN_NAME
+
     before_action :ensure_logged_in, except: [:public_garage]
 
     def index
@@ -40,10 +42,9 @@ module DiscourseEventSystem
       }
     end
 
-
     def models
       manufacturer = DesManufacturer.find(params[:manufacturer_id])
-      models = DesCarModel.where(manufacturer_id: manufacturer.id, status: ['approved', 'pending']).order(:name)
+      models = DesCarModel.visible_to(guardian).where(manufacturer_id: manufacturer.id).where.not(status: "rejected").order(:name)
       render json: {
         models: models.map { |m| { id: m.id, name: m.name, year_released: m.year_released, driveline: m.driveline, scale: m.scale, chassis_type: m.chassis_type, status: m.status } }
       }
@@ -93,7 +94,7 @@ module DiscourseEventSystem
 
     def suggest_model
       normalised_name = params[:name].to_s.strip.squeeze(" ").split.map(&:capitalize).join(" ")
-      existing = DesCarModel.where(manufacturer_id: params[:manufacturer_id])
+      existing = DesCarModel.visible_to(guardian).where(manufacturer_id: params[:manufacturer_id])
         .where("LOWER(name) = ?", normalised_name.downcase).first
       if existing
         render json: { id: existing.id, name: existing.name, status: existing.status }
@@ -102,10 +103,10 @@ module DiscourseEventSystem
       model = DesCarModel.create!(
         manufacturer_id: params[:manufacturer_id],
         name: normalised_name,
-        year_released: params[:year_released].present? ? params[:year_released].to_i : nil,
-        driveline: params[:driveline].present? ? params[:driveline] : nil,
-        scale: params[:scale].present? ? params[:scale] : nil,
-        chassis_type: params[:chassis_type].present? ? params[:chassis_type] : nil,
+        year_released: params[:year_released].presence&.to_i,
+        driveline: params[:driveline].presence,
+        scale: params[:scale].presence,
+        chassis_type: params[:chassis_type].presence,
         box_art_upload_id: DesCarModel.box_art_upload_id_for(params[:box_art_upload_id], current_user),
         status: 'pending',
         created_by: current_user.id
@@ -133,7 +134,7 @@ module DiscourseEventSystem
       # If custom model name given, check if it matches an existing model
       if attrs[:custom_model_name].present? && attrs[:manufacturer_id].present?
         normalised = attrs[:custom_model_name].strip.squeeze(" ").split.map(&:capitalize).join(" ")
-        existing = DesCarModel.where(manufacturer_id: attrs[:manufacturer_id])
+        existing = DesCarModel.visible_to(guardian).where(manufacturer_id: attrs[:manufacturer_id])
           .where("LOWER(name) = ?", normalised.downcase).first
         if existing
           attrs[:car_model_id] = existing.id

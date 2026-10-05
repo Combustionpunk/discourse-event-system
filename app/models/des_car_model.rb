@@ -48,6 +48,20 @@ class DesCarModel < ActiveRecord::Base
   scope :approved, -> { where(status: "approved") }
   scope :pending, -> { where(status: "pending") }
 
+  # Approved models plus the viewer's own pending suggestions; car model editors see everything.
+  scope :visible_to,
+        ->(guardian) do
+          next all if guardian.can_edit_car_models?
+          next approved unless guardian.authenticated?
+          where(status: "approved").or(where(status: "pending", created_by: guardian.user.id))
+        end
+
+  # Unlike the list, a suggester can still open their own rejected model.
+  def visible_to?(guardian)
+    status == "approved" || guardian.can_edit_car_models? ||
+      (guardian.authenticated? && created_by == guardian.user.id)
+  end
+
   # Admins may attach any upload; suggesters only uploads they made themselves.
   def self.box_art_upload_id_for(upload_id, user)
     return if upload_id.blank?

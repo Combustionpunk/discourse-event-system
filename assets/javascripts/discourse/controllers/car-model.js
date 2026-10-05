@@ -9,6 +9,7 @@ import { carModelSlug, powerTypeLabel } from "../components/des-car-model-card";
 import DesMergeCarModelModal from "../components/des-merge-car-model-modal";
 
 export default class CarModelController extends Controller {
+  // eslint-disable-next-line discourse/no-unused-services
   @service currentUser;
   @service dialog;
   @service modal;
@@ -34,17 +35,17 @@ export default class CarModelController extends Controller {
     return this.carModel.in_garage || this.addedToGarage;
   }
 
-  get isAdmin() {
-    return !!this.currentUser?.admin;
+  get canEdit() {
+    return !!this.model.can_edit;
   }
 
   // Who suggested a model is moderation context, so admins only.
   get showSuggestedBy() {
-    return this.isAdmin && !!this.carModel.created_by;
+    return this.canEdit && !!this.carModel.created_by;
   }
 
   get isEditing() {
-    return !!this.edit && !!this.model.edit_options;
+    return !!this.edit && this.canEdit;
   }
 
   get specs() {

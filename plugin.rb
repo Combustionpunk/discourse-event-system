@@ -26,64 +26,65 @@ register_asset "stylesheets/common/des-car-models.scss"
 register_asset "stylesheets/common/rc-events-list.scss"
 
 after_initialize do
-  load File.expand_path("../app/models/des_position.rb", __FILE__)
-  load File.expand_path("../app/models/des_organisation.rb", __FILE__)
-  load File.expand_path("../app/models/des_organisation_member.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_type.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_class_type.rb", __FILE__)
-  load File.expand_path("../app/models/des_event.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_pricing_rule.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_class.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_discount.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_discount_condition.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_booking.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_booking_class.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_booking_payment.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_booking_refund.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_waitlist.rb", __FILE__)
-  load File.expand_path("../app/models/des_organisation_membership_type.rb", __FILE__)
-  load File.expand_path("../app/models/des_organisation_membership.rb", __FILE__)
-  load File.expand_path("../app/models/des_membership_payment.rb", __FILE__)
-  load File.expand_path("../app/models/des_membership_payout.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_payout.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_cancellation_refund.rb", __FILE__)
-  load File.expand_path("../app/models/des_manufacturer.rb", __FILE__)
-  load File.expand_path("../app/models/des_car_model.rb", __FILE__)
-  load File.expand_path("../app/models/des_car_model_image_suggestion.rb", __FILE__)
-  load File.expand_path("../app/models/des_user_car.rb", __FILE__)
-  load File.expand_path("../app/models/des_class_compatibility_rule.rb", __FILE__)
-  load File.expand_path("../app/models/des_event_booking_alert.rb", __FILE__)
-  load File.expand_path("../app/models/des_imported_event.rb", __FILE__)
-  load File.expand_path("../app/models/des_venue_suggestion.rb", __FILE__)
-  load File.expand_path("../app/models/des_venue_track.rb", __FILE__)
-  load File.expand_path("../app/services/des_paypal_service.rb", __FILE__)
-  load File.expand_path("../app/services/des_booking_service.rb", __FILE__)
-  load File.expand_path("../app/services/des_car_model_merge_service.rb", __FILE__)
-  load File.expand_path("../app/services/des_car_model_name_tidier.rb", __FILE__)
-  load File.expand_path("../app/controllers/discourse_event_system/events_controller.rb", __FILE__)
-  load File.expand_path("../app/controllers/discourse_event_system/bookings_controller.rb", __FILE__)
-  load File.expand_path("../app/controllers/discourse_event_system/organisations_controller.rb", __FILE__)
-  load File.expand_path("../app/controllers/discourse_event_system/frontend_controller.rb", __FILE__)
-  load File.expand_path("../app/controllers/discourse_event_system/racing_profiles_controller.rb", __FILE__)
-  load File.expand_path("../app/controllers/discourse_event_system/garage_controller.rb", __FILE__)
-  load File.expand_path("../app/controllers/discourse_event_system/admin_controller.rb", __FILE__)
-  load File.expand_path("../app/controllers/discourse_event_system/car_models_controller.rb", __FILE__)
-  load File.expand_path("../app/controllers/discourse_event_system/payouts_controller.rb", __FILE__)
-  load File.expand_path("../app/mailers/discourse_event_system/event_mailer.rb", __FILE__)
-  load File.expand_path("../app/mailers/discourse_event_system/booking_alert_mailer.rb", __FILE__)
-  load File.expand_path("../app/jobs/scheduled/membership_expiry_check.rb", __FILE__)
-  load File.expand_path("../app/jobs/scheduled/check_booking_alerts.rb", __FILE__)
-  load File.expand_path("../app/jobs/regular/discourse_event_system_geocode_venue.rb", __FILE__)
-  load File.expand_path("../app/jobs/scheduled/brca_calendar_sync.rb", __FILE__)
-  load File.expand_path("../app/models/des_membership_family_member.rb", __FILE__)
-  load File.expand_path("../app/models/des_organisation_membership.rb", __FILE__)
-  load File.expand_path("../app/models/des_organisation_membership_type.rb", __FILE__)
-  load File.expand_path("../app/models/des_racing_family_member.rb", __FILE__)
-  load File.expand_path("../db/seeds.rb", __FILE__) if DesPosition.count == 0
+  # Members may only suggest car models and box art; everything else goes through this.
+  add_to_class(:guardian, :can_edit_car_models?) { is_admin? }
+
+  require_relative "app/models/des_position"
+  require_relative "app/models/des_organisation"
+  require_relative "app/models/des_organisation_member"
+  require_relative "app/models/des_event_type"
+  require_relative "app/models/des_event_class_type"
+  require_relative "app/models/des_event"
+  require_relative "app/models/des_event_pricing_rule"
+  require_relative "app/models/des_event_class"
+  require_relative "app/models/des_event_discount"
+  require_relative "app/models/des_event_discount_condition"
+  require_relative "app/models/des_event_booking"
+  require_relative "app/models/des_event_booking_class"
+  require_relative "app/models/des_event_booking_payment"
+  require_relative "app/models/des_event_booking_refund"
+  require_relative "app/models/des_event_waitlist"
+  require_relative "app/models/des_organisation_membership_type"
+  require_relative "app/models/des_organisation_membership"
+  require_relative "app/models/des_membership_payment"
+  require_relative "app/models/des_membership_payout"
+  require_relative "app/models/des_event_payout"
+  require_relative "app/models/des_event_cancellation_refund"
+  require_relative "app/models/des_manufacturer"
+  require_relative "app/models/des_car_model"
+  require_relative "app/models/des_car_model_image_suggestion"
+  require_relative "app/models/des_user_car"
+  require_relative "app/models/des_class_compatibility_rule"
+  require_relative "app/models/des_event_booking_alert"
+  require_relative "app/models/des_imported_event"
+  require_relative "app/models/des_venue_suggestion"
+  require_relative "app/models/des_venue_track"
+  require_relative "app/services/des_paypal_service"
+  require_relative "app/services/des_booking_service"
+  require_relative "app/services/des_car_model_merge_service"
+  require_relative "app/services/des_car_model_name_tidier"
+  require_relative "app/controllers/discourse_event_system/events_controller"
+  require_relative "app/controllers/discourse_event_system/bookings_controller"
+  require_relative "app/controllers/discourse_event_system/organisations_controller"
+  require_relative "app/controllers/discourse_event_system/frontend_controller"
+  require_relative "app/controllers/discourse_event_system/racing_profiles_controller"
+  require_relative "app/controllers/discourse_event_system/garage_controller"
+  require_relative "app/controllers/discourse_event_system/admin_controller"
+  require_relative "app/controllers/discourse_event_system/car_models_controller"
+  require_relative "app/controllers/discourse_event_system/payouts_controller"
+  require_relative "app/mailers/discourse_event_system/event_mailer"
+  require_relative "app/mailers/discourse_event_system/booking_alert_mailer"
+  require_relative "app/jobs/scheduled/membership_expiry_check"
+  require_relative "app/jobs/scheduled/check_booking_alerts"
+  require_relative "app/jobs/regular/discourse_event_system_geocode_venue"
+  require_relative "app/jobs/scheduled/brca_calendar_sync"
+  require_relative "app/models/des_membership_family_member"
+  require_relative "app/models/des_racing_family_member"
+  require_relative "db/seeds" if DesPosition.count == 0
 
   # Auto-create events category if it doesn't exist
-  DiscourseEvent.on(:site_settings_changed) do |changes|
-    next unless changes.include?(:discourse_event_system_category_slug)
+  on(:site_settings_changed) do |changes|
+    next if changes.exclude?(:discourse_event_system_category_slug)
   end
 
   # In development with Ember CLI on port 4200, PayPal return URLs must point
@@ -112,8 +113,8 @@ after_initialize do
   end
 
   # Load badge service
-  load File.expand_path("../app/services/des_payout_service.rb", __FILE__)
-  load File.expand_path("../app/services/des_badge_service.rb", __FILE__)
+  require_relative "app/services/des_payout_service"
+  require_relative "app/services/des_badge_service"
 
   # Create RC racing badges
   begin

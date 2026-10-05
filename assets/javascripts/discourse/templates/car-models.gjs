@@ -24,7 +24,7 @@ const ModelCard = <template>
       @model.id
     }}
     @canAddToGarage={{@controller.currentUser}}
-    @canManage={{@controller.isAdmin}}
+    @canManage={{@controller.canEdit}}
     @canSuggestBoxArt={{@controller.currentUser}}
     @garageUsername={{@controller.currentUser.username}}
     @inGarage={{has @controller.garageModelIds @model.id}}
@@ -54,7 +54,7 @@ export default <template>
 
     <div class="manage-section-header des-car-models-header">
       <h1>🚗 {{i18n "discourse_event_system.car_models.title"}}</h1>
-      {{#if @controller.isAdmin}}
+      {{#if @controller.canEdit}}
         <DButton
           class="btn-default des-car-models-header__tidy"
           @action={{@controller.openNameTidy}}
@@ -130,7 +130,7 @@ export default <template>
     {{/unless}}
 
     {{#if @controller.currentUser}}
-      {{#unless @controller.isAdmin}}
+      {{#unless @controller.canEdit}}
         <div class="des-suggest-bar">
           <DButton
             class="btn-small"
@@ -236,7 +236,7 @@ export default <template>
               </span>
             {{/if}}
           </h2>
-          {{#if @controller.isAdmin}}
+          {{#if @controller.canEdit}}
             <DButton
               class="btn-small"
               @action={{fn @controller.startAddModel mfrSection.manufacturer.id}}

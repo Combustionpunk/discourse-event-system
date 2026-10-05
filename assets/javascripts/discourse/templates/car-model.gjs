@@ -83,7 +83,7 @@ export default <template>
           <h1 class="des-car-model-detail__title">
             {{@controller.carModel.name}}
           </h1>
-          {{#if @controller.isAdmin}}
+          {{#if @controller.canEdit}}
             <DMenu
               @icon="ellipsis"
               @identifier="des-car-model-detail-actions"

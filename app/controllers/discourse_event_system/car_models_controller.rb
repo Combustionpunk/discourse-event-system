@@ -2,15 +2,23 @@
 
 module DiscourseEventSystem
   class CarModelsController < ApplicationController
+    requires_plugin PLUGIN_NAME
+
     skip_before_action :check_xhr, only: :page
+    before_action :ensure_logged_in, only: %i[suggest_box_art suggest_manufacturer]
 
     def index
-      manufacturers = DesManufacturer.includes(:logo).all.order(:name)
-      models = DesCarModel.includes(:manufacturer, :creator, box_art: :optimized_images).order(:name)
+      manufacturers = DesManufacturer.visible_to(guardian).includes(:logo).order(:name)
+      models =
+        DesCarModel
+          .visible_to(guardian)
+          .includes(:manufacturer, :creator, box_art: :optimized_images)
+          .order(:name)
       @racer_counts =
         DesUserCar.active.where.not(car_model_id: nil).group(:car_model_id).distinct.count(:user_id)
 
       render json: {
+        can_edit: guardian.can_edit_car_models?,
         image_suggestions: image_suggestions_payload,
         my_pending_box_art_model_ids: my_pending_box_art_model_ids,
         my_garage_model_ids: my_garage_model_ids,
@@ -42,10 +50,11 @@ module DiscourseEventSystem
           ),
         racers: current_user ? serialize_racers(model) : nil,
         my_pending_box_art:
-          current_user.present? && !current_user.admin? &&
+          current_user.present? && !guardian.can_edit_car_models? &&
             model.image_suggestions.pending.exists?(user_id: current_user.id),
         eligible_classes: eligible_classes(model),
-        edit_options: current_user&.admin? ? edit_options : nil,
+        can_edit: guardian.can_edit_car_models?,
+        edit_options: guardian.can_edit_car_models? ? edit_options : nil,
       }
     end
 
@@ -57,12 +66,11 @@ module DiscourseEventSystem
     end
 
     def suggest_box_art
-      ensure_logged_in
-      model = DesCarModel.find(params[:id])
+      model = find_visible_model!
       upload_id = DesCarModel.box_art_upload_id_for(params[:upload_id], current_user)
       raise Discourse::InvalidParameters.new(:upload_id) if upload_id.blank?
 
-      if current_user.admin?
+      if guardian.can_edit_car_models?
         model.update!(box_art_upload_id: upload_id)
         return render json: { applied: true }
       end
@@ -79,26 +87,21 @@ module DiscourseEventSystem
     end
 
     def suggest_manufacturer
-      ensure_logged_in
       manufacturer = DesManufacturer.create!(
         name: params[:name].to_s.strip,
         status: 'pending',
         created_by: current_user.id
       )
       render json: serialize_manufacturer(manufacturer), status: :created
-    rescue => e
-      render json: { error: e.message }, status: :unprocessable_entity
+    rescue ActiveRecord::RecordInvalid => e
+      render_json_error(e.record.errors.full_messages.join(", "))
     end
 
     private
 
     def find_visible_model!
       model = DesCarModel.includes(:creator, manufacturer: :logo, box_art: :optimized_images).find_by(id: params[:id].to_i)
-      visible =
-        model &&
-          (model.status == "approved" || current_user&.admin? ||
-            (model.status == "pending" && model.created_by == current_user&.id))
-      raise Discourse::NotFound unless visible
+      raise Discourse::NotFound unless model&.visible_to?(guardian)
       model
     end
 
@@ -132,7 +135,7 @@ module DiscourseEventSystem
     end
 
     def image_suggestions_payload
-      return [] unless current_user&.admin?
+      return [] unless guardian.can_edit_car_models?
       DesCarModelImageSuggestion
         .pending
         .includes(:user, :upload, car_model: :manufacturer)
@@ -155,7 +158,7 @@ module DiscourseEventSystem
     end
 
     def my_pending_box_art_model_ids
-      return [] if current_user.blank? || current_user.admin?
+      return [] if current_user.blank? || guardian.can_edit_car_models?
       DesCarModelImageSuggestion.pending.where(user_id: current_user.id).pluck(:car_model_id)
     end
 
@@ -167,6 +170,11 @@ module DiscourseEventSystem
         logo_upload_id: m.logo&.id,
         logo_url: m.logo&.url
       }
+    end
+
+    # Who suggested a model is moderation context, but suggesters can see their own.
+    def show_creator?(model)
+      guardian.can_edit_car_models? || (current_user.present? && model.created_by == current_user.id)
     end
 
     def serialize_model(m)
@@ -181,7 +189,7 @@ module DiscourseEventSystem
         chassis_type: m.chassis_type,
         power_type: m.power_type,
         status: m.status,
-        created_by: m.creator&.username,
+        created_by: show_creator?(m) ? m.creator&.username : nil,
         created_at: m.created_at,
         racer_count: @racer_counts&.fetch(m.id, 0) || 0,
         box_art_upload_id: m.box_art&.id,

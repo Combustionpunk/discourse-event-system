@@ -95,8 +95,8 @@ export default class CarModelsController extends Controller {
     return this.searchInput ?? this.q;
   }
 
-  get isAdmin() {
-    return !!this.currentUser?.admin;
+  get canEdit() {
+    return !!this.model.can_edit;
   }
 
   get allModels() {
@@ -115,7 +115,7 @@ export default class CarModelsController extends Controller {
     return this.allModels.filter(
       (m) =>
         m.status === "approved" ||
-        (!this.isAdmin &&
+        (!this.canEdit &&
           username &&
           m.status === "pending" &&
           m.created_by === username)
@@ -123,7 +123,7 @@ export default class CarModelsController extends Controller {
   }
 
   get pendingModels() {
-    if (!this.isAdmin) {
+    if (!this.canEdit) {
       return [];
     }
     const filters = this.activeFilters;
@@ -690,7 +690,7 @@ export default class CarModelsController extends Controller {
 
     if (tile.matchCount > 0) {
       this.#scrollToManufacturer(manufacturer.id);
-    } else if (tile.totalCount === 0 && this.isAdmin) {
+    } else if (tile.totalCount === 0 && this.canEdit) {
       this.startAddModel(manufacturer.id);
       schedule("afterRender", () =>
         this.#scrollToManufacturer(manufacturer.id)
@@ -755,7 +755,7 @@ export default class CarModelsController extends Controller {
         label: i18n("discourse_event_system.car_models.filters.my_cars"),
       });
     }
-    if (this.isAdmin) {
+    if (this.canEdit) {
       options.push({
         value: "missing_box_art",
         label: i18n("discourse_event_system.car_models.filters.missing_box_art"),
@@ -771,7 +771,7 @@ export default class CarModelsController extends Controller {
     if (totalCount > 0) {
       return i18n("discourse_event_system.car_models.tile_no_matches");
     }
-    if (this.isAdmin) {
+    if (this.canEdit) {
       return i18n("discourse_event_system.car_models.tile_add", {
         manufacturer: manufacturer.name,
       });

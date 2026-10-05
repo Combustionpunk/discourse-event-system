@@ -22,6 +22,13 @@ class DesManufacturer < ActiveRecord::Base
   scope :approved, -> { where(status: "approved") }
   scope :pending, -> { where(status: "pending") }
 
+  scope :visible_to,
+        ->(guardian) do
+          next all if guardian.can_edit_car_models?
+          next approved unless guardian.authenticated?
+          where(status: "approved").or(where(status: "pending", created_by: guardian.user.id))
+        end
+
   def approve!
     update!(status: "approved")
   end
