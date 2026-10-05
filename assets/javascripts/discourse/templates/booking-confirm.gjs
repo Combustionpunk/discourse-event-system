@@ -1,5 +1,7 @@
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
+import { i18n } from "discourse-i18n";
+import DesMeetingsLink from "../components/des-meetings-link";
 
 export default <template>
   <div class="booking-confirm-container">
@@ -97,12 +99,10 @@ export default <template>
       </LinkTo>
       {{#if @controller.model.event.topic_url}}
         <a class="btn btn-default" href={{@controller.model.event.topic_url}}>
-          💬 Discuss this Event
+          {{i18n "discourse_event_system.booking.back_to_event"}}
         </a>
       {{/if}}
-      <LinkTo class="btn btn-default" @route="events">
-        📅 Browse More Events
-      </LinkTo>
+      <DesMeetingsLink class="btn btn-default" />
     </div>
   </div>
 </template>

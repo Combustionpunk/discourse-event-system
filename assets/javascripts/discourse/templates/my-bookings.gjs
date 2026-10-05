@@ -2,6 +2,7 @@ import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
+import DesMeetingsLink from "../components/des-meetings-link";
 
 export default <template>
   <div class="my-bookings-container">
@@ -82,7 +83,7 @@ export default <template>
     {{#unless @controller.model.bookings.length}}
       <div class="empty-state">
         <p>You don't have any bookings yet.</p>
-        <LinkTo class="btn btn-primary" @route="events">Browse Events</LinkTo>
+        <DesMeetingsLink class="btn btn-primary" />
       </div>
     {{/unless}}
 

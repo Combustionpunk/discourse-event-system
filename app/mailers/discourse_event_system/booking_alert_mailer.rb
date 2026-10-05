@@ -5,7 +5,7 @@ module DiscourseEventSystem
     def booking_open(user, event)
       @user = user
       @event = event
-      @event_url = "#{Discourse.base_url}#{event.topic_id ? "/t/#{event.topic_id}" : ''}"
+      @event_url = "#{Discourse.base_url}#{event.topic_id ? "/t/#{event.topic_id}" : DesEvent.meetings_url}"
       @event_date = event.start_date&.strftime('%A, %d %B %Y at %H:%M')
       @venue_name = event.venue&.name
 

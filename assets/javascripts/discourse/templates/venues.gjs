@@ -2,12 +2,13 @@ import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
+import DesMeetingsLink from "../components/des-meetings-link";
 import DesVenueForm from "../components/des-venue-form";
 
 export default <template>
   <div class="venues-container">
     <div class="events-nav">
-      <LinkTo class="btn btn-default" @route="events">📅 Events</LinkTo>
+      <DesMeetingsLink class="btn btn-default" />
       <LinkTo class="btn btn-default" @route="organisations">🏢 Organisations</LinkTo>
       <LinkTo class="btn btn-default" @route="venues">📍 Venues</LinkTo>
     </div>

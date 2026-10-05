@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DesEventType < ActiveRecord::Base
   has_many :des_events
 

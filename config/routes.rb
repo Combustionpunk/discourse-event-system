@@ -2,9 +2,9 @@
 
 DiscourseEventSystem::Engine.routes.draw do
   # Frontend routes
-  get "/events" => "frontend#index"
+  get "/events" => "frontend#events"
   get "/events/:id/manage" => "frontend#index"
-  get "/events/:id" => "frontend#index"
+  get "/events/:id" => "frontend#event", constraints: { id: /\d+/ }
   get "/events/booking/:booking_id/confirm" => "frontend#index"
   get "/events/booking/:booking_id/cancel" => "frontend#index"
   get "/my-bookings" => "frontend#index"

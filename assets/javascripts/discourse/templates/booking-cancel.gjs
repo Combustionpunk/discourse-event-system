@@ -1,4 +1,5 @@
-import { LinkTo } from "@ember/routing";
+import { i18n } from "discourse-i18n";
+import DesMeetingsLink from "../components/des-meetings-link";
 
 export default <template>
   <div class="booking-cancel-container">
@@ -9,9 +10,12 @@ export default <template>
     </div>
 
     <div class="booking-cancel-actions">
-      <LinkTo class="btn btn-primary" @route="events">
-        Browse Events
-      </LinkTo>
+      {{#if @controller.model.event.topic_url}}
+        <a class="btn btn-primary" href={{@controller.model.event.topic_url}}>
+          {{i18n "discourse_event_system.booking.back_to_event"}}
+        </a>
+      {{/if}}
+      <DesMeetingsLink class="btn btn-default" />
     </div>
   </div>
 </template>

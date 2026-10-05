@@ -1,9 +1,22 @@
 import Route from "@ember/routing/route";
 import { ajax } from "discourse/lib/ajax";
+import DiscourseURL from "discourse/lib/url";
 
 export default class EventRoute extends Route {
+  // Mirrors FrontendController#event: members are sent to the event's topic.
   async model(params) {
-    const event = await ajax(`/des/events/${params.event_id}.json`);
+    let event;
+    try {
+      event = await ajax(`/des/events/${params.event_id}.json`);
+    } catch {
+      return { unavailable: true };
+    }
+    if (!event.is_admin) {
+      if (event.topic_url) {
+        DiscourseURL.routeTo(event.topic_url, { replaceURL: true });
+      }
+      return { unavailable: true };
+    }
     const date = new Date(event.start_date);
     event.formatted_date = date.toLocaleDateString("en-GB", {
       weekday: "long",
@@ -40,7 +53,7 @@ export default class EventRoute extends Route {
 
   setupController(controller, model) {
     super.setupController(controller, model);
-    if (model.event_type?.name?.toLowerCase().includes("championship")) {
+    if (!model.unavailable && model.event_type?.name?.toLowerCase().includes("championship")) {
       controller.loadResults();
     }
   }

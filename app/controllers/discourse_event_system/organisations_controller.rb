@@ -867,6 +867,7 @@ module DiscourseEventSystem
           {
             id: e.id,
             title: e.title,
+            topic_url: e.topic_id ? "/t/#{e.topic_id}" : nil,
             start_date: e.start_date,
             booking_closing_date: e.booking_closing_date,
             location: e.location,

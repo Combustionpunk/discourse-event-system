@@ -3,12 +3,13 @@ import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq, or } from "discourse/truth-helpers";
 import DEditor from "discourse/ui-kit/d-editor";
+import { i18n } from "discourse-i18n";
 import DesCloneEventModal from "../components/des-clone-event-modal";
 
 export default <template>
   <div class="event-manage-container">
     <div class="events-nav">
-      <LinkTo class="btn btn-default" @route="events">📅 Events</LinkTo>
+      <LinkTo class="btn btn-default" @route="events">{{i18n "discourse_event_system.nav.event_admin"}}</LinkTo>
       <LinkTo class="btn btn-default" @model={{@controller.model.event.id}} @route="event">
         👁 View Event
       </LinkTo>

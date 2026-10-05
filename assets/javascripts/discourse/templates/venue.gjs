@@ -2,6 +2,7 @@ import { get } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq, gt } from "discourse/truth-helpers";
+import DesEventLink from "../components/des-event-link";
 import DesVenueForm from "../components/des-venue-form";
 
 export default <template>
@@ -177,7 +178,7 @@ export default <template>
               <a href={{event.booking_url}} rel="noopener noreferrer" target="_blank">{{event.title}}</a>
               <span class="rc-event-badge rc-event-badge--brca">BRCA</span>
             {{else}}
-              <LinkTo @model={{event.id}} @route="event">{{event.title}}</LinkTo>
+              <DesEventLink @event={{event}}>{{event.title}}</DesEventLink>
             {{/if}}
             <span class="venue-event-date">📅 {{event.formatted_date}}</span>
             <span class="field-help">{{event.organisation_name}}</span>

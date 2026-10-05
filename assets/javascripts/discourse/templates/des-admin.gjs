@@ -2,6 +2,7 @@ import { concat, fn, hash } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
+import { i18n } from "discourse-i18n";
 import DesClassTypeForm from "../components/des-class-type-form";
 import DesLogoUploader from "../components/des-logo-uploader";
 import DesVenueForm from "../components/des-venue-form";
@@ -11,7 +12,7 @@ const includes = (list, value) => list?.includes(value);
 export default <template>
   <div class="des-admin-container">
     <div class="events-nav">
-      <LinkTo class="btn btn-default" @route="events">📅 Events</LinkTo>
+      <LinkTo class="btn btn-default" @route="events">{{i18n "discourse_event_system.nav.event_admin"}}</LinkTo>
       <LinkTo class="btn btn-default" @route="organisations">🏢 Organisations</LinkTo>
       <LinkTo class="btn btn-primary" @route="des-admin">⚙️ Admin</LinkTo>
     </div>

@@ -29,7 +29,7 @@ module Jobs
               message: "🏁 Booking is now open!",
               display_username: "Booking Open",
               topic_title: event.title,
-              url: event.topic_id ? "/t/#{event.topic_id}" : "/events"
+              url: event.topic_id ? "/t/#{event.topic_id}" : DesEvent.meetings_url
             }.to_json
           )
 

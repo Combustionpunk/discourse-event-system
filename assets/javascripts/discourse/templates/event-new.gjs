@@ -3,11 +3,12 @@ import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
 import DEditor from "discourse/ui-kit/d-editor";
+import { i18n } from "discourse-i18n";
 
 export default <template>
   <div class="event-new-container">
     <div class="events-nav">
-      <LinkTo class="btn btn-default" @route="events">📅 Events</LinkTo>
+      <LinkTo class="btn btn-default" @route="events">{{i18n "discourse_event_system.nav.event_admin"}}</LinkTo>
       <LinkTo class="btn btn-default" @route="organisations">🏢 Organisations</LinkTo>
     </div>
 

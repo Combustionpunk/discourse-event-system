@@ -1,12 +1,25 @@
 import Route from "@ember/routing/route";
+import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
+import DiscourseURL from "discourse/lib/url";
 
 export default class EventsRoute extends Route {
+  @service currentUser;
+  @service site;
+
   queryParams = {
     filter: { refreshModel: true },
     organisation_id: { refreshModel: true },
     event_type_id: { refreshModel: true },
   };
+
+  // Mirrors FrontendController#events for in-app navigation.
+  beforeModel(transition) {
+    if (!this.currentUser?.des_event_organiser) {
+      transition.abort();
+      DiscourseURL.routeTo(this.site.des_meetings_url, { replaceURL: true });
+    }
+  }
 
   async model(params) {
     const data = {};

@@ -139,8 +139,14 @@ en:
           nitro: "Nitro"
           petrol: "Petrol"
           both: "Both"
+      nav:
+        rc_meetings: "🏁 RC Meetings"
+        event_admin: "📅 Event admin"
+      booking:
+        back_to_event: "🏁 Back to event"
       event_detail:
         discussion_and_booking: "🏁 Discussion & booking"
+        unavailable: "This event isn't available."
       event_widget:
         race_day: "🏁 Race day. Results will appear here after racing."
         processing: "⏳ Results are being processed and will appear here once published."

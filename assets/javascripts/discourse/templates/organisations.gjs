@@ -1,9 +1,10 @@
 import { LinkTo } from "@ember/routing";
+import DesMeetingsLink from "../components/des-meetings-link";
 
 export default <template>
   <div class="organisations-container">
     <div class="events-nav">
-      <LinkTo class="btn btn-default" @route="events">📅 Events</LinkTo>
+      <DesMeetingsLink class="btn btn-default" />
       <LinkTo class="btn btn-default" @route="my-bookings">🎟 My Bookings</LinkTo>
       <LinkTo class="btn btn-default" @route="organisations">🏢 Organisations</LinkTo>
       <LinkTo class="btn btn-primary" @route="organisation-new">+ New Organisation</LinkTo>

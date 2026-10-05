@@ -276,7 +276,7 @@ module DiscourseEventSystem
             message: "💰 Payout approved for #{event.title}",
             display_username: "Payment Available",
             topic_title: event.title,
-            url: event.topic_id ? "/t/#{event.topic_id}" : "/events"
+            url: event.topic_id ? "/t/#{event.topic_id}" : DesEvent.meetings_url
           }.to_json
         )
       end

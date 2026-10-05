@@ -3,9 +3,9 @@ import { ajax } from "discourse/lib/ajax";
 
 export default class BookingCancelRoute extends Route {
   async model(params) {
-    await ajax(`/des/bookings/${params.booking_id}/cancel.json`, {
+    const booking = await ajax(`/des/bookings/${params.booking_id}/cancel.json`, {
       type: "POST",
     });
-    return { booking_id: params.booking_id };
+    return { booking_id: params.booking_id, event: booking.event };
   }
 }

@@ -3,11 +3,13 @@ import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
 import DesClassTypeForm from "../components/des-class-type-form";
+import DesEventLink from "../components/des-event-link";
+import DesMeetingsLink from "../components/des-meetings-link";
 
 export default <template>
   <div class="organisation-container">
     <div class="events-nav">
-      <LinkTo class="btn btn-default" @route="events">📅 Events</LinkTo>
+      <DesMeetingsLink class="btn btn-default" />
       <LinkTo class="btn btn-default" @route="organisations">🏢 Organisations</LinkTo>
     </div>
 
@@ -193,7 +195,7 @@ export default <template>
           <div class="org-events-list">
             {{#each @controller.model.events as |event|}}
               <div class="org-event-item">
-                <LinkTo @model={{event.id}} @route="event">{{event.title}}</LinkTo>
+                <DesEventLink @event={{event}}>{{event.title}}</DesEventLink>
                 <div style="display:flex; gap:8px; align-items:center;">
                   <span class="event-status event-status--{{event.status}}">{{event.status}}</span>
                 </div>
@@ -457,7 +459,7 @@ export default <template>
           <div class="org-events-list">
             {{#each @controller.model.events as |event|}}
               <div class="org-event-item">
-                <LinkTo @model={{event.id}} @route="event">{{event.title}}</LinkTo>
+                <DesEventLink @event={{event}}>{{event.title}}</DesEventLink>
                 <div style="display:flex; gap:8px; align-items:center;">
                   <span class="event-status event-status--{{event.status}}">{{event.status}}</span>
                   <LinkTo class="btn btn-small btn-default" @model={{event.id}} @route="event-manage">

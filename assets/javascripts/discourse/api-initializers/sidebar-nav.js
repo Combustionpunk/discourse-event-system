@@ -1,4 +1,5 @@
 import { apiInitializer } from "discourse/lib/api";
+import { i18n } from "discourse-i18n";
 
 export default apiInitializer("1.0", (api) => {
   // Add RC Racing links to user profile menu
@@ -25,6 +26,23 @@ export default apiInitializer("1.0", (api) => {
         get text() { return this._title; }
       }
 
+      class RCHrefLink extends BaseCustomSidebarSectionLink {
+        constructor({ name, href, title }) {
+          super(...arguments);
+          this._name = name;
+          this._href = href;
+          this._title = title;
+        }
+
+        get name() { return this._name; }
+
+        get href() { return this._href; }
+
+        get title() { return this._title; }
+
+        get text() { return this._title; }
+      }
+
       class RCEventsSidebarSection extends BaseCustomSidebarSection {
         get name() { return "rc-events"; }
         get title() { return "RC Racing"; }
@@ -34,14 +52,21 @@ export default apiInitializer("1.0", (api) => {
         get links() {
           const user = api.getCurrentUser();
           const links = [
+            new RCHrefLink({
+              name: "rc-meetings",
+              href: api.container.lookup("service:site").des_meetings_url,
+              title: i18n("discourse_event_system.nav.rc_meetings"),
+            }),
             new RCLink({ route: "organisations", title: "🏢 Organisations" }),
             new RCLink({ route: "venues", title: "📍 Venues" }),
             new RCLink({ route: "car-models", title: "🚗 Car Models" }),
           ];
           if (user) {
             links.push(new RCLink({ route: "racing-profile", title: "🏎️ My Racing Profile" }));
+            if (user.des_event_organiser) {
+              links.push(new RCLink({ route: "events", title: i18n("discourse_event_system.nav.event_admin") }));
+            }
             if (user.admin) {
-              links.push(new RCLink({ route: "events", title: "📅 Events" }));
               links.push(new RCLink({ route: "des-admin", title: "⚙️ DES Admin" }));
             }
           }

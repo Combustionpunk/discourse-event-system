@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DesOrganisationMember < ActiveRecord::Base
   belongs_to :organisation, class_name: 'DesOrganisation', foreign_key: 'organisation_id'
   belongs_to :user, class_name: 'User', foreign_key: 'user_id'
@@ -11,6 +13,7 @@ class DesOrganisationMember < ActiveRecord::Base
   validates :status, inclusion: { in: %w[active inactive] }
 
   scope :active, -> { where(status: 'active') }
+  scope :admins, -> { active.joins(:position).where(des_positions: { is_admin: true }) }
   scope :inactive, -> { where(status: 'inactive') }
 
   def deactivate!

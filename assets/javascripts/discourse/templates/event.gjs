@@ -2,9 +2,17 @@ import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
 import DButton from "discourse/ui-kit/d-button";
+import { i18n } from "discourse-i18n";
 import DesEventResults from "../components/des-event-results";
 
 export default <template>
+  {{#if @controller.model.unavailable}}
+    <div class="event-detail-container">
+      <p class="event-unavailable">{{i18n
+          "discourse_event_system.event_detail.unavailable"
+        }}</p>
+    </div>
+  {{else}}
   <div class="event-detail-container">
     <div class="event-detail-header">
       <h1>{{@controller.model.title}}</h1>
@@ -201,4 +209,5 @@ export default <template>
     {{/if}}
 
   </div>
+  {{/if}}
 </template>

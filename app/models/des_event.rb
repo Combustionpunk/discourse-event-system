@@ -107,11 +107,23 @@ class DesEvent < ActiveRecord::Base
   def manageable_by?(user)
     return false if user.blank?
     return true if user.admin?
-    DesOrganisationMember
-      .joins(:position)
-      .where(organisation_id: organisation_id, user_id: user.id, status: "active")
-      .where(des_positions: { is_admin: true })
-      .exists?
+    DesOrganisationMember.admins.exists?(organisation_id: organisation_id, user_id: user.id)
+  end
+
+  # Who gets the /events back office: site admins and officials of any organisation.
+  def self.organiser?(user)
+    return false if user.blank?
+    user.admin? || DesOrganisationMember.admins.exists?(user_id: user.id)
+  end
+
+  # The RC Meetings category, where member-facing event topics live.
+  def self.meetings_category
+    slug = SiteSetting.discourse_event_system_category_slug.presence || "rc-meetings"
+    Category.find_by(slug: slug)
+  end
+
+  def self.meetings_url
+    meetings_category&.url || "/categories"
   end
 
   def race_day?(now = Time.zone.now)

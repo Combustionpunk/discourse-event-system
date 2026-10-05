@@ -87,7 +87,7 @@ export default class EventController extends Controller {
       text: e.title,
       dates: dates,
       location: e.location || "",
-      details: (e.description || "") + "\n\n" + window.location.origin + "/events/" + e.id
+      details: (e.description || "") + "\n\n" + window.location.origin + (e.topic_url || "")
     });
     return "https://calendar.google.com/calendar/render?" + params.toString();
   }
@@ -103,7 +103,7 @@ export default class EventController extends Controller {
       startdt: start,
       enddt: end,
       location: e.location || "",
-      body: (e.description || "") + "\n\n" + window.location.origin + "/events/" + e.id,
+      body: (e.description || "") + "\n\n" + window.location.origin + (e.topic_url || ""),
       path: "/calendar/action/compose"
     });
     return "https://outlook.live.com/calendar/0/deeplink/compose?" + params.toString();
@@ -128,7 +128,7 @@ export default class EventController extends Controller {
       "DTEND:" + end,
       "LOCATION:" + (e.location || ""),
       "DESCRIPTION:" + (e.description || "").replace(/\n/g, "\\n"),
-      "URL:" + window.location.origin + "/events/" + e.id,
+      "URL:" + window.location.origin + (e.topic_url || ""),
       "END:VEVENT",
       "END:VCALENDAR"
     ].join("\r\n");

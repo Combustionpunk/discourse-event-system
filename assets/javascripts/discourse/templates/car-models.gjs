@@ -12,6 +12,7 @@ import {
   FormActions,
   ModelSpecFields,
 } from "../components/des-car-model-form-fields";
+import DesMeetingsLink from "../components/des-meetings-link";
 import DesPendingModelsPanel from "../components/des-pending-models-panel";
 import DesSuggestModelModal from "../components/des-suggest-model-modal";
 
@@ -42,8 +43,7 @@ const ModelCard = <template>
 export default <template>
   <div class="car-models-container">
     <div class="events-nav">
-      <LinkTo class="btn btn-default" @route="events">📅
-        {{i18n "discourse_event_system.car_models.nav.events"}}</LinkTo>
+      <DesMeetingsLink class="btn btn-default" />
       <LinkTo class="btn btn-default" @route="organisations">🏢
         {{i18n "discourse_event_system.car_models.nav.organisations"}}</LinkTo>
       <LinkTo class="btn btn-default" @route="venues">📍

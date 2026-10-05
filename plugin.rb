@@ -29,6 +29,9 @@ after_initialize do
   # Members may only suggest car models and box art; everything else goes through this.
   add_to_class(:guardian, :can_edit_car_models?) { is_admin? }
 
+  add_to_serializer(:current_user, :des_event_organiser) { DesEvent.organiser?(object) }
+  add_to_serializer(:site, :des_meetings_url) { DesEvent.meetings_url }
+
   require_relative "app/models/des_position"
   require_relative "app/models/des_organisation"
   require_relative "app/models/des_organisation_member"
