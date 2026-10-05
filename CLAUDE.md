@@ -2,6 +2,12 @@
 
 Core conventions in `../../CLAUDE.md` apply here too.
 
+## Branches and commits
+
+- Work on a feature branch (currently `feature/topic-first-events`). Check `git branch --show-current` before committing.
+- Never commit to or push `main`. Push only the feature branch: `git push origin feature/topic-first-events`.
+- Migrations are additive only: add tables, columns and indexes, but never drop, rename or rewrite existing data in place.
+
 ## Running Ruby
 
 Ruby only exists inside the `discourse_dev` Docker container, so run Ruby tooling from the Discourse root (`../..`) through `d/exec`. Paths are relative to `/src`, the Discourse root inside the container.
