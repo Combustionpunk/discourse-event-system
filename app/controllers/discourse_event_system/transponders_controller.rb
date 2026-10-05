@@ -2,6 +2,8 @@
 
 module DiscourseEventSystem
   class TranspondersController < ApplicationController
+    requires_plugin PLUGIN_NAME
+
     before_action :ensure_logged_in
 
     def index
@@ -53,8 +55,17 @@ module DiscourseEventSystem
 
     private
 
+    # Officials only see transponders of people who have booked one of their organisation's events.
     def org_official?
-      DesOrganisationMember.exists?(user_id: current_user.id, status: 'active')
+      managed_org_ids = DesOrganisationMember
+        .joins(:position)
+        .where(user_id: current_user.id, status: 'active')
+        .where(des_positions: { is_admin: true })
+        .select(:organisation_id)
+      DesEventBooking
+        .joins(:event)
+        .where(user_id: params[:user_id].to_i, des_events: { organisation_id: managed_org_ids })
+        .exists?
     end
 
     def serialize_transponder(t)

@@ -113,7 +113,7 @@ module DiscourseEventSystem
       User
         .where(id: racers_scope(model).select(:user_id))
         .order(:username_lower)
-        .map { |user| { id: user.id, username: user.username, name: user.name, avatar_template: user.avatar_template } }
+        .map { |user| { id: user.id, username: user.username, avatar_template: user.avatar_template } }
     end
 
     # Reuses the booking eligibility check by asking it about an unsaved garage car of this model.

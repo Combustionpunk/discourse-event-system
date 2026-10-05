@@ -4,8 +4,11 @@ require 'net/http'
 
 module DiscourseEventSystem
   class EventsController < ApplicationController
+    requires_plugin PLUGIN_NAME
+
     before_action :ensure_logged_in, except: [:index, :show, :public_entrants, :rc_topic_list, :geocode_postcode_endpoint, :by_topic, :results]
     before_action :set_event, only: [:show, :update, :update_pricing, :publish, :cancel, :clone, :destroy, :update_booking_status, :subscribe_booking_alert, :unsubscribe_booking_alert, :entrants, :public_entrants, :export_csv, :add_class, :update_class, :toggle_class_status, :cancel_entrant, :delete_booking, :change_entrant_car, :move_entrant_class, :sync_transponders, :destroy_class, :remove_from_waitlist]
+    before_action :ensure_event_visible!, only: [:show, :public_entrants]
 
     def index
       if current_user&.admin?
@@ -46,6 +49,7 @@ module DiscourseEventSystem
     def by_topic
       event = DesEvent.find_by(topic_id: params[:topic_id])
       return render json: { error: 'Not found' }, status: :not_found unless event
+      raise Discourse::NotFound if event.draft? && !event.manageable_by?(current_user)
       render json: serialize_event(event)
     end
 
@@ -394,7 +398,12 @@ module DiscourseEventSystem
       }
     end
 
+    # Organisers get everything; everyone else sees who is racing but none of their
+    # personal details. Logged-out visitors only see the list on race day.
     def public_entrants
+      manager = @event.manageable_by?(current_user)
+      raise Discourse::InvalidAccess if !manager && current_user.blank? && !@event.race_day?
+
       bookings = DesEventBooking.where(event_id: @event.id, status: ['confirmed', 'pending'])
         .includes(:user, booking_classes: [:event_class, { user_car: [:manufacturer, :car_model] }])
 
@@ -411,32 +420,36 @@ module DiscourseEventSystem
           entrants = class_bookings.map do |b|
             bc = b.booking_classes.find { |bc| bc.event_class_id == ec.id }
             car = bc&.user_car
-            {
+            entrant = {
               username: b.user.username,
-              name: b.user.name,
               user_id: b.user_id,
               avatar_template: b.user.avatar_template&.gsub('{'+'size}', '32'),
-              transponder: bc&.transponder_number,
               manufacturer_name: car&.manufacturer&.name,
               model_name: car&.car_model&.name || car&.custom_model_name,
               status: b.status,
-              brca_number: b.brca_membership_number
             }
+            if manager
+              entrant.merge!(
+                name: b.user.name,
+                transponder: bc&.transponder_number,
+                brca_number: b.brca_membership_number,
+              )
+            end
+            entrant
           end
 
           class_waitlist.each do |w|
-            entrants << {
+            entrant = {
               username: w.user.username,
-              name: w.user.name,
               user_id: w.user_id,
               avatar_template: w.user.avatar_template&.gsub('{'+'size}', '32'),
-              transponder: nil,
               manufacturer_name: nil,
               model_name: nil,
               status: 'waitlist',
-              brca_number: nil,
               waitlist_position: w.position
             }
+            entrant[:name] = w.user.name if manager
+            entrants << entrant
           end
 
           {
@@ -697,6 +710,10 @@ module DiscourseEventSystem
       @event = DesEvent.find(params[:id])
     end
 
+    def ensure_event_visible!
+      raise Discourse::NotFound if @event.draft? && !@event.manageable_by?(current_user)
+    end
+
     def event_params
       params.require(:event).permit(
         :title, :description, :organisation_id, :event_type_id,
@@ -840,11 +857,7 @@ module DiscourseEventSystem
     end
 
     def is_event_admin?(event)
-      return true if current_user.admin?
-      DesOrganisationMember.joins(:position)
-        .where(organisation_id: event.organisation_id, user_id: current_user.id)
-        .where(des_positions: { is_admin: true })
-        .exists?
+      event.manageable_by?(current_user)
     end
 
     def serialize_class(event_class)

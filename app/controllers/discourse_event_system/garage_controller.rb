@@ -22,6 +22,7 @@ module DiscourseEventSystem
     def public_garage
       user = User.find_by(username: params[:username])
       return render json: { cars: [] }, status: :not_found unless user
+      can_see_transponders = current_user.present? && (current_user.admin? || current_user.id == user.id)
       cars = DesUserCar.where(user_id: user.id)
         .includes(:manufacturer, :car_model, :class_type)
         .active
@@ -36,7 +37,7 @@ module DiscourseEventSystem
             chassis_type: c.car_model&.chassis_type,
             driveline: c.effective_driveline,
             year_released: c.year_released,
-            transponder_number: c.transponder_number
+            transponder_number: can_see_transponders ? c.transponder_number : nil
           }
         }
       }

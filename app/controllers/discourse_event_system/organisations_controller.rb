@@ -2,6 +2,8 @@
 
 module DiscourseEventSystem
   class OrganisationsController < ApplicationController
+    requires_plugin PLUGIN_NAME
+
     before_action :ensure_logged_in
     before_action :set_organisation, only: [:show, :update, :approve, :reject, :members, :add_member, :remove_member, :rules, :create_rule, :destroy_rule, :class_types, :create_class_type, :update_class_type, :destroy_class_type, :create_class_type_rule, :destroy_class_type_rule, :membership_types, :create_membership_type, :update_membership_type, :destroy_membership_type, :join, :confirm_membership, :admin_memberships, :admin_add_membership, :admin_update_membership, :admin_add_family_member, :admin_remove_family_member, :admin_update_family_member, :admin_delete_membership]
 
@@ -813,6 +815,20 @@ module DiscourseEventSystem
       raise Discourse::InvalidAccess unless is_admin || current_user.admin?
     end
 
+    # Organisations whose payout details this user may see: all for site admins.
+    def managed_organisation_ids
+      @managed_organisation_ids ||=
+        if current_user.admin?
+          DesOrganisation.pluck(:id)
+        else
+          DesOrganisationMember
+            .joins(:position)
+            .where(user_id: current_user.id, status: 'active')
+            .where(des_positions: { is_admin: true })
+            .pluck(:organisation_id)
+        end
+    end
+
     def is_org_admin?
       DesOrganisationMember
         .joins(:position)
@@ -824,6 +840,7 @@ module DiscourseEventSystem
     def serialize_organisation_detail(org)
       members = org.des_organisation_members.active.includes(:user, :position)
       events = DesEvent.where(organisation_id: org.id).order(start_date: :desc).limit(10)
+      events = events.where.not(status: 'draft') unless is_org_admin?
       venues = DesVenue.where(created_by_organisation_id: org.id)
         .or(DesVenue.where(claimed_organisation_id: org.id, claim_status: 'approved'))
         .includes(:tracks)
@@ -839,7 +856,7 @@ module DiscourseEventSystem
         address: org.address,
         logo_url: org.logo_url,
         google_maps_url: org.google_maps_url,
-        paypal_email: org.paypal_email,
+        paypal_email: is_org_admin? ? org.paypal_email : nil,
         status: org.status,
         surcharge_percentage: org.surcharge_percentage,
         rejection_reason: org.rejection_reason,
@@ -894,7 +911,7 @@ module DiscourseEventSystem
         address: org.address,
         logo_url: org.logo_url,
         google_maps_url: org.google_maps_url,
-        paypal_email: org.paypal_email,
+        paypal_email: managed_organisation_ids.include?(org.id) ? org.paypal_email : nil,
         status: org.status,
         surcharge_percentage: org.surcharge_percentage,
         rejection_reason: org.rejection_reason,

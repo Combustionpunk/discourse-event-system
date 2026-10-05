@@ -1,5 +1,7 @@
 module DiscourseEventSystem
   class ResultsController < ::ApplicationController
+    requires_plugin PLUGIN_NAME
+
     before_action :ensure_logged_in
     before_action :set_event
 
@@ -9,8 +11,12 @@ module DiscourseEventSystem
         class_summaries: [:first_user, :second_user, :third_user, :fastest_lap_user]
       ).find_by(event_id: @event.id)
 
-      if result
-        render json: serialize_result(result)
+      manager = @event.manageable_by?(current_user)
+      if result && (result.status == 'published' || manager)
+        render json: serialize_result(result, personal_details: manager)
+      elsif result
+        # Unpublished results stay with organisers; members only learn they are being processed.
+        render json: { status: result.status }
       else
         render json: { status: 'none' }
       end
@@ -234,7 +240,7 @@ module DiscourseEventSystem
       end
     end
 
-    def serialize_result(result)
+    def serialize_result(result, personal_details: true)
       {
         id: result.id,
         status: result.status,
@@ -262,7 +268,7 @@ module DiscourseEventSystem
                 user: entry.user ? {
                   id: entry.user.id,
                   username: entry.user.username,
-                  name: entry.user.name,
+                  name: personal_details ? entry.user.name : nil,
                   avatar_url: entry.user.avatar_template&.gsub('{size}', '60')
                 } : nil
               }
@@ -272,22 +278,22 @@ module DiscourseEventSystem
         class_summaries: result.class_summaries.map do |summary|
           {
             class_name: summary.class_name,
-            first:  podium_entry(summary.first_user,  summary.first_driver_name),
-            second: podium_entry(summary.second_user, summary.second_driver_name),
-            third:  podium_entry(summary.third_user,  summary.third_driver_name),
-            fastest_lap: podium_entry(summary.fastest_lap_user, summary.fastest_lap_driver_name, summary.fastest_lap_time)
+            first:  podium_entry(summary.first_user,  summary.first_driver_name, personal_details: personal_details),
+            second: podium_entry(summary.second_user, summary.second_driver_name, personal_details: personal_details),
+            third:  podium_entry(summary.third_user,  summary.third_driver_name, personal_details: personal_details),
+            fastest_lap: podium_entry(summary.fastest_lap_user, summary.fastest_lap_driver_name, summary.fastest_lap_time, personal_details: personal_details)
           }
         end
       }
     end
 
-    def podium_entry(user, driver_name, extra = nil)
+    def podium_entry(user, driver_name, extra = nil, personal_details: true)
       {
         driver_name: driver_name,
         user: user ? {
           id: user.id,
           username: user.username,
-          name: user.name,
+          name: personal_details ? user.name : nil,
           avatar_url: user.avatar_template&.gsub('{size}', '60')
         } : nil,
         extra: extra
