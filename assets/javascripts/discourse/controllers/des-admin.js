@@ -764,49 +764,6 @@ export default class DesAdminController extends Controller {
   }
 
 
-  @tracked editingModelId = null;
-  @tracked editingModel = null;
-
-  @action
-  editModel(model) {
-    this.editingModelId = model.id;
-    this.editingModel = { ...model };
-  }
-
-  @action
-  updateEditField(field, e) {
-    const val = field === "manufacturer_id" ? parseInt(e.target.value, 10) : e.target.value;
-    this.editingModel = { ...this.editingModel, [field]: val };
-  }
-
-  @action
-  cancelEdit() {
-    this.editingModelId = null;
-    this.editingModel = null;
-  }
-
-  @action
-  async saveModel() {
-    try {
-      await ajax("/des/admin/models/" + this.editingModel.id + ".json", {
-        type: "PUT",
-        data: {
-          manufacturer_id: this.editingModel.manufacturer_id,
-          name: this.editingModel.name,
-          year_released: this.editingModel.year_released,
-          driveline: this.editingModel.driveline,
-          scale: this.editingModel.scale,
-          chassis_type: this.editingModel.chassis_type,
-        },
-      });
-      this.editingModelId = null;
-      this.editingModel = null;
-      this.router.refresh();
-    } catch (error) {
-      popupAjaxError(error);
-    }
-  }
-
   // Class Type management
   @tracked showAddClassTypeForm = false;
 

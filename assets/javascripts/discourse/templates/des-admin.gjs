@@ -1,4 +1,4 @@
-import { concat, fn } from "@ember/helper";
+import { concat, fn, hash } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
@@ -373,80 +373,28 @@ export default <template>
             <h3 class="models-manufacturer-heading">🏭 {{mfr.manufacturer}}</h3>
             <div class="models-grid">
               {{#each mfr.models as |model|}}
-                <div class="model-card {{if (eq @controller.editingModelId model.id) 'model-card--editing'}}">
-                  {{#if (eq @controller.editingModelId model.id)}}
-                    <div class="model-edit-form">
-                      <div class="org-form-field">
-                        <label>Manufacturer</label>
-                        <select {{on "change" (fn @controller.updateEditField "manufacturer_id")}}>
-                          {{#each @controller.model.approved_manufacturers as |mfr|}}
-                            <option selected={{eq (concat mfr.id "") (concat @controller.editingModel.manufacturer_id "")}} value={{mfr.id}}>{{mfr.name}}</option>
-                          {{/each}}
-                        </select>
-                      </div>
-                      <div class="org-form-field">
-                        <label>Name</label>
-                        <input type="text" value={{@controller.editingModel.name}} {{on "input" (fn @controller.updateEditField "name")}} />
-                      </div>
-                      <div class="org-form-field">
-                        <label>Year</label>
-                        <input max="2030" min="1970" type="number" value={{@controller.editingModel.year_released}} {{on "input" (fn @controller.updateEditField "year_released")}} />
-                      </div>
-                      <div class="org-form-field">
-                        <label>Driveline</label>
-                        <select {{on "change" (fn @controller.updateEditField "driveline")}}>
-                          <option value="">Select...</option>
-                          {{#each @controller.drivelines as |d|}}
-                            <option selected={{eq d @controller.editingModel.driveline}} value={{d}}>{{d}}</option>
-                          {{/each}}
-                        </select>
-                      </div>
-                      <div class="org-form-field">
-                        <label>Scale</label>
-                        <select {{on "change" (fn @controller.updateEditField "scale")}}>
-                          <option value="">Select...</option>
-                          {{#each @controller.scales as |s|}}
-                            <option selected={{eq s @controller.editingModel.scale}} value={{s}}>{{s}}</option>
-                          {{/each}}
-                        </select>
-                      </div>
-                      <div class="org-form-field">
-                        <label>Chassis Type</label>
-                        <select {{on "change" (fn @controller.updateEditField "chassis_type")}}>
-                          <option value="">Select...</option>
-                          {{#each @controller.chassisTypes as |c|}}
-                            <option selected={{eq c @controller.editingModel.chassis_type}} value={{c}}>{{c}}</option>
-                          {{/each}}
-                        </select>
-                      </div>
-                      <div class="model-card-actions">
-                        <button class="btn btn-primary btn-small" {{on "click" @controller.saveModel}}>💾 Save</button>
-                        <button class="btn btn-default btn-small" {{on "click" @controller.cancelEdit}}>✕ Cancel</button>
-                      </div>
-                    </div>
-                  {{else}}
-                    <div class="model-card-header">
-                      <strong>{{model.name}}</strong>
-                      {{#if model.scale}}<span class="driveline-badge">📏 {{model.scale}}</span>{{/if}}
-                      {{#if model.chassis_type}}
-                        <span class="driveline-badge">🚗 {{model.chassis_type}}</span>
-                      {{else}}
-                        <span class="pending-tag">⚠️ No chassis</span>
-                      {{/if}}
-                    </div>
-                    <div class="model-card-meta">
-                      {{#if model.year_released}}<span>📅 {{model.year_released}}</span>{{/if}}
-                      {{#if model.driveline}}<span class="driveline-badge">{{model.driveline}}</span>{{/if}}
-                    </div>
-                    <div class="model-card-actions">
-                      <button class="btn btn-default btn-small" {{on "click" (fn @controller.editModel model)}}>
-                        ✏️ Edit
-                      </button>
-                      <button class="btn btn-danger btn-small" {{on "click" (fn @controller.deleteModel model)}}>
-                        🗑 Delete
-                      </button>
-                    </div>
-                  {{/if}}
+                <div class="model-card">
+                  <div class="model-card-header">
+                    <strong>{{model.name}}</strong>
+                    {{#if model.scale}}<span class="driveline-badge">📏 {{model.scale}}</span>{{/if}}
+                    {{#if model.chassis_type}}
+                      <span class="driveline-badge">🚗 {{model.chassis_type}}</span>
+                    {{else}}
+                      <span class="pending-tag">⚠️ No chassis</span>
+                    {{/if}}
+                  </div>
+                  <div class="model-card-meta">
+                    {{#if model.year_released}}<span>📅 {{model.year_released}}</span>{{/if}}
+                    {{#if model.driveline}}<span class="driveline-badge">{{model.driveline}}</span>{{/if}}
+                  </div>
+                  <div class="model-card-actions">
+                    <LinkTo class="btn btn-default btn-small" @model={{model.id}} @query={{hash edit="1"}} @route="car-model">
+                      ✏️ Edit
+                    </LinkTo>
+                    <button class="btn btn-danger btn-small" {{on "click" (fn @controller.deleteModel model)}}>
+                      🗑 Delete
+                    </button>
+                  </div>
                 </div>
               {{/each}}
             </div>

@@ -496,7 +496,6 @@
 
   &__art-link,
   &__actions,
-  &__edit-form,
   &__in-garage {
     position: relative;
     z-index: 1;
@@ -524,14 +523,9 @@
     font-size: var(--font-down-1);
   }
 
-  &__specs,
-  &__suggested-by {
+  &__specs {
     color: var(--primary-medium);
     font-size: var(--font-down-1);
-  }
-
-  &__suggested-by {
-    font-size: var(--font-down-2);
   }
 
   &__actions {
@@ -554,10 +548,6 @@
 
   &__menu-trigger {
     margin-left: auto;
-  }
-
-  &__edit-form {
-    margin-top: 0.5em;
   }
 }
 
@@ -704,6 +694,16 @@
     }
   }
 
+  &__meta {
+    margin: 0 0 1em;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+
+    > span + span::before {
+      content: " · ";
+    }
+  }
+
   &__actions {
     margin: 1em 0;
   }
@@ -755,9 +755,72 @@
   }
 }
 
+.des-car-model-editor {
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 1.5em;
+    align-items: start;
+  }
+
+  &__art,
+  &__fields {
+    min-width: 0;
+  }
+
+  &__art {
+    .file-uploader__preview {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      box-sizing: border-box;
+      background-size: contain;
+    }
+  }
+
+  &__help {
+    margin: 0.5em 0;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+  }
+
+  &__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1em;
+    align-content: start;
+
+    > * {
+      min-width: 0;
+    }
+
+    input,
+    select,
+    .form-kit__control-input,
+    .form-kit__control-select {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+  }
+
+  &__footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin-top: 1em;
+    padding: 0.75em 0;
+    border-top: 1px solid var(--primary-low);
+    background: var(--secondary);
+  }
+}
+
 @media (width < 600px) {
-  .des-car-model-detail__layout {
-    grid-template-columns: 1fr;
+  .des-car-model-detail__layout,
+  .des-car-model-editor__layout,
+  .des-car-model-editor__fields {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

@@ -4,8 +4,8 @@ import { eq } from "discourse/truth-helpers";
 import DButton from "discourse/ui-kit/d-button";
 import { i18n } from "discourse-i18n";
 
-const DRIVELINES = ["2WD", "4WD", "FWD", "Rear Motor"];
-const POWER_TYPES = ["electric", "nitro", "petrol", "both"];
+export const DRIVELINES = ["2WD", "4WD", "FWD", "Rear Motor"];
+export const POWER_TYPES = ["electric", "nitro", "petrol", "both"];
 
 const PowerTypeOptions = <template>
   <option value="">{{i18n "discourse_event_system.car_models.select"}}</option>

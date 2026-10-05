@@ -12,7 +12,6 @@ import {
   FormActions,
   ModelSpecFields,
 } from "../components/des-car-model-form-fields";
-import DesLogoUploader from "../components/des-logo-uploader";
 import DesPendingModelsPanel from "../components/des-pending-models-panel";
 import DesSuggestModelModal from "../components/des-suggest-model-modal";
 
@@ -32,69 +31,12 @@ const ModelCard = <template>
     @model={{@model}}
     @onAddToGarage={{@controller.addToGarage}}
     @onDelete={{@controller.deleteModel}}
-    @onEdit={{@controller.startEditModel}}
+    @onEdit={{@controller.editModel}}
     @onMerge={{@controller.openMerge}}
     @onSuggestBoxArt={{@controller.suggestBoxArt}}
     @placeholderLogoUrl={{@placeholderLogoUrl}}
     @showManufacturer={{@showManufacturer}}
-  @showSuggestedBy={{@controller.isAdmin}}
-  >
-    {{#if (eq @controller.editingModelId @model.id)}}
-      <div class="add-model-form des-model-card__edit-form">
-        <div class="org-form-row">
-          <div class="org-form-field">
-            <label>{{i18n
-                "discourse_event_system.car_models.fields.name"
-              }}</label>
-            <input
-              type="text"
-              value={{@controller.editModelForm.name}}
-              {{on
-                "input"
-                (fn @controller.updateEditModelField "name")
-              }}
-            />
-          </div>
-          <ModelSpecFields
-            @chassisTypes={{@controller.chassisTypes}}
-            @form={{@controller.editModelForm}}
-            @onChange={{@controller.updateEditModelField}}
-            @scales={{@controller.scales}}
-          />
-          <div class="org-form-field des-model-card__box-art-field">
-            <label>{{i18n
-                "discourse_event_system.car_models.box_art.label"
-              }}</label>
-            <DesLogoUploader
-              @changeLabel={{i18n
-                "discourse_event_system.car_models.box_art.change"
-              }}
-              @helpText={{i18n
-                "discourse_event_system.car_models.box_art.help"
-              }}
-              @logoUrl={{@controller.editModelForm.box_art_url}}
-              @onRemove={{@controller.removeEditBoxArt}}
-              @onUpload={{@controller.editBoxArtUploaded}}
-              @previewAlt={{i18n
-                "discourse_event_system.car_models.box_art.label"
-              }}
-              @removeLabel={{i18n
-                "discourse_event_system.car_models.box_art.remove"
-              }}
-              @uploadLabel={{i18n
-                "discourse_event_system.car_models.box_art.upload"
-              }}
-            />
-          </div>
-        </div>
-        <FormActions
-          @confirmLabel="discourse_event_system.car_models.save"
-          @onCancel={{@controller.cancelEditModel}}
-          @onConfirm={{@controller.saveEditModel}}
-        />
-      </div>
-    {{/if}}
-  </DesCarModelCard>
+  />
 </template>;
 
 export default <template>

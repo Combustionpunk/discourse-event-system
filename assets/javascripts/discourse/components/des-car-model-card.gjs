@@ -126,17 +126,6 @@ export default class DesCarModelCard extends Component {
         </div>
       {{/if}}
 
-      {{#if @showSuggestedBy}}
-        {{#if @model.created_by}}
-          <div class="des-model-card__suggested-by">
-            {{i18n
-              "discourse_event_system.car_models.suggested_by"
-              username=@model.created_by
-            }}
-          </div>
-        {{/if}}
-      {{/if}}
-
       <div class="des-model-card__actions">
         {{#if @canAddToGarage}}
           {{#unless this.isPending}}
@@ -198,7 +187,6 @@ export default class DesCarModelCard extends Component {
         {{/if}}
       </div>
 
-      {{yield}}
     </div>
   </template>
 }

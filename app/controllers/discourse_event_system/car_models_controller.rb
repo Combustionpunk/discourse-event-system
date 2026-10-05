@@ -45,6 +45,7 @@ module DiscourseEventSystem
           current_user.present? && !current_user.admin? &&
             model.image_suggestions.pending.exists?(user_id: current_user.id),
         eligible_classes: eligible_classes(model),
+        edit_options: current_user&.admin? ? edit_options : nil,
       }
     end
 
@@ -122,6 +123,14 @@ module DiscourseEventSystem
         .map { |class_type| { id: class_type.id, name: class_type.name, organisation_name: class_type.organisation&.name } }
     end
 
+    def edit_options
+      {
+        manufacturers: DesManufacturer.order(:name).pluck(:id, :name).map { |id, name| { id: id, name: name } },
+        scales: DesScale.order(:position, :name).pluck(:name),
+        chassis_types: DesChassisType.order(:position, :name).pluck(:name),
+      }
+    end
+
     def image_suggestions_payload
       return [] unless current_user&.admin?
       DesCarModelImageSuggestion
@@ -173,6 +182,7 @@ module DiscourseEventSystem
         power_type: m.power_type,
         status: m.status,
         created_by: m.creator&.username,
+        created_at: m.created_at,
         racer_count: @racer_counts&.fetch(m.id, 0) || 0,
         box_art_upload_id: m.box_art&.id,
         box_art_url: m.box_art_thumbnail_url,

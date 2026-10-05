@@ -5,11 +5,14 @@ import DMenu from "discourse/float-kit/components/d-menu";
 import lightbox from "discourse/lib/lightbox";
 import DButton from "discourse/ui-kit/d-button";
 import DDropdownMenu from "discourse/ui-kit/d-dropdown-menu";
+import DInterpolatedTranslation from "discourse/ui-kit/d-interpolated-translation";
+import DUserLink from "discourse/ui-kit/d-user-link";
 import dAvatar from "discourse/ui-kit/helpers/d-avatar";
+import dFormatDate from "discourse/ui-kit/helpers/d-format-date";
 import { i18n } from "discourse-i18n";
 import DesAddCarModal from "../components/des-add-car-modal";
 import DesBoxArtPlaceholder from "../components/des-box-art-placeholder";
-import DesCarModelEditForm from "../components/des-car-model-edit-form";
+import DesCarModelEditor from "../components/des-car-model-editor";
 
 const applyLightbox = modifier((element) => {
   lightbox(element);
@@ -21,6 +24,22 @@ export default <template>
       {{i18n "discourse_event_system.car_model_detail.back"}}
     </LinkTo>
 
+    {{#if @controller.isEditing}}
+      <h1 class="des-car-model-detail__title">
+        {{i18n
+          "discourse_event_system.car_model_detail.edit.heading"
+          name=@controller.carModel.name
+        }}
+      </h1>
+      <DesCarModelEditor
+        @chassisTypes={{@model.edit_options.chassis_types}}
+        @manufacturers={{@model.edit_options.manufacturers}}
+        @model={{@controller.carModel}}
+        @onCancel={{@controller.cancelEdit}}
+        @onSaved={{@controller.onSaved}}
+        @scales={{@model.edit_options.scales}}
+      />
+    {{else}}
     <div class="des-car-model-detail__layout">
       <div class="des-car-model-detail__art">
         {{#if @controller.carModel.box_art_full_url}}
@@ -121,6 +140,39 @@ export default <template>
           {{/each}}
         </dl>
 
+        <p class="des-car-model-detail__meta">
+          {{#if @controller.showSuggestedBy}}
+            <span>
+              <DInterpolatedTranslation
+                @key="discourse_event_system.car_model_detail.suggested_by"
+                as |Placeholder|
+              >
+                <Placeholder @name="username">
+                  <DUserLink @username={{@controller.carModel.created_by}}>
+                    @{{@controller.carModel.created_by}}
+                  </DUserLink>
+                </Placeholder>
+              </DInterpolatedTranslation>
+            </span>
+          {{/if}}
+          {{#if @controller.carModel.created_at}}
+            <span>
+              <DInterpolatedTranslation
+                @key="discourse_event_system.car_model_detail.added"
+                as |Placeholder|
+              >
+                <Placeholder @name="date">
+                  {{dFormatDate
+                    @controller.carModel.created_at
+                    format="medium"
+                    leaveAgo="true"
+                  }}
+                </Placeholder>
+              </DInterpolatedTranslation>
+            </span>
+          {{/if}}
+        </p>
+
         {{#if @controller.currentUser}}
           <div class="des-car-model-detail__actions">
             {{#if @controller.inGarage}}
@@ -141,18 +193,9 @@ export default <template>
             {{/if}}
           </div>
         {{/if}}
-
-        {{#if @controller.isEditing}}
-          <DesCarModelEditForm
-            @chassisTypes={{@controller.chassisTypes}}
-            @model={{@controller.carModel}}
-            @onCancel={{@controller.cancelEdit}}
-            @onSaved={{@controller.onSaved}}
-            @scales={{@controller.scales}}
-          />
-        {{/if}}
       </div>
     </div>
+    {{/if}}
 
     {{#if @model.racers}}
       <section class="des-car-model-detail__section">

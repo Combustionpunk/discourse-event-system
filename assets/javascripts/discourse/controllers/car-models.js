@@ -7,6 +7,7 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import discourseDebounce from "discourse/lib/debounce";
 import { i18n } from "discourse-i18n";
+import { carModelSlug } from "../components/des-car-model-card";
 import DesMergeCarModelModal from "../components/des-merge-car-model-modal";
 import DesNameTidyModal from "../components/des-name-tidy-modal";
 
@@ -56,9 +57,6 @@ export default class CarModelsController extends Controller {
   @tracked approvingModelId = null;
   @tracked
   approveModelForm = { year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
-  @tracked editingModelId = null;
-  @tracked
-  editModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
   @tracked addingModelForManufacturerId = null;
   @tracked
   newModelForm = { name: "", year_released: "", driveline: "", scale: "", chassis_type: "", power_type: "" };
@@ -584,68 +582,10 @@ export default class CarModelsController extends Controller {
   }
 
   @action
-  startEditModel(model) {
-    this.editingModelId = model.id;
-    this.editModelForm = {
-      name: model.name,
-      year_released: model.year_released || "",
-      driveline: model.driveline || "",
-      scale: model.scale || "",
-      chassis_type: model.chassis_type || "",
-      power_type: model.power_type || "",
-      box_art_upload_id: model.box_art_upload_id || null,
-      box_art_url: model.box_art_url || null,
-    };
-  }
-
-  @action
-  editBoxArtUploaded(upload) {
-    this.editModelForm = {
-      ...this.editModelForm,
-      box_art_upload_id: upload.id,
-      box_art_url: upload.url,
-    };
-  }
-
-  @action
-  removeEditBoxArt() {
-    this.editModelForm = {
-      ...this.editModelForm,
-      box_art_upload_id: null,
-      box_art_url: null,
-    };
-  }
-
-  @action
-  cancelEditModel() {
-    this.editingModelId = null;
-  }
-
-  @action
-  updateEditModelField(field, e) {
-    this.editModelForm = { ...this.editModelForm, [field]: e.target.value };
-  }
-
-  @action
-  async saveEditModel() {
-    try {
-      const form = this.editModelForm;
-      await ajax(`/des/admin/models/${this.editingModelId}.json`, {
-        type: "PUT",
-        data: {
-          name: form.name,
-          year_released: form.year_released,
-          driveline: form.driveline,
-          scale: form.scale,
-          chassis_type: form.chassis_type,
-          power_type: form.power_type,
-          // Blank clears the box art server-side.
-          box_art_upload_id: form.box_art_upload_id || "",
-        },
-      });
-      this.editingModelId = null;
-      this.router.refresh();
-    } catch (error) { popupAjaxError(error); }
+  editModel(model) {
+    this.router.transitionTo("car-model", carModelSlug(model), {
+      queryParams: { edit: "1" },
+    });
   }
 
   @action

@@ -17,10 +17,10 @@ export default class CarModelController extends Controller {
 
   @tracked addedToGarage = false;
   @tracked boxArtSubmitted = false;
-  @tracked chassisTypes = [];
-  @tracked isEditing = false;
-  @tracked scales = [];
+  @tracked edit = null;
   @tracked showAddCarModal = false;
+
+  queryParams = ["edit"];
 
   get carModel() {
     return this.model.model;
@@ -36,6 +36,15 @@ export default class CarModelController extends Controller {
 
   get isAdmin() {
     return !!this.currentUser?.admin;
+  }
+
+  // Who suggested a model is moderation context, so admins only.
+  get showSuggestedBy() {
+    return this.isAdmin && !!this.carModel.created_by;
+  }
+
+  get isEditing() {
+    return !!this.edit && !!this.model.edit_options;
   }
 
   get specs() {
@@ -72,26 +81,9 @@ export default class CarModelController extends Controller {
   }
 
   @action
-  async startEdit() {
-    if (!this.scales.length) {
-      try {
-        const [scales, chassis] = await Promise.all([
-          ajax("/des/admin/scales.json"),
-          ajax("/des/admin/chassis-types.json"),
-        ]);
-        this.scales = scales.scales.map((s) => s.name);
-        this.chassisTypes = chassis.chassis_types.map((c) => c.name);
-      } catch (error) {
-        popupAjaxError(error);
-      }
-    }
-    this.isEditing = true;
-  }
-
-  @action
   startEditAndClose(close) {
     close();
-    this.startEdit();
+    this.edit = "1";
   }
 
   @action
@@ -148,13 +140,19 @@ export default class CarModelController extends Controller {
 
   @action
   cancelEdit() {
-    this.isEditing = false;
+    this.edit = null;
   }
 
   @action
-  onSaved() {
-    this.isEditing = false;
-    this.router.refresh();
+  async onSaved() {
+    this.edit = null;
+    await this.router.refresh();
+    this.toasts.success({
+      duration: "short",
+      data: {
+        message: i18n("discourse_event_system.car_model_detail.edit.saved"),
+      },
+    });
   }
 
   @action
