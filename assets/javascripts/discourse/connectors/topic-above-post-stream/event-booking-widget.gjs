@@ -931,11 +931,13 @@ export default class EventBookingWidget extends Component {
                         <tr>
                           <th class="avatar-col"></th>
                           <th>Username</th>
-                          <th>Full Name</th>
+                          {{#if this.event.is_admin}}<th>Full Name</th>{{/if}}
                           <th>Manufacturer</th>
                           <th>Model</th>
-                          <th>Transponder</th>
-                          <th>BRCA No.</th>
+                          {{#if this.event.is_admin}}
+                            <th>Transponder</th>
+                            <th>BRCA No.</th>
+                          {{/if}}
                           <th>Status</th>
                         </tr>
                       </thead>
@@ -944,11 +946,13 @@ export default class EventBookingWidget extends Component {
                           <tr class="entrant-row entrant-row--{{entrant.status}}">
                             <td class="avatar-col"><a data-user-card={{entrant.username}}><img src="{{entrant.avatar_template}}" class="entrant-avatar" alt="" /></a></td>
                             <td>{{entrant.username}}</td>
-                            <td>{{entrant.name}}</td>
+                            {{#if this.event.is_admin}}<td>{{entrant.name}}</td>{{/if}}
                             <td>{{entrant.manufacturer_name}}</td>
                             <td>{{entrant.model_name}}</td>
-                            <td class="transponder-number">{{entrant.transponder}}</td>
-                            <td>{{entrant.brca_number}}</td>
+                            {{#if this.event.is_admin}}
+                              <td class="transponder-number">{{entrant.transponder}}</td>
+                              <td>{{entrant.brca_number}}</td>
+                            {{/if}}
                             <td><span class="booking-status booking-status--{{entrant.status}}">{{#if entrant.waitlist_position}}Waitlist #{{entrant.waitlist_position}}{{else}}{{entrant.status}}{{/if}}</span></td>
                           </tr>
                         {{/each}}

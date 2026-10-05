@@ -98,6 +98,26 @@ class DesEvent < ActiveRecord::Base
     des_event_classes.sum(:capacity)
   end
 
+  def draft?
+    status == "draft"
+  end
+
+  # Site admins, or active officials with an admin position in the event's organisation.
+  def manageable_by?(user)
+    return false if user.blank?
+    return true if user.admin?
+    DesOrganisationMember
+      .joins(:position)
+      .where(organisation_id: organisation_id, user_id: user.id, status: "active")
+      .where(des_positions: { is_admin: true })
+      .exists?
+  end
+
+  def race_day?(now = Time.zone.now)
+    return false if start_date.blank?
+    now.between?(start_date.beginning_of_day, (end_date || start_date).end_of_day)
+  end
+
   def create_topic!
     creator_user = User.find(created_by)
     category_slug = SiteSetting.discourse_event_system_category_slug.presence || 'rc-meetings'
