@@ -2912,7 +2912,9 @@ body.des-embedded-event {
   margin: 12px 0;
 
   h3 { margin: 0 0 8px; }
-  a { color: var(--tertiary); text-decoration: none; &:hover { text-decoration: underline; } }
+
+  // Buttons rendered as links keep their own button colours.
+  a:not(.btn) { color: var(--tertiary); text-decoration: none; &:hover { text-decoration: underline; } }
 }
 
 .event-org-row {

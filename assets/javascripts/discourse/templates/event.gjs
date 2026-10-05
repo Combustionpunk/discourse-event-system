@@ -85,14 +85,15 @@ export default <template>
         {{/if}}
         <div class="event-booking-dates">
           {{#if @controller.model.booking_open}}
+            <p class="booking-date-info">🟢 Bookings are open</p>
             {{#if @controller.model.topic_url}}
-              <DButton
-                class="btn-primary"
-                @href={{@controller.model.topic_url}}
-                @label="discourse_event_system.event_detail.discussion_and_booking"
-              />
-            {{else}}
-              <p class="booking-date-info">🟢 Bookings are open</p>
+              <div class="event-discussion-cta">
+                <DButton
+                  class="btn-primary btn-large"
+                  @href={{@controller.model.topic_url}}
+                  @label="discourse_event_system.event_detail.discussion_and_booking"
+                />
+              </div>
             {{/if}}
           {{else if @controller.model.booking_manually_closed}}
             <p class="booking-date-info booking-closed">🔴 Bookings are closed</p>
