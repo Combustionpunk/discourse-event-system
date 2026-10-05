@@ -139,6 +139,8 @@ en:
           nitro: "Nitro"
           petrol: "Petrol"
           both: "Both"
+      event_detail:
+        discussion_and_booking: "🏁 Discussion & booking"
       car_model_detail:
         back: "← Car models"
         racers: "Racing this car"

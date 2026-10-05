@@ -1,6 +1,7 @@
 import { on } from "@ember/modifier";
 import { LinkTo } from "@ember/routing";
 import { eq } from "discourse/truth-helpers";
+import DButton from "discourse/ui-kit/d-button";
 
 export default <template>
   <div class="event-detail-container">
@@ -48,6 +49,16 @@ export default <template>
       </div>
     {{/if}}
 
+    {{#if @controller.model.topic_url}}
+      <div class="event-discussion-cta">
+        <DButton
+          class="btn-primary btn-large"
+          @href={{@controller.model.topic_url}}
+          @label="discourse_event_system.event_detail.discussion_and_booking"
+        />
+      </div>
+    {{/if}}
+
     {{!-- 3. Description --}}
     {{#if @controller.model.description_cooked}}
       <div class="event-description-box cooked">
@@ -74,7 +85,15 @@ export default <template>
         {{/if}}
         <div class="event-booking-dates">
           {{#if @controller.model.booking_open}}
-            <p class="booking-date-info">🟢 Bookings are open</p>
+            {{#if @controller.model.topic_url}}
+              <DButton
+                class="btn-primary"
+                @href={{@controller.model.topic_url}}
+                @label="discourse_event_system.event_detail.discussion_and_booking"
+              />
+            {{else}}
+              <p class="booking-date-info">🟢 Bookings are open</p>
+            {{/if}}
           {{else if @controller.model.booking_manually_closed}}
             <p class="booking-date-info booking-closed">🔴 Bookings are closed</p>
           {{else if @controller.model.booking_opens_at}}
@@ -251,12 +270,6 @@ export default <template>
           </div>
 
         {{/if}}
-      </div>
-    {{/if}}
-
-    {{#if @controller.model.topic_url}}
-      <div class="event-discussion-link">
-        <a class="btn btn-primary" href={{@controller.model.topic_url}}>💬 View Discussion & Comments</a>
       </div>
     {{/if}}
 
