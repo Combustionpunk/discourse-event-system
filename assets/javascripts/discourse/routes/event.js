@@ -53,7 +53,7 @@ export default class EventRoute extends Route {
 
   setupController(controller, model) {
     super.setupController(controller, model);
-    if (!model.unavailable && model.event_type?.name?.toLowerCase().includes("championship")) {
+    if (!model.unavailable && model.expects_results) {
       controller.loadResults();
     }
   }

@@ -138,12 +138,12 @@ export default <template>
 
     {{!-- Discussion link --}}
 
-    {{#if @controller.isChampionshipRound}}
+    {{#if @controller.expectsResults}}
       {{#if (eq @controller.results.status "published")}}
         <DesEventResults @results={{@controller.results}} />
       {{else}}
         <div class="event-results-section">
-          <h2 class="results-heading">🏆 Championship Round Results</h2>
+          <h2 class="results-heading">{{i18n "discourse_event_system.event_results.heading"}}</h2>
           {{#if (eq @controller.results.status "pending_match")}}
             <div class="results-awaiting"><p>⏳ Results being processed</p></div>
           {{else}}

@@ -37,6 +37,7 @@ RSpec.describe "Topic-first events" do
   end
   fab!(:club_meeting) { DesEventType.create!(name: "Spec club meeting") }
   fab!(:championship) { DesEventType.create!(name: "Spec championship round") }
+  fab!(:practice) { DesEventType.create!(name: "Spec practice", produces_results: false) }
 
   def create_event(
     start_date: 10.days.from_now,
@@ -166,21 +167,32 @@ RSpec.describe "Topic-first events" do
       expect(state_of(event)).to eq("race_day")
     end
 
-    it "awaits results after a championship round or an event with an RC Results meeting" do
+    it "awaits results after club meetings, championship rounds and events with an RC Results meeting" do
+      club = create_event(start_date: 3.days.ago)
       championship_round = create_event(start_date: 3.days.ago, event_type: championship)
-      with_meeting_id = create_event(start_date: 3.days.ago, rc_results_meeting_id: 123)
+      practice_with_meeting_id =
+        create_event(start_date: 3.days.ago, event_type: practice, rc_results_meeting_id: 123)
 
-      expect(state_of(championship_round)).to eq("awaiting_results")
-      expect(state_of(with_meeting_id)).to eq("awaiting_results")
+      expect([club, championship_round, practice_with_meeting_id].map { |e| state_of(e) }).to all(
+        eq("awaiting_results"),
+      )
     end
 
-    it "expects no results from past club meetings or external events" do
-      club = create_event(start_date: 3.days.ago)
-      external =
-        create_event(start_date: 3.days.ago, event_type: championship, booking_type: "external")
+    it "expects no results from practice sessions or external events" do
+      practice_session = create_event(start_date: 3.days.ago, event_type: practice)
+      external = create_event(start_date: 3.days.ago, booking_type: "external")
 
-      expect(state_of(club)).to eq("no_results_expected")
+      expect(state_of(practice_session)).to eq("no_results_expected")
+      expect(response.parsed_body["expects_results"]).to eq(false)
       expect(state_of(external)).to eq("no_results_expected")
+    end
+
+    it "expects results once any exist, whatever the event type" do
+      practice_session = create_event(start_date: 3.days.ago, event_type: practice)
+      add_result(practice_session, "pending_match")
+
+      expect(state_of(practice_session)).to eq("processing")
+      expect(response.parsed_body["expects_results"]).to eq(true)
     end
 
     it "is processing while results are unpublished, and results once published" do

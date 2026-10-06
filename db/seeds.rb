@@ -38,7 +38,9 @@ end
   'Race Meeting', 'Club Meeting', 'Championship Round',
   'Regional', 'National', 'Practice'
 ].each do |name|
-  DesEventType.find_or_create_by!(name: name)
+  DesEventType.find_or_create_by!(name: name) do |type|
+    type.produces_results = name != 'Practice'
+  end
 end
 
 # Global Class Compatibility Rules

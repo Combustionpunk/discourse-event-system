@@ -22,8 +22,8 @@ export default class EventController extends Controller {
   @tracked results = { status: 'none' };
   @tracked isLoadingResults = false;
 
-  get isChampionshipRound() {
-    return this.model.event_type?.name?.toLowerCase().includes('championship');
+  get expectsResults() {
+    return this.model.expects_results;
   }
 
   @action

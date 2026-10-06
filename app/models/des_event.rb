@@ -134,7 +134,8 @@ class DesEvent < ActiveRecord::Base
   # External events are run and scored elsewhere, so their results never arrive here.
   def expects_results?
     return false if booking_type == "external"
-    rc_results_meeting_id.present? || !!event_type&.produces_results?
+    rc_results_meeting_id.present? || des_event_result.present? ||
+      !!event_type&.produces_results?
   end
 
   # Where the event is in its life, from a member's point of view. Drives the topic widget.

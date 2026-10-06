@@ -5,8 +5,8 @@ class DesEventType < ActiveRecord::Base
 
   validates :name, presence: true, uniqueness: true
 
-  # Championship rounds are the meetings whose results get imported and published.
+  # Set per type (the produces_results column); practice sessions don't publish results.
   def produces_results?
-    name.to_s.match?(/championship/i)
+    produces_results
   end
 end

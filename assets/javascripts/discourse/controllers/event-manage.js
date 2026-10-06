@@ -37,9 +37,6 @@ export default class EventManageController extends Controller {
   @tracked pendingMatches = {};
   @tracked userSuggestions = {};
 
-  get isChampionshipRound() {
-    return this.model.event.event_type?.name?.toLowerCase().includes('championship');
-  }
   @tracked swapCarEntrant = null;
   @tracked swapCarClassId = null;
   @tracked swapCarOptions = [];
